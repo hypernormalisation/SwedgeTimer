@@ -29,3 +29,9 @@ addon_data.utils.TablePrinter = function(table)
         print(value)
     end
 end
+
+--=======================================================================================
+-- a switch to control debug statements in module parsing
+-- NOTE: this does not incur any additional CPU usage in the addon's
+--       typical operation, just in parsing the code.
+addon_data.debug = true

@@ -338,4 +338,30 @@ addon_data.player.OnUpdate = function(elapsed)
     end
 end
 
-print('-- Parsed player module correctly')
+--=========================================================================================
+-- Create a frame to process events relating to player information.
+--=========================================================================================
+-- This function handles events related to the player's statistics
+local function player_frame_on_event(self, event, ...)
+	local args = {...}
+    if event == "UNIT_INVENTORY_CHANGED" then
+        addon_data.player.OnInventoryChange()
+    elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
+        local combat_info = {CombatLogGetCurrentEventInfo()}
+        addon_data.player.OnCombatLogUnfiltered(combat_info)
+    elseif event == "UNIT_AURA" then
+        addon_data.player.OnUnitAuraChange()
+    elseif event == "UNIT_SPELLCAST_SENT" then
+        -- print('player casted a spell')
+        addon_data.player.OnPlayerSpellCast(event, args)
+    elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
+        addon_data.player.OnPlayerSpellCompletion(event, args)
+	end
+end
+
+addon_data.player_frame = CreateFrame("Frame", addon_name .. "PlayerFrame", UIParent)
+
+--=========================================================================================
+-- End, if debug verify module was read.
+--=========================================================================================
+if addon_data.debug then print('-- Parsed player.lua module correctly') end

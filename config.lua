@@ -21,7 +21,7 @@ addon_data.config.InitializeVisuals = function()
     panel.global_panel:SetPoint('TOPLEFT', 10, -10)
     panel.global_panel:SetSize(1, 1)
 
-    panel.name = "Hurricane"
+    panel.name = "SwedgeTimer"
     panel.default = addon_data.config.OnDefault
     InterfaceOptions_AddCategory(panel)
     
@@ -358,4 +358,7 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
     return panel
 end
 
--- print('-- Parsed config module correctly')
+--=========================================================================================
+-- End, if debug verify module was read.
+--=========================================================================================
+if addon_data.debug then print('-- Parsed config.lua module correctly') end

@@ -441,4 +441,7 @@ addon_data.bar.BackplaneAlphaOnValChange = function(self)
     addon_data.bar.UpdateVisualsOnSettingsChange()
 end
 
-print('-- Parsed bar module correctly')
+--=========================================================================================
+-- End, if debug verify module was read.
+--=========================================================================================
+if addon_data.debug then print('-- Parsed bar.lua module correctly') end
