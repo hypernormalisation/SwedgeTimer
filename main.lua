@@ -27,7 +27,8 @@ local function in_combat_frame_event_handler(self, event, ...)
 end
 
 --=========================================================================================
--- Funcs for loading 
+-- Funcs for loading and initialising all data.
+--=========================================================================================
 addon_data.core.all_timers = {
     addon_data.bar,
 }
@@ -68,7 +69,7 @@ local function LoadAllSettings(self)
 end
 
 local function InitializeAllVisuals()
-    addon_data.bar.InitializeVisuals()
+    addon_data.bar.init_bar_visuals()
     addon_data.config.InitializeVisuals()
 end
 
@@ -78,28 +79,7 @@ local function CoreFrame_OnUpdate(self, elapsed)
 end
 
 
-
-
--- -- This function handles events related to the player's statistics
--- local function core_player_frame(self, event, ...)
--- 	local args = {...}
---     if event == "UNIT_INVENTORY_CHANGED" then
---         addon_data.player.OnInventoryChange()
---     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
---         local combat_info = {CombatLogGetCurrentEventInfo()}
---         addon_data.player.OnCombatLogUnfiltered(combat_info)
---     elseif event == "UNIT_AURA" then
---         addon_data.player.OnUnitAuraChange()
---     elseif event == "UNIT_SPELLCAST_SENT" then
---         -- print('player casted a spell')
---         addon_data.player.OnPlayerSpellCast(event, args)
---     elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
---         addon_data.player.OnPlayerSpellCompletion(event, args)
--- 	end
--- end
-
 -- SLASH COMMANDS ===================================================================
--- Add slash commands to bring up the config window
 SLASH_SWEDGETIMER_HOME1 = "/swedgetimer"
 SLASH_SWEDGETIMER_HOME2 = "/SWEDGETIMER"
 SLASH_SWEDGETIMER_HOME3 = "/st"
@@ -107,6 +87,8 @@ SlashCmdList["SWEDGETIMER_HOME"] = function(option)
     -- print(option)
     if option == "bar" then
         addon_data.bar.TwistBarToggle()
+
+    -- If no args, bring up the main config window
     elseif option == '' then
         InterfaceOptionsFrame_OpenToCategory(addon_data.config.config_parent_panel)
         InterfaceOptionsFrame_OpenToCategory(addon_data.config.config_parent_panel)
@@ -115,31 +97,21 @@ SlashCmdList["SWEDGETIMER_HOME"] = function(option)
     end
 end
 
--- SLASH_HDEBUG1 = '/h1'
--- SlashCmdList['HDEBUG'] = function(option)
---     AuraUtil.ForEachAura("player", "HELPFUL", nil, function(name, icon, ...)
---         print(name, icon, ...)
---     end)
--- end
--- -- toggle slash commands
--- SLASH_HURRICANE_TOGGLEBAR1 = "/hc bar"
--- SlashCmdList["HURRICANE_TOGGLEBAR"] = addon_data.bar.TwistBarToggle
-
 --=========================================================================================
 -- Now, a frame to load the addon upon intercepting the ADDON_LOADED event trigger
 --=========================================================================================
 -- This function is called once when the addon is loaded, and 
 -- sets up the various frames and elements.
 local function init_addon(self)
-    
-    -- Register the appropriate events and event handler funcs with the in_combat_frame
+
+    if addon_data.debug then print('Registering events and widget handlers...') end
+    -- Register the in-combat events and widget handlers
     addon_data.core.in_combat_frame:SetScript("OnEvent", in_combat_frame_event_handler)
     addon_data.core.in_combat_frame:RegisterEvent("PLAYER_REGEN_ENABLED")
     addon_data.core.in_combat_frame:RegisterEvent("PLAYER_REGEN_DISABLED")
 
-
-    -- Attach the rest of the events and scripts to the core frame
-    addon_data.player_frame:SetScript("OnEvent", core_player_frame)
+    -- Attach the events and widget handlers for the player stats frame
+    addon_data.player_frame:SetScript("OnEvent", addon_data.player.player_frame_on_event)
     addon_data.player_frame:SetScript("OnUpdate", CoreFrame_OnUpdate)
     addon_data.player_frame:RegisterEvent("PLAYER_TARGET_CHANGED")
     addon_data.player_frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
@@ -148,36 +120,31 @@ local function init_addon(self)
     addon_data.player_frame:RegisterEvent("UNIT_SPELLCAST_SENT")
     addon_data.player_frame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 
-    -- addon_data.core.player_frame:RegisterUnitEvent("UNIT_SPELLCAST_SENT", "player")
-
-
 	-- Load the settings for the core and all timers
 	-- addon_data.player.LoadSettings()
 	-- addon_data.core.LoadSettings()
-    print('Loading all settings...')
+    if addon_data.debug then print('Loading all settings...') end
     LoadAllSettings()
     -- print('... settings loaded successfully')
 
     -- Load visuals
-    print('Initialising visuals...')
+    if addon_data.debug then print('Initialising visuals...') end
     InitializeAllVisuals()
-    -- print('... visuals initialised successfully')
-    -- addon_data.bar.InitializeVisuals()
 
     -- Any other misc operations that happen at the start
     addon_data.player.InitSwingTimer()
-	
-    if character_core_settings.welcome_message then	
-		print(load_message)	
-	end
+
+    -- If appropriate show welcome message
+    if addon_data.debug then print('... complete!') end
+    if character_core_settings.welcome_message then	print(load_message)	end
 end
 
+-- The frame responsible for loading the addon at the appropriate time
 addon_data.core.init_frame = CreateFrame("Frame", addon_name .. "InitFrame", UIParent)
 local function init_frame_event_handler(self, event, ...)
     local args = {...}
     if event == "ADDON_LOADED" then
         if args[1] == "SwedgeTimer" then
-            print('LOADING')
             init_addon()
         end
     end

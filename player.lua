@@ -342,7 +342,7 @@ end
 -- Create a frame to process events relating to player information.
 --=========================================================================================
 -- This function handles events related to the player's statistics
-local function player_frame_on_event(self, event, ...)
+addon_data.player.player_frame_on_event = function(self, event, ...)
 	local args = {...}
     if event == "UNIT_INVENTORY_CHANGED" then
         addon_data.player.OnInventoryChange()
