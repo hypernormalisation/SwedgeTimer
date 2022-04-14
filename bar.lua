@@ -38,13 +38,7 @@ addon_data.bar.recalculate_ticks = false
 addon_data.bar.twist_tick_offset = 0.1
 
 
-print(addon_data.bar.default_settings["bar_color_twisting"][1])
-
--- addon_data.bar.default_bar_colors = {
---     default = {0.1, 0.1, 0.9, 1.0},
---     twisting = {0.6, 0.6, 0.9, 1.0},
--- }
-
+-- print(addon_data.bar.default_settings["bar_color_twisting"][1])
 
 addon_data.bar.LoadSettings = function()
     -- If the carried over settings dont exist then make them

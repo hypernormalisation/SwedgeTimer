@@ -50,21 +50,16 @@ addon_data.player.active_seal_2_remaining = 0
 -- Flag to detect if we have a new/falling off SotCr aura and need to change swing
 -- timers to account for haste snapshotting
 addon_data.crusader_lock = false
-
-addon_data.crusader_active_previous_swing = false
-addon_data.crusader_newly_active = false
 addon_data.crusader_currently_active = false
-addon_data.crusader_fallen_off = false
-addon_data.crusader_fallen_off_mid_swing = false
 
-addon_data.snapshot_new_crusader = false
-
+-- Flags to detect any spell casts that would reset the swing timer.
 addon_data.player.how_cast_guid = nil
 addon_data.player.holy_wrath_cast_guid = nil
 
-addon_data.player.InitSwingTimer = function()
-    addon_data.player.swing_timer = 0.0001
-end
+-- quick function to set the swing timer initially
+-- addon_data.player.InitSwingTimer = function()
+--     addon_data.player.swing_timer = 0.0001
+-- end
 
 -- Function that will carry out all speed changes, set all relevant flags etc
 -- addon_data.player.handle_speed_change = function()
@@ -97,11 +92,7 @@ end
 
 -- Called when the swing timer should be reset
 addon_data.player.reset_swing_timer = function()
-    -- handle seal of the crusader snapshotting for new crusader buffs
-    -- addon_data.crusader_lock = false
-    -- addon_data.crusader_fallen_off_mid_swing = false
-    -- addon_data.player.update_weapon_speed()
-    -- set the swing timer to the attack speed
+    addon_data.player.update_weapon_speed() -- NOT SURE IF THIS IS NEEDED
     addon_data.player.swing_timer = addon_data.player.current_weapon_speed
 end
 
@@ -166,20 +157,12 @@ addon_data.player.OnCombatLogUnfiltered = function(combat_info)
 			addon_data.player.extra_attacks_flag = true
 		end
         if (event == "SWING_DAMAGE") then
-			-- print('swing went off')
-            -- local _, _, _, _, _, _, _, _, _, is_offhand = select(12, unpack(combat_info))
 			if (addon_data.player.extra_attacks_flag == false) then
 				addon_data.player.reset_swing_timer()
 			end
 			addon_data.player.extra_attacks_flag = false
-            -- addon_data.snapshot_new_crusader = false
-            -- addon_data.player.crusader_newly_active = false
-            -- addon_data.crusader_fallen_off_mid_swing = false
         elseif (event == "SWING_MISSED") then
 			addon_data.player.reset_swing_timer()
-            -- addon_data.snapshot_new_crusader = false
-            -- addon_data.player.crusader_newly_active = false
-            -- addon_data.crusader_fallen_off_mid_swing = false
         end
 
     -- Handle all relevant events where the player is the target
@@ -203,19 +186,17 @@ addon_data.player.OnCombatLogUnfiltered = function(combat_info)
     addon_data.player.update_weapon_speed()
 end
 
--- Called once on aura change for each active seal on the player
-addon_data.player.OnSealChange = function(...)
-    -- print('processing seal change')
-    -- print('time now: ' .. GetTime())
-    args = {...}
-    if not args then
-        return
-    end
-    -- for key, value in pairs(args) do
-    --     print('key ' .. key)
-    --     print(value)
-    -- end
-end
+-- -- Called once on aura change for each active seal on the player
+-- addon_data.player.OnSealChange = function(...)
+--     args = {...}
+--     if not args then
+--         return
+--     end
+--     -- for key, value in pairs(args) do
+--     --     print('key ' .. key)
+--     --     print(value)
+--     -- end
+-- end
 
 
 -- There is no information in the event payload on what changed, so we have to rescan auras
@@ -229,6 +210,8 @@ addon_data.player.on_player_aura_change = function()
 
     -- copy the previous seals
     local previous_active_seals = addon_data.player.active_seals
+
+    -- iterate over the current player auras and process seals
     addon_data.player.active_seals = {}
     while not end_iter do
         local name, icon, count, _, duration, expiration_time, _, _, _, spell_id = UnitAura("player", counter)
@@ -236,22 +219,18 @@ addon_data.player.on_player_aura_change = function()
             end_iter = True
             break
         end
-        -- print(name .. " - " .. icon .. " - "  .. spell_id .. " - "  .. count .. " - expires: " .. expiration_time)
-
         -- if a seal spell, process it
         if string.find(name, 'Seal of ') then
-            addon_data.player.OnSealChange(name, spell_id, expiration_time)
-            -- table.insert(addon_data.player.active_seals, name)
             addon_data.player.active_seals[name] = true
             addon_data.player.n_active_seals = addon_data.player.n_active_seals + 1
             if name == 'Seal of the Crusader' then               
                 addon_data.player.crusader_currently_active = true
             end
         end
-
         counter = counter + 1
     end
 
+    -- Check if crusader currently active.
     if addon_data.player.active_seals["Seal of the Crusader"] == nil then
         addon_data.player.crusader_currently_active = false
     end
@@ -259,14 +238,9 @@ addon_data.player.on_player_aura_change = function()
     -- check for any new Seal of the Crusader casts
     if addon_data.player.crusader_currently_active then
         if previous_active_seals["Seal of the Crusader"] == nil then
-            -- addon_data.player.crusader_newly_active = true
-            -- print('crusader newly up')
-            -- print('swing timer says: ' .. addon_data.player.swing_timer)
-
             -- if we're also midway through a swing, need some additional logic 
             -- to handle the haste snapshotting
             if addon_data.player.swing_timer > 0 then
-                -- print('midway a swing and new crusader, trigger additional speed logic')
                 addon_data.crusader_lock = true
             end
         end
@@ -274,18 +248,11 @@ addon_data.player.on_player_aura_change = function()
     -- check for any Seal of the Crusader that's fallen off midswing
     elseif previous_active_seals["Seal of the Crusader"] then
         if addon_data.player.swing_timer > 0 then
-            -- print('crusader fallen off, need some snapshot magic')
             addon_data.crusader_lock = true
         end
     end
     print(addon_data.player.active_seals)
-    print(addon_data.player.n_active_seals)
-    -- print('N active seals = ' .. addon_data.player.n_active_seals)
-    -- for key, value in pairs(addon_data.player.active_seals) do
-    --     print('key ' .. key)
-    --     print(value)
-    -- end
-    
+    print(addon_data.player.n_active_seals)   
 end
 
 -- function to detect any spell casts like repentance that would reset

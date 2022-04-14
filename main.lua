@@ -132,7 +132,7 @@ local function init_addon(self)
     InitializeAllVisuals()
 
     -- Any other misc operations that happen at the start
-    addon_data.player.InitSwingTimer()
+    -- addon_data.player.InitSwingTimer()
 
     -- If appropriate show welcome message
     if addon_data.debug then print('... complete!') end
