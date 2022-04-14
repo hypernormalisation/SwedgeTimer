@@ -26,7 +26,25 @@ addon_data.bar.default_settings = {
     fill_empty = true,
     main_r = 0.1, main_g = 0.1, main_b = 0.9, main_a = 1.0,
     main_text_r = 1.0, main_text_g = 1.0, main_text_b = 1.0, main_text_a = 1.0,
+    bar_color_default = {0.4, 0.4, 0.4, 1.0},
+    bar_color_twisting = {0.51, 0.04, 0.73, 1.0},
+    bar_color_twist_ready = {0., 0.99, 0., 1.0},
+    bar_color_blood = {0.99, 0.67, 0.0, 1.0},
 }
+
+-- the following should be flagged when the swing speed changes to
+-- evaluate the new offsets for ticks
+addon_data.bar.recalculate_ticks = false
+addon_data.bar.twist_tick_offset = 0.1
+
+
+print(addon_data.bar.default_settings["bar_color_twisting"][1])
+
+-- addon_data.bar.default_bar_colors = {
+--     default = {0.1, 0.1, 0.9, 1.0},
+--     twisting = {0.6, 0.6, 0.9, 1.0},
+-- }
+
 
 addon_data.bar.LoadSettings = function()
     -- If the carried over settings dont exist then make them
@@ -39,6 +57,16 @@ addon_data.bar.LoadSettings = function()
             character_bar_settings[setting] = value
         end
     end
+
+    -- -- same again for the default colors
+    -- if not bar_colors then
+    --     bar_colors = {}
+    -- end
+    -- for setting, value in pairs(addon_data.bar.default_bar_colors) do
+    --     if character_bar_settings[setting] == nil then
+    --         character_bar_settings[setting] = value
+    --     end
+    -- end
 end
 
 --=========================================================================================
@@ -90,6 +118,41 @@ addon_data.bar.init_bar_visuals = function()
     frame.backplane:SetPoint('BOTTOMRIGHT', 9, -9)
     frame.backplane:SetFrameStrata('BACKGROUND')
 
+    if settings.show_border then
+        frame.backplane:SetBackdrop({
+            bgFile = "Interface/AddOns/Hurricane/Images/Background", 
+            edgeFile = "Interface/AddOns/Hurricane/Images/Border", 
+            tile = true, tileSize = 16, edgeSize = 12, 
+            insets = { left = 8, right = 8, top = 8, bottom = 8}})
+    else
+        frame.backplane:SetBackdrop({
+            bgFile = "Interface/AddOns/Hurricane/Images/Background", 
+            edgeFile = nil, 
+            tile = true, tileSize = 16, edgeSize = 16, 
+            insets = { left = 8, right = 8, top = 8, bottom = 8}})
+    end
+
+    -- if settings.show_border then
+    --     frame.backplane:SetBackdrop({
+    --         bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+    --         edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+    --         edgeSize = 16,
+    --         insets = { left = 4, right = 4, top = 4, bottom = 4 },
+    --     })
+    --     -- frame.backplane:SetBackdrop({
+    --     --     bgFile = "Interface/AddOns/Hurricane/Images/Background", 
+    --     --     edgeFile = "Interface/buttons/white8x8", 
+    --     --     tile = true, tileSize = 16,
+    --     --     edgeSize = 16, 
+    --     --     insets = { left = 8, right = 8, top = 8, bottom = 8}})
+    -- else
+    --     frame.backplane:SetBackdrop({
+    --         bgFile = "Interface/AddOns/Hurricane/Images/Background", 
+    --         edgeFile = nil, 
+    --         tile = true, tileSize = 16, edgeSize = 16, 
+    --         insets = { left = 8, right = 8, top = 8, bottom = 8}})
+    -- end
+
     -- Create the main hand bar
     frame.bar = frame:CreateTexture(nil,"ARTWORK")
     frame:SetHeight(settings.height)
@@ -99,23 +162,42 @@ addon_data.bar.init_bar_visuals = function()
 
     -- Create the main hand bar left text
     frame.left_text = frame:CreateFontString(nil, "OVERLAY")
-    frame.left_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize)
+    frame.left_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize, "OUTLINE")
+    frame.left_text:SetShadowColor(0.0,0.0,0.0,1.0)
+    frame.left_text:SetShadowOffset(1,-1)
     frame.left_text:SetJustifyV("CENTER")
     frame.left_text:SetJustifyH("LEFT")
     -- Create the main hand bar right text
     frame.right_text = frame:CreateFontString(nil, "OVERLAY")
-    frame.right_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize)
+    frame.right_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize, "OUTLINE")
+    frame.right_text:SetShadowColor(0.0,0.0,0.0,1.0)
+    frame.right_text:SetShadowOffset(1,-1)
     frame.right_text:SetJustifyV("CENTER")
     frame.right_text:SetJustifyH("RIGHT")
 
     -- Create the line markers
-    frame.twist_line = frame:CreateLine()
-    frame.gcd1_marker = frame:CreateLine()
-    frame.gcd2_marker = frame:CreateLine()
+    frame.twist_line = frame:CreateLine() -- the twist window marker
+    frame.twist_line:SetColorTexture(1,1,1,1)
+    frame.twist_line:SetDrawLayer("OVERLAY")
+    frame.twist_line:SetThickness(3)
 
+    -- local offset = addon_data.bar.get_twist_tick_offset()
+    -- print(offset)
+    -- frame.bar.twist_tick_offset = offset
+    -- frame.bar.recalculate_ticks = false
+    -- frame.twist_line:SetStartPoint("TOPRIGHT",offset,0)
+    -- frame.twist_line:SetEndPoint("BOTTOMRIGHT",offset,0)
+
+    frame.gcd1_line = frame:CreateLine() -- the first gcd possible before a twist
+    frame.gcd1_line:SetColorTexture(1,0.1,0.1,1)
+    frame.gcd1_line:SetDrawLayer("OVERLAY")
+    frame.gcd1_line:SetThickness(2)
+    
+    frame.gcd2_marker = frame:CreateLine()
+    
     -- Run an update to configure the bar appropriately
     addon_data.bar.UpdateVisualsOnSettingsChange()
-    addon_data.bar.UpdateVisualsOnUpdate()
+    addon_data.bar.update_visuals_on_update()
 
     print('Successfully initialised all bar visuals.')
 	frame:Show()
@@ -145,6 +227,20 @@ addon_data.bar.UpdateVisualsOnSettingsChange = function()
                 tile = true, tileSize = 16, edgeSize = 16, 
                 insets = { left = 8, right = 8, top = 8, bottom = 8}})
         end
+        -- if settings.show_border then
+        --     frame.backplane:SetBackdrop({
+        --         bgFile = "Interface/AddOns/Hurricane/Images/Background", 
+        --         edgeFile = "interface/buttons/white8x8", 
+        --         tile = true, tileSize = 16,
+        --         edgeSize = 16, 
+        --         insets = { left = 8, right = 8, top = 8, bottom = 8}})
+        -- else
+        --     frame.backplane:SetBackdrop({
+        --         bgFile = "Interface/AddOns/Hurricane/Images/Background", 
+        --         edgeFile = nil, 
+        --         tile = true, tileSize = 16, edgeSize = 16, 
+        --         insets = { left = 8, right = 8, top = 8, bottom = 8}})
+        -- end
         frame.backplane:SetBackdropColor(0,0,0,settings.backplane_alpha)
 
         frame.bar:SetPoint("TOPLEFT", 0, 0)
@@ -157,11 +253,11 @@ addon_data.bar.UpdateVisualsOnSettingsChange = function()
         frame.spark:SetSize(16, settings.height)
         frame.left_text:SetPoint("TOPLEFT", 2, -(settings.height / 2) + (settings.fontsize / 2))
         frame.left_text:SetTextColor(settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a)
-		frame.left_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize)
+		-- frame.left_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize)
 	
         frame.right_text:SetPoint("TOPRIGHT", -5, -(settings.height / 2) + (settings.fontsize / 2))
         frame.right_text:SetTextColor(settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a)
-		frame.right_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize)
+		-- frame.right_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize)
 
         if settings.show_left_text then
             frame.left_text:Show()
@@ -184,8 +280,9 @@ end
 
 -- This function will be called once every frame after the event-based code has run,
 -- but before the frame is drawn.
+-- Func is called by the player frame OnUpdate (maybe we should change this).
 -- As such it should be kept as minimal as possible to avoid wasting resources.
-addon_data.bar.UpdateVisualsOnUpdate = function()
+addon_data.bar.update_visuals_on_update = function()
     local settings = character_player_settings
     local frame = addon_data.bar.frame
 
@@ -199,13 +296,7 @@ addon_data.bar.UpdateVisualsOnUpdate = function()
         print('WARNING: prevented zero division error')
     end
 
-    -- Change bar colours depending on conditions.
-    if addon_data.player.n_active_seals == 2 then
-        addon_data.bar.frame.bar:SetVertexColor(0.6, 0.6, 0.9, 1.0)
-    else
-        addon_data.bar.frame.bar:SetVertexColor(
-        settings.main_r, settings.main_g, settings.main_b, settings.main_a)
-    end
+
 
     -- Update the main bars width
     width = math.min(settings.width - (settings.width * (timer / speed)), settings.width)
@@ -231,25 +322,62 @@ addon_data.bar.UpdateVisualsOnUpdate = function()
         frame.right_text:Hide()
     end
 
-        -- Update the alpha
+    -- Change bar colours depending on conditions.
+    local c = addon_data.bar.return_bar_color()
+    addon_data.bar.frame.bar:SetVertexColor(unpack(c))
+    
+
+    -- Update the alpha
     if addon_data.core.in_combat then
         frame:SetAlpha(settings.in_combat_alpha)
     else
         frame:SetAlpha(settings.ooc_alpha)
     end
 
-    -- set the tick line for the twist window
-    local l = frame.twist_line
-    l:SetColorTexture(1,0,0,1)
-    local offset = addon_data.bar.GetTwistWindowOffset() * -1
-    l:SetStartPoint("TOPRIGHT",offset,0)
-    l:SetEndPoint("BOTTOMRIGHT",offset,0)
 
-    if addon_data.bar.draw_twist_window() then
-        l:Show()
-    else
-        l:Hide()
+    -- Sort out ticks
+    local l_t = frame.twist_line
+    local l_1 = frame.gcd1_line
+
+    -- Move the ticks if required
+    if true then -- addon_data.bar.recalculate_ticks then
+
+        -- first the twist bar
+        local offset = addon_data.bar.get_twist_tick_offset()
+        -- print('offset says')
+        -- print(offset)
+        addon_data.bar.twist_tick_offset = offset
+        addon_data.bar.recalculate_ticks = false
+        l_t:SetStartPoint("TOPRIGHT",offset,0)
+        l_t:SetEndPoint("BOTTOMRIGHT",offset,0)
+
+        -- now the first gcd line
+        local offset = addon_data.bar.get_gcd1_tick_offset()
+        -- print('gcd1 offset')
+        -- print(offset)
+        l_1:SetStartPoint("TOPRIGHT",offset,0)
+        l_1:SetEndPoint("BOTTOMRIGHT",offset,0)
+
+        addon_data.bar.recalculate_ticks = false
     end
+
+    -- Display twist tick or not
+    if true then --addon_data.bar.draw_twist_window() then
+        l_t:Show()
+    else
+        l_t:Hide()
+    end
+    
+    -- Display first gcd line or not
+
+end
+
+-- draw the right text or not
+addon_data.bar.draw_right_text = function()
+    if addon_data.player.swing_timer == 0 then
+        return false
+    end
+    return true
 end
 
 -- Determine wether or not to draw the GCD line.
@@ -258,32 +386,53 @@ addon_data.bar.draw_twist_window = function()
     if addon_data.player.swing_timer == 0 then
         return false
     end
-    -- print(addon_data.player.active_seals["Seal of Command"] == nil)
     if addon_data.player.active_seals["Seal of Command"] ~= nil then
         return true
     end
-    -- print('got here, returning false')
     return false
 end
 
-addon_data.bar.draw_right_text = function()
-    if addon_data.player.swing_timer == 0 then
-        return false
-    end
-    return true
+
+-- Get the offset position of the twist window
+addon_data.bar.get_twist_tick_offset = function()
+    local settings = character_player_settings
+    return (0.4 / addon_data.player.current_weapon_speed) * settings.width * -1
 end
 
+-- Get the offset position of the first gcd window
+addon_data.bar.get_gcd1_tick_offset = function()
+    local settings = character_player_settings
+    -- dummy for the actual gcd value, which we will figure out later
+    local gcd_duration = 1.5
+    local grace_period = 0.2
+    return ((gcd_duration + grace_period) / addon_data.player.current_weapon_speed) * settings.width * -1
+end
 
 -- a function to return the present bar color
 -- is called every update, be efficient!
 addon_data.bar.return_bar_color = function()
-end
+    -- if no seal return default color
+    if addon_data.player.n_active_seals == 0 then
+        return character_bar_settings["bar_color_default"]
+    end   
+    -- if we're currently twisting return twist color
+    if addon_data.player.n_active_seals == 2 then
+        return character_bar_settings["bar_color_twisting"]
+    end
+    -- if we're under only SoC then return the ready to twist color
+    if addon_data.player.active_seals["Seal of Command"] ~= nil then
+        return character_bar_settings["bar_color_twist_ready"]
+    -- if we're only under SoB, return the blood color
+    elseif addon_data.player.active_seals["Seal of Blood"] ~= nil then
+        return character_bar_settings["bar_color_blood"]
+    end
 
--- =============================================================================
--- Functions to calculate positioning of bar elements
-addon_data.bar.GetTwistWindowOffset = function()
-    local settings = character_player_settings
-    return (0.4 / addon_data.player.current_weapon_speed) * settings.width
+    -- if addon_data.player.n_active_seals == 0 then
+    --     return character_bar_settings["bar_color_default"]
+    -- end   
+
+    -- if we get to the end return the default color
+    return character_bar_settings["bar_color_default"]
 end
 
 

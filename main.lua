@@ -20,7 +20,6 @@ addon_data.core.in_combat_frame = CreateFrame("Frame", addon_name .. "CombatFram
 local function in_combat_frame_event_handler(self, event, ...)
     if event == "PLAYER_REGEN_ENABLED" then
         addon_data.core.in_combat = false
-		-- print('leaving combat')
     elseif event == "PLAYER_REGEN_DISABLED" then
         addon_data.core.in_combat = true
     end
@@ -129,6 +128,7 @@ local function init_addon(self)
 
     -- Load visuals
     if addon_data.debug then print('Initialising visuals...') end
+    addon_data.bar.recalculate_ticks = true -- force initial draw
     InitializeAllVisuals()
 
     -- Any other misc operations that happen at the start
