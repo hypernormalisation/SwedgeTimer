@@ -147,6 +147,7 @@ addon_data.player.on_equipment_change = function()
     addon_data.player.weapon_id = new_guid
 end
 
+-- Function run when we intercept an unfiltered combatlog event.
 addon_data.player.OnCombatLogUnfiltered = function(combat_info)
 	local _, event, _, source_guid, _, _, _, dest_guid, _, _, _, _, spell_name, _ = unpack(combat_info)
 	
@@ -164,7 +165,6 @@ addon_data.player.OnCombatLogUnfiltered = function(combat_info)
         elseif (event == "SWING_MISSED") then
 			addon_data.player.reset_swing_timer()
         end
-
     -- Handle all relevant events where the player is the target
     elseif (dest_guid == addon_data.player.guid) then
         if (event == "SWING_MISSED") then
@@ -181,27 +181,12 @@ addon_data.player.OnCombatLogUnfiltered = function(combat_info)
             end
         end
     end
-
     -- finally update the attack speed
     addon_data.player.update_weapon_speed()
 end
 
--- -- Called once on aura change for each active seal on the player
--- addon_data.player.OnSealChange = function(...)
---     args = {...}
---     if not args then
---         return
---     end
---     -- for key, value in pairs(args) do
---     --     print('key ' .. key)
---     --     print(value)
---     -- end
--- end
-
-
--- There is no information in the event payload on what changed, so we have to rescan auras
--- on the player.
-addon_data.player.on_player_aura_change = function()
+-- Function to iterate over the player's auras and record any active Seals.
+addon_data.player.parse_auras = function()
     local end_iter = false
     local counter = 1
     addon_data.player.n_active_seals = 0
@@ -209,7 +194,7 @@ addon_data.player.on_player_aura_change = function()
     -- print('Processing auras on change...')
 
     -- copy the previous seals
-    local previous_active_seals = addon_data.player.active_seals
+    addon_data.player.previous_active_seals = addon_data.player.active_seals
 
     -- iterate over the current player auras and process seals
     addon_data.player.active_seals = {}
@@ -229,30 +214,43 @@ addon_data.player.on_player_aura_change = function()
         end
         counter = counter + 1
     end
+end
 
+-- Function to parse the list of Seals and set flags etc.
+addon_data.player.process_auras = function()
     -- Check if crusader currently active.
     if addon_data.player.active_seals["Seal of the Crusader"] == nil then
         addon_data.player.crusader_currently_active = false
     end
-
     -- check for any new Seal of the Crusader casts
     if addon_data.player.crusader_currently_active then
-        if previous_active_seals["Seal of the Crusader"] == nil then
+        if addon_data.player.previous_active_seals["Seal of the Crusader"] == nil then
             -- if we're also midway through a swing, need some additional logic 
             -- to handle the haste snapshotting
             if addon_data.player.swing_timer > 0 then
                 addon_data.crusader_lock = true
             end
         end
-
     -- check for any Seal of the Crusader that's fallen off midswing
-    elseif previous_active_seals["Seal of the Crusader"] then
+    elseif addon_data.player.previous_active_seals["Seal of the Crusader"] then
         if addon_data.player.swing_timer > 0 then
             addon_data.crusader_lock = true
         end
     end
-    print(addon_data.player.active_seals)
-    print(addon_data.player.n_active_seals)   
+end
+
+-- There is no information in the event payload on what changed, so we have to rescan auras
+-- on the player.
+addon_data.player.on_player_aura_change = function()
+
+    -- Function that parses the auras to record seals.
+    addon_data.player.parse_auras()
+
+    -- Function that processes the above.
+    addon_data.player.process_auras()
+
+    -- print(addon_data.player.active_seals)
+    -- print(addon_data.player.n_active_seals)   
 end
 
 -- function to detect any spell casts like repentance that would reset

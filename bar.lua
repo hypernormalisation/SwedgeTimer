@@ -38,8 +38,6 @@ addon_data.bar.recalculate_ticks = false
 addon_data.bar.twist_tick_offset = 0.1
 
 
--- print(addon_data.bar.default_settings["bar_color_twisting"][1])
-
 addon_data.bar.LoadSettings = function()
     -- If the carried over settings dont exist then make them
     if not character_bar_settings then
@@ -52,15 +50,6 @@ addon_data.bar.LoadSettings = function()
         end
     end
 
-    -- -- same again for the default colors
-    -- if not bar_colors then
-    --     bar_colors = {}
-    -- end
-    -- for setting, value in pairs(addon_data.bar.default_bar_colors) do
-    --     if character_bar_settings[setting] == nil then
-    --         character_bar_settings[setting] = value
-    --     end
-    -- end
 end
 
 --=========================================================================================
@@ -277,9 +266,9 @@ end
 -- Func is called by the player frame OnUpdate (maybe we should change this).
 -- As such it should be kept as minimal as possible to avoid wasting resources.
 addon_data.bar.update_visuals_on_update = function()
+
     local settings = character_player_settings
     local frame = addon_data.bar.frame
-
     if not settings.enabled then return end 
 
     local speed = addon_data.player.current_weapon_speed
@@ -289,8 +278,6 @@ addon_data.bar.update_visuals_on_update = function()
         speed = 2
         print('WARNING: prevented zero division error')
     end
-
-
 
     -- Update the main bars width
     width = math.min(settings.width - (settings.width * (timer / speed)), settings.width)
@@ -363,6 +350,12 @@ addon_data.bar.update_visuals_on_update = function()
     end
     
     -- Display first gcd line or not
+    if true then
+        l_1:Show()
+    else
+        l_1:Show()
+    end
+
 
 end
 
