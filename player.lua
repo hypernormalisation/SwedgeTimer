@@ -47,8 +47,14 @@ addon_data.player.active_seal_1_remaining = 0
 addon_data.player.active_seal_2 = nil
 addon_data.player.active_seal_2_remaining = 0
 
+-- flag to run a double poll after 0.1s on aura change to catch bad API calls
+addon_data.player.aura_repoll_counter = 0.0
+addon_data.player.repoll_on_aura_change = false
+
 -- a flag to ensure the code on swing completion only runs once
 addon_data.player.reported_swing_timer_complete = false
+addon_data.player.reported_swing_timer_complete_double = false
+addon_data.player.time_since_swing_completion = 0.0
 
 -- a flag to ensure the code on speed change only runs once per change
 addon_data.player.reported_speed_change = false
@@ -291,20 +297,45 @@ end
 
 addon_data.player.OnUpdate = function(elapsed)
     
-    -- check if the swing timer is up
+    -- Logic for when the swing timer is complete.
     if addon_data.player.swing_timer == 0 then
         if not addon_data.player.reported_swing_timer_complete then
             addon_data.player.swing_timer_complete()
             addon_data.player.reported_swing_timer_complete = true
+            -- addon_data.player.reported_swing_timer_complete_double = false
+            addon_data.player.time_since_swing_completion = 0
         end
-    end
 
+        -- -- Ensure the player's swing timer is re-polled a short time after swing completion 
+        -- -- to catch late API updates.
+        -- if not addon_data.player.reported_swing_timer_complete_double then
+        --     if addon_data.player.time_since_swing_completion < 0.1 then
+        --         addon_data.player.time_since_swing_completion = addon_data.player.time_since_swing_completion + elapsed
+        --     else
+        --         print('additional check')
+        --         addon_data.player.update_weapon_speed()
+        --         addon_data.player.reported_swing_timer_complete_double = true
+        --     end
+        -- end
+        
+    end
     
     -- addon_data.player.update_weapon_speed()
     -- print(addon_data.player.current_weapon_speed)
     -- temp fix for div by zero
-    if addon_data.player.current_weapon_speed == 0 then
-        addon_data.player.current_weapon_speed = 2
+    -- if addon_data.player.current_weapon_speed == 0 then
+    --     addon_data.player.current_weapon_speed = 2
+    -- end
+  
+    -- Repoll the attack speed a short while after an aura change
+    if addon_data.player.repoll_on_aura_change then
+        if addon_data.player.aura_repoll_counter > 0.4 then
+            print('SECONDARY API POLL ON AURA CHANGE')
+            addon_data.player.update_weapon_speed()
+            addon_data.player.repoll_on_aura_change = false
+        else
+            addon_data.player.aura_repoll_counter = addon_data.player.aura_repoll_counter + elapsed
+        end
     end
 
 	-- If the weapon speed changed due to buffs/debuffs, we need to modify the swing timer
@@ -318,7 +349,7 @@ addon_data.player.OnUpdate = function(elapsed)
             addon_data.player.reported_speed_change = true
         end
     end
-    
+
     -- Update the swing timer
     addon_data.player.update_swing_timer(elapsed)
     
@@ -344,6 +375,14 @@ addon_data.player.player_frame_on_event = function(self, event, ...)
         print('processing aura change')
         addon_data.player.on_player_aura_change()
         addon_data.player.update_weapon_speed()
+
+        -- Trigger logic to repoll after a small amount of time
+        addon_data.player.repoll_on_aura_change = true
+        -- reset the counter if we're still waiting on a second poll
+        if addon_data.player.aura_repoll_counter > 0.0 then
+            addon_data.player.aura_repoll_counter = 0.0
+        end
+
 
     elseif event == "UNIT_SPELLCAST_SENT" then
         addon_data.player.OnPlayerSpellCast(event, args)
