@@ -33,7 +33,7 @@ addon_data.player.guid = UnitGUID("player")
 -- addon_data.player.auras = UnitAura(addon_data.player.guid)
 
 addon_data.player.swing_timer = 0.00001
-addon_data.player.prev_weapon_speed = 2
+addon_data.player.prev_weapon_speed = 0.1
 addon_data.player.current_weapon_speed = 2
 addon_data.player.weapon_id = GetInventoryItemID("player", 16)
 addon_data.player.speed_changed = false
@@ -47,6 +47,12 @@ addon_data.player.active_seal_1_remaining = 0
 addon_data.player.active_seal_2 = nil
 addon_data.player.active_seal_2_remaining = 0
 
+-- a flag to ensure the code on swing completion only runs once
+addon_data.player.reported_swing_timer_complete = false
+
+-- a flag to ensure the code on speed change only runs once per change
+addon_data.player.reported_speed_change = false
+
 -- Flag to detect if we have a new/falling off SotCr aura and need to change swing
 -- timers to account for haste snapshotting
 addon_data.crusader_lock = false
@@ -55,17 +61,6 @@ addon_data.crusader_currently_active = false
 -- Flags to detect any spell casts that would reset the swing timer.
 addon_data.player.how_cast_guid = nil
 addon_data.player.holy_wrath_cast_guid = nil
-
--- quick function to set the swing timer initially
--- addon_data.player.InitSwingTimer = function()
---     addon_data.player.swing_timer = 0.0001
--- end
-
--- Function that will carry out all speed changes, set all relevant flags etc
--- addon_data.player.handle_speed_change = function()
---     addon_data.player.update_weapon_speed()
---     addon_data.bar.recalculate_ticks = true
--- end
 
 
 addon_data.player.LoadSettings = function()
@@ -87,13 +82,15 @@ end
 addon_data.player.swing_timer_complete = function()
     -- handle seal of the crusader snapshotting for new crusader buffs
     addon_data.crusader_lock = false
+    print('blah')
     addon_data.player.update_weapon_speed()
 end
 
 -- Called when the swing timer should be reset
 addon_data.player.reset_swing_timer = function()
-    addon_data.player.update_weapon_speed() -- NOT SURE IF THIS IS NEEDED
+    -- addon_data.player.update_weapon_speed() -- NOT SURE IF THIS IS NEEDED
     addon_data.player.swing_timer = addon_data.player.current_weapon_speed
+    addon_data.player.reported_swing_timer_complete = false
 end
 
 -- called w
@@ -116,7 +113,8 @@ addon_data.player.update_weapon_speed = function()
     -- Should be run when we receive an event that could indicate the player's 
     -- attack speed may have changed.
     addon_data.player.prev_weapon_speed = addon_data.player.current_weapon_speed
-    -- print(UnitAttackSpeed("player"))
+    print('API speed says:')
+    print(UnitAttackSpeed("player"))
 
     -- Handle crusader snapshotting
     if addon_data.crusader_lock == true then
@@ -127,9 +125,10 @@ addon_data.player.update_weapon_speed = function()
 
     -- Update the attack speed and mark if it has changed.
     addon_data.player.current_weapon_speed, _ = UnitAttackSpeed("player")
-    -- print(addon_data.player.current_weapon_speed)
+    print(addon_data.player.current_weapon_speed)
     if addon_data.player.current_weapon_speed ~= addon_data.player.prev_weapon_speed then
         addon_data.player.speed_changed = true
+        addon_data.player.reported_speed_change = false
     else
         addon_data.player.speed_changed = false
     end
@@ -182,7 +181,7 @@ addon_data.player.OnCombatLogUnfiltered = function(combat_info)
         end
     end
     -- finally update the attack speed
-    addon_data.player.update_weapon_speed()
+    -- addon_data.player.update_weapon_speed()
 end
 
 -- Function to iterate over the player's auras and record any active Seals.
@@ -228,12 +227,14 @@ addon_data.player.process_auras = function()
             -- if we're also midway through a swing, need some additional logic 
             -- to handle the haste snapshotting
             if addon_data.player.swing_timer > 0 then
+                print('enabling crusader lock, new SotC cast midswing')
                 addon_data.crusader_lock = true
             end
         end
     -- check for any Seal of the Crusader that's fallen off midswing
     elseif addon_data.player.previous_active_seals["Seal of the Crusader"] then
         if addon_data.player.swing_timer > 0 then
+            print('enabling crusader lock, old SotC fell off midswing')
             addon_data.crusader_lock = true
         end
     end
@@ -249,8 +250,8 @@ addon_data.player.on_player_aura_change = function()
     -- Function that processes the above.
     addon_data.player.process_auras()
 
-    -- print(addon_data.player.active_seals)
-    -- print(addon_data.player.n_active_seals)   
+    print(addon_data.player.active_seals)
+    print(addon_data.player.n_active_seals)   
 end
 
 -- function to detect any spell casts like repentance that would reset
@@ -292,7 +293,10 @@ addon_data.player.OnUpdate = function(elapsed)
     
     -- check if the swing timer is up
     if addon_data.player.swing_timer == 0 then
-        addon_data.player.swing_timer_complete()
+        if not addon_data.player.reported_swing_timer_complete then
+            addon_data.player.swing_timer_complete()
+            addon_data.player.reported_swing_timer_complete = true
+        end
     end
 
     
@@ -305,10 +309,14 @@ addon_data.player.OnUpdate = function(elapsed)
 
 	-- If the weapon speed changed due to buffs/debuffs, we need to modify the swing timer
     if addon_data.player.speed_changed then
-        -- print('swing speed changed, timer updating')
-        -- print(tostring(addon_data.player.current_weapon_speed))
-        local main_multiplier = addon_data.player.current_weapon_speed / addon_data.player.prev_weapon_speed
-        addon_data.player.swing_timer = addon_data.player.swing_timer * main_multiplier
+        if not addon_data.player.reported_speed_change then
+            addon_data.bar.recalculate_ticks = true
+            print('swing speed changed, timer updating')
+            print(tostring(addon_data.player.prev_weapon_speed) .. " > " .. tostring(addon_data.player.current_weapon_speed))
+            local main_multiplier = addon_data.player.current_weapon_speed / addon_data.player.prev_weapon_speed
+            addon_data.player.swing_timer = addon_data.player.swing_timer * main_multiplier
+            addon_data.player.reported_speed_change = true
+        end
     end
     
     -- Update the swing timer
@@ -333,6 +341,7 @@ addon_data.player.player_frame_on_event = function(self, event, ...)
         addon_data.player.OnCombatLogUnfiltered(combat_info)
     
     elseif event == "UNIT_AURA" then
+        print('processing aura change')
         addon_data.player.on_player_aura_change()
         addon_data.player.update_weapon_speed()
 

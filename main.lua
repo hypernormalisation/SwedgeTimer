@@ -133,6 +133,7 @@ local function init_addon(self)
 
     -- Any other misc operations that happen at the start
     -- addon_data.player.InitSwingTimer()
+    addon_data.player.update_weapon_speed()
 
     -- If appropriate show welcome message
     if addon_data.debug then print('... complete!') end

@@ -37,6 +37,9 @@ addon_data.bar.default_settings = {
 addon_data.bar.recalculate_ticks = false
 addon_data.bar.twist_tick_offset = 0.1
 
+addon_data.bar.gcd2_tick_offset = 0.1
+
+
 
 addon_data.bar.LoadSettings = function()
     -- If the carried over settings dont exist then make them
@@ -176,7 +179,10 @@ addon_data.bar.init_bar_visuals = function()
     frame.gcd1_line:SetDrawLayer("OVERLAY")
     frame.gcd1_line:SetThickness(2)
     
-    frame.gcd2_marker = frame:CreateLine()
+    frame.gcd2_line = frame:CreateLine()
+    frame.gcd2_line:SetColorTexture(1,1,1,1)
+    frame.gcd2_line:SetDrawLayer("OVERLAY")
+    frame.gcd2_line:SetThickness(2)
     
     -- Run an update to configure the bar appropriately
     addon_data.bar.UpdateVisualsOnSettingsChange()
@@ -319,6 +325,7 @@ addon_data.bar.update_visuals_on_update = function()
     -- Sort out ticks
     local l_t = frame.twist_line
     local l_1 = frame.gcd1_line
+    local l_2 = frame.gcd2_line
 
     -- Move the ticks if required
     if true then -- addon_data.bar.recalculate_ticks then
@@ -339,21 +346,47 @@ addon_data.bar.update_visuals_on_update = function()
         l_1:SetStartPoint("TOPRIGHT",offset,0)
         l_1:SetEndPoint("BOTTOMRIGHT",offset,0)
 
+        -- and the second gcd line
+        local offset = addon_data.bar.get_gcd2_tick_offset()
+        addon_data.bar.gcd2_tick_offset = offset
+        l_2:SetStartPoint("TOPRIGHT",offset,0)
+        l_2:SetEndPoint("BOTTOMRIGHT",offset,0)
+
+        -- print(l_2:GetEndPoint())
+
         addon_data.bar.recalculate_ticks = false
     end
 
-    -- Display twist tick or not
-    if true then --addon_data.bar.draw_twist_window() then
-        l_t:Show()
-    else
+
+    -- Hide ticks when bar full
+    if addon_data.player.swing_timer == 0 then
         l_t:Hide()
-    end
+        l_1:Hide()
+        l_2:Hide()
     
-    -- Display first gcd line or not
-    if true then
-        l_1:Show()
+    -- else figure out which to show
     else
-        l_1:Show()
+    
+        -- Display twist tick or not
+        if true then --addon_data.bar.draw_twist_window() then
+            l_t:Show()
+        else
+            l_t:Hide()
+        end
+    
+        -- Display first gcd line or not
+        if true then
+            l_1:Show()
+        else
+            l_1:Show()
+        end
+
+        -- Display first gcd line or not
+        if addon_data.bar.draw_gcd2_window() then
+            l_2:Show()
+        else
+            l_2:Show()
+        end
     end
 
 
@@ -367,16 +400,24 @@ addon_data.bar.draw_right_text = function()
     return true
 end
 
--- Determine wether or not to draw the GCD line.
+-- Determine wether or not to draw the twist line
 -- Hide if we are not in SoC or the swing bar is full
 addon_data.bar.draw_twist_window = function()
-    if addon_data.player.swing_timer == 0 then
-        return false
-    end
     if addon_data.player.active_seals["Seal of Command"] ~= nil then
         return true
     end
     return false
+end
+
+-- determine wether or not to draw the gcd1 line
+addon_data.bar.draw_gcd2_window = function()
+    local settings = character_player_settings
+    -- print(addon_data.bar.gcd2_tick_offset)
+    -- print(settings.width)
+    if addon_data.bar.gcd2_tick_offset * -1 > settings.width then
+        return false
+    end
+    return true
 end
 
 
@@ -386,13 +427,22 @@ addon_data.bar.get_twist_tick_offset = function()
     return (0.4 / addon_data.player.current_weapon_speed) * settings.width * -1
 end
 
--- Get the offset position of the first gcd window
+-- Get the offset position of the first gcd window tick
 addon_data.bar.get_gcd1_tick_offset = function()
     local settings = character_player_settings
     -- dummy for the actual gcd value, which we will figure out later
     local gcd_duration = 1.5
     local grace_period = 0.2
     return ((gcd_duration + grace_period) / addon_data.player.current_weapon_speed) * settings.width * -1
+end
+
+-- Get the offset position of the second gcd window tick
+addon_data.bar.get_gcd2_tick_offset = function()
+    local settings = character_player_settings
+    -- dummy for the actual gcd value, which we will figure out later
+    local gcd_duration = 1.5
+    local grace_period = 0.2
+    return ((2*gcd_duration + grace_period) / addon_data.player.current_weapon_speed) * settings.width * -1
 end
 
 -- a function to return the present bar color
@@ -413,10 +463,6 @@ addon_data.bar.return_bar_color = function()
     elseif addon_data.player.active_seals["Seal of Blood"] ~= nil then
         return character_bar_settings["bar_color_blood"]
     end
-
-    -- if addon_data.player.n_active_seals == 0 then
-    --     return character_bar_settings["bar_color_default"]
-    -- end   
 
     -- if we get to the end return the default color
     return character_bar_settings["bar_color_default"]
