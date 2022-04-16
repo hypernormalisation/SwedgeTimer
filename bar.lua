@@ -106,13 +106,13 @@ addon_data.bar.init_bar_visuals = function()
 
     if settings.show_border then
         frame.backplane:SetBackdrop({
-            bgFile = "Interface/AddOns/Hurricane/Images/Background", 
-            edgeFile = "Interface/AddOns/Hurricane/Images/Border", 
+            bgFile = "Interface/AddOns/SwedgeTimer/Images/Background", 
+            edgeFile = "Interface/AddOns/SwedgeTimer/Images/Border", 
             tile = true, tileSize = 16, edgeSize = 12, 
             insets = { left = 8, right = 8, top = 8, bottom = 8}})
     else
         frame.backplane:SetBackdrop({
-            bgFile = "Interface/AddOns/Hurricane/Images/Background", 
+            bgFile = "Interface/AddOns/SwedgeTimer/Images/Background", 
             edgeFile = nil, 
             tile = true, tileSize = 16, edgeSize = 16, 
             insets = { left = 8, right = 8, top = 8, bottom = 8}})
@@ -144,7 +144,7 @@ addon_data.bar.init_bar_visuals = function()
     frame:SetHeight(settings.height)
     -- Create the main spark
     frame.spark = frame:CreateTexture(nil,"OVERLAY")
-    frame.spark:SetTexture('Interface/AddOns/Hurricane/Images/Spark')
+    frame.spark:SetTexture('Interface/AddOns/SwedgeTimer/Images/Spark')
 
     -- Create the main hand bar left text
     frame.left_text = frame:CreateFontString(nil, "OVERLAY")
@@ -205,13 +205,13 @@ addon_data.bar.UpdateVisualsOnSettingsChange = function()
         frame:SetWidth(settings.width)
         if settings.show_border then
             frame.backplane:SetBackdrop({
-                bgFile = "Interface/AddOns/Hurricane/Images/Background", 
-                edgeFile = "Interface/AddOns/Hurricane/Images/Border", 
+                bgFile = "Interface/AddOns/SwedgeTimer/Images/Background", 
+                edgeFile = "Interface/AddOns/SwedgeTimer/Images/Border", 
                 tile = true, tileSize = 16, edgeSize = 12, 
                 insets = { left = 8, right = 8, top = 8, bottom = 8}})
         else
             frame.backplane:SetBackdrop({
-                bgFile = "Interface/AddOns/Hurricane/Images/Background", 
+                bgFile = "Interface/AddOns/SwedgeTimer/Images/Background", 
                 edgeFile = nil, 
                 tile = true, tileSize = 16, edgeSize = 16, 
                 insets = { left = 8, right = 8, top = 8, bottom = 8}})
@@ -237,7 +237,7 @@ addon_data.bar.UpdateVisualsOnSettingsChange = function()
 
 
 
-        frame.bar:SetTexture('Interface/AddOns/Hurricane/Images/Bar')
+        frame.bar:SetTexture('Interface/AddOns/SwedgeTimer/Images/Bar')
         frame.bar:SetVertexColor(settings.main_r, settings.main_g, settings.main_b, settings.main_a)
         frame.spark:SetSize(16, settings.height)
         frame.left_text:SetPoint("TOPLEFT", 2, -(settings.height / 2) + (settings.fontsize / 2))
