@@ -48,6 +48,9 @@ addon_data.player.active_seal_1_remaining = 0
 addon_data.player.active_seal_2 = nil
 addon_data.player.active_seal_2_remaining = 0
 
+-- containers for GCD information
+addon_data.player.current_gcd_duration = 1.5
+
 -- flag to run a double poll after 0.1s on aura change to catch bad API calls
 addon_data.player.aura_repoll_counter = 0.0
 addon_data.player.repoll_on_aura_change = false

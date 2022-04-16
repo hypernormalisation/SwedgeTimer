@@ -32,6 +32,9 @@ addon_data.bar.default_settings = {
     bar_color_twisting = {0.51, 0.04, 0.73, 1.0},
     bar_color_twist_ready = {0., 0.99, 0., 1.0},
     bar_color_blood = {0.99, 0.67, 0.0, 1.0},
+    bar_color_warning = {1.0, 0.0, 0.0, 1.0}, -- when if you cast SoC, you can't twist out of it that swing
+    twist_window = 0.4,
+    grace_period = 0.1,
 }
 
 -- the following should be flagged when the swing speed changes to
@@ -48,6 +51,7 @@ addon_data.bar.LoadSettings = function()
     if not character_bar_settings then
         character_bar_settings = {}
     end
+    -- character_bar_settings = {} -- REMOVE ME THIS IS FOR TESTING
     -- If the carried over settings aren't set then set them to the defaults
     for setting, value in pairs(addon_data.bar.default_settings) do
         if character_bar_settings[setting] == nil then
@@ -242,7 +246,7 @@ addon_data.bar.UpdateVisualsOnSettingsChange = function()
 
 
         frame.bar:SetTexture('Interface/AddOns/SwedgeTimer/Images/Bar')
-        frame.bar:SetVertexColor(settings.main_r, settings.main_g, settings.main_b, settings.main_a)
+        frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_default"]))
         frame.spark:SetSize(16, settings.height)
         frame.left_text:SetPoint("TOPLEFT", 2, -(settings.height / 2) + (settings.fontsize / 2))
         frame.left_text:SetTextColor(settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a)
@@ -315,10 +319,21 @@ addon_data.bar.update_visuals_on_update = function()
         frame.right_text:Hide()
     end
 
-    -- Change bar colours depending on conditions.
-    local c = addon_data.bar.return_bar_color()
-    addon_data.bar.frame.bar:SetVertexColor(unpack(c))
+    -- -- If SoC, bar colour is time sensitive. Deal with that here.
+    if addon_data.player.active_seals["Seal of Command"] ~= nil and addon_data.player.n_active_seals == 1 then
+        if addon_data.player.swing_timer < character_bar_settings["twist_window"] then 
+            addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_twist_ready"]))
+        else
+            local min_time = addon_data.player.current_gcd_duration + character_bar_settings["grace_period"]
+            if addon_data.player.swing_timer > min_time then            
+                addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_twist_ready"]))
+            else
+                addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_warning"]))
+            end
+        end        
+    end
     
+
     -- Update the alpha
     if addon_data.core.in_combat then
         frame:SetAlpha(settings.in_combat_alpha)
@@ -375,6 +390,7 @@ addon_data.bar.update_bar_on_aura_change = function()
     else
         addon_data.bar.frame.twist_line:Hide()
     end
+    addon_data.bar.set_bar_color()
 end
 
 -- Determine wether or not to draw the twist line
@@ -409,8 +425,8 @@ end
 addon_data.bar.set_gcd1_tick_offset = function()
     local settings = character_player_settings
     -- dummy for the actual gcd value, which we will figure out later
-    local gcd_duration = 1.5
-    local grace_period = 0.2
+    local gcd_duration = addon_data.player.current_gcd_duration
+    local grace_period = character_bar_settings["grace_period"]
     offset = ((gcd_duration + grace_period) / addon_data.player.current_weapon_speed) * settings.width * -1
     addon_data.bar.gcd1_tick_offset = offset
     addon_data.bar.frame.gcd1_line:SetStartPoint("TOPRIGHT", offset, 0)
@@ -421,8 +437,8 @@ end
 addon_data.bar.set_gcd2_tick_offset = function()
     local settings = character_player_settings
     -- dummy for the actual gcd value, which we will figure out later
-    local gcd_duration = 1.5
-    local grace_period = 0.2
+    local gcd_duration = addon_data.player.current_gcd_duration
+    local grace_period = character_bar_settings["grace_period"]
     offset = ((2*gcd_duration + grace_period) / addon_data.player.current_weapon_speed) * settings.width * -1
     addon_data.bar.gcd2_tick_offset = offset
     addon_data.bar.frame.gcd2_line:SetStartPoint("TOPRIGHT", offset, 0)
@@ -431,27 +447,29 @@ end
 
 
 
--- a function to return the present bar color
--- is called every update, be efficient!
-addon_data.bar.return_bar_color = function()
+addon_data.bar.set_bar_color = function()
+    -- This function sets the bar colour for all cases outside of seal of command, which has
+    -- a time sensitive component and must be handled on-update.
+
     -- if no seal return default color
     if addon_data.player.n_active_seals == 0 then
-        return character_bar_settings["bar_color_default"]
+        addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_default"]))
+        return
     end   
     -- if we're currently twisting return twist color
     if addon_data.player.n_active_seals == 2 then
-        return character_bar_settings["bar_color_twisting"]
+        addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_twisting"]))
+        return
     end
-    -- if we're under only SoC then return the ready to twist color
-    if addon_data.player.active_seals["Seal of Command"] ~= nil then
-        return character_bar_settings["bar_color_twist_ready"]
+
     -- if we're only under SoB, return the blood color
-    elseif addon_data.player.active_seals["Seal of Blood"] ~= nil then
-        return character_bar_settings["bar_color_blood"]
+    if addon_data.player.active_seals["Seal of Blood"] ~= nil then
+        addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_blood"]))
+        return
     end
 
     -- if we get to the end return the default color
-    return character_bar_settings["bar_color_default"]
+    addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_default"]))
 end
 
 -- draw the right text or not

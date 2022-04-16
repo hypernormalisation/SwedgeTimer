@@ -126,8 +126,10 @@ local function init_addon(self)
 	-- addon_data.core.LoadSettings()
     -- print('... settings loaded successfully')
 
+    -- Some settings that have to be set after the bar is initialised
     addon_data.bar.UpdateVisualsOnSettingsChange()
     addon_data.bar.update_visuals_on_update()
+    addon_data.bar.set_bar_color()
 
     -- Any other misc operations that happen at the start
     -- addon_data.player.InitSwingTimer()
