@@ -1,5 +1,6 @@
 local addon_name, addon_data = ...
 local print = addon_data.utils.print_msg
+local floor = addon_data.utils.SimpleRound
 
 --=========================================================================================
 -- PLAYER SETTINGS 
@@ -34,7 +35,7 @@ addon_data.player.guid = UnitGUID("player")
 
 addon_data.player.swing_timer = 0.00001
 addon_data.player.prev_weapon_speed = 0.1
-addon_data.player.current_weapon_speed = 2
+addon_data.player.current_weapon_speed = 2.0
 addon_data.player.weapon_id = GetInventoryItemID("player", 16)
 addon_data.player.speed_changed = false
 addon_data.player.extra_attacks_flag = false
@@ -57,7 +58,7 @@ addon_data.player.reported_swing_timer_complete_double = false
 addon_data.player.time_since_swing_completion = 0.0
 
 -- a flag to ensure the code on speed change only runs once per change
-addon_data.player.reported_speed_change = false
+addon_data.player.reported_speed_change = true
 
 -- Flag to detect if we have a new/falling off SotCr aura and need to change swing
 -- timers to account for haste snapshotting
@@ -88,8 +89,9 @@ end
 addon_data.player.swing_timer_complete = function()
     -- handle seal of the crusader snapshotting for new crusader buffs
     addon_data.crusader_lock = false
-    print('blah')
+    -- print('Swing timer complete.')
     addon_data.player.update_weapon_speed()
+    addon_data.bar.update_bar_on_timer_full()
 end
 
 -- Called when the swing timer should be reset
@@ -97,6 +99,7 @@ addon_data.player.reset_swing_timer = function()
     -- addon_data.player.update_weapon_speed() -- NOT SURE IF THIS IS NEEDED
     addon_data.player.swing_timer = addon_data.player.current_weapon_speed
     addon_data.player.reported_swing_timer_complete = false
+    addon_data.bar.update_bar_on_swing_reset()
 end
 
 -- called w
@@ -116,11 +119,24 @@ end
 --=========================================================================================
 
 addon_data.player.update_weapon_speed = function()
-    -- Should be run when we receive an event that could indicate the player's 
-    -- attack speed may have changed.
+    -- Function called whenever it is possible that the attack speed has changed.
+    -- We use the reported_speed_change flag to ensure that this logic happens
+    -- exactly once during a player frame update, because multiple events can
+    -- happen between the same update, and the logic to process speed changes
+    -- is most efficiently handled in the onupdate.
+    if not addon_data.player.reported_speed_change then 
+        -- check the speed isn't the same, and if it is, return it
+        -- this check picks up on multiple events between updates
+        -- that can trigger attack speed changes
+        local old = addon_data.player.current_weapon_speed
+        local new = UnitAttackSpeed("player")
+        if old == new then return end
+    end
+
     addon_data.player.prev_weapon_speed = addon_data.player.current_weapon_speed
-    print('API speed says:')
-    print(UnitAttackSpeed("player"))
+    -- Poll the API for the attack speed
+    addon_data.player.current_weapon_speed, _ = UnitAttackSpeed("player")
+    print('API speed says: ' .. tostring(addon_data.player.current_weapon_speed))
 
     -- Handle crusader snapshotting
     if addon_data.crusader_lock == true then
@@ -130,8 +146,6 @@ addon_data.player.update_weapon_speed = function()
     end
 
     -- Update the attack speed and mark if it has changed.
-    addon_data.player.current_weapon_speed, _ = UnitAttackSpeed("player")
-    print(addon_data.player.current_weapon_speed)
     if addon_data.player.current_weapon_speed ~= addon_data.player.prev_weapon_speed then
         addon_data.player.speed_changed = true
         addon_data.player.reported_speed_change = false
@@ -257,7 +271,8 @@ addon_data.player.on_player_aura_change = function()
     addon_data.player.process_auras()
 
     print(addon_data.player.active_seals)
-    print(addon_data.player.n_active_seals)   
+    print(addon_data.player.n_active_seals)
+    addon_data.bar.update_bar_on_aura_change()
 end
 
 -- function to detect any spell casts like repentance that would reset
@@ -295,16 +310,19 @@ addon_data.player.OnPlayerSpellCompletion = function(event, args)
 end
 
 
-addon_data.player.OnUpdate = function(elapsed)
+addon_data.player.frame_on_update = function(self, elapsed)
     
+    -- print('elapsed says')
+    -- print(elapsed)
+
     -- Logic for when the swing timer is complete.
-    if addon_data.player.swing_timer == 0 then
-        if not addon_data.player.reported_swing_timer_complete then
-            addon_data.player.swing_timer_complete()
-            addon_data.player.reported_swing_timer_complete = true
-            -- addon_data.player.reported_swing_timer_complete_double = false
-            addon_data.player.time_since_swing_completion = 0
-        end
+    if addon_data.player.swing_timer == 0 and not addon_data.player.reported_swing_timer_complete then
+        addon_data.player.swing_timer_complete()
+        addon_data.bar.update_bar_on_timer_full()
+        addon_data.player.reported_swing_timer_complete = true
+        -- addon_data.player.reported_swing_timer_complete_double = false
+        addon_data.player.time_since_swing_completion = 0
+    end
 
         -- -- Ensure the player's swing timer is re-polled a short time after swing completion 
         -- -- to catch late API updates.
@@ -317,9 +335,7 @@ addon_data.player.OnUpdate = function(elapsed)
         --         addon_data.player.reported_swing_timer_complete_double = true
         --     end
         -- end
-        
-    end
-    
+            
     -- addon_data.player.update_weapon_speed()
     -- print(addon_data.player.current_weapon_speed)
     -- temp fix for div by zero
@@ -339,15 +355,18 @@ addon_data.player.OnUpdate = function(elapsed)
     end
 
 	-- If the weapon speed changed due to buffs/debuffs, we need to modify the swing timer
-    if addon_data.player.speed_changed then
-        if not addon_data.player.reported_speed_change then
-            addon_data.bar.recalculate_ticks = true
-            print('swing speed changed, timer updating')
-            print(tostring(addon_data.player.prev_weapon_speed) .. " > " .. tostring(addon_data.player.current_weapon_speed))
-            local main_multiplier = addon_data.player.current_weapon_speed / addon_data.player.prev_weapon_speed
-            addon_data.player.swing_timer = addon_data.player.swing_timer * main_multiplier
-            addon_data.player.reported_speed_change = true
-        end
+    -- and inform all the UI elements that need things altered or recalculated.   
+    if addon_data.player.speed_changed and not addon_data.player.reported_speed_change then
+        print('swing speed changed, timer updating')
+        print(tostring(addon_data.player.prev_weapon_speed) .. " > " .. tostring(addon_data.player.current_weapon_speed))
+        local main_multiplier = addon_data.player.current_weapon_speed / addon_data.player.prev_weapon_speed
+        addon_data.player.swing_timer = addon_data.player.swing_timer * main_multiplier
+
+        -- recalculate any necessary bar visuals
+        addon_data.bar.update_bar_on_speed_change()
+
+        -- flag so this only runs once on speed change
+        addon_data.player.reported_speed_change = true
     end
 
     -- Update the swing timer
@@ -361,9 +380,10 @@ end
 -- Create a frame to process events relating to player information.
 --=========================================================================================
 -- This function handles events related to the player's statistics
-addon_data.player.player_frame_on_event = function(self, event, ...)
+addon_data.player.frame_on_event = function(self, event, ...)
 	local args = {...}
     if event == "UNIT_INVENTORY_CHANGED" then
+        print('INVENTORY CHANGE DETECTED')
         addon_data.player.on_equipment_change()
         addon_data.player.update_weapon_speed()
     

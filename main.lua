@@ -72,12 +72,6 @@ local function InitializeAllVisuals()
     addon_data.config.InitializeVisuals()
 end
 
--- function to update all values
-local function CoreFrame_OnUpdate(self, elapsed)
-    addon_data.player.OnUpdate(elapsed)
-end
-
-
 -- SLASH COMMANDS ===================================================================
 SLASH_SWEDGETIMER_HOME1 = "/swedgetimer"
 SLASH_SWEDGETIMER_HOME2 = "/SWEDGETIMER"
@@ -103,6 +97,14 @@ end
 -- sets up the various frames and elements.
 local function init_addon(self)
 
+    if addon_data.debug then print('Loading all settings...') end
+    LoadAllSettings()
+
+    -- Load visuals
+    if addon_data.debug then print('Initialising visuals...') end
+    addon_data.bar.recalculate_ticks = true -- force initial draw
+    InitializeAllVisuals()
+
     if addon_data.debug then print('Registering events and widget handlers...') end
     -- Register the in-combat events and widget handlers
     addon_data.core.in_combat_frame:SetScript("OnEvent", in_combat_frame_event_handler)
@@ -110,8 +112,8 @@ local function init_addon(self)
     addon_data.core.in_combat_frame:RegisterEvent("PLAYER_REGEN_DISABLED")
 
     -- Attach the events and widget handlers for the player stats frame
-    addon_data.player_frame:SetScript("OnEvent", addon_data.player.player_frame_on_event)
-    addon_data.player_frame:SetScript("OnUpdate", CoreFrame_OnUpdate)
+    addon_data.player_frame:SetScript("OnEvent", addon_data.player.frame_on_event)
+    addon_data.player_frame:SetScript("OnUpdate", addon_data.player.frame_on_update)
     addon_data.player_frame:RegisterEvent("PLAYER_TARGET_CHANGED")
     addon_data.player_frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     addon_data.player_frame:RegisterEvent("UNIT_INVENTORY_CHANGED")
@@ -122,14 +124,10 @@ local function init_addon(self)
 	-- Load the settings for the core and all timers
 	-- addon_data.player.LoadSettings()
 	-- addon_data.core.LoadSettings()
-    if addon_data.debug then print('Loading all settings...') end
-    LoadAllSettings()
     -- print('... settings loaded successfully')
 
-    -- Load visuals
-    if addon_data.debug then print('Initialising visuals...') end
-    addon_data.bar.recalculate_ticks = true -- force initial draw
-    InitializeAllVisuals()
+    addon_data.bar.UpdateVisualsOnSettingsChange()
+    addon_data.bar.update_visuals_on_update()
 
     -- Any other misc operations that happen at the start
     -- addon_data.player.InitSwingTimer()
@@ -147,6 +145,9 @@ local function init_frame_event_handler(self, event, ...)
     if event == "ADDON_LOADED" then
         if args[1] == "SwedgeTimer" then
             init_addon()
+            -- Now we've loaded, remove the handler from the frame to stop it 
+            -- processing events
+            addon_data.core.init_frame:SetScript("OnEvent", nil)
         end
     end
 end

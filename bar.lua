@@ -1,6 +1,8 @@
+
 -- bar.lua =============================================================================
 local addon_name, addon_data = ...
 local print = addon_data.utils.print_msg
+print('starting bar.lua parsing')
 
 --=========================================================================================
 -- BAR SETTINGS 
@@ -36,7 +38,7 @@ addon_data.bar.default_settings = {
 -- evaluate the new offsets for ticks
 addon_data.bar.recalculate_ticks = false
 addon_data.bar.twist_tick_offset = 0.1
-
+addon_data.bar.gcd1_tick_offset = 0.1
 addon_data.bar.gcd2_tick_offset = 0.1
 
 
@@ -166,6 +168,8 @@ addon_data.bar.init_bar_visuals = function()
     frame.twist_line:SetColorTexture(1,1,1,1)
     frame.twist_line:SetDrawLayer("OVERLAY")
     frame.twist_line:SetThickness(3)
+    frame.twist_line:SetStartPoint("TOPRIGHT", 0, 0) -- dummy vars so the line is initialised
+    frame.twist_line:SetEndPoint("BOTTOMRIGHT", 0, 0)
 
     -- local offset = addon_data.bar.get_twist_tick_offset()
     -- print(offset)
@@ -185,8 +189,8 @@ addon_data.bar.init_bar_visuals = function()
     frame.gcd2_line:SetThickness(2)
     
     -- Run an update to configure the bar appropriately
-    addon_data.bar.UpdateVisualsOnSettingsChange()
-    addon_data.bar.update_visuals_on_update()
+    -- addon_data.bar.UpdateVisualsOnSettingsChange()
+    -- addon_data.bar.update_visuals_on_update()
 
     print('Successfully initialised all bar visuals.')
 	frame:Show()
@@ -263,15 +267,17 @@ addon_data.bar.UpdateVisualsOnSettingsChange = function()
     end
 end
 
+
+print('ok')
 --=========================================================================================
 -- OnUpdate widget handlers and functions
 --=========================================================================================
 
--- This function will be called once every frame after the event-based code has run,
--- but before the frame is drawn.
--- Func is called by the player frame OnUpdate (maybe we should change this).
--- As such it should be kept as minimal as possible to avoid wasting resources.
 addon_data.bar.update_visuals_on_update = function()
+    -- This function will be called once every frame after the event-based code has run,
+    -- but before the frame is drawn.
+    -- Func is called by the player frame OnUpdate (maybe we should change this).
+    -- As such it should be kept as minimal as possible to avoid wasting resources.
 
     local settings = character_player_settings
     local frame = addon_data.bar.frame
@@ -313,7 +319,6 @@ addon_data.bar.update_visuals_on_update = function()
     local c = addon_data.bar.return_bar_color()
     addon_data.bar.frame.bar:SetVertexColor(unpack(c))
     
-
     -- Update the alpha
     if addon_data.core.in_combat then
         frame:SetAlpha(settings.in_combat_alpha)
@@ -321,88 +326,60 @@ addon_data.bar.update_visuals_on_update = function()
         frame:SetAlpha(settings.ooc_alpha)
     end
 
-
-    -- Sort out ticks
-    local l_t = frame.twist_line
-    local l_1 = frame.gcd1_line
-    local l_2 = frame.gcd2_line
-
-    -- Move the ticks if required
-    if true then -- addon_data.bar.recalculate_ticks then
-
-        -- first the twist bar
-        local offset = addon_data.bar.get_twist_tick_offset()
-        -- print('offset says')
-        -- print(offset)
-        addon_data.bar.twist_tick_offset = offset
-        addon_data.bar.recalculate_ticks = false
-        l_t:SetStartPoint("TOPRIGHT",offset,0)
-        l_t:SetEndPoint("BOTTOMRIGHT",offset,0)
-
-        -- now the first gcd line
-        local offset = addon_data.bar.get_gcd1_tick_offset()
-        -- print('gcd1 offset')
-        -- print(offset)
-        l_1:SetStartPoint("TOPRIGHT",offset,0)
-        l_1:SetEndPoint("BOTTOMRIGHT",offset,0)
-
-        -- and the second gcd line
-        local offset = addon_data.bar.get_gcd2_tick_offset()
-        addon_data.bar.gcd2_tick_offset = offset
-        l_2:SetStartPoint("TOPRIGHT",offset,0)
-        l_2:SetEndPoint("BOTTOMRIGHT",offset,0)
-
-        -- print(l_2:GetEndPoint())
-
-        addon_data.bar.recalculate_ticks = false
-    end
+end
 
 
-    -- Hide ticks when bar full
-    if addon_data.player.swing_timer == 0 then
-        l_t:Hide()
-        l_1:Hide()
-        l_2:Hide()
-    
-    -- else figure out which to show
+
+addon_data.bar.update_bar_on_timer_full = function()
+    -- Function called when the bar fills up to change any bar visuals
+    addon_data.bar.frame.twist_line:Hide()
+    addon_data.bar.frame.gcd1_line:Hide()
+    addon_data.bar.frame.gcd2_line:Hide()
+end
+
+addon_data.bar.update_bar_on_swing_reset = function()
+    -- Function called when the swing timer resets to change any bar visuals
+    local frame = addon_data.bar.frame
+    -- Twist line
+    if addon_data.bar.should_draw_twist_window() then
+        frame.twist_line:Show()
     else
-    
-        -- Display twist tick or not
-        if true then --addon_data.bar.draw_twist_window() then
-            l_t:Show()
-        else
-            l_t:Hide()
-        end
-    
-        -- Display first gcd line or not
-        if true then
-            l_1:Show()
-        else
-            l_1:Show()
-        end
-
-        -- Display first gcd line or not
-        if addon_data.bar.draw_gcd2_window() then
-            l_2:Show()
-        else
-            l_2:Show()
-        end
+        frame.twist_line:Hide()
     end
-
+    -- Always show the first GCD line
+    frame.gcd1_line:Show()
+    -- Second GCD line
+    if addon_data.bar.should_draw_gcd2_window() then
+        frame.gcd2_line:Show()
+    else
+        frame.gcd2_line:Hide()
+    end
 
 end
 
--- draw the right text or not
-addon_data.bar.draw_right_text = function()
-    if addon_data.player.swing_timer == 0 then
-        return false
+addon_data.bar.update_bar_on_speed_change = function()
+    -- A function to be run once upon the player's speed updating.
+    -- This will recalculate all necessary frame element updates here
+    -- to keep them out the main onupdate function
+    print('Recalculating bar visuals on speed change...')
+    addon_data.bar.set_twist_tick_offset()
+    addon_data.bar.set_gcd1_tick_offset()
+    addon_data.bar.set_gcd2_tick_offset()
+end
+
+addon_data.bar.update_bar_on_aura_change = function()
+    -- A function to be run once upon the player's auras changing.
+    -- Aura changes determine if the twist line should be drawn or not.
+    if addon_data.player.swing_timer ~=0 and addon_data.bar.should_draw_twist_window() then
+        addon_data.bar.frame.twist_line:Show()
+    else
+        addon_data.bar.frame.twist_line:Hide()
     end
-    return true
 end
 
 -- Determine wether or not to draw the twist line
 -- Hide if we are not in SoC or the swing bar is full
-addon_data.bar.draw_twist_window = function()
+addon_data.bar.should_draw_twist_window = function()
     if addon_data.player.active_seals["Seal of Command"] ~= nil then
         return true
     end
@@ -410,40 +387,49 @@ addon_data.bar.draw_twist_window = function()
 end
 
 -- determine wether or not to draw the gcd1 line
-addon_data.bar.draw_gcd2_window = function()
+addon_data.bar.should_draw_gcd2_window = function()
     local settings = character_player_settings
-    -- print(addon_data.bar.gcd2_tick_offset)
-    -- print(settings.width)
-    if addon_data.bar.gcd2_tick_offset * -1 > settings.width then
+    if math.abs(addon_data.bar.gcd2_tick_offset) > settings.width then
         return false
     end
     return true
 end
 
-
--- Get the offset position of the twist window
-addon_data.bar.get_twist_tick_offset = function()
+addon_data.bar.set_twist_tick_offset = function()
+-- Set the offset position of the twist window
     local settings = character_player_settings
-    return (0.4 / addon_data.player.current_weapon_speed) * settings.width * -1
+    local offset = (0.4 / addon_data.player.current_weapon_speed) * settings.width * -1
+    print(offset)
+    addon_data.bar.twist_tick_offset = offset
+    addon_data.bar.frame.twist_line:SetStartPoint("TOPRIGHT", offset, 0)
+    addon_data.bar.frame.twist_line:SetEndPoint("BOTTOMRIGHT", offset, 0)
 end
 
 -- Get the offset position of the first gcd window tick
-addon_data.bar.get_gcd1_tick_offset = function()
+addon_data.bar.set_gcd1_tick_offset = function()
     local settings = character_player_settings
     -- dummy for the actual gcd value, which we will figure out later
     local gcd_duration = 1.5
     local grace_period = 0.2
-    return ((gcd_duration + grace_period) / addon_data.player.current_weapon_speed) * settings.width * -1
+    offset = ((gcd_duration + grace_period) / addon_data.player.current_weapon_speed) * settings.width * -1
+    addon_data.bar.gcd1_tick_offset = offset
+    addon_data.bar.frame.gcd1_line:SetStartPoint("TOPRIGHT", offset, 0)
+    addon_data.bar.frame.gcd1_line:SetEndPoint("BOTTOMRIGHT", offset, 0)
 end
 
 -- Get the offset position of the second gcd window tick
-addon_data.bar.get_gcd2_tick_offset = function()
+addon_data.bar.set_gcd2_tick_offset = function()
     local settings = character_player_settings
     -- dummy for the actual gcd value, which we will figure out later
     local gcd_duration = 1.5
     local grace_period = 0.2
-    return ((2*gcd_duration + grace_period) / addon_data.player.current_weapon_speed) * settings.width * -1
+    offset = ((2*gcd_duration + grace_period) / addon_data.player.current_weapon_speed) * settings.width * -1
+    addon_data.bar.gcd2_tick_offset = offset
+    addon_data.bar.frame.gcd2_line:SetStartPoint("TOPRIGHT", offset, 0)
+    addon_data.bar.frame.gcd2_line:SetEndPoint("BOTTOMRIGHT", offset, 0)
 end
+
+
 
 -- a function to return the present bar color
 -- is called every update, be efficient!
@@ -468,191 +454,12 @@ addon_data.bar.return_bar_color = function()
     return character_bar_settings["bar_color_default"]
 end
 
-
--- addon_data.bar.GetGCD1Offset = function()
---     local settings = character_player_settings
---     local _, duration = GetSpellCooldown(29515)
---     -- print(duration)
---     return ( (0.4 + duration) / addon_data.player.current_weapon_speed ) * settings.width
--- end
-
---[[============================================================================================]]--
---[[================================== CONFIG WINDOW RELATED ===================================]]--
---[[============================================================================================]]--
-
-addon_data.bar.UpdateConfigPanelValues = function()
-    local panel = addon_data.bar.config_frame
-    local settings = character_player_settings
-    panel.enabled_checkbox:SetChecked(settings.enabled)
-    panel.show_border_checkbox:SetChecked(settings.show_border)
-    panel.classic_bars_checkbox:SetChecked(settings.classic_bars)
-    panel.fill_empty_checkbox:SetChecked(settings.fill_empty)
-    panel.show_left_text_checkbox:SetChecked(settings.show_left_text)
-    panel.show_right_text_checkbox:SetChecked(settings.show_right_text)
-    panel.width_editbox:SetText(tostring(settings.width))
-    panel.width_editbox:SetCursorPosition(0)
-    panel.height_editbox:SetText(tostring(settings.height))
-    panel.height_editbox:SetCursorPosition(0)
-	panel.fontsize_editbox:SetText(tostring(settings.fontsize))
-    panel.fontsize_editbox:SetCursorPosition(0)
-    panel.x_offset_editbox:SetText(tostring(settings.x_offset))
-    panel.x_offset_editbox:SetCursorPosition(0)
-    panel.y_offset_editbox:SetText(tostring(settings.y_offset))
-    panel.y_offset_editbox:SetCursorPosition(0)
-    panel.main_color_picker.foreground:SetColorTexture(
-        settings.main_r, settings.main_g, settings.main_b, settings.main_a)
-    panel.main_text_color_picker.foreground:SetColorTexture(
-        settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a)
-    panel.in_combat_alpha_slider:SetValue(settings.in_combat_alpha)
-    panel.in_combat_alpha_slider.editbox:SetCursorPosition(0)
-    panel.ooc_alpha_slider:SetValue(settings.ooc_alpha)
-    panel.ooc_alpha_slider.editbox:SetCursorPosition(0)
-    panel.backplane_alpha_slider:SetValue(settings.backplane_alpha)
-    panel.backplane_alpha_slider.editbox:SetCursorPosition(0)
-end
-
-addon_data.bar.EnabledCheckBoxOnClick = function(self)
-    character_player_settings.enabled = self:GetChecked()
-    addon_data.bar.UpdateVisualsOnSettingsChange()
-end
-
-addon_data.bar.TwistBarToggle = function()
-    currently_on = character_player_settings.enabled == true
-    if not currently_on then
-        character_player_settings.enabled = true
-    else
-        character_player_settings.enabled = false
+-- draw the right text or not
+addon_data.bar.draw_right_text = function()
+    if addon_data.player.swing_timer == 0 then
+        return false
     end
-    addon_data.bar.UpdateVisualsOnSettingsChange()
-end
-
-addon_data.bar.IsLockedCheckBoxOnClick = function(self)
-    character_player_settings.is_locked = self:GetChecked()
-    addon_data.bar.frame:EnableMouse(not character_player_settings.is_locked)
-    addon_data.bar.UpdateVisualsOnSettingsChange()
-end
-
-addon_data.bar.ShowOffHandCheckBoxOnClick = function(self)
-    character_player_settings.show_offhand = self:GetChecked()
-    addon_data.bar.UpdateVisualsOnSettingsChange()
-end
-
-addon_data.bar.ShowBorderCheckBoxOnClick = function(self)
-    character_player_settings.show_border = self:GetChecked()
-    addon_data.bar.UpdateVisualsOnSettingsChange()
-end
-
-addon_data.bar.ClassicBarsCheckBoxOnClick = function(self)
-    character_player_settings.classic_bars = self:GetChecked()
-    addon_data.bar.UpdateVisualsOnSettingsChange()
-end
-
-addon_data.bar.FillEmptyCheckBoxOnClick = function(self)
-    character_player_settings.fill_empty = self:GetChecked()
-    addon_data.bar.UpdateVisualsOnSettingsChange()
-end
-
-addon_data.bar.ShowLeftTextCheckBoxOnClick = function(self)
-    character_player_settings.show_left_text = self:GetChecked()
-    addon_data.bar.UpdateVisualsOnSettingsChange()
-end
-
-addon_data.bar.ShowRightTextCheckBoxOnClick = function(self)
-    character_player_settings.show_right_text = self:GetChecked()
-    addon_data.bar.UpdateVisualsOnSettingsChange()
-end
-
-addon_data.bar.WidthEditBoxOnEnter = function(self)
-    character_player_settings.width = tonumber(self:GetText())
-    addon_data.bar.UpdateVisualsOnSettingsChange()
-end
-
-addon_data.bar.HeightEditBoxOnEnter = function(self)
-    character_player_settings.height = tonumber(self:GetText())
-    addon_data.bar.UpdateVisualsOnSettingsChange()
-end
-
-addon_data.bar.FontSizeEditBoxOnEnter = function(self)
-    character_player_settings.fontsize = tonumber(self:GetText())
-    addon_data.bar.UpdateVisualsOnSettingsChange()
-end
-
-addon_data.bar.XOffsetEditBoxOnEnter = function(self)
-    character_player_settings.x_offset = tonumber(self:GetText())
-    addon_data.bar.UpdateVisualsOnSettingsChange()
-end
-
-addon_data.bar.YOffsetEditBoxOnEnter = function(self)
-    character_player_settings.y_offset = tonumber(self:GetText())
-    addon_data.bar.UpdateVisualsOnSettingsChange()
-end
-
-addon_data.bar.MainColorPickerOnClick = function()
-    local settings = character_player_settings
-    local function MainOnActionFunc(restore)
-        local settings = character_player_settings
-        local new_r, new_g, new_b, new_a
-        if restore then
-            new_r, new_g, new_b, new_a = unpack(restore)
-        else
-            new_a, new_r, new_g, new_b = 1 - OpacitySliderFrame:GetValue(), ColorPickerFrame:GetColorRGB()
-        end
-        settings.main_r, settings.main_g, settings.main_b, settings.main_a = new_r, new_g, new_b, new_a
-        addon_data.bar.frame.bar:SetVertexColor(
-            settings.main_r, settings.main_g, settings.main_b, settings.main_a)
-        addon_data.bar.config_frame.main_color_picker.foreground:SetColorTexture(
-            settings.main_r, settings.main_g, settings.main_b, settings.main_a)
-    end
-    ColorPickerFrame.func, ColorPickerFrame.opacityFunc, ColorPickerFrame.cancelFunc = 
-        MainOnActionFunc, MainOnActionFunc, MainOnActionFunc
-    ColorPickerFrame.hasOpacity = true 
-    ColorPickerFrame.opacity = 1 - settings.main_a
-    ColorPickerFrame:SetColorRGB(settings.main_r, settings.main_g, settings.main_b)
-    ColorPickerFrame.previousValues = {settings.main_r, settings.main_g, settings.main_b, settings.main_a}
-    ColorPickerFrame:Show()
-end
-
-addon_data.bar.MainTextColorPickerOnClick = function()
-    local settings = character_player_settings
-    local function MainTextOnActionFunc(restore)
-        local settings = character_player_settings
-        local new_r, new_g, new_b, new_a
-        if restore then
-            new_r, new_g, new_b, new_a = unpack(restore)
-        else
-            new_a, new_r, new_g, new_b = 1 - OpacitySliderFrame:GetValue(), ColorPickerFrame:GetColorRGB()
-        end
-        settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a = new_r, new_g, new_b, new_a
-        addon_data.bar.frame.left_text:SetTextColor(
-            settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a)
-        addon_data.bar.frame.right_text:SetTextColor(
-            settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a)
-        addon_data.bar.config_frame.main_text_color_picker.foreground:SetColorTexture(
-            settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a)
-    end
-    ColorPickerFrame.func, ColorPickerFrame.opacityFunc, ColorPickerFrame.cancelFunc = 
-        MainTextOnActionFunc, MainTextOnActionFunc, MainTextOnActionFunc
-    ColorPickerFrame.hasOpacity = true 
-    ColorPickerFrame.opacity = 1 - settings.main_text_a
-    ColorPickerFrame:SetColorRGB(settings.main_text_r, settings.main_text_g, settings.main_text_b)
-    ColorPickerFrame.previousValues = {settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a}
-    ColorPickerFrame:Show()
-end
-
-
-addon_data.bar.CombatAlphaOnValChange = function(self)
-    character_player_settings.in_combat_alpha = tonumber(self:GetValue())
-    addon_data.bar.UpdateVisualsOnSettingsChange()
-end
-
-addon_data.bar.OOCAlphaOnValChange = function(self)
-    character_player_settings.ooc_alpha = tonumber(self:GetValue())
-    addon_data.bar.UpdateVisualsOnSettingsChange()
-end
-
-addon_data.bar.BackplaneAlphaOnValChange = function(self)
-    character_player_settings.backplane_alpha = tonumber(self:GetValue())
-    addon_data.bar.UpdateVisualsOnSettingsChange()
+    return true
 end
 
 --=========================================================================================

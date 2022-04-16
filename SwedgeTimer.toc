@@ -9,5 +9,6 @@
 utils.lua
 player.lua
 bar.lua
+bar_config.lua
 config.lua
 main.lua
