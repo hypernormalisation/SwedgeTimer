@@ -23,6 +23,7 @@ local function in_combat_frame_event_handler(self, event, ...)
     elseif event == "PLAYER_REGEN_DISABLED" then
         addon_data.core.in_combat = true
     end
+    addon_data.bar.update_bar_on_combat()
 end
 
 --=========================================================================================
@@ -135,6 +136,7 @@ local function init_addon(self)
     addon_data.player.swing_timer = 0.00001
     addon_data.player.update_weapon_speed()
     addon_data.player.calculate_spell_GCD_duration()
+    addon_data.bar.update_bar_on_combat()
 
     -- If appropriate show welcome message
     if addon_data.debug then print('... complete!') end

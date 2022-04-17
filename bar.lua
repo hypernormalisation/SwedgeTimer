@@ -290,12 +290,12 @@ addon_data.bar.update_visuals_on_update = function()
     local speed = addon_data.player.current_weapon_speed
     local timer = addon_data.player.swing_timer
 
-    if speed == 0 then
-        speed = 2
-        print('WARNING: prevented zero division error')
-    end
+    -- if speed == 0 then
+    --     speed = 2
+    --     print('WARNING: prevented zero division error')
+    -- end
 
-    -- Update the main bars width
+    -- Update the main bar's width
     width = math.min(settings.width - (settings.width * (timer / speed)), settings.width)
     if not settings.fill_empty then
         width = settings.width - width + 0.001
@@ -319,7 +319,7 @@ addon_data.bar.update_visuals_on_update = function()
         frame.right_text:Hide()
     end
 
-    -- -- If SoC, bar colour is time sensitive. Deal with that here.
+    -- If SoC, bar colour is time sensitive. Deal with that here.
     if addon_data.player.active_seals["Seal of Command"] ~= nil and addon_data.player.n_active_seals == 1 then
         if addon_data.player.swing_timer < character_bar_settings["twist_window"] then 
             addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_twist_ready"]))
@@ -333,17 +333,18 @@ addon_data.bar.update_visuals_on_update = function()
         end        
     end
     
-
-    -- Update the alpha
-    if addon_data.core.in_combat then
-        frame:SetAlpha(settings.in_combat_alpha)
-    else
-        frame:SetAlpha(settings.ooc_alpha)
-    end
-
 end
 
 
+addon_data.bar.update_bar_on_combat = function()
+    -- Function called to update bar when entering/leaving combat.
+        -- Update the alpha
+        if addon_data.core.in_combat then
+            addon_data.bar.frame:SetAlpha(character_bar_settings.in_combat_alpha)
+        else
+            addon_data.bar.frame:SetAlpha(character_bar_settings.ooc_alpha)
+        end
+end
 
 addon_data.bar.update_bar_on_timer_full = function()
     -- Function called when the bar fills up to change any bar visuals
