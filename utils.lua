@@ -11,9 +11,10 @@ addon_data.utils.print_msg = function(msg)
 		-- print('found a table')
 		addon_data.utils.TablePrinter(msg)
 		return
-	elseif type(msg) == "boolean" then
-		msg = tostring(msg)
 	end
+	-- elseif type(msg) == "boolean" then
+	msg = tostring(msg)
+	-- end
 	local chat_msg = "|cFFF58CBA" .. addon_name .. ": [" .. addon_data.debug_counter .. "] |r" .. msg
 	DEFAULT_CHAT_FRAME:AddMessage(chat_msg)
 end

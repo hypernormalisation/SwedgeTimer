@@ -34,7 +34,7 @@ addon_data.bar.default_settings = {
     bar_color_blood = {0.99, 0.37, 0.0, 1.0},
     bar_color_warning = {1.0, 0.0, 0.0, 1.0}, -- when if you cast SoC, you can't twist out of it that swing
     twist_window = 0.4,
-    grace_period = 0.1,
+    grace_period = 0.2,
 }
 
 -- the following should be flagged when the swing speed changes to
@@ -324,7 +324,7 @@ addon_data.bar.update_visuals_on_update = function()
         if addon_data.player.swing_timer < character_bar_settings["twist_window"] then 
             addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_twist_ready"]))
         else
-            local min_time = addon_data.player.current_gcd_duration + character_bar_settings["grace_period"]
+            local min_time = addon_data.player.spell_gcd_duration + character_bar_settings["grace_period"]
             if addon_data.player.swing_timer > min_time then            
                 addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_twist_ready"]))
             else
@@ -391,6 +391,11 @@ addon_data.bar.update_bar_on_aura_change = function()
         addon_data.bar.frame.twist_line:Hide()
     end
     addon_data.bar.set_bar_color()
+
+    -- if the spell haste changes we need to update the tick offsets
+    addon_data.bar.set_twist_tick_offset()
+    addon_data.bar.set_gcd1_tick_offset()
+    addon_data.bar.set_gcd2_tick_offset()
 end
 
 -- Determine wether or not to draw the twist line
@@ -414,8 +419,9 @@ end
 addon_data.bar.set_twist_tick_offset = function()
 -- Set the offset position of the twist window
     local settings = character_player_settings
-    local offset = (0.4 / addon_data.player.current_weapon_speed) * settings.width * -1
-    print(offset)
+    local bar_fraction = (0.4 / addon_data.player.current_weapon_speed)
+    local offset = bar_fraction * settings.width * -1
+    -- print('twist tick time = ' .. time_value)
     addon_data.bar.twist_tick_offset = offset
     addon_data.bar.frame.twist_line:SetStartPoint("TOPRIGHT", offset, 0)
     addon_data.bar.frame.twist_line:SetEndPoint("BOTTOMRIGHT", offset, 0)
@@ -425,9 +431,11 @@ end
 addon_data.bar.set_gcd1_tick_offset = function()
     local settings = character_player_settings
     -- dummy for the actual gcd value, which we will figure out later
-    local gcd_duration = addon_data.player.current_gcd_duration
+    local gcd_duration = addon_data.player.spell_gcd_duration
     local grace_period = character_bar_settings["grace_period"]
-    offset = ((gcd_duration + grace_period) / addon_data.player.current_weapon_speed) * settings.width * -1
+    local time_before_swing = gcd_duration + grace_period
+    print('GCD1 tick time = ' .. time_before_swing)
+    offset = (time_before_swing / addon_data.player.current_weapon_speed) * settings.width * -1
     addon_data.bar.gcd1_tick_offset = offset
     addon_data.bar.frame.gcd1_line:SetStartPoint("TOPRIGHT", offset, 0)
     addon_data.bar.frame.gcd1_line:SetEndPoint("BOTTOMRIGHT", offset, 0)
@@ -437,9 +445,11 @@ end
 addon_data.bar.set_gcd2_tick_offset = function()
     local settings = character_player_settings
     -- dummy for the actual gcd value, which we will figure out later
-    local gcd_duration = addon_data.player.current_gcd_duration
+    local gcd_duration = addon_data.player.spell_gcd_duration
     local grace_period = character_bar_settings["grace_period"]
-    offset = ((2*gcd_duration + grace_period) / addon_data.player.current_weapon_speed) * settings.width * -1
+    local time_before_swing = (2 * gcd_duration) + grace_period
+    print('GCD2 tick time = ' .. time_before_swing)
+    offset = (time_before_swing / addon_data.player.current_weapon_speed) * settings.width * -1
     addon_data.bar.gcd2_tick_offset = offset
     addon_data.bar.frame.gcd2_line:SetStartPoint("TOPRIGHT", offset, 0)
     addon_data.bar.frame.gcd2_line:SetEndPoint("BOTTOMRIGHT", offset, 0)

@@ -132,8 +132,9 @@ local function init_addon(self)
     addon_data.bar.set_bar_color()
 
     -- Any other misc operations that happen at the start
-    -- addon_data.player.InitSwingTimer()
+    addon_data.player.swing_timer = 0.00001
     addon_data.player.update_weapon_speed()
+    addon_data.player.calculate_spell_GCD_duration()
 
     -- If appropriate show welcome message
     if addon_data.debug then print('... complete!') end
@@ -145,7 +146,7 @@ addon_data.core.init_frame = CreateFrame("Frame", addon_name .. "InitFrame", UIP
 local function init_frame_event_handler(self, event, ...)
     local args = {...}
     if event == "ADDON_LOADED" then
-        if args[1] == "SwedgeTimer" then
+        if args[1] == "SwedgeTimer" then -- and addon_data.player.class == "Paladin" then
             init_addon()
             -- Now we've loaded, remove the handler from the frame to stop it 
             -- processing events

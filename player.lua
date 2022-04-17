@@ -28,17 +28,23 @@ addon_data.player.default_settings = {
     main_text_r = 1.0, main_text_g = 1.0, main_text_b = 1.0, main_text_a = 1.0,
 }
 
-addon_data.player.class = UnitClass("player")[2]
+addon_data.player.class, addon_data.player.english_class, _ = UnitClass("player")[2] -- seems broken?
+
+-- print(UnitClass("player")[2])
+-- print(addon_data.player.class)
 addon_data.player.guid = UnitGUID("player")
 
 -- addon_data.player.auras = UnitAura(addon_data.player.guid)
 
 addon_data.player.swing_timer = 0.00001
 addon_data.player.prev_weapon_speed = 0.1
-addon_data.player.current_weapon_speed = 2.0
+addon_data.player.current_weapon_speed = 4.0
 addon_data.player.weapon_id = GetInventoryItemID("player", 16)
 addon_data.player.speed_changed = false
 addon_data.player.extra_attacks_flag = false
+
+-- flag for when we update equipment without double counting the 
+addon_data.player.equipment_update_flag = false
 
 -- containers for seal information
 addon_data.player.n_active_seals = 0
@@ -48,12 +54,18 @@ addon_data.player.active_seal_1_remaining = 0
 addon_data.player.active_seal_2 = nil
 addon_data.player.active_seal_2_remaining = 0
 
+-- does the player have heroism/lust buff active
+addon_data.player.has_bloodlust = false
+
 -- containers for GCD information
-addon_data.player.current_gcd_duration = 1.5
+addon_data.player.new_cast_flag = false
+addon_data.player.gcd_cooldown_poll_max = nil -- container for the first returned result of the GCD poll
+addon_data.player.spell_gcd_duration = 1.5
+addon_data.player.base_gcd_duration = 1.5 -- should never change, use this for CS
 
 -- flag to run a double poll after 0.1s on aura change to catch bad API calls
 addon_data.player.aura_repoll_counter = 0.0
-addon_data.player.repoll_on_aura_change = false
+addon_data.player.repoll_on_aura_change = true
 
 -- a flag to ensure the code on swing completion only runs once
 addon_data.player.reported_swing_timer_complete = false
@@ -99,13 +111,14 @@ end
 
 -- Called when the swing timer should be reset
 addon_data.player.reset_swing_timer = function()
-    -- addon_data.player.update_weapon_speed() -- NOT SURE IF THIS IS NEEDED
+    addon_data.crusader_lock = false
+    addon_data.player.update_weapon_speed() -- NOT SURE IF THIS IS NEEDED
     addon_data.player.swing_timer = addon_data.player.current_weapon_speed
     addon_data.player.reported_swing_timer_complete = false
     addon_data.bar.update_bar_on_swing_reset()
 end
 
--- called w
+-- called when we need to manually alter the swing timer with the elapsed time
 addon_data.player.update_swing_timer = function(elapsed)
     if character_player_settings.enabled then
         if addon_data.player.swing_timer > 0 then
@@ -136,17 +149,19 @@ addon_data.player.update_weapon_speed = function()
         if old == new then return end
     end
 
-    addon_data.player.prev_weapon_speed = addon_data.player.current_weapon_speed
-    -- Poll the API for the attack speed
-    addon_data.player.current_weapon_speed, _ = UnitAttackSpeed("player")
-    print('API speed says: ' .. tostring(addon_data.player.current_weapon_speed))
-
     -- Handle crusader snapshotting
     if addon_data.crusader_lock == true then
         print('Locking speed change because of crusader snapshot.')
         addon_data.player.speed_changed = false
         return
     end
+
+    addon_data.player.prev_weapon_speed = addon_data.player.current_weapon_speed
+    -- Poll the API for the attack speed
+    addon_data.player.current_weapon_speed, _ = UnitAttackSpeed("player")
+    print('API speed says: ' .. tostring(addon_data.player.current_weapon_speed))
+
+
 
     -- Update the attack speed and mark if it has changed.
     if addon_data.player.current_weapon_speed ~= addon_data.player.prev_weapon_speed then
@@ -163,10 +178,11 @@ addon_data.player.on_equipment_change = function()
     local new_guid = GetInventoryItemID("player", 16)
     -- Check for a main hand weapon change
     if addon_data.player.weapon_id ~= new_guid then
+        addon_data.player.equipment_update_flag = true
         addon_data.player.update_weapon_speed()
         addon_data.player.reset_swing_timer()
+        addon_data.player.weapon_id = new_guid
     end
-    addon_data.player.weapon_id = new_guid
 end
 
 -- Function run when we intercept an unfiltered combatlog event.
@@ -207,6 +223,23 @@ addon_data.player.OnCombatLogUnfiltered = function(combat_info)
     -- addon_data.player.update_weapon_speed()
 end
 
+addon_data.player.calculate_spell_GCD_duration = function()
+    local rating_percent_reduction = GetCombatRatingBonus(20)
+    local base = addon_data.player.base_gcd_duration
+    local current = base * (100 / (100+rating_percent_reduction))
+    if addon_data.player.has_bloodlust then
+        current = current * (1/1.3)
+    end
+    -- minimum GCD for paladins in 1s
+    if current < 1 then
+        current = 1.0
+    end
+    -- round to 3 decimal places
+    current = floor(current, 0.001)
+    addon_data.player.spell_gcd_duration = current
+    return current
+end
+
 -- Function to iterate over the player's auras and record any active Seals.
 addon_data.player.parse_auras = function()
     local end_iter = false
@@ -217,7 +250,7 @@ addon_data.player.parse_auras = function()
 
     -- copy the previous seals
     addon_data.player.previous_active_seals = addon_data.player.active_seals
-
+    local has_bloodlust = false
     -- iterate over the current player auras and process seals
     addon_data.player.active_seals = {}
     while not end_iter do
@@ -233,9 +266,13 @@ addon_data.player.parse_auras = function()
             if name == 'Seal of the Crusader' then               
                 addon_data.player.crusader_currently_active = true
             end
+        -- Catch bloodlust or heroism
+        elseif spell_id == 2825 or spell_id == 32182 then
+            has_bloodlust = true
         end
         counter = counter + 1
     end
+    addon_data.player.has_bloodlust = has_bloodlust
 end
 
 -- Function to parse the list of Seals and set flags etc.
@@ -275,17 +312,28 @@ addon_data.player.on_player_aura_change = function()
 
     print(addon_data.player.active_seals)
     print(addon_data.player.n_active_seals)
+    addon_data.player.calculate_spell_GCD_duration()
+    addon_data.player.update_weapon_speed()
     addon_data.bar.update_bar_on_aura_change()
 end
 
--- function to detect any spell casts like repentance that would reset
--- the swing timer
+-- Function to detect any spell casts like repentance that would reset
+-- the swing timer, and to handle GCD tracking
 addon_data.player.OnPlayerSpellCast = function(event, args)
     -- only process player casts
     if not args[1] == "player" then
         return
     end
 
+    -- poll the GCD immediately for the max duration
+    local _, duration = GetSpellCooldown(29515)
+    print('GCD duration from poll = ' .. tostring(duration))
+    our_duration = addon_data.player.calculate_spell_GCD_duration()
+    print('GCD duration from calc = ' .. tostring(our_duration))
+
+
+    -- print('Sp Haste rating = ' .. tostring(GetCombatRating(20)))
+    -- print('Sp Haste bonus = ' .. tostring(GetCombatRatingBonus(20)))
     -- detect repentance casts and reset the timer
     if args[4] == 20066 then
         addon_data.player.reset_swing_timer()
@@ -348,9 +396,10 @@ addon_data.player.frame_on_update = function(self, elapsed)
   
     -- Repoll the attack speed a short while after an aura change
     if addon_data.player.repoll_on_aura_change then
-        if addon_data.player.aura_repoll_counter > 0.4 then
+        if addon_data.player.aura_repoll_counter > 0.3 then
             print('SECONDARY API POLL ON AURA CHANGE')
             addon_data.player.update_weapon_speed()
+            addon_data.player.aura_repoll_counter = 0.0
             addon_data.player.repoll_on_aura_change = false
         else
             addon_data.player.aura_repoll_counter = addon_data.player.aura_repoll_counter + elapsed
@@ -362,20 +411,34 @@ addon_data.player.frame_on_update = function(self, elapsed)
     if addon_data.player.speed_changed and not addon_data.player.reported_speed_change then
         print('swing speed changed, timer updating')
         print(tostring(addon_data.player.prev_weapon_speed) .. " > " .. tostring(addon_data.player.current_weapon_speed))
-        local main_multiplier = addon_data.player.current_weapon_speed / addon_data.player.prev_weapon_speed
-        addon_data.player.swing_timer = addon_data.player.swing_timer * main_multiplier
+        
 
+        -- Modify swing timer but only if we don't have the equipment flag set because the timer is already reset
+        if not addon_data.player.equipment_update_flag then
+            local multiplier = addon_data.player.current_weapon_speed / addon_data.player.prev_weapon_speed
+            print('multiplier: ' .. tostring(multiplier))
+            print('swing timer before multiplier: ' .. tostring(addon_data.player.swing_timer))
+            addon_data.player.swing_timer = addon_data.player.swing_timer * multiplier
+            print('swing timer after multiplier: ' .. tostring(addon_data.player.swing_timer))
+            -- print(addon_data.player.swing_timer)
+            print('swing timer after update func and elapsed: ' .. tostring(addon_data.player.swing_timer))
+            
+        else
+            print('intercepting redundant speed change from equipment change')
+            addon_data.player.equipment_update_flag = false
+        end            
         -- recalculate any necessary bar visuals
         addon_data.bar.update_bar_on_speed_change()
-
         -- flag so this only runs once on speed change
         addon_data.player.reported_speed_change = true
+
     end
 
-    -- Update the swing timer
+    -- Always update the swing timer with how much time has elapsed
     addon_data.player.update_swing_timer(elapsed)
-    
-    -- Update the bar visuals
+
+
+    -- Always update the bar visuals
     addon_data.bar.update_visuals_on_update()
 end
 
@@ -388,7 +451,7 @@ addon_data.player.frame_on_event = function(self, event, ...)
     if event == "UNIT_INVENTORY_CHANGED" then
         print('INVENTORY CHANGE DETECTED')
         addon_data.player.on_equipment_change()
-        addon_data.player.update_weapon_speed()
+        -- addon_data.player.update_weapon_speed()
     
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
         local combat_info = {CombatLogGetCurrentEventInfo()}
@@ -397,7 +460,6 @@ addon_data.player.frame_on_event = function(self, event, ...)
     elseif event == "UNIT_AURA" then
         print('processing aura change')
         addon_data.player.on_player_aura_change()
-        addon_data.player.update_weapon_speed()
 
         -- Trigger logic to repoll after a small amount of time
         addon_data.player.repoll_on_aura_change = true
