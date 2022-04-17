@@ -57,8 +57,15 @@ addon_data.player.active_seal_2_remaining = 0
 -- does the player have heroism/lust buff active
 addon_data.player.has_bloodlust = false
 
+ -- a flag for any non-instant cast we pick up that doesn't trigger GCD on cast start,
+ -- but instead will trigger gcd on the cast finish
+addon_data.player.spell_guid_awaiting_gcd = nil
+
 -- containers for GCD information
+addon_data.player.active_gcd_full_duration = 0.0 -- length of the currently active GCD
+addon_data.player.active_gcd_remaining = 0.0 -- timer on currently active GCD.
 addon_data.player.new_cast_flag = false
+addon_data.player.gcd_lockout = false -- lock for when we have an active GCD ticking
 addon_data.player.gcd_cooldown_poll_max = nil -- container for the first returned result of the GCD poll
 addon_data.player.spell_gcd_duration = 1.5
 addon_data.player.base_gcd_duration = 1.5 -- should never change, use this for CS
@@ -118,7 +125,7 @@ addon_data.player.reset_swing_timer = function()
     addon_data.bar.update_bar_on_swing_reset()
 end
 
--- called when we need to manually alter the swing timer with the elapsed time
+-- called onupdate to manually alter the swing timer with the elapsed time
 addon_data.player.update_swing_timer = function(elapsed)
     if character_player_settings.enabled then
         if addon_data.player.swing_timer > 0 then
@@ -129,6 +136,16 @@ addon_data.player.update_swing_timer = function(elapsed)
         end
     end
 end
+
+-- called onupdate to manually alter the active GCD remaining time_before_swing
+addon_data.player.update_active_gcd_timer = function(elapsed)
+    if addon_data.player.active_gcd_remaining > 0 then
+        addon_data.player.active_gcd_remaining = addon_data.player.active_gcd_remaining - elapsed
+        if addon_data.player.active_gcd_remaining < 0 then
+            addon_data.player.active_gcd_remaining = 0
+        end
+    end
+end 
 
 --=========================================================================================
 -- Functions run when relevant events are intercepted
@@ -320,37 +337,63 @@ end
 -- Function to detect any spell casts like repentance that would reset
 -- the swing timer, and to handle GCD tracking
 addon_data.player.OnPlayerSpellCast = function(event, args)
+    
+    print('detected spell cast')
     -- only process player casts
     if not args[1] == "player" then
         return
     end
-
+    
     -- poll the GCD immediately for the max duration
     local _, duration = GetSpellCooldown(29515)
-    print('GCD duration from poll = ' .. tostring(duration))
-    our_duration = addon_data.player.calculate_spell_GCD_duration()
-    print('GCD duration from calc = ' .. tostring(our_duration))
+    
+    -- if spell is not judgement, check if we're not on GCD.
+    local spell_id = args[4] -- universal for a given spell type
+    local spell_guid = args[3] -- completely unique 
+    if not addon_data.player.gcd_lockout then
+        if spell_id ~= 20271 then
+            if duration == 0 then
+                print('found a delayed GCD cast, GUID: ' .. spell_guid)
+                addon_data.player.spell_guid_awaiting_gcd = spell_guid
+            else
+                print('detected GCD going off, setting internally: ' .. tostring(duration))
+                addon_data.player.gcd_lockout = true
+                addon_data.player.active_gcd_full_duration = duration
+                addon_data.player.active_gcd_remaining = duration
+            end
+        end
+    -- elseif duration == 0 then
+    --     print('Clearing GCD lock, GCD is zero')
+    --     addon_data.player.gcd_lockout = false
+    end
+
+    -- print(args)
+    
+    -- print('GCD duration from poll = ' .. tostring(duration))
+    -- our_duration = addon_data.player.calculate_spell_GCD_duration()
+    -- print('GCD duration from calc = ' .. tostring(our_duration))
 
 
     -- print('Sp Haste rating = ' .. tostring(GetCombatRating(20)))
     -- print('Sp Haste bonus = ' .. tostring(GetCombatRatingBonus(20)))
     -- detect repentance casts and reset the timer
-    if args[4] == 20066 then
+    if spell_id == 20066 then
         addon_data.player.reset_swing_timer()
 
     -- detect HoW casts and log the cast guid
-    elseif args[4] == 27180 then
-        addon_data.player.how_cast_guid = args[3]
+    elseif spell_id == 27180 then
+        addon_data.player.how_cast_guid = spell_guid
 
     -- detect Holy Wrath casts and log the cast guid
-    elseif args[4] == 27139 then
-        addon_data.player.holy_wrath_cast_guid = args[3]
+    elseif spell_id == 27139 then
+        addon_data.player.holy_wrath_cast_guid = spell_guid
     end
 end
 
 -- function to detect the player's successful casts that reset the 
 -- swing timer
 addon_data.player.OnPlayerSpellCompletion = function(event, args)
+    print('Spell completed')
     if args[2] == addon_data.player.how_cast_guid then
         -- print('player successfully cast HoW, resetting swing timer')
         addon_data.player.reset_swing_timer()
@@ -358,7 +401,17 @@ addon_data.player.OnPlayerSpellCompletion = function(event, args)
         -- print('player successfully cast Holy Wrath, resetting swing timer...')
         addon_data.player.reset_swing_timer()
     end
+    -- Catch any previous casts and check for GCD that *didn't* trigger a GCD
+    -- Poll the GCD endpoint to see if we've started one.
+    if args[2] == addon_data.player.spell_guid_awaiting_gcd then          
+        local _, duration = GetSpellCooldown(29515)
+        if duration > 0 then
+            print('Received a late GCD from cast completion.')
+        end
+    end
+
 end
+
 
 
 addon_data.player.frame_on_update = function(self, elapsed)
@@ -406,7 +459,16 @@ addon_data.player.frame_on_update = function(self, elapsed)
         end
     end
 
-	-- If the weapon speed changed due to buffs/debuffs, we need to modify the swing timer
+    -- If there is a GCD lock, check if we should clear it.
+    if addon_data.player.gcd_lockout then
+        addon_data.player.update_active_gcd_timer(elapsed)
+        if addon_data.player.gcd == 0 then
+            print('reached end of GCD, releasing lock')
+            addon_data.player.gcd_lockout = false
+        end
+    end
+
+    -- If the weapon speed changed due to buffs/debuffs, we need to modify the swing timer
     -- and inform all the UI elements that need things altered or recalculated.   
     if addon_data.player.speed_changed and not addon_data.player.reported_speed_change then
         print('swing speed changed, timer updating')
@@ -440,6 +502,8 @@ addon_data.player.frame_on_update = function(self, elapsed)
 
     -- Always update the bar visuals
     addon_data.bar.update_visuals_on_update()
+
+
 end
 
 --=========================================================================================
