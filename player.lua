@@ -176,7 +176,7 @@ addon_data.player.update_weapon_speed = function()
     addon_data.player.prev_weapon_speed = addon_data.player.current_weapon_speed
     -- Poll the API for the attack speed
     addon_data.player.current_weapon_speed, _ = UnitAttackSpeed("player")
-    print('API speed says: ' .. tostring(addon_data.player.current_weapon_speed))
+    -- print('API speed says: ' .. tostring(addon_data.player.current_weapon_speed))
 
 
 
@@ -199,6 +199,11 @@ addon_data.player.on_equipment_change = function()
         addon_data.player.update_weapon_speed()
         addon_data.player.reset_swing_timer()
         addon_data.player.weapon_id = new_guid
+    end
+
+    -- if we're in combat, trigger a GCD
+    if addon_data.core.in_combat then
+        addon_data.player.trigger_gcd()
     end
 end
 
@@ -317,6 +322,8 @@ addon_data.player.process_auras = function()
     end
 end
 
+
+
 -- There is no information in the event payload on what changed, so we have to rescan auras
 -- on the player.
 addon_data.player.on_player_aura_change = function()
@@ -334,6 +341,19 @@ addon_data.player.on_player_aura_change = function()
     addon_data.bar.update_bar_on_aura_change()
 end
 
+
+addon_data.player.trigger_gcd = function()
+    -- Function to trigger a new GCD in the addon's internal code.
+    local _, duration = GetSpellCooldown(29515)
+    print('detected GCD going off, setting internally: ' .. tostring(duration))
+    addon_data.player.gcd_lockout = true
+    addon_data.player.active_gcd_full_duration = duration
+    addon_data.player.active_gcd_remaining = duration
+    -- tell the bar to update
+    addon_data.bar.update_bar_on_new_gcd()
+end
+
+
 -- Function to detect any spell casts like repentance that would reset
 -- the swing timer, and to handle GCD tracking
 addon_data.player.OnPlayerSpellCast = function(event, args)
@@ -345,27 +365,31 @@ addon_data.player.OnPlayerSpellCast = function(event, args)
     end
     
     -- poll the GCD immediately for the max duration
-    local _, duration = GetSpellCooldown(29515)
+    -- local _, duration = GetSpellCooldown(29515)
     
     -- if spell is not judgement, check if we're not on GCD.
     local spell_id = args[4] -- universal for a given spell type
     local spell_guid = args[3] -- completely unique 
-    if not addon_data.player.gcd_lockout then
-        if spell_id ~= 20271 then
-            if duration == 0 then
-                print('found a delayed GCD cast, GUID: ' .. spell_guid)
-                addon_data.player.spell_guid_awaiting_gcd = spell_guid
-            else
-                print('detected GCD going off, setting internally: ' .. tostring(duration))
-                addon_data.player.gcd_lockout = true
-                addon_data.player.active_gcd_full_duration = duration
-                addon_data.player.active_gcd_remaining = duration
-            end
+
+    if not addon_data.player.gcd_lockout and spell_id ~= 20271 then
+        local _, duration = GetSpellCooldown(29515)
+
+        if duration == 0 then
+            print('found a delayed GCD cast, GUID: ' .. spell_guid)
+            addon_data.player.spell_guid_awaiting_gcd = spell_guid
+        else
+            print('detected GCD going off: ' .. tostring(duration))
+            addon_data.player.trigger_gcd()
+
+            -- addon_data.player.gcd_lockout = true
+            -- addon_data.player.active_gcd_full_duration = duration
+            -- addon_data.player.active_gcd_remaining = duration
         end
+        -- addon_data.player.trigger_gcd()
+    end
+
     -- elseif duration == 0 then
     --     print('Clearing GCD lock, GCD is zero')
-    --     addon_data.player.gcd_lockout = false
-    end
 
     -- print(args)
     
@@ -455,7 +479,7 @@ addon_data.player.frame_on_update = function(self, elapsed)
     -- Repoll the attack speed a short while after an aura change
     if addon_data.player.repoll_on_aura_change then
         if addon_data.player.aura_repoll_counter > 0.3 then
-            print('SECONDARY API POLL ON AURA CHANGE')
+            -- print('SECONDARY API POLL ON AURA CHANGE')
             addon_data.player.update_weapon_speed()
             addon_data.player.aura_repoll_counter = 0.0
             addon_data.player.repoll_on_aura_change = false
@@ -470,6 +494,7 @@ addon_data.player.frame_on_update = function(self, elapsed)
         if addon_data.player.active_gcd_remaining == 0 then
             print('reached end of GCD, releasing lock')
             addon_data.player.gcd_lockout = false
+            addon_data.bar.hide_gcd_bar()
         end
     end
 

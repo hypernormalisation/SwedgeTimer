@@ -18,8 +18,8 @@ addon_data.bar.default_settings = {
 	x_offset = 0,
 	y_offset = -180,
 	in_combat_alpha = 1.0,
-	ooc_alpha = 0.65,
-	backplane_alpha = 0.5,
+	ooc_alpha = 1.0,
+	backplane_alpha = 1.0,
 	is_locked = false,
     show_left_text = true,
     show_right_text = true,
@@ -33,6 +33,7 @@ addon_data.bar.default_settings = {
     bar_color_twist_ready = {0., 0.99, 0., 1.0},
     bar_color_blood = {0.99, 0.37, 0.0, 1.0},
     bar_color_warning = {1.0, 0.0, 0.0, 1.0}, -- when if you cast SoC, you can't twist out of it that swing
+    bar_color_gcd = {0.2, 0.2, 0.2, 1.0},
     twist_window = 0.4,
     grace_period = 0.2,
 }
@@ -44,7 +45,7 @@ addon_data.bar.twist_tick_offset = 0.1
 addon_data.bar.gcd1_tick_offset = 0.1
 addon_data.bar.gcd2_tick_offset = 0.1
 
-
+addon_data.bar.gcd_bar_width = 0.0
 
 addon_data.bar.LoadSettings = function()
     -- If the carried over settings dont exist then make them
@@ -145,21 +146,34 @@ addon_data.bar.init_bar_visuals = function()
     --         insets = { left = 8, right = 8, top = 8, bottom = 8}})
     -- end
 
-    -- Create the main hand bar
+    -- Create the swing timer bar
     frame.bar = frame:CreateTexture(nil,"ARTWORK")
     frame:SetHeight(settings.height)
-    -- Create the main spark
+    frame.bar:SetPoint("TOPLEFT", 0, 0)
+    frame.bar:SetHeight(settings.height)
+    frame.bar:SetTexture('Interface/AddOns/SwedgeTimer/Images/Bar')
+    frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_default"]))
+
+    -- Create the GCD timer bar
+    frame.gcd_bar = frame:CreateTexture(nil, "ARTWORK")
+    frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
+    frame.gcd_bar:SetHeight(settings.height)
+    frame.gcd_bar:SetTexture('Interface/AddOns/SwedgeTimer/Images/Bar')
+    frame.gcd_bar:SetVertexColor(unpack(character_bar_settings["bar_color_gcd"]))
+    frame.gcd_bar:SetDrawLayer("ARTWORK", -1)
+
+    -- Create the spark for the timer
     frame.spark = frame:CreateTexture(nil,"OVERLAY")
     frame.spark:SetTexture('Interface/AddOns/SwedgeTimer/Images/Spark')
 
-    -- Create the main hand bar left text
+    -- Create the bar left text
     frame.left_text = frame:CreateFontString(nil, "OVERLAY")
     frame.left_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize, "OUTLINE")
     frame.left_text:SetShadowColor(0.0,0.0,0.0,1.0)
     frame.left_text:SetShadowOffset(1,-1)
     frame.left_text:SetJustifyV("CENTER")
     frame.left_text:SetJustifyH("LEFT")
-    -- Create the main hand bar right text
+    -- Create the bar right text
     frame.right_text = frame:CreateFontString(nil, "OVERLAY")
     frame.right_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize, "OUTLINE")
     frame.right_text:SetShadowColor(0.0,0.0,0.0,1.0)
@@ -170,7 +184,7 @@ addon_data.bar.init_bar_visuals = function()
     -- Create the line markers
     frame.twist_line = frame:CreateLine() -- the twist window marker
     frame.twist_line:SetColorTexture(1,1,1,1)
-    frame.twist_line:SetDrawLayer("OVERLAY")
+    frame.twist_line:SetDrawLayer("OVERLAY", -1)
     frame.twist_line:SetThickness(3)
     frame.twist_line:SetStartPoint("TOPRIGHT", 0, 0) -- dummy vars so the line is initialised
     frame.twist_line:SetEndPoint("BOTTOMRIGHT", 0, 0)
@@ -183,14 +197,14 @@ addon_data.bar.init_bar_visuals = function()
     -- frame.twist_line:SetEndPoint("BOTTOMRIGHT",offset,0)
 
     frame.gcd1_line = frame:CreateLine() -- the first gcd possible before a twist
-    frame.gcd1_line:SetColorTexture(1,0.1,0.1,1)
-    frame.gcd1_line:SetDrawLayer("OVERLAY")
-    frame.gcd1_line:SetThickness(2)
+    frame.gcd1_line:SetColorTexture(1,0.4,0.1,1)
+    frame.gcd1_line:SetDrawLayer("OVERLAY", -1)
+    frame.gcd1_line:SetThickness(3)
     
     frame.gcd2_line = frame:CreateLine()
     frame.gcd2_line:SetColorTexture(1,1,1,1)
-    frame.gcd2_line:SetDrawLayer("OVERLAY")
-    frame.gcd2_line:SetThickness(2)
+    frame.gcd2_line:SetDrawLayer("OVERLAY", -1)
+    frame.gcd2_line:SetThickness(3)
     
     -- Run an update to configure the bar appropriately
     -- addon_data.bar.UpdateVisualsOnSettingsChange()
@@ -296,15 +310,18 @@ addon_data.bar.update_visuals_on_update = function()
     -- end
 
     -- Update the main bar's width
-    width = math.min(settings.width - (settings.width * (timer / speed)), settings.width)
+    local timer_width = math.min(settings.width - (settings.width * (timer / speed)), settings.width)
     if not settings.fill_empty then
-        width = settings.width - width + 0.001
+        timer_width = settings.width - timer_width + 0.001
     end
     
-    frame.bar:SetWidth(width)
-    frame.spark:SetPoint('TOPLEFT', width - 8, 0)
+    frame.bar:SetWidth(timer_width)
+    frame.spark:SetPoint('TOPLEFT', timer_width - 8, 0)
     
-    if width == settings.width or not settings.classic_bars or width == 0.001 then
+    -- frame.gcd_bar:SetWidth(settings.width/2)
+    frame.gcd_bar:Show()
+
+    if timer_width == settings.width or not settings.classic_bars or timer_width == 0.001 then
         frame.spark:Hide()
     else
         frame.spark:Show()
@@ -336,6 +353,56 @@ addon_data.bar.update_visuals_on_update = function()
 end
 
 
+addon_data.bar.hide_gcd_bar = function()
+    -- function to "hide" the gcd bar by reducing the width to zero
+    -- instead of using the dedicated Hide method
+    addon_data.bar.gcd_bar_width = 0
+    addon_data.bar.frame.gcd_bar:SetWidth(0)
+end
+
+addon_data.bar.set_gcd_bar_width = function()
+
+    if not addon_data.player.gcd_lockout then
+        addon_data.bar.gcd_bar_width = 0
+        addon_data.bar.frame.gcd_bar:SetWidth(0)
+    end
+
+    local settings = character_player_settings
+    local attack_speed = addon_data.player.current_weapon_speed
+    local swing_timer = addon_data.player.swing_timer
+    print(attack_speed)
+    print(swing_timer)
+    print(addon_data.player.active_gcd_remaining)
+    local time_since_bar_start = addon_data.player.current_weapon_speed - addon_data.player.swing_timer
+
+
+    local time_gcd_ends = time_since_bar_start + addon_data.player.active_gcd_remaining
+    print("Time relative to bar the GCD ends = " .. tostring(time_gcd_ends))
+
+    if time_gcd_ends > attack_speed then
+        time_gcd_ends = attack_speed
+    end
+    print("Modified time relative to bar the GCD ends = " .. tostring(time_gcd_ends))
+
+
+    -- local gcd_bar_width = settings.width - (time_gcd_ends / attack_speed)
+
+    local gcd_bar_width = (time_gcd_ends / attack_speed) * settings.width
+    -- print('offset says ' .. tostring(offset))
+
+    -- -- if it exceeds the bar width, max it out.
+    -- if offset > settings.width then
+    --     gcd_bar_width = settings.width - 0.001
+    -- elseif gcd_bar_width < 0 then
+    --     gcd_bar_width = 0.001
+    -- end
+        
+    print('gcd bar width says ' .. gcd_bar_width)
+    addon_data.bar.gcd_bar_width = gcd_bar_width
+    addon_data.bar.frame.gcd_bar:SetWidth(gcd_bar_width)
+end
+
+
 addon_data.bar.update_bar_on_combat = function()
     -- Function called to update bar when entering/leaving combat.
         -- Update the alpha
@@ -351,6 +418,7 @@ addon_data.bar.update_bar_on_timer_full = function()
     addon_data.bar.frame.twist_line:Hide()
     addon_data.bar.frame.gcd1_line:Hide()
     addon_data.bar.frame.gcd2_line:Hide()
+    addon_data.bar.set_gcd_bar_width()
 end
 
 addon_data.bar.update_bar_on_swing_reset = function()
@@ -362,7 +430,7 @@ addon_data.bar.update_bar_on_swing_reset = function()
     else
         frame.twist_line:Hide()
     end
-    -- Always show the first GCD line
+    -- Always show the first GCD line TODO - CHANGE THIS
     frame.gcd1_line:Show()
     -- Second GCD line
     if addon_data.bar.should_draw_gcd2_window() then
@@ -371,6 +439,13 @@ addon_data.bar.update_bar_on_swing_reset = function()
         frame.gcd2_line:Hide()
     end
 
+    -- Recalculate the gcd bar width if we're on GCD.
+    addon_data.bar.set_gcd_bar_width()
+
+end
+
+addon_data.bar.update_bar_on_new_gcd = function()
+    addon_data.bar.set_gcd_bar_width()
 end
 
 addon_data.bar.update_bar_on_speed_change = function()
@@ -435,7 +510,7 @@ addon_data.bar.set_gcd1_tick_offset = function()
     local gcd_duration = addon_data.player.spell_gcd_duration
     local grace_period = character_bar_settings["grace_period"]
     local time_before_swing = gcd_duration + grace_period
-    print('GCD1 tick time = ' .. time_before_swing)
+    -- print('GCD1 tick time = ' .. time_before_swing)
     offset = (time_before_swing / addon_data.player.current_weapon_speed) * settings.width * -1
     addon_data.bar.gcd1_tick_offset = offset
     addon_data.bar.frame.gcd1_line:SetStartPoint("TOPRIGHT", offset, 0)
@@ -449,7 +524,7 @@ addon_data.bar.set_gcd2_tick_offset = function()
     local gcd_duration = addon_data.player.spell_gcd_duration
     local grace_period = character_bar_settings["grace_period"]
     local time_before_swing = (2 * gcd_duration) + grace_period
-    print('GCD2 tick time = ' .. time_before_swing)
+    -- print('GCD2 tick time = ' .. time_before_swing)
     offset = (time_before_swing / addon_data.player.current_weapon_speed) * settings.width * -1
     addon_data.bar.gcd2_tick_offset = offset
     addon_data.bar.frame.gcd2_line:SetStartPoint("TOPRIGHT", offset, 0)
