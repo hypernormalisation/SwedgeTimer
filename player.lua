@@ -413,6 +413,11 @@ addon_data.player.OnPlayerSpellCompletion = function(event, args)
 end
 
 
+-- Called when the player's spellcast is interrupt to reset the gcd.
+addon_data.player.on_spell_interrupt = function()
+    addon_data.player.active_gcd_remaining = 0
+end
+
 
 addon_data.player.frame_on_update = function(self, elapsed)
     
@@ -462,7 +467,7 @@ addon_data.player.frame_on_update = function(self, elapsed)
     -- If there is a GCD lock, check if we should clear it.
     if addon_data.player.gcd_lockout then
         addon_data.player.update_active_gcd_timer(elapsed)
-        if addon_data.player.gcd == 0 then
+        if addon_data.player.active_gcd_remaining == 0 then
             print('reached end of GCD, releasing lock')
             addon_data.player.gcd_lockout = false
         end
@@ -538,7 +543,12 @@ addon_data.player.frame_on_event = function(self, event, ...)
     
     elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
         addon_data.player.OnPlayerSpellCompletion(event, args)
-	end
+
+    elseif event == "UNIT_SPELLCAST_INTERRUPTED" then
+        print('found an interruption')
+        addon_data.player.on_spell_interrupt()
+    end
+        
 end
 
 addon_data.player_frame = CreateFrame("Frame", addon_name .. "PlayerFrame", UIParent)

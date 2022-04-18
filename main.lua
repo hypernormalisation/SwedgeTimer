@@ -115,10 +115,12 @@ local function init_addon(self)
     -- Attach the events and widget handlers for the player stats frame
     addon_data.player_frame:SetScript("OnEvent", addon_data.player.frame_on_event)
     addon_data.player_frame:SetScript("OnUpdate", addon_data.player.frame_on_update)
-    addon_data.player_frame:RegisterEvent("PLAYER_TARGET_CHANGED")
+    -- addon_data.player_frame:RegisterEvent("PLAYER_TARGET_CHANGED")
     addon_data.player_frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     addon_data.player_frame:RegisterEvent("UNIT_INVENTORY_CHANGED")
     addon_data.player_frame:RegisterUnitEvent("UNIT_AURA", "player")
+    addon_data.player_frame:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTED", "player")
+
     addon_data.player_frame:RegisterEvent("UNIT_SPELLCAST_SENT")
     addon_data.player_frame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 
