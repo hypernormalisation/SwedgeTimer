@@ -164,7 +164,7 @@ addon_data.bar.init_bar_visuals = function()
 
     -- Create the spark for the timer
     frame.spark = frame:CreateTexture(nil,"OVERLAY")
-    frame.spark:SetTexture('Interface/AddOns/SwedgeTimer/Images/Spark')
+    -- frame.spark:SetTexture('Interface/AddOns/SwedgeTimer/Images/Spark')
 
     -- Create the bar left text
     frame.left_text = frame:CreateFontString(nil, "OVERLAY")
@@ -197,7 +197,7 @@ addon_data.bar.init_bar_visuals = function()
     -- frame.twist_line:SetEndPoint("BOTTOMRIGHT",offset,0)
 
     frame.gcd1_line = frame:CreateLine() -- the first gcd possible before a twist
-    frame.gcd1_line:SetColorTexture(1,0.4,0.1,1)
+    frame.gcd1_line:SetColorTexture(0.4,0.4,1,1)
     frame.gcd1_line:SetDrawLayer("OVERLAY", -1)
     frame.gcd1_line:SetThickness(3)
     
@@ -370,19 +370,19 @@ addon_data.bar.set_gcd_bar_width = function()
     local settings = character_player_settings
     local attack_speed = addon_data.player.current_weapon_speed
     local swing_timer = addon_data.player.swing_timer
-    print(attack_speed)
-    print(swing_timer)
-    print(addon_data.player.active_gcd_remaining)
+    -- print(attack_speed)
+    -- print(swing_timer)
+    -- print(addon_data.player.active_gcd_remaining)
     local time_since_bar_start = addon_data.player.current_weapon_speed - addon_data.player.swing_timer
 
 
     local time_gcd_ends = time_since_bar_start + addon_data.player.active_gcd_remaining
-    print("Time relative to bar the GCD ends = " .. tostring(time_gcd_ends))
+    -- print("Time relative to bar the GCD ends = " .. tostring(time_gcd_ends))
 
     if time_gcd_ends > attack_speed then
         time_gcd_ends = attack_speed
     end
-    print("Modified time relative to bar the GCD ends = " .. tostring(time_gcd_ends))
+    -- print("Modified time relative to bar the GCD ends = " .. tostring(time_gcd_ends))
 
 
     -- local gcd_bar_width = settings.width - (time_gcd_ends / attack_speed)
@@ -397,7 +397,7 @@ addon_data.bar.set_gcd_bar_width = function()
     --     gcd_bar_width = 0.001
     -- end
         
-    print('gcd bar width says ' .. gcd_bar_width)
+    -- print('gcd bar width says ' .. gcd_bar_width)
     addon_data.bar.gcd_bar_width = gcd_bar_width
     addon_data.bar.frame.gcd_bar:SetWidth(gcd_bar_width)
 end
@@ -415,33 +415,51 @@ end
 
 addon_data.bar.update_bar_on_timer_full = function()
     -- Function called when the bar fills up to change any bar visuals
+    -- addon_data.bar.frame.twist_line:Hide()
+    -- addon_data.bar.frame.gcd1_line:Hide()
+    -- addon_data.bar.frame.gcd2_line:Hide()
+    addon_data.bar.set_gcd_bar_width()
     addon_data.bar.frame.twist_line:Hide()
     addon_data.bar.frame.gcd1_line:Hide()
     addon_data.bar.frame.gcd2_line:Hide()
-    addon_data.bar.set_gcd_bar_width()
 end
 
-addon_data.bar.update_bar_on_swing_reset = function()
-    -- Function called when the swing timer resets to change any bar visuals
+addon_data.bar.show_or_hide_ticks = function()
     local frame = addon_data.bar.frame
+
+    -- always hide ticks at full swing timer
+    if addon_data.player.swing_timer == 0 then
+        addon_data.bar.frame.twist_line:Hide()
+        addon_data.bar.frame.gcd1_line:Hide()
+        addon_data.bar.frame.gcd2_line:Hide()
+        return
+    end
+
     -- Twist line
     if addon_data.bar.should_draw_twist_window() then
         frame.twist_line:Show()
     else
         frame.twist_line:Hide()
     end
-    -- Always show the first GCD line TODO - CHANGE THIS
-    frame.gcd1_line:Show()
+    -- First GCD line
+    if addon_data.bar.should_draw_gcd1_window() then
+        frame.gcd1_line:Show()
+    else
+        frame.gcd1_line:Hide()
+    end
     -- Second GCD line
     if addon_data.bar.should_draw_gcd2_window() then
         frame.gcd2_line:Show()
     else
         frame.gcd2_line:Hide()
     end
+end
 
-    -- Recalculate the gcd bar width if we're on GCD.
+addon_data.bar.update_bar_on_swing_reset = function()
+    -- Function called when the swing timer resets to change any bar visuals
+    addon_data.bar.show_or_hide_ticks()
+    -- Recalculate the gcd bar width
     addon_data.bar.set_gcd_bar_width()
-
 end
 
 addon_data.bar.update_bar_on_new_gcd = function()
@@ -472,6 +490,9 @@ addon_data.bar.update_bar_on_aura_change = function()
     addon_data.bar.set_twist_tick_offset()
     addon_data.bar.set_gcd1_tick_offset()
     addon_data.bar.set_gcd2_tick_offset()
+
+    -- determine if we should now show or hide the ticks
+    addon_data.bar.show_or_hide_ticks()
 end
 
 -- Determine wether or not to draw the twist line
@@ -484,6 +505,15 @@ addon_data.bar.should_draw_twist_window = function()
 end
 
 -- determine wether or not to draw the gcd1 line
+addon_data.bar.should_draw_gcd1_window = function()
+    local settings = character_player_settings
+    if math.abs(addon_data.bar.gcd1_tick_offset) > settings.width then
+        return false
+    end
+    return true
+end
+
+-- determine wether or not to draw the gcd2 line
 addon_data.bar.should_draw_gcd2_window = function()
     local settings = character_player_settings
     if math.abs(addon_data.bar.gcd2_tick_offset) > settings.width then

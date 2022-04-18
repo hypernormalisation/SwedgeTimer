@@ -123,7 +123,7 @@ local function init_addon(self)
 
     addon_data.player_frame:RegisterEvent("UNIT_SPELLCAST_SENT")
     addon_data.player_frame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-
+    addon_data.player_frame:RegisterEvent("SPELL_UPDATE_COOLDOWN")
 	-- Load the settings for the core and all timers
 	-- addon_data.player.LoadSettings()
 	-- addon_data.core.LoadSettings()
