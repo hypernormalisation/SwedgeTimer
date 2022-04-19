@@ -200,11 +200,11 @@ addon_data.player.on_equipment_change = function()
         addon_data.player.update_weapon_speed()
         addon_data.player.reset_swing_timer()
         addon_data.player.weapon_id = new_guid
-    end
 
-    -- if we're in combat, trigger a GCD
-    if addon_data.core.in_combat then
-        addon_data.player.trigger_gcd()
+        -- if we're also in combat, trigger a GCD
+        if addon_data.core.in_combat then
+            addon_data.player.process_possible_spell_cooldown()
+        end
     end
 end
 
@@ -444,6 +444,23 @@ addon_data.player.on_spell_interrupt = function()
 end
 
 
+-- A function to repoll the GCD that does not respect the lockout
+-- Used in the onupdate to account for event lag
+addon_data.player.force_gcd_repoll = function()
+    if addon_data.player.gcd_lockout then
+        -- print('force repolling GCD')
+        -- local time_now = GetTime()
+        local time_now2, duration = GetSpellCooldown(29515)
+        -- print('time_now says: ' .. time_now)
+        -- print('time_now2 says: ' .. time_now)
+        -- print('force repolled GCD: ' .. tostring(duration))
+
+        addon_data.player.active_gcd_full_duration = duration
+        addon_data.player.active_gcd_remaining = duration
+    end
+end
+
+
 -- Called when we receive the SPELL_UPDATE_COOLDOWN event
 addon_data.player.process_possible_spell_cooldown = function()
     -- first check if we're on gcd lockout
@@ -452,16 +469,23 @@ addon_data.player.process_possible_spell_cooldown = function()
         return
     end
 
-    local _, duration = GetSpellCooldown(29515)
+    local time_started, duration = GetSpellCooldown(29515)
     print('detected GCD going off, setting internally: ' .. tostring(duration))
     if duration == 0 then
         print('SPELL_UPDATE_COOLDOWN with no GCD duration')
         return
     end
+
+    local time_now = GetTime()
+    local calced_duration_remaining = duration - (time_now - time_started)
+    print('time_now says:' .. tostring(time_now))
+    print('time_started says:' .. tostring(time_started))
+    print('calculated duration remaining:' .. tostring(calced_duration_remaining))
+
     addon_data.player.gcd_lockout = true
     addon_data.reported_gcd_lockout = false
     addon_data.player.active_gcd_full_duration = duration
-    addon_data.player.active_gcd_remaining = duration
+    addon_data.player.active_gcd_remaining = calced_duration_remaining
     
     -- tell the bar to update
     -- addon_data.bar.update_bar_on_new_gcd()
@@ -552,8 +576,9 @@ addon_data.player.frame_on_update = function(self, elapsed)
     end
 
     if addon_data.player.gcd_lockout and not addon_data.reported_gcd_lockout then
-         addon_data.bar.update_bar_on_new_gcd()
-         addon_data.reported_gcd_lockout = true
+        -- addon_data.player.force_gcd_repoll()     
+        addon_data.bar.update_bar_on_new_gcd()
+        addon_data.reported_gcd_lockout = true
     end 
 
 
@@ -588,7 +613,7 @@ addon_data.player.frame_on_event = function(self, event, ...)
         addon_data.player.OnCombatLogUnfiltered(combat_info)
     
     elseif event == "UNIT_AURA" then
-        print('processing aura change')
+        -- print('processing aura change')
         addon_data.player.on_player_aura_change()
 
         -- Trigger logic to repoll after a small amount of time

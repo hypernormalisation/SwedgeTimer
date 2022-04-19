@@ -30,8 +30,8 @@ addon_data.bar.default_settings = {
     main_text_r = 1.0, main_text_g = 1.0, main_text_b = 1.0, main_text_a = 1.0,
     bar_color_default = {0.4, 0.4, 0.4, 1.0},
     bar_color_twisting = {0.51, 0.04, 0.73, 1.0},
-    bar_color_twist_ready = {0., 0.99, 0., 1.0},
-    bar_color_blood = {0.99, 0.37, 0.0, 1.0},
+    bar_color_twist_ready = {0., 0.68, 0., 1.0},
+    bar_color_blood = {0.7, 0.27, 0.0, 1.0},
     bar_color_warning = {1.0, 0.0, 0.0, 1.0}, -- when if you cast SoC, you can't twist out of it that swing
     bar_color_gcd = {0.2, 0.2, 0.2, 1.0},
     twist_window = 0.4,
@@ -52,7 +52,7 @@ addon_data.bar.LoadSettings = function()
     if not character_bar_settings then
         character_bar_settings = {}
     end
-    -- character_bar_settings = {} -- REMOVE ME THIS IS FOR TESTING
+    character_bar_settings = {} -- REMOVE ME THIS IS FOR TESTING
     -- If the carried over settings aren't set then set them to the defaults
     for setting, value in pairs(addon_data.bar.default_settings) do
         if character_bar_settings[setting] == nil then

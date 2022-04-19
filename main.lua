@@ -138,8 +138,12 @@ local function init_addon(self)
     addon_data.player.swing_timer = 0.00001
     addon_data.player.update_weapon_speed()
     addon_data.player.calculate_spell_GCD_duration()
+    addon_data.player.on_player_aura_change()
     addon_data.bar.update_bar_on_combat()
+    -- addon_data.bar.update_bar_on_aura_change()
+    
     addon_data.bar.set_gcd_bar_width()
+    addon_data.bar.set_bar_color()
 
     -- If appropriate show welcome message
     if addon_data.debug then print('... complete!') end
