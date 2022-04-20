@@ -139,6 +139,9 @@ local function init_addon(self)
     addon_data.player.update_weapon_speed()
     addon_data.player.calculate_spell_GCD_duration()
     addon_data.player.on_player_aura_change()
+    addon_data.player.update_lag()
+
+    
     addon_data.bar.update_bar_on_combat()
     -- addon_data.bar.update_bar_on_aura_change()
     

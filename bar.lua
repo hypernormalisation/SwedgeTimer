@@ -34,6 +34,7 @@ addon_data.bar.default_settings = {
     bar_color_blood = {0.7, 0.27, 0.0, 1.0},
     bar_color_warning = {1.0, 0.0, 0.0, 1.0}, -- when if you cast SoC, you can't twist out of it that swing
     bar_color_gcd = {0.2, 0.2, 0.2, 1.0},
+    bar_color_cant_twist = {0.7, 0.7, 0.01, 1.0},
     twist_window = 0.4,
     grace_period = 0.2,
 }
@@ -285,8 +286,6 @@ addon_data.bar.UpdateVisualsOnSettingsChange = function()
     end
 end
 
-
-print('ok')
 --=========================================================================================
 -- OnUpdate widget handlers and functions
 --=========================================================================================
@@ -338,7 +337,9 @@ addon_data.bar.update_visuals_on_update = function()
 
     -- If SoC, bar colour is time sensitive. Deal with that here.
     if addon_data.player.active_seals["Seal of Command"] ~= nil and addon_data.player.n_active_seals == 1 then
-        if addon_data.player.swing_timer < character_bar_settings["twist_window"] then 
+        if addon_data.player.twist_impossible then
+            addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_cant_twist"]))
+        elseif addon_data.player.swing_timer < character_bar_settings["twist_window"] then 
             addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_twist_ready"]))
         else
             local min_time = addon_data.player.spell_gcd_duration + character_bar_settings["grace_period"]
@@ -569,7 +570,7 @@ end
 addon_data.bar.set_bar_color = function()
     -- This function sets the bar colour for all cases outside of seal of command, which has
     -- a time sensitive component and must be handled on-update.
-
+    print('CALL TO SET COLOUR')
     -- if no seal return default color
     if addon_data.player.n_active_seals == 0 then
         addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_default"]))

@@ -8,6 +8,8 @@ local floor = addon_data.utils.SimpleRound
 addon_data.player = {}
 addon_data.player.default_settings = {
 	enabled = true,
+    lag_threshold = 0.00,
+    lag_multiplier = 1.5,
 	width = 400,
 	height = 20,
 	fontsize = 12,
@@ -54,6 +56,8 @@ addon_data.player.active_seal_1_remaining = 0
 addon_data.player.active_seal_2 = nil
 addon_data.player.active_seal_2_remaining = 0
 
+addon_data.player.twist_impossible = false
+
 -- does the player have heroism/lust buff active
 addon_data.player.has_bloodlust = false
 
@@ -92,6 +96,15 @@ addon_data.crusader_currently_active = false
 addon_data.player.how_cast_guid = nil
 addon_data.player.holy_wrath_cast_guid = nil
 
+-- A measure of the player's ping
+addon_data.player.lag_world = 0.0
+
+addon_data.player.update_lag = function()
+    local _, _, _, lag = GetNetStats()
+    lag = (lag * character_player_settings.lag_multiplier) + character_player_settings.lag_threshold
+    addon_data.player.lag_world = lag / 1000.0
+end
+
 
 addon_data.player.LoadSettings = function()
     -- If the carried over settings dont exist then make them
@@ -120,6 +133,7 @@ end
 -- Called when the swing timer should be reset
 addon_data.player.reset_swing_timer = function()
     addon_data.crusader_lock = false
+    addon_data.player.twist_impossible = false
     addon_data.player.update_weapon_speed() -- NOT SURE IF THIS IS NEEDED
     addon_data.player.swing_timer = addon_data.player.current_weapon_speed
     addon_data.player.reported_swing_timer_complete = false
@@ -340,6 +354,7 @@ addon_data.player.on_player_aura_change = function()
     addon_data.player.calculate_spell_GCD_duration()
     addon_data.player.update_weapon_speed()
     addon_data.bar.update_bar_on_aura_change()
+    
 end
 
 
@@ -487,6 +502,37 @@ addon_data.player.process_possible_spell_cooldown = function()
     addon_data.player.active_gcd_full_duration = duration
     addon_data.player.active_gcd_remaining = calced_duration_remaining
     
+    -- -- Figure out if we're lagging
+    -- local gcd_with_lag = time_now + duration
+    -- print('GCD with lag says:' .. tostring(gcd_with_lag))
+    -- local time_since_previous_swing = addon_data.player.current_weapon_speed - addon_data.player.swing_timer
+    -- local gcd_ends_relative_to_swing = time_since_previous_swing + duration
+    -- print('GCD ends relative to swing: ' .. tostring(gcd_ends_relative_to_swing))
+    -- if gcd_ends_relative_to_swing > addon_data.player.current_weapon_speed then
+    --     if addon_data.player.swing_timer > character_bar_settings.twist_window then
+    --         print('SHIT SON WE COULD BE MISSING THIS TWIST')
+    --         addon_data.player.twist_impossible = true
+    --     end
+    -- end
+
+    -- Figure out if we're lagging
+    addon_data.player.update_lag()
+    local gcd_with_lag = calced_duration_remaining + addon_data.player.lag_world
+    local time_since_previous_swing = addon_data.player.current_weapon_speed - addon_data.player.swing_timer
+    local gcd_ends_relative_to_swing = time_since_previous_swing + gcd_with_lag
+    print('GCD + lag ends relative to swing: ' .. tostring(gcd_ends_relative_to_swing))
+    print('Current attack speed: ' .. tostring(addon_data.player.current_weapon_speed))
+
+    -- local gcd_relative_to_swing_with_threshold = gcd_ends_relative_to_swing + character_player_settings.lag_threshold
+    if gcd_ends_relative_to_swing > addon_data.player.current_weapon_speed then
+        if addon_data.player.swing_timer > character_bar_settings.twist_window then
+            print('SHIT SON WE COULD BE MISSING THIS TWIST')
+            addon_data.player.twist_impossible = true
+        end
+    end
+
+    -- addon_data.player.update_lag
+
     -- tell the bar to update
     -- addon_data.bar.update_bar_on_new_gcd()
 end
@@ -502,6 +548,7 @@ addon_data.player.frame_on_update = function(self, elapsed)
         addon_data.player.swing_timer_complete()
         addon_data.bar.update_bar_on_timer_full()
         addon_data.player.reported_swing_timer_complete = true
+        addon_data.player.twist_impossible = false
         -- addon_data.player.reported_swing_timer_complete_double = false
         addon_data.player.time_since_swing_completion = 0
     end
