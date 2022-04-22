@@ -25,7 +25,7 @@ As such, rets commonly use a patched version of weak auras, with the patched `ge
 
 SwedgeTimer handles Seal of the Crusader haste snapshotting implicitly, meaning no need to manually patch weak auras after every release, and no need for the patch maintainers to ensure compatibility with new WeakAura versions.
 
-#### Accurate in Retribution edge cases
+### Accurate in Retribution edge cases
 
 Traditional WeakAura swing timers do not recognise that the player's swing timer is reset by some of our abilities.
 The most notable of these is Repentance, a crucial ability in PvP play.
@@ -36,7 +36,7 @@ SwedgeTimer correctly resets the paladin's swing timer upon any relevant ability
 - Holy Wrath
 - Hammer of Justice
 
-#### Customisable
+### Customisable
 
 WeakAuras allows for extensive customisation of the appearance of a given WA, but there is no way to easily persist a player's customisation when the WA is updated.
 Instead a player must re-implement any cosmetic changes each time their WA of choice is updated.
@@ -48,7 +48,7 @@ At present, the bar width, bar height, and font size are all customisable in the
 
 In a future update, font and bar texture customisation will also be implemented.
 
-#### Lag Detection
+### Lag Detection
 
 At high haste, many rets will be familiar with the experience of attempting a twist that your swing timer indicates that you can make, only to end up landing a Seal of Command swing due to lag, with the Seal of Blood cast taking you out of SoC and denying your ability to twist.
 
