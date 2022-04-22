@@ -29,7 +29,7 @@ SwedgeTimer handles Seal of the Crusader haste snapshotting implicitly, meaning 
 
 Traditional WeakAura swing timers do not recognise that the player's swing timer is reset by some of our abilities.
 The most notable of these is Repentance, a crucial ability in PvP play.
-Players must guage themselves when a swing is up after casting Repentence, reducing the player's ability to re-open with a twist following a cast.
+Players must guess themselves when a swing is up after casting Repentence, impacting the player's ability to promptly re-open with a twist following a cast.
 
 SwedgeTimer correctly resets the paladin's swing timer upon any relevant ability cast. These include:
 - Repentance
