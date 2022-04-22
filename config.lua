@@ -212,32 +212,32 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         addon_data.bar.IsLockedCheckBoxOnClick)
     panel.is_locked_checkbox:SetPoint("TOPLEFT", 10, -40)
 
-    -- Show Border Checkbox
-    panel.show_border_checkbox = addon_data.config.CheckBoxFactory(
-        "PlayerShowBorderCheckBox",
-        panel,
-        "Show border",
-        "Enables the player bar's border.",
-        addon_data.bar.ShowBorderCheckBoxOnClick)
-    panel.show_border_checkbox:SetPoint("TOPLEFT", 10, -60)
+    -- -- Show Border Checkbox
+    -- panel.show_border_checkbox = addon_data.config.CheckBoxFactory(
+    --     "PlayerShowBorderCheckBox",
+    --     panel,
+    --     "Show border",
+    --     "Enables the player bar's border.",
+    --     addon_data.bar.ShowBorderCheckBoxOnClick)
+    -- panel.show_border_checkbox:SetPoint("TOPLEFT", 10, -60)
     
-    -- Show Classic Bars Checkbox
-    panel.classic_bars_checkbox = addon_data.config.CheckBoxFactory(
-        "PlayerClassicBarsCheckBox",
-        panel,
-        "Classic bars",
-        "Enables the classic texture for the player's bars.",
-        addon_data.bar.ClassicBarsCheckBoxOnClick)
-    panel.classic_bars_checkbox:SetPoint("TOPLEFT", 10, -100)
+    -- -- Show Classic Bars Checkbox
+    -- panel.classic_bars_checkbox = addon_data.config.CheckBoxFactory(
+    --     "PlayerClassicBarsCheckBox",
+    --     panel,
+    --     "Classic bars",
+    --     "Enables the classic texture for the player's bars.",
+    --     addon_data.bar.ClassicBarsCheckBoxOnClick)
+    -- panel.classic_bars_checkbox:SetPoint("TOPLEFT", 10, -100)
 
-    -- Fill/Empty Checkbox
-    panel.fill_empty_checkbox = addon_data.config.CheckBoxFactory(
-        "PlayerFillEmptyCheckBox",
-        panel,
-        "Fill / Empty",
-        "Determines if the bar is full or empty when a swing is ready.",
-        addon_data.bar.FillEmptyCheckBoxOnClick)
-    panel.fill_empty_checkbox:SetPoint("TOPLEFT", 10, -120)
+    -- -- Fill/Empty Checkbox
+    -- panel.fill_empty_checkbox = addon_data.config.CheckBoxFactory(
+    --     "PlayerFillEmptyCheckBox",
+    --     panel,
+    --     "Fill / Empty",
+    --     "Determines if the bar is full or empty when a swing is ready.",
+    --     addon_data.bar.FillEmptyCheckBoxOnClick)
+    -- panel.fill_empty_checkbox:SetPoint("TOPLEFT", 10, -120)
 
     -- Show Left Text Checkbox
     panel.show_left_text_checkbox = addon_data.config.CheckBoxFactory(
@@ -266,6 +266,7 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         25,
         addon_data.bar.WidthEditBoxOnEnter)
     panel.width_editbox:SetPoint("TOPLEFT", 240, -60, "BOTTOMRIGHT", 275, -85)
+
     -- Height EditBox
     panel.height_editbox = addon_data.config.EditBoxFactory(
         "PlayerHeightEditBox",
@@ -275,6 +276,7 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         25,
         addon_data.bar.HeightEditBoxOnEnter)
     panel.height_editbox:SetPoint("TOPLEFT", 320, -60, "BOTTOMRIGHT", 355, -85)
+
 	-- Font Size EditBox
 	panel.fontsize_editbox = addon_data.config.EditBoxFactory(
         "FontSizeEditBox",
@@ -284,6 +286,7 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         25,
         addon_data.bar.FontSizeEditBoxOnEnter)
     panel.fontsize_editbox:SetPoint("TOPLEFT", 160, -60)
+
     -- X Offset EditBox
     panel.x_offset_editbox = addon_data.config.EditBoxFactory(
         "PlayerXOffsetEditBox",
@@ -293,6 +296,7 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         25,
         addon_data.bar.XOffsetEditBoxOnEnter)
     panel.x_offset_editbox:SetPoint("TOPLEFT", 200, -110, "BOTTOMRIGHT", 275, -135)
+
     -- Y Offset EditBox
     panel.y_offset_editbox = addon_data.config.EditBoxFactory(
         "PlayerYOffsetEditBox",
@@ -304,54 +308,54 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
     panel.y_offset_editbox:SetPoint("TOPLEFT", 280, -110, "BOTTOMRIGHT", 355, -135)
     
     -- Twist bar color picker
-    panel.main_color_picker = addon_data.config.color_picker_factory(
-        'PlayerMainColorPicker',
-        panel,
-        settings.main_r, settings.main_g, settings.main_b, settings.main_a,
-        "Twist Bar Color",
-        addon_data.bar.MainColorPickerOnClick)
-    panel.main_color_picker:SetPoint('TOPLEFT', 205, -150)
+    -- panel.main_color_picker = addon_data.config.color_picker_factory(
+    --     'PlayerMainColorPicker',
+    --     panel,
+    --     settings.main_r, settings.main_g, settings.main_b, settings.main_a,
+    --     "Twist Bar Color",
+    --     addon_data.bar.MainColorPickerOnClick)
+    -- panel.main_color_picker:SetPoint('TOPLEFT', 205, -150)
 
-    -- Twist bar text color picker
-    panel.main_text_color_picker = addon_data.config.color_picker_factory(
-        'PlayerMainTextColorPicker',
-        panel,
-        settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a,
-        "Twist Bar Text Color",
-        addon_data.bar.MainTextColorPickerOnClick)
-    panel.main_text_color_picker:SetPoint('TOPLEFT', 205, -170)
+    -- -- Twist bar text color picker
+    -- panel.main_text_color_picker = addon_data.config.color_picker_factory(
+    --     'PlayerMainTextColorPicker',
+    --     panel,
+    --     settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a,
+    --     "Twist Bar Text Color",
+    --     addon_data.bar.MainTextColorPickerOnClick)
+    -- panel.main_text_color_picker:SetPoint('TOPLEFT', 205, -170)
     
     -- In Combat Alpha Slider
-    panel.in_combat_alpha_slider = addon_data.config.SliderFactory(
-        "PlayerInCombatAlphaSlider",
-        panel,
-        "In Combat Opacity",
-        0,
-        1,
-        0.05,
-        addon_data.bar.CombatAlphaOnValChange)
-    panel.in_combat_alpha_slider:SetPoint("TOPLEFT", 405, -60)
+    -- panel.in_combat_alpha_slider = addon_data.config.SliderFactory(
+    --     "PlayerInCombatAlphaSlider",
+    --     panel,
+    --     "In Combat Opacity",
+    --     0,
+    --     1,
+    --     0.05,
+    --     addon_data.bar.CombatAlphaOnValChange)
+    -- panel.in_combat_alpha_slider:SetPoint("TOPLEFT", 405, -60)
 
-    -- Out Of Combat Alpha Slider
-    panel.ooc_alpha_slider = addon_data.config.SliderFactory(
-        "PlayerOOCAlphaSlider",
-        panel,
-        "Out of Combat Opacity",
-        0,
-        1,
-        0.05,
-        addon_data.bar.OOCAlphaOnValChange)
-    panel.ooc_alpha_slider:SetPoint("TOPLEFT", 405, -110)
-    -- Backplane Alpha Slider
-    panel.backplane_alpha_slider = addon_data.config.SliderFactory(
-        "PlayerBackplaneAlphaSlider",
-        panel,
-        "Backplane Opacity",
-        0,
-        1,
-        0.05,
-        addon_data.bar.BackplaneAlphaOnValChange)
-    panel.backplane_alpha_slider:SetPoint("TOPLEFT", 405, -160)
+    -- -- Out Of Combat Alpha Slider
+    -- panel.ooc_alpha_slider = addon_data.config.SliderFactory(
+    --     "PlayerOOCAlphaSlider",
+    --     panel,
+    --     "Out of Combat Opacity",
+    --     0,
+    --     1,
+    --     0.05,
+    --     addon_data.bar.OOCAlphaOnValChange)
+    -- panel.ooc_alpha_slider:SetPoint("TOPLEFT", 405, -110)
+    -- -- Backplane Alpha Slider
+    -- panel.backplane_alpha_slider = addon_data.config.SliderFactory(
+    --     "PlayerBackplaneAlphaSlider",
+    --     panel,
+    --     "Backplane Opacity",
+    --     0,
+    --     1,
+    --     0.05,
+    --     addon_data.bar.BackplaneAlphaOnValChange)
+    -- panel.backplane_alpha_slider:SetPoint("TOPLEFT", 405, -160)
     
     -- Return the final panel
     addon_data.bar.UpdateConfigPanelValues()
