@@ -102,11 +102,11 @@ addon_data.player.lag_world = 0.0
 
 addon_data.player.update_lag = function()
     local _, _, _, lag = GetNetStats()
-    print('lag before calibration: ' .. tostring(lag))
-    print('lag multiplier: ' .. tostring(character_player_settings.lag_multiplier))
-    print('lag threshold: ' .. tostring(character_player_settings.lag_threshold))
+    -- print('lag before calibration: ' .. tostring(lag))
+    -- print('lag multiplier: ' .. tostring(character_player_settings.lag_multiplier))
+    -- print('lag threshold: ' .. tostring(character_player_settings.lag_threshold))
     lag = (lag * character_player_settings.lag_multiplier) + character_player_settings.lag_threshold
-    print('lag after calibration: ' .. tostring(lag))
+    -- print('lag after calibration: ' .. tostring(lag))
     addon_data.player.lag_world = lag / 1000.0
 end
 
@@ -332,14 +332,14 @@ addon_data.player.process_auras = function()
             -- if we're also midway through a swing, need some additional logic 
             -- to handle the haste snapshotting
             if addon_data.player.swing_timer > 0 then
-                print('enabling crusader lock, new SotC cast midswing')
+                -- print('enabling crusader lock, new SotC cast midswing')
                 addon_data.crusader_lock = true
             end
         end
     -- check for any Seal of the Crusader that's fallen off midswing
     elseif addon_data.player.previous_active_seals["Seal of the Crusader"] then
         if addon_data.player.swing_timer > 0 then
-            print('enabling crusader lock, old SotC fell off midswing')
+            -- print('enabling crusader lock, old SotC fell off midswing')
             addon_data.crusader_lock = true
         end
     end
@@ -357,8 +357,8 @@ addon_data.player.on_player_aura_change = function()
     -- Function that processes the above.
     addon_data.player.process_auras()
 
-    print(addon_data.player.active_seals)
-    print(addon_data.player.n_active_seals)
+    -- print(addon_data.player.active_seals)
+    -- print(addon_data.player.n_active_seals)
     addon_data.player.calculate_spell_GCD_duration()
     addon_data.player.update_weapon_speed()
     addon_data.bar.update_bar_on_aura_change()
@@ -382,7 +382,7 @@ end
 -- the swing timer, and to handle GCD tracking
 addon_data.player.OnPlayerSpellCast = function(event, args)
     
-    print('detected spell cast')
+    -- print('detected spell cast')
     -- only process player casts
     if not args[1] == "player" then
         return
@@ -454,7 +454,7 @@ addon_data.player.OnPlayerSpellCompletion = function(event, args)
     if args[2] == addon_data.player.spell_guid_awaiting_gcd then          
         local _, duration = GetSpellCooldown(29515)
         if duration > 0 then
-            print('Received a late GCD from cast completion.')
+            -- print('Received a late GCD from cast completion.')
         end
     end
 
@@ -502,10 +502,10 @@ addon_data.player.process_possible_spell_cooldown = function()
     local time_now = GetTime()
     local calced_duration_remaining = duration - (time_now - time_started)
     -- print(time_now - time_started)
-    print('time_now says:' .. tostring(time_now))
-    print('time_started says: ' .. tostring(time_started))
-    print('duration says: ' .. tostring(duration))
-    print('calculated duration remaining:' .. tostring(calced_duration_remaining))
+    -- print('time_now says:' .. tostring(time_now))
+    -- print('time_started says: ' .. tostring(time_started))
+    -- print('duration says: ' .. tostring(duration))
+    -- print('calculated duration remaining:' .. tostring(calced_duration_remaining))
 
     addon_data.player.gcd_lockout = true
     addon_data.reported_gcd_lockout = false
@@ -532,33 +532,35 @@ addon_data.player.process_possible_spell_cooldown = function()
     -- and when we are first aware of the GCD. This is most often zero but sometimes there
     -- will be a pronounced difference that I theorise is due to lag, and is more likely
     -- to be accurate that the ping from the GetNetStats API, which only repolls every 30s.
-    local dynamic_lag = duration - calced_duration_remaining
-    print('Dynamic lag estimate: ' .. tostring(dynamic_lag))
+    -- local dynamic_lag = duration - calced_duration_remaining
+    -- print('Dynamic lag estimate: ' .. tostring(dynamic_lag))
 
     local gcd_ends_relative_to_swing = 0
     local time_since_previous_swing = addon_data.player.current_weapon_speed - addon_data.player.swing_timer
 
-    if dynamic_lag > 0 then
-        print('DETECTED DYNAMIC LAG, using for estimate.')
-        local gcd_with_lag = calced_duration_remaining + dynamic_lag
-        gcd_ends_relative_to_swing = time_since_previous_swing + gcd_with_lag
-    else
-        local gcd_with_lag = calced_duration_remaining + addon_data.player.lag_world
-        gcd_ends_relative_to_swing = time_since_previous_swing + gcd_with_lag
-    end
+    -- if dynamic_lag > 0 then
+    --     print('DETECTED DYNAMIC LAG, using for estimate.')
+    --     local gcd_with_lag = calced_duration_remaining + dynamic_lag
+    --     gcd_ends_relative_to_swing = time_since_previous_swing + gcd_with_lag
+    -- else
+    --     local gcd_with_lag = calced_duration_remaining + addon_data.player.lag_world
+    --     gcd_ends_relative_to_swing = time_since_previous_swing + gcd_with_lag
+    -- end
 
+    local gcd_with_lag = calced_duration_remaining + addon_data.player.lag_world
+    gcd_ends_relative_to_swing = time_since_previous_swing + gcd_with_lag
     -- local gcd_with_lag = calced_duration_remaining + addon_data.player.lag_world
     
     -- local gcd_ends_relative_to_swing = time_since_previous_swing + gcd_with_lag
-    print('GCD + lag ends relative to swing: ' .. tostring(gcd_ends_relative_to_swing))
-    print('Current attack speed: ' .. tostring(addon_data.player.current_weapon_speed))
+    -- print('GCD + lag ends relative to swing: ' .. tostring(gcd_ends_relative_to_swing))
+    -- print('Current attack speed: ' .. tostring(addon_data.player.current_weapon_speed))
     -- print('Lag after calibration: ' .. tostring(addon_data.player.lag_world))
        
     -- local gcd_relative_to_swing_with_threshold = gcd_ends_relative_to_swing + character_player_settings.lag_threshold
     if character_bar_settings.lag_detection_enabled then
         if gcd_ends_relative_to_swing > addon_data.player.current_weapon_speed then
             if addon_data.player.swing_timer > character_bar_settings.twist_window then
-                print('SHIT SON WE COULD BE MISSING THIS TWIST')
+                -- print('SHIT SON WE COULD BE MISSING THIS TWIST')
                 addon_data.player.twist_impossible = true
             end
         end
@@ -630,22 +632,22 @@ addon_data.player.frame_on_update = function(self, elapsed)
     -- If the weapon speed changed due to buffs/debuffs, we need to modify the swing timer
     -- and inform all the UI elements that need things altered or recalculated.   
     if addon_data.player.speed_changed and not addon_data.player.reported_speed_change then
-        print('swing speed changed, timer updating')
-        print(tostring(addon_data.player.prev_weapon_speed) .. " > " .. tostring(addon_data.player.current_weapon_speed))
+        -- print('swing speed changed, timer updating')
+        -- print(tostring(addon_data.player.prev_weapon_speed) .. " > " .. tostring(addon_data.player.current_weapon_speed))
         
 
         -- Modify swing timer but only if we don't have the equipment flag set because the timer is already reset
         if not addon_data.player.equipment_update_flag then
             local multiplier = addon_data.player.current_weapon_speed / addon_data.player.prev_weapon_speed
-            print('multiplier: ' .. tostring(multiplier))
-            print('swing timer before multiplier: ' .. tostring(addon_data.player.swing_timer))
+            -- print('multiplier: ' .. tostring(multiplier))
+            -- print('swing timer before multiplier: ' .. tostring(addon_data.player.swing_timer))
             addon_data.player.swing_timer = addon_data.player.swing_timer * multiplier
-            print('swing timer after multiplier: ' .. tostring(addon_data.player.swing_timer))
+            -- print('swing timer after multiplier: ' .. tostring(addon_data.player.swing_timer))
             -- print(addon_data.player.swing_timer)
-            print('swing timer after update func and elapsed: ' .. tostring(addon_data.player.swing_timer))
+            -- print('swing timer after update func and elapsed: ' .. tostring(addon_data.player.swing_timer))
             
         else
-            print('intercepting redundant speed change from equipment change')
+            -- print('intercepting redundant speed change from equipment change')
             addon_data.player.equipment_update_flag = false
         end            
         -- recalculate any necessary bar visuals

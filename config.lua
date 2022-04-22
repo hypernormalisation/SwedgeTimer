@@ -342,7 +342,7 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         25,
         addon_data.bar.LagThresholdOnEnter
     )
-    panel.lag_threshold_editbox:SetPoint("TOPLEFT", 300, -60, "BOTTOMRIGHT", 355, 30)
+    panel.lag_threshold_editbox:SetPoint("TOPLEFT", 335, -60, "BOTTOMRIGHT", 355, 30)
 
     -- Twist bar color picker
     -- panel.main_color_picker = addon_data.config.color_picker_factory(
