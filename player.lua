@@ -8,6 +8,7 @@ local floor = addon_data.utils.SimpleRound
 addon_data.player = {}
 addon_data.player.default_settings = {
 	-- enabled = true,
+    lag_detection_enabled = true,
     lag_threshold = 0.00,
     lag_multiplier = 1.5,
 	-- width = 400,
@@ -101,10 +102,17 @@ addon_data.player.lag_world = 0.0
 
 addon_data.player.update_lag = function()
     local _, _, _, lag = GetNetStats()
+    print('lag before calibration: ' .. tostring(lag))
+    print('lag multiplier: ' .. tostring(character_player_settings.lag_multiplier))
+    print('lag threshold: ' .. tostring(character_player_settings.lag_threshold))
     lag = (lag * character_player_settings.lag_multiplier) + character_player_settings.lag_threshold
+    print('lag after calibration: ' .. tostring(lag))
     addon_data.player.lag_world = lag / 1000.0
 end
 
+addon_data.player.lag_detection_enabled = function()
+    return character_player_settings.lag_detection_enabled
+end
 
 addon_data.player.LoadSettings = function()
     -- If the carried over settings dont exist then make them
@@ -487,15 +495,17 @@ addon_data.player.process_possible_spell_cooldown = function()
     local time_started, duration = GetSpellCooldown(29515)
     -- print('detected GCD going off, setting internally: ' .. tostring(duration))
     if duration == 0 then
-        print('SPELL_UPDATE_COOLDOWN with no GCD duration')
+        -- print('SPELL_UPDATE_COOLDOWN with no GCD duration')
         return
     end
 
     local time_now = GetTime()
     local calced_duration_remaining = duration - (time_now - time_started)
-    -- print('time_now says:' .. tostring(time_now))
-    -- print('time_started says:' .. tostring(time_started))
-    -- print('calculated duration remaining:' .. tostring(calced_duration_remaining))
+    -- print(time_now - time_started)
+    print('time_now says:' .. tostring(time_now))
+    print('time_started says: ' .. tostring(time_started))
+    print('duration says: ' .. tostring(duration))
+    print('calculated duration remaining:' .. tostring(calced_duration_remaining))
 
     addon_data.player.gcd_lockout = true
     addon_data.reported_gcd_lockout = false
@@ -517,17 +527,40 @@ addon_data.player.process_possible_spell_cooldown = function()
 
     -- Figure out if we're lagging
     addon_data.player.update_lag()
-    local gcd_with_lag = calced_duration_remaining + addon_data.player.lag_world
+
+    -- This is the lag derived from the difference in the duration remaining from the API
+    -- and when we are first aware of the GCD. This is most often zero but sometimes there
+    -- will be a pronounced difference that I theorise is due to lag, and is more likely
+    -- to be accurate that the ping from the GetNetStats API, which only repolls every 30s.
+    local dynamic_lag = duration - calced_duration_remaining
+    print('Dynamic lag estimate: ' .. tostring(dynamic_lag))
+
+    local gcd_ends_relative_to_swing = 0
     local time_since_previous_swing = addon_data.player.current_weapon_speed - addon_data.player.swing_timer
-    local gcd_ends_relative_to_swing = time_since_previous_swing + gcd_with_lag
+
+    if dynamic_lag > 0 then
+        print('DETECTED DYNAMIC LAG, using for estimate.')
+        local gcd_with_lag = calced_duration_remaining + dynamic_lag
+        gcd_ends_relative_to_swing = time_since_previous_swing + gcd_with_lag
+    else
+        local gcd_with_lag = calced_duration_remaining + addon_data.player.lag_world
+        gcd_ends_relative_to_swing = time_since_previous_swing + gcd_with_lag
+    end
+
+    -- local gcd_with_lag = calced_duration_remaining + addon_data.player.lag_world
+    
+    -- local gcd_ends_relative_to_swing = time_since_previous_swing + gcd_with_lag
     print('GCD + lag ends relative to swing: ' .. tostring(gcd_ends_relative_to_swing))
     print('Current attack speed: ' .. tostring(addon_data.player.current_weapon_speed))
-
+    -- print('Lag after calibration: ' .. tostring(addon_data.player.lag_world))
+       
     -- local gcd_relative_to_swing_with_threshold = gcd_ends_relative_to_swing + character_player_settings.lag_threshold
-    if gcd_ends_relative_to_swing > addon_data.player.current_weapon_speed then
-        if addon_data.player.swing_timer > character_bar_settings.twist_window then
-            print('SHIT SON WE COULD BE MISSING THIS TWIST')
-            addon_data.player.twist_impossible = true
+    if character_bar_settings.lag_detection_enabled then
+        if gcd_ends_relative_to_swing > addon_data.player.current_weapon_speed then
+            if addon_data.player.swing_timer > character_bar_settings.twist_window then
+                print('SHIT SON WE COULD BE MISSING THIS TWIST')
+                addon_data.player.twist_impossible = true
+            end
         end
     end
 

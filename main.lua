@@ -94,7 +94,9 @@ SlashCmdList["SWEDGETIMER_HOME"] = function(option)
         InterfaceOptionsFrame_OpenToCategory(addon_data.config.config_parent_panel)
         InterfaceOptionsFrame_OpenToCategory(addon_data.config.config_parent_panel)
     else
-        print('usage advice: will be implemented later i promise')
+        print('Recognised SwedgeTimer commands:')
+        print('--  /st lock: toggles bar lock')
+        print('--  /st bar: toggles bar visibility')
     end
 end
 

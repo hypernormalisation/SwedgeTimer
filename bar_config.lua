@@ -12,6 +12,14 @@ addon_data.bar.UpdateConfigPanelValues = function()
     local settings = character_bar_settings
     panel.enabled_checkbox:SetChecked(settings.enabled)
     panel.is_locked_checkbox:SetChecked(settings.is_locked)
+
+    panel.is_lag_detection_enabled_checkbox:SetChecked(settings.lag_detection_enabled)
+    panel.lag_multiplier_editbox:SetText(tostring(character_player_settings.lag_multiplier))
+    panel.lag_multiplier_editbox:SetCursorPosition(0)
+
+    panel.lag_threshold_editbox:SetText(tostring(character_player_settings.lag_threshold))
+    panel.lag_threshold_editbox:SetCursorPosition(0)
+
     -- panel.show_border_checkbox:SetChecked(settings.show_border)
     -- panel.classic_bars_checkbox:SetChecked(settings.classic_bars)
     -- panel.fill_empty_checkbox:SetChecked(settings.fill_empty)
@@ -71,6 +79,11 @@ addon_data.bar.IsLockedCheckBoxOnClick = function(self)
     addon_data.bar.UpdateVisualsOnSettingsChange()
 end
 
+addon_data.bar.LagDetectionEnabledBoxOnClick = function(self)
+    character_bar_settings.lag_detection_enabled = self:GetChecked()
+    addon_data.bar.UpdateVisualsOnSettingsChange()
+end
+
 -- addon_data.bar.ShowOffHandCheckBoxOnClick = function(self)
 --     character_bar_settings.show_offhand = self:GetChecked()
 --     addon_data.bar.UpdateVisualsOnSettingsChange()
@@ -125,6 +138,16 @@ addon_data.bar.YOffsetEditBoxOnEnter = function(self)
     character_bar_settings.y_offset = tonumber(self:GetText())
     addon_data.bar.UpdateVisualsOnSettingsChange()
 end
+
+
+addon_data.bar.LagMultiplierOnEnter = function(self)
+    character_player_settings.lag_multiplier = tonumber(self:GetText())    
+end
+
+addon_data.bar.LagThresholdOnEnter = function(self)
+    character_player_settings.lag_threshold = tonumber(self:GetText())    
+end
+
 
 -- addon_data.bar.MainColorPickerOnClick = function()
 --     local settings = character_bar_settings

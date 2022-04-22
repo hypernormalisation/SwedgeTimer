@@ -198,7 +198,7 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
     panel.enabled_checkbox = addon_data.config.CheckBoxFactory(
         "PlayerEnabledCheckBox",
         panel,
-        "Enable",
+        " Enable",
         "Enables the twist bar.",
         addon_data.bar.EnabledCheckBoxOnClick)
     panel.enabled_checkbox:SetPoint("TOPLEFT", 10, 36)
@@ -211,6 +211,7 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         "Locks the twist bar in place.",
         addon_data.bar.IsLockedCheckBoxOnClick)
     panel.is_locked_checkbox:SetPoint("TOPLEFT", 10, 16)
+
 
     -- -- Show Border Checkbox
     -- panel.show_border_checkbox = addon_data.config.CheckBoxFactory(
@@ -257,6 +258,16 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         addon_data.bar.ShowRightTextCheckBoxOnClick)
     panel.show_right_text_checkbox:SetPoint("TOPLEFT", 10, -24)
     
+    -- lag detection enabled checkbox
+    panel.is_lag_detection_enabled_checkbox = addon_data.config.CheckBoxFactory(
+        "IsLagDetectionEnabledCheckbox",
+        panel,
+        " Lag Detection",
+        "Enables experimental lag detection, changing the bar colour to yellow when lag might ruin a twist attempt.",
+        addon_data.bar.LagDetectionEnabledBoxOnClick
+    )
+    panel.is_lag_detection_enabled_checkbox:SetPoint("TOPLEFT", 10, -44)
+
     -- Width EditBox
     panel.width_editbox = addon_data.config.EditBoxFactory(
         "PlayerWidthEditBox",
@@ -307,6 +318,32 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         addon_data.bar.YOffsetEditBoxOnEnter)
     panel.y_offset_editbox:SetPoint("TOPLEFT", 340, 30, "BOTTOMRIGHT", 355, 30)
     
+    -- Lag multiplier EditBox
+    panel.lag_multiplier_editbox = addon_data.config.EditBoxFactory(
+        "LagMultiplierEditBox",
+        panel,
+        "Lag Multiplier (s)",
+        -- "A multiplier used in calibrating the lag detection. Your world ping multiplied by this number" ..
+        -- " will be compared to the time left on your swing to detect impossible twists.",
+        75,
+        25,
+        addon_data.bar.LagMultiplierOnEnter
+    )
+    panel.lag_multiplier_editbox:SetPoint("TOPLEFT", 200, -60, "BOTTOMRIGHT", 355, 30)
+
+    -- Lag multiplier EditBox
+    panel.lag_threshold_editbox = addon_data.config.EditBoxFactory(
+        "LagThresholdEditBox",
+        panel,
+        "Lag Threshold (s)",
+        -- "A multiplier used in calibrating the lag detection. Your world ping multiplied by this number" ..
+        -- " will be compared to the time left on your swing to detect impossible twists.",
+        75,
+        25,
+        addon_data.bar.LagThresholdOnEnter
+    )
+    panel.lag_threshold_editbox:SetPoint("TOPLEFT", 300, -60, "BOTTOMRIGHT", 355, 30)
+
     -- Twist bar color picker
     -- panel.main_color_picker = addon_data.config.color_picker_factory(
     --     'PlayerMainColorPicker',

@@ -2,7 +2,6 @@
 -- bar.lua =============================================================================
 local addon_name, addon_data = ...
 local print = addon_data.utils.print_msg
-print('starting bar.lua parsing')
 
 --=========================================================================================
 -- BAR SETTINGS 
@@ -10,6 +9,7 @@ print('starting bar.lua parsing')
 addon_data.bar = {}
 addon_data.bar.default_settings = {
 	enabled = true,
+    lag_detection_enabled = true,
 	width = 345,
 	height = 32,
 	fontsize = 16,
