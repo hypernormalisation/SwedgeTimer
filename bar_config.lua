@@ -53,6 +53,17 @@ addon_data.bar.TwistBarToggle = function()
     addon_data.bar.UpdateVisualsOnSettingsChange()
 end
 
+addon_data.bar.TwistBarLockToggle = function()
+    currently_on = character_player_settings.is_locked == true
+    if not currently_on then
+        character_player_settings.is_locked = true
+    else
+        character_player_settings.is_locked = false
+    end
+    addon_data.bar.UpdateVisualsOnSettingsChange()
+end
+
+
 addon_data.bar.IsLockedCheckBoxOnClick = function(self)
     character_player_settings.is_locked = self:GetChecked()
     addon_data.bar.frame:EnableMouse(not character_player_settings.is_locked)

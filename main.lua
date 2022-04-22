@@ -81,9 +81,15 @@ SlashCmdList["SWEDGETIMER_HOME"] = function(option)
     -- print(option)
     if option == "bar" then
         addon_data.bar.TwistBarToggle()
-
+    elseif option == "lock" then
+        addon_data.bar.TwistBarLockToggle()
+        
     -- If no args, bring up the main config window
     elseif option == '' then
+        -- Doing it twice works around the longstanding Blizzard bug
+	    -- that fails to actually open the requested panel if it's
+	    -- not currently visible in the lefthand list, and scrolling
+	    -- is required to bring it into view.
         InterfaceOptionsFrame_OpenToCategory(addon_data.config.config_parent_panel)
         InterfaceOptionsFrame_OpenToCategory(addon_data.config.config_parent_panel)
     else

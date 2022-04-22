@@ -226,19 +226,19 @@ addon_data.bar.UpdateVisualsOnSettingsChange = function()
         frame:ClearAllPoints()
         frame:SetPoint(settings.point, UIParent, settings.rel_point, settings.x_offset, settings.y_offset)
         frame:SetWidth(settings.width)
-        if settings.show_border then
-            frame.backplane:SetBackdrop({
-                bgFile = "Interface/AddOns/SwedgeTimer/Images/Background", 
-                edgeFile = "Interface/AddOns/SwedgeTimer/Images/Border", 
-                tile = true, tileSize = 16, edgeSize = 12, 
-                insets = { left = 8, right = 8, top = 8, bottom = 8}})
-        else
-            frame.backplane:SetBackdrop({
-                bgFile = "Interface/AddOns/SwedgeTimer/Images/Background", 
-                edgeFile = nil, 
-                tile = true, tileSize = 16, edgeSize = 16, 
-                insets = { left = 8, right = 8, top = 8, bottom = 8}})
-        end
+        -- if settings.show_border then
+        --     frame.backplane:SetBackdrop({
+        --         bgFile = "Interface/AddOns/SwedgeTimer/Images/Background", 
+        --         edgeFile = "Interface/AddOns/SwedgeTimer/Images/Border", 
+        --         tile = true, tileSize = 16, edgeSize = 12, 
+        --         insets = { left = 8, right = 8, top = 8, bottom = 8}})
+        -- else
+        --     frame.backplane:SetBackdrop({
+        --         bgFile = "Interface/AddOns/SwedgeTimer/Images/Background", 
+        --         edgeFile = nil, 
+        --         tile = true, tileSize = 16, edgeSize = 16, 
+        --         insets = { left = 8, right = 8, top = 8, bottom = 8}})
+        -- end
         -- if settings.show_border then
         --     frame.backplane:SetBackdrop({
         --         bgFile = "Interface/AddOns/Hurricane/Images/Background", 
@@ -303,16 +303,11 @@ addon_data.bar.update_visuals_on_update = function()
     local speed = addon_data.player.current_weapon_speed
     local timer = addon_data.player.swing_timer
 
-    -- if speed == 0 then
-    --     speed = 2
-    --     print('WARNING: prevented zero division error')
-    -- end
-
     -- Update the main bar's width
     local timer_width = math.min(settings.width - (settings.width * (timer / speed)), settings.width)
-    if not settings.fill_empty then
-        timer_width = settings.width - timer_width + 0.001
-    end
+    -- if not settings.fill_empty then
+    --     timer_width = settings.width - timer_width + 0.001
+    -- end
     
     frame.bar:SetWidth(timer_width)
     frame.spark:SetPoint('TOPLEFT', timer_width - 8, 0)
