@@ -7,27 +7,27 @@ local floor = addon_data.utils.SimpleRound
 --=========================================================================================
 addon_data.player = {}
 addon_data.player.default_settings = {
-	enabled = true,
+	-- enabled = true,
     lag_threshold = 0.00,
     lag_multiplier = 1.5,
-	width = 400,
-	height = 20,
-	fontsize = 12,
-    point = "CENTER",
-	rel_point = "CENTER",
-	x_offset = 0,
-	y_offset = -180,
-	in_combat_alpha = 1.0,
-	ooc_alpha = 0.65,
-	backplane_alpha = 0.5,
-	is_locked = false,
-    show_left_text = true,
-    show_right_text = true,
-    show_border = false,
-    classic_bars = true,
-    fill_empty = true,
-    main_r = 0.1, main_g = 0.1, main_b = 0.9, main_a = 1.0,
-    main_text_r = 1.0, main_text_g = 1.0, main_text_b = 1.0, main_text_a = 1.0,
+	-- width = 400,
+	-- height = 20,
+	-- fontsize = 12,
+    -- point = "CENTER",
+	-- rel_point = "CENTER",
+	-- x_offset = 0,
+	-- y_offset = -180,
+	-- in_combat_alpha = 1.0,
+	-- ooc_alpha = 0.65,
+	-- backplane_alpha = 0.5,
+	-- is_locked = false,
+    -- show_left_text = true,
+    -- show_right_text = true,
+    -- show_border = false,
+    -- classic_bars = true,
+    -- fill_empty = true,
+    -- main_r = 0.1, main_g = 0.1, main_b = 0.9, main_a = 1.0,
+    -- main_text_r = 1.0, main_text_g = 1.0, main_text_b = 1.0, main_text_a = 1.0,
 }
 
 addon_data.player.class, addon_data.player.english_class, _ = UnitClass("player")[2] -- seems broken?
@@ -134,7 +134,7 @@ end
 addon_data.player.reset_swing_timer = function()
     addon_data.crusader_lock = false
     addon_data.player.twist_impossible = false
-    addon_data.player.update_weapon_speed() -- NOT SURE IF THIS IS NEEDED
+    -- addon_data.player.update_weapon_speed() -- NOT SURE IF THIS IS NEEDED
     addon_data.player.swing_timer = addon_data.player.current_weapon_speed
     addon_data.player.reported_swing_timer_complete = false
     addon_data.bar.update_bar_on_swing_reset()
@@ -142,7 +142,7 @@ end
 
 -- called onupdate to manually alter the swing timer with the elapsed time
 addon_data.player.update_swing_timer = function(elapsed)
-    if character_player_settings.enabled then
+    if true then
         if addon_data.player.swing_timer > 0 then
             addon_data.player.swing_timer = addon_data.player.swing_timer - elapsed
             if addon_data.player.swing_timer < 0 then
@@ -433,7 +433,7 @@ end
 -- function to detect the player's successful casts that reset the 
 -- swing timer
 addon_data.player.OnPlayerSpellCompletion = function(event, args)
-    print('Spell completed')
+    -- print('Spell completed')
     if args[2] == addon_data.player.how_cast_guid then
         -- print('player successfully cast HoW, resetting swing timer')
         addon_data.player.reset_swing_timer()
@@ -480,12 +480,12 @@ end
 addon_data.player.process_possible_spell_cooldown = function()
     -- first check if we're on gcd lockout
     if addon_data.player.gcd_lockout then
-        print('on gcd lockout already, ignoring')
+        -- print('on gcd lockout already, ignoring')
         return
     end
 
     local time_started, duration = GetSpellCooldown(29515)
-    print('detected GCD going off, setting internally: ' .. tostring(duration))
+    -- print('detected GCD going off, setting internally: ' .. tostring(duration))
     if duration == 0 then
         print('SPELL_UPDATE_COOLDOWN with no GCD duration')
         return
@@ -493,9 +493,9 @@ addon_data.player.process_possible_spell_cooldown = function()
 
     local time_now = GetTime()
     local calced_duration_remaining = duration - (time_now - time_started)
-    print('time_now says:' .. tostring(time_now))
-    print('time_started says:' .. tostring(time_started))
-    print('calculated duration remaining:' .. tostring(calced_duration_remaining))
+    -- print('time_now says:' .. tostring(time_now))
+    -- print('time_started says:' .. tostring(time_started))
+    -- print('calculated duration remaining:' .. tostring(calced_duration_remaining))
 
     addon_data.player.gcd_lockout = true
     addon_data.reported_gcd_lockout = false
@@ -588,7 +588,7 @@ addon_data.player.frame_on_update = function(self, elapsed)
     if addon_data.player.gcd_lockout then
         addon_data.player.update_active_gcd_timer(elapsed)
         if addon_data.player.active_gcd_remaining == 0 then
-            print('reached end of GCD, releasing lock')
+            -- print('reached end of GCD, releasing lock')
             addon_data.player.gcd_lockout = false
             addon_data.bar.hide_gcd_bar()
         end
@@ -646,13 +646,13 @@ end
 addon_data.player.frame_on_event = function(self, event, ...)
 	local args = {...}
     if event == "UNIT_INVENTORY_CHANGED" then
-        print('INVENTORY CHANGE DETECTED')
+        -- print('INVENTORY CHANGE DETECTED')
         addon_data.player.on_equipment_change()
         addon_data.player.process_possible_spell_cooldown()
         -- addon_data.player.update_weapon_speed()
 
     elseif event == "UNIT_SPELLCAST_SENT" then
-        print('INFO: received spellcast trigger')
+        -- print('INFO: received spellcast trigger')
         addon_data.player.OnPlayerSpellCast(event, args)        
 
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
@@ -674,12 +674,12 @@ addon_data.player.frame_on_event = function(self, event, ...)
         addon_data.player.OnPlayerSpellCompletion(event, args)
 
     elseif event == "UNIT_SPELLCAST_INTERRUPTED" then
-        print('found an interruption')
+        -- print('found an interruption')
         addon_data.player.on_spell_interrupt()
     
 
     elseif event == "SPELL_UPDATE_COOLDOWN" then
-        print('spell update cd triggering a GCD')
+        -- print('spell update cd triggering a GCD')
         addon_data.player.process_possible_spell_cooldown()
     end
 

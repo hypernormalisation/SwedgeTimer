@@ -10,22 +10,22 @@ print('starting bar.lua parsing')
 addon_data.bar = {}
 addon_data.bar.default_settings = {
 	enabled = true,
-	width = 400,
-	height = 20,
-	fontsize = 12,
+	width = 345,
+	height = 32,
+	fontsize = 16,
     point = "CENTER",
 	rel_point = "CENTER",
 	x_offset = 0,
 	y_offset = -180,
-	in_combat_alpha = 1.0,
-	ooc_alpha = 1.0,
+	-- in_combat_alpha = 1.0,
+	-- ooc_alpha = 1.0,
 	backplane_alpha = 1.0,
 	is_locked = false,
     show_left_text = true,
     show_right_text = true,
-    show_border = false,
-    classic_bars = true,
-    fill_empty = true,
+    -- show_border = false,
+    -- classic_bars = true,
+    -- fill_empty = true,
     main_r = 0.1, main_g = 0.1, main_b = 0.9, main_a = 1.0,
     main_text_r = 1.0, main_text_g = 1.0, main_text_b = 1.0, main_text_a = 1.0,
     bar_color_default = {0.4, 0.4, 0.4, 1.0},
@@ -53,7 +53,7 @@ addon_data.bar.LoadSettings = function()
     if not character_bar_settings then
         character_bar_settings = {}
     end
-    character_bar_settings = {} -- REMOVE ME THIS IS FOR TESTING
+    -- character_bar_settings = {} -- REMOVE ME THIS IS FOR TESTING
     -- If the carried over settings aren't set then set them to the defaults
     for setting, value in pairs(addon_data.bar.default_settings) do
         if character_bar_settings[setting] == nil then
@@ -67,25 +67,26 @@ end
 -- Drag and drop settings
 --=========================================================================================
 addon_data.bar.OnFrameDragStart = function()
-    if not character_player_settings.is_locked then
+    if not character_bar_settings.is_locked then
         addon_data.bar.frame:StartMoving()
     end
 end
 
 addon_data.bar.OnFrameDragStop = function()
     local frame = addon_data.bar.frame
-    local settings = character_player_settings
+    local settings = character_bar_settings
     frame:StopMovingOrSizing()
     point, _, rel_point, x_offset, y_offset = frame:GetPoint()
-    if x_offset < 20 and x_offset > -20 then
-        x_offset = 0
-    end
+    -- if x_offset < 5 and x_offset > -5 then
+    --     x_offset = 0
+    -- end
     settings.point = point
     settings.rel_point = rel_point
-    settings.x_offset = addon_data.utils.SimpleRound(x_offset, 1)
-    settings.y_offset = addon_data.utils.SimpleRound(y_offset, 1)
+    settings.x_offset = addon_data.utils.SimpleRound(x_offset, 0.1)
+    settings.y_offset = addon_data.utils.SimpleRound(y_offset, 0.1)
     addon_data.bar.UpdateVisualsOnSettingsChange()
     addon_data.bar.UpdateConfigPanelValues()
+    addon_data.bar.set_bar_color()
 end
 
 --=========================================================================================
@@ -94,7 +95,7 @@ end
 
 -- this function is called once to initialise all the graphics of the bar
 addon_data.bar.init_bar_visuals = function()
-    local settings = character_player_settings
+    local settings = character_bar_settings
     addon_data.bar.frame = CreateFrame("Frame", addon_name .. "BarFrame", UIParent)   
     local frame = addon_data.bar.frame
 
@@ -111,20 +112,25 @@ addon_data.bar.init_bar_visuals = function()
     frame.backplane:SetPoint('TOPLEFT', -9, 9)
     frame.backplane:SetPoint('BOTTOMRIGHT', 9, -9)
     frame.backplane:SetFrameStrata('BACKGROUND')
-
-    if settings.show_border then
-        frame.backplane:SetBackdrop({
-            bgFile = "Interface/AddOns/SwedgeTimer/Images/Background", 
-            edgeFile = "Interface/AddOns/SwedgeTimer/Images/Border", 
-            tile = true, tileSize = 16, edgeSize = 12, 
-            insets = { left = 8, right = 8, top = 8, bottom = 8}})
-    else
-        frame.backplane:SetBackdrop({
-            bgFile = "Interface/AddOns/SwedgeTimer/Images/Background", 
-            edgeFile = nil, 
-            tile = true, tileSize = 16, edgeSize = 16, 
-            insets = { left = 8, right = 8, top = 8, bottom = 8}})
-    end
+    frame.backplane:SetBackdrop({
+        bgFile = "Interface/AddOns/SwedgeTimer/Images/Background", 
+        edgeFile = nil, 
+        tile = true, tileSize = 16, edgeSize = 16, 
+        insets = { left = 8, right = 8, top = 8, bottom = 8}}
+    )
+    -- if settings.show_border then
+    --     frame.backplane:SetBackdrop({
+    --         bgFile = "Interface/AddOns/SwedgeTimer/Images/Background", 
+    --         edgeFile = "Interface/AddOns/SwedgeTimer/Images/Border", 
+    --         tile = true, tileSize = 16, edgeSize = 12, 
+    --         insets = { left = 8, right = 8, top = 8, bottom = 8}})
+    -- else
+    --     frame.backplane:SetBackdrop({
+    --         bgFile = "Interface/AddOns/SwedgeTimer/Images/Background", 
+    --         edgeFile = nil, 
+    --         tile = true, tileSize = 16, edgeSize = 16, 
+    --         insets = { left = 8, right = 8, top = 8, bottom = 8}})
+    -- end
 
     -- if settings.show_border then
     --     frame.backplane:SetBackdrop({
@@ -190,13 +196,6 @@ addon_data.bar.init_bar_visuals = function()
     frame.twist_line:SetStartPoint("TOPRIGHT", 0, 0) -- dummy vars so the line is initialised
     frame.twist_line:SetEndPoint("BOTTOMRIGHT", 0, 0)
 
-    -- local offset = addon_data.bar.get_twist_tick_offset()
-    -- print(offset)
-    -- frame.bar.twist_tick_offset = offset
-    -- frame.bar.recalculate_ticks = false
-    -- frame.twist_line:SetStartPoint("TOPRIGHT",offset,0)
-    -- frame.twist_line:SetEndPoint("BOTTOMRIGHT",offset,0)
-
     frame.gcd1_line = frame:CreateLine() -- the first gcd possible before a twist
     frame.gcd1_line:SetColorTexture(0.4,0.4,1,1)
     frame.gcd1_line:SetDrawLayer("OVERLAY", -1)
@@ -211,14 +210,14 @@ addon_data.bar.init_bar_visuals = function()
     -- addon_data.bar.UpdateVisualsOnSettingsChange()
     -- addon_data.bar.update_visuals_on_update()
 
-    print('Successfully initialised all bar visuals.')
+    -- print('Successfully initialised all bar visuals.')
 	frame:Show()
 end
 
 -- this function is called when a setting related to bar visuals is changed
 addon_data.bar.UpdateVisualsOnSettingsChange = function()
     local frame = addon_data.bar.frame
-    local settings = character_player_settings
+    local settings = character_bar_settings
     -- print("enabled says: " .. tostring(settings.enabled))
     -- print("show_border says : " .. tostring(settings.show_border))
     if settings.enabled then
@@ -226,50 +225,25 @@ addon_data.bar.UpdateVisualsOnSettingsChange = function()
         frame:ClearAllPoints()
         frame:SetPoint(settings.point, UIParent, settings.rel_point, settings.x_offset, settings.y_offset)
         frame:SetWidth(settings.width)
-        -- if settings.show_border then
-        --     frame.backplane:SetBackdrop({
-        --         bgFile = "Interface/AddOns/SwedgeTimer/Images/Background", 
-        --         edgeFile = "Interface/AddOns/SwedgeTimer/Images/Border", 
-        --         tile = true, tileSize = 16, edgeSize = 12, 
-        --         insets = { left = 8, right = 8, top = 8, bottom = 8}})
-        -- else
-        --     frame.backplane:SetBackdrop({
-        --         bgFile = "Interface/AddOns/SwedgeTimer/Images/Background", 
-        --         edgeFile = nil, 
-        --         tile = true, tileSize = 16, edgeSize = 16, 
-        --         insets = { left = 8, right = 8, top = 8, bottom = 8}})
-        -- end
-        -- if settings.show_border then
-        --     frame.backplane:SetBackdrop({
-        --         bgFile = "Interface/AddOns/Hurricane/Images/Background", 
-        --         edgeFile = "interface/buttons/white8x8", 
-        --         tile = true, tileSize = 16,
-        --         edgeSize = 16, 
-        --         insets = { left = 8, right = 8, top = 8, bottom = 8}})
-        -- else
-        --     frame.backplane:SetBackdrop({
-        --         bgFile = "Interface/AddOns/Hurricane/Images/Background", 
-        --         edgeFile = nil, 
-        --         tile = true, tileSize = 16, edgeSize = 16, 
-        --         insets = { left = 8, right = 8, top = 8, bottom = 8}})
-        -- end
         frame.backplane:SetBackdropColor(0,0,0,settings.backplane_alpha)
-
         frame.bar:SetPoint("TOPLEFT", 0, 0)
         frame.bar:SetHeight(settings.height)
+        frame.bar:SetWidth(settings.width)
 
-
+        frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
+        frame.gcd_bar:SetHeight(settings.height)
+        frame.gcd_bar:SetWidth(settings.width)
 
         frame.bar:SetTexture('Interface/AddOns/SwedgeTimer/Images/Bar')
         frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_default"]))
         frame.spark:SetSize(16, settings.height)
         frame.left_text:SetPoint("TOPLEFT", 2, -(settings.height / 2) + (settings.fontsize / 2))
         frame.left_text:SetTextColor(settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a)
-		-- frame.left_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize)
+		frame.left_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize, "OUTLINE")
 	
         frame.right_text:SetPoint("TOPRIGHT", -5, -(settings.height / 2) + (settings.fontsize / 2))
         frame.right_text:SetTextColor(settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a)
-		-- frame.right_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize)
+		frame.right_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize, "OUTLINE")
 
         if settings.show_left_text then
             frame.left_text:Show()
@@ -296,7 +270,7 @@ addon_data.bar.update_visuals_on_update = function()
     -- Func is called by the player frame OnUpdate (maybe we should change this).
     -- As such it should be kept as minimal as possible to avoid wasting resources.
 
-    local settings = character_player_settings
+    local settings = character_bar_settings
     local frame = addon_data.bar.frame
     if not settings.enabled then return end 
 
@@ -315,11 +289,11 @@ addon_data.bar.update_visuals_on_update = function()
     -- frame.gcd_bar:SetWidth(settings.width/2)
     frame.gcd_bar:Show()
 
-    if timer_width == settings.width or not settings.classic_bars or timer_width == 0.001 then
-        frame.spark:Hide()
-    else
-        frame.spark:Show()
-    end
+    -- if timer_width == settings.width or not settings.classic_bars or timer_width == 0.001 then
+    --     frame.spark:Hide()
+    -- else
+    --     frame.spark:Show()
+    -- end
 
     -- Update the main bars text, hide right text if bar full
     frame.left_text:SetText(tostring(addon_data.utils.SimpleRound(speed, 0.1)))
@@ -363,7 +337,7 @@ addon_data.bar.set_gcd_bar_width = function()
         addon_data.bar.frame.gcd_bar:SetWidth(0)
     end
 
-    local settings = character_player_settings
+    local settings = character_bar_settings
     local attack_speed = addon_data.player.current_weapon_speed
     local swing_timer = addon_data.player.swing_timer
     -- print(attack_speed)
@@ -402,11 +376,11 @@ end
 addon_data.bar.update_bar_on_combat = function()
     -- Function called to update bar when entering/leaving combat.
         -- Update the alpha
-        if addon_data.core.in_combat then
-            addon_data.bar.frame:SetAlpha(character_bar_settings.in_combat_alpha)
-        else
-            addon_data.bar.frame:SetAlpha(character_bar_settings.ooc_alpha)
-        end
+        -- if addon_data.core.in_combat then
+        --     addon_data.bar.frame:SetAlpha(character_bar_settings.in_combat_alpha)
+        -- else
+        --     addon_data.bar.frame:SetAlpha(character_bar_settings.ooc_alpha)
+        -- end
 end
 
 addon_data.bar.update_bar_on_timer_full = function()
@@ -466,7 +440,7 @@ addon_data.bar.update_bar_on_speed_change = function()
     -- A function to be run once upon the player's speed updating.
     -- This will recalculate all necessary frame element updates here
     -- to keep them out the main onupdate function
-    print('Recalculating bar visuals on speed change...')
+    -- print('Recalculating bar visuals on speed change...')
     addon_data.bar.set_twist_tick_offset()
     addon_data.bar.set_gcd1_tick_offset()
     addon_data.bar.set_gcd2_tick_offset()
@@ -477,11 +451,11 @@ end
 addon_data.bar.update_bar_on_aura_change = function()
     -- A function to be run once upon the player's auras changing.
     -- Aura changes determine if the twist line should be drawn or not.
-    if addon_data.player.swing_timer ~=0 and addon_data.bar.should_draw_twist_window() then
-        addon_data.bar.frame.twist_line:Show()
-    else
-        addon_data.bar.frame.twist_line:Hide()
-    end
+    -- if addon_data.player.swing_timer ~= 0 and addon_data.bar.should_draw_twist_window() then
+    --     addon_data.bar.frame.twist_line:Show()
+    -- else
+    --     addon_data.bar.frame.twist_line:Hide()
+    -- end
     addon_data.bar.set_bar_color()
 
     -- if the spell haste changes we need to update the tick offsets
@@ -505,7 +479,7 @@ end
 
 -- determine wether or not to draw the gcd1 line
 addon_data.bar.should_draw_gcd1_window = function()
-    local settings = character_player_settings
+    local settings = character_bar_settings
     if math.abs(addon_data.bar.gcd1_tick_offset) > settings.width then
         return false
     end
@@ -514,7 +488,7 @@ end
 
 -- determine wether or not to draw the gcd2 line
 addon_data.bar.should_draw_gcd2_window = function()
-    local settings = character_player_settings
+    local settings = character_bar_settings
     if math.abs(addon_data.bar.gcd2_tick_offset) > settings.width then
         return false
     end
@@ -523,7 +497,7 @@ end
 
 addon_data.bar.set_twist_tick_offset = function()
 -- Set the offset position of the twist window
-    local settings = character_player_settings
+    local settings = character_bar_settings
     local bar_fraction = (0.4 / addon_data.player.current_weapon_speed)
     local offset = bar_fraction * settings.width * -1
     -- print('twist tick time = ' .. time_value)
@@ -534,7 +508,7 @@ end
 
 -- Get the offset position of the first gcd window tick
 addon_data.bar.set_gcd1_tick_offset = function()
-    local settings = character_player_settings
+    local settings = character_bar_settings
     -- dummy for the actual gcd value, which we will figure out later
     local gcd_duration = addon_data.player.spell_gcd_duration
     local grace_period = character_bar_settings["grace_period"]
@@ -548,7 +522,7 @@ end
 
 -- Get the offset position of the second gcd window tick
 addon_data.bar.set_gcd2_tick_offset = function()
-    local settings = character_player_settings
+    local settings = character_bar_settings
     -- dummy for the actual gcd value, which we will figure out later
     local gcd_duration = addon_data.player.spell_gcd_duration
     local grace_period = character_bar_settings["grace_period"]
@@ -565,7 +539,7 @@ end
 addon_data.bar.set_bar_color = function()
     -- This function sets the bar colour for all cases outside of seal of command, which has
     -- a time sensitive component and must be handled on-update.
-    print('CALL TO SET COLOUR')
+    -- print('CALL TO SET COLOUR')
     -- if no seal return default color
     if addon_data.player.n_active_seals == 0 then
         addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_default"]))
@@ -589,6 +563,9 @@ end
 
 -- draw the right text or not
 addon_data.bar.draw_right_text = function()
+    if not character_bar_settings.show_right_text then
+        return false
+    end
     if addon_data.player.swing_timer == 0 then
         return false
     end

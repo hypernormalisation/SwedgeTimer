@@ -9,8 +9,9 @@ local print = addon_data.utils.print_msg
 
 addon_data.bar.UpdateConfigPanelValues = function()
     local panel = addon_data.bar.config_frame
-    local settings = character_player_settings
+    local settings = character_bar_settings
     panel.enabled_checkbox:SetChecked(settings.enabled)
+    panel.is_locked_checkbox:SetChecked(settings.is_locked)
     -- panel.show_border_checkbox:SetChecked(settings.show_border)
     -- panel.classic_bars_checkbox:SetChecked(settings.classic_bars)
     -- panel.fill_empty_checkbox:SetChecked(settings.fill_empty)
@@ -39,96 +40,96 @@ addon_data.bar.UpdateConfigPanelValues = function()
 end
 
 addon_data.bar.EnabledCheckBoxOnClick = function(self)
-    character_player_settings.enabled = self:GetChecked()
+    character_bar_settings.enabled = self:GetChecked()
     addon_data.bar.UpdateVisualsOnSettingsChange()
 end
 
 addon_data.bar.TwistBarToggle = function()
-    currently_on = character_player_settings.enabled == true
+    currently_on = character_bar_settings.enabled == true
     if not currently_on then
-        character_player_settings.enabled = true
+        character_bar_settings.enabled = true
     else
-        character_player_settings.enabled = false
+        character_bar_settings.enabled = false
     end
     addon_data.bar.UpdateVisualsOnSettingsChange()
 end
 
 addon_data.bar.TwistBarLockToggle = function()
-    currently_on = character_player_settings.is_locked == true
+    currently_on = character_bar_settings.is_locked == true
     if not currently_on then
-        character_player_settings.is_locked = true
+        character_bar_settings.is_locked = true
     else
-        character_player_settings.is_locked = false
+        character_bar_settings.is_locked = false
     end
     addon_data.bar.UpdateVisualsOnSettingsChange()
 end
 
 
 addon_data.bar.IsLockedCheckBoxOnClick = function(self)
-    character_player_settings.is_locked = self:GetChecked()
-    addon_data.bar.frame:EnableMouse(not character_player_settings.is_locked)
+    character_bar_settings.is_locked = self:GetChecked()
+    addon_data.bar.frame:EnableMouse(not character_bar_settings.is_locked)
     addon_data.bar.UpdateVisualsOnSettingsChange()
 end
 
 -- addon_data.bar.ShowOffHandCheckBoxOnClick = function(self)
---     character_player_settings.show_offhand = self:GetChecked()
+--     character_bar_settings.show_offhand = self:GetChecked()
 --     addon_data.bar.UpdateVisualsOnSettingsChange()
 -- end
 
 -- addon_data.bar.ShowBorderCheckBoxOnClick = function(self)
---     character_player_settings.show_border = self:GetChecked()
+--     character_bar_settings.show_border = self:GetChecked()
 --     addon_data.bar.UpdateVisualsOnSettingsChange()
 -- end
 
 -- addon_data.bar.ClassicBarsCheckBoxOnClick = function(self)
---     character_player_settings.classic_bars = self:GetChecked()
+--     character_bar_settings.classic_bars = self:GetChecked()
 --     addon_data.bar.UpdateVisualsOnSettingsChange()
 -- end
 
 -- addon_data.bar.FillEmptyCheckBoxOnClick = function(self)
---     character_player_settings.fill_empty = self:GetChecked()
+--     character_bar_settings.fill_empty = self:GetChecked()
 --     addon_data.bar.UpdateVisualsOnSettingsChange()
 -- end
 
 addon_data.bar.ShowLeftTextCheckBoxOnClick = function(self)
-    character_player_settings.show_left_text = self:GetChecked()
+    character_bar_settings.show_left_text = self:GetChecked()
     addon_data.bar.UpdateVisualsOnSettingsChange()
 end
 
 addon_data.bar.ShowRightTextCheckBoxOnClick = function(self)
-    character_player_settings.show_right_text = self:GetChecked()
+    character_bar_settings.show_right_text = self:GetChecked()
     addon_data.bar.UpdateVisualsOnSettingsChange()
 end
 
 addon_data.bar.WidthEditBoxOnEnter = function(self)
-    character_player_settings.width = tonumber(self:GetText())
+    character_bar_settings.width = tonumber(self:GetText())
     addon_data.bar.UpdateVisualsOnSettingsChange()
 end
 
 addon_data.bar.HeightEditBoxOnEnter = function(self)
-    character_player_settings.height = tonumber(self:GetText())
+    character_bar_settings.height = tonumber(self:GetText())
     addon_data.bar.UpdateVisualsOnSettingsChange()
 end
 
 addon_data.bar.FontSizeEditBoxOnEnter = function(self)
-    character_player_settings.fontsize = tonumber(self:GetText())
+    character_bar_settings.fontsize = tonumber(self:GetText())
     addon_data.bar.UpdateVisualsOnSettingsChange()
 end
 
 addon_data.bar.XOffsetEditBoxOnEnter = function(self)
-    character_player_settings.x_offset = tonumber(self:GetText())
+    character_bar_settings.x_offset = tonumber(self:GetText())
     addon_data.bar.UpdateVisualsOnSettingsChange()
 end
 
 addon_data.bar.YOffsetEditBoxOnEnter = function(self)
-    character_player_settings.y_offset = tonumber(self:GetText())
+    character_bar_settings.y_offset = tonumber(self:GetText())
     addon_data.bar.UpdateVisualsOnSettingsChange()
 end
 
 -- addon_data.bar.MainColorPickerOnClick = function()
---     local settings = character_player_settings
+--     local settings = character_bar_settings
 --     local function MainOnActionFunc(restore)
---         local settings = character_player_settings
+--         local settings = character_bar_settings
 --         local new_r, new_g, new_b, new_a
 --         if restore then
 --             new_r, new_g, new_b, new_a = unpack(restore)
@@ -151,9 +152,9 @@ end
 -- end
 
 -- addon_data.bar.MainTextColorPickerOnClick = function()
---     local settings = character_player_settings
+--     local settings = character_bar_settings
 --     local function MainTextOnActionFunc(restore)
---         local settings = character_player_settings
+--         local settings = character_bar_settings
 --         local new_r, new_g, new_b, new_a
 --         if restore then
 --             new_r, new_g, new_b, new_a = unpack(restore)
@@ -179,17 +180,17 @@ end
 
 
 -- addon_data.bar.CombatAlphaOnValChange = function(self)
---     character_player_settings.in_combat_alpha = tonumber(self:GetValue())
+--     character_bar_settings.in_combat_alpha = tonumber(self:GetValue())
 --     addon_data.bar.UpdateVisualsOnSettingsChange()
 -- end
 
 -- addon_data.bar.OOCAlphaOnValChange = function(self)
---     character_player_settings.ooc_alpha = tonumber(self:GetValue())
+--     character_bar_settings.ooc_alpha = tonumber(self:GetValue())
 --     addon_data.bar.UpdateVisualsOnSettingsChange()
 -- end
 
 -- addon_data.bar.BackplaneAlphaOnValChange = function(self)
---     character_player_settings.backplane_alpha = tonumber(self:GetValue())
+--     character_bar_settings.backplane_alpha = tonumber(self:GetValue())
 --     addon_data.bar.UpdateVisualsOnSettingsChange()
 -- end
 

@@ -150,7 +150,7 @@ end
 
 addon_data.config.UpdateConfigValues = function()
     local panel = addon_data.config.config_frame
-    local settings = character_player_settings
+    -- local settings = character_player_settings
     local settings_core = character_core_settings
 	panel.welcome_checkbox:SetChecked(settings_core.welcome_message)
 end
@@ -187,7 +187,7 @@ end
 addon_data.bar.CreateConfigPanel = function(parent_panel)
     addon_data.bar.config_frame = CreateFrame("Frame", addon_name .. "PlayerConfigPanel", parent_panel)
     local panel = addon_data.bar.config_frame
-    local settings = character_player_settings
+    local settings = character_bar_settings
     
     -- Title Text
     panel.title_text = addon_data.config.TextFactory(panel, "Twist Bar", 18)
@@ -201,7 +201,7 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         "Enable",
         "Enables the twist bar.",
         addon_data.bar.EnabledCheckBoxOnClick)
-    panel.enabled_checkbox:SetPoint("TOPLEFT", 10, 44)
+    panel.enabled_checkbox:SetPoint("TOPLEFT", 10, 36)
     
     -- Is Locked Checkbox
     panel.is_locked_checkbox = addon_data.config.CheckBoxFactory(
@@ -210,7 +210,7 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         " Lock Bar",
         "Locks the twist bar in place.",
         addon_data.bar.IsLockedCheckBoxOnClick)
-    panel.is_locked_checkbox:SetPoint("TOPLEFT", 10, -40)
+    panel.is_locked_checkbox:SetPoint("TOPLEFT", 10, 16)
 
     -- -- Show Border Checkbox
     -- panel.show_border_checkbox = addon_data.config.CheckBoxFactory(
@@ -243,19 +243,19 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
     panel.show_left_text_checkbox = addon_data.config.CheckBoxFactory(
         "PlayerShowLeftTextCheckBox",
         panel,
-        "Show Left Text",
-        "Enables the player's left side text.",
+        "Show Attack Speed Text",
+        "Shows the player's attack speed on the left of the bar.",
         addon_data.bar.ShowLeftTextCheckBoxOnClick)
-    panel.show_left_text_checkbox:SetPoint("TOPLEFT", 10, -140)
+    panel.show_left_text_checkbox:SetPoint("TOPLEFT", 10, -4)
 
     -- Show Right Text Checkbox
     panel.show_right_text_checkbox = addon_data.config.CheckBoxFactory(
         "PlayerShowRightTextCheckBox",
         panel,
-        "Show Right Text",
-        "Enables the player's right side text.",
+        "Show Swing Timer Text",
+        "Shows the player's swing timer on the right of the bar.",
         addon_data.bar.ShowRightTextCheckBoxOnClick)
-    panel.show_right_text_checkbox:SetPoint("TOPLEFT", 10, -160)
+    panel.show_right_text_checkbox:SetPoint("TOPLEFT", 10, -24)
     
     -- Width EditBox
     panel.width_editbox = addon_data.config.EditBoxFactory(
@@ -265,7 +265,7 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         75,
         25,
         addon_data.bar.WidthEditBoxOnEnter)
-    panel.width_editbox:SetPoint("TOPLEFT", 240, -60, "BOTTOMRIGHT", 275, -85)
+    panel.width_editbox:SetPoint("TOPLEFT", 220, -15, "BOTTOMRIGHT", 275, -85)
 
     -- Height EditBox
     panel.height_editbox = addon_data.config.EditBoxFactory(
@@ -275,7 +275,7 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         75,
         25,
         addon_data.bar.HeightEditBoxOnEnter)
-    panel.height_editbox:SetPoint("TOPLEFT", 320, -60, "BOTTOMRIGHT", 355, -85)
+    panel.height_editbox:SetPoint("TOPLEFT", 300, -15, "BOTTOMRIGHT", 355, -85)
 
 	-- Font Size EditBox
 	panel.fontsize_editbox = addon_data.config.EditBoxFactory(
@@ -285,7 +285,7 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         75,
         25,
         addon_data.bar.FontSizeEditBoxOnEnter)
-    panel.fontsize_editbox:SetPoint("TOPLEFT", 160, -60)
+    panel.fontsize_editbox:SetPoint("TOPLEFT", 180, 30)
 
     -- X Offset EditBox
     panel.x_offset_editbox = addon_data.config.EditBoxFactory(
@@ -295,7 +295,7 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         75,
         25,
         addon_data.bar.XOffsetEditBoxOnEnter)
-    panel.x_offset_editbox:SetPoint("TOPLEFT", 200, -110, "BOTTOMRIGHT", 275, -135)
+    panel.x_offset_editbox:SetPoint("TOPLEFT", 260, 30, "BOTTOMRIGHT", 240, 30)
 
     -- Y Offset EditBox
     panel.y_offset_editbox = addon_data.config.EditBoxFactory(
@@ -305,7 +305,7 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         75,
         25,
         addon_data.bar.YOffsetEditBoxOnEnter)
-    panel.y_offset_editbox:SetPoint("TOPLEFT", 280, -110, "BOTTOMRIGHT", 355, -135)
+    panel.y_offset_editbox:SetPoint("TOPLEFT", 340, 30, "BOTTOMRIGHT", 355, 30)
     
     -- Twist bar color picker
     -- panel.main_color_picker = addon_data.config.color_picker_factory(

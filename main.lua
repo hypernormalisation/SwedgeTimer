@@ -34,7 +34,6 @@ addon_data.core.all_timers = {
 }
 
 addon_data.core.default_settings = {
-    one_frame = false,
 	welcome_message = true
 }
 
@@ -81,8 +80,10 @@ SlashCmdList["SWEDGETIMER_HOME"] = function(option)
     -- print(option)
     if option == "bar" then
         addon_data.bar.TwistBarToggle()
+        addon_data.bar.UpdateConfigPanelValues()
     elseif option == "lock" then
         addon_data.bar.TwistBarLockToggle()
+        addon_data.bar.UpdateConfigPanelValues()
         
     -- If no args, bring up the main config window
     elseif option == '' then
