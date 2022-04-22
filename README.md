@@ -17,7 +17,7 @@ It does not aim to replace any of the other components of a typical Ret UI or he
 
 There are some advantages in using the SwedgeTimer addon over a traditional weak aura bar.
 
-#### Seal of the Crusader snapshotting
+### Seal of the Crusader snapshotting
 
 Seal of the Crusader uses haste snapshotting to prevent taking advantage of the shortened attack timer by switching to (or from) another seal mid-swing.
 This has been brought to the attention of the weak aura developers by members of the ret community but they refuse to incorporate a fix.
