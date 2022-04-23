@@ -225,6 +225,8 @@ addon_data.bar.UpdateVisualsOnSettingsChange = function()
         frame:ClearAllPoints()
         frame:SetPoint(settings.point, UIParent, settings.rel_point, settings.x_offset, settings.y_offset)
         frame:SetWidth(settings.width)
+        frame:SetHeight(settings.height)
+
         frame.backplane:SetBackdropColor(0,0,0,settings.backplane_alpha)
         frame.bar:SetPoint("TOPLEFT", 0, 0)
         frame.bar:SetHeight(settings.height)
