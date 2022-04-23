@@ -254,7 +254,7 @@ addon_data.player.OnCombatLogUnfiltered = function(combat_info)
             local miss_type, is_offhand = select(12, unpack(combat_info))
             if miss_type == "PARRY" then
                 -- parry reduces your swing timer by 40%, but cannot go below 20%.
-                local swing_timer_reduced_40p = addon_data.player.swing_timer * 0.6
+                local swing_timer_reduced_40p = addon_data.player.swing_timer - (0.4 * addon_data.player.current_weapon_speed)
                 local min_swing_time = addon_data.player.current_weapon_speed * 0.2             
                 if swing_timer_reduced_40p < min_swing_time then
                     addon_data.player.swing_timer = min_swing_time
