@@ -234,19 +234,26 @@ end
 addon_data.player.OnCombatLogUnfiltered = function(combat_info)
 	local _, event, _, source_guid, _, _, _, dest_guid, _, _, _, _, spell_name, _ = unpack(combat_info)
 	
+    -- addon_data.player.extra_attacks_flag = false
+    
     -- Handle all relevant events where the player is the action source
     if (source_guid == addon_data.player.guid) then
 	-- check for extra attacks that would accidently reset the swing timer
 		if (event == "SPELL_EXTRA_ATTACKS") then
 			addon_data.player.extra_attacks_flag = true
 		end
+        if event == "SWING_EXTRA_ATTACKS" then
+            addon_data.player.extra_attacks_flag = true
+        end
         if (event == "SWING_DAMAGE") then
 			if (addon_data.player.extra_attacks_flag == false) then
 				addon_data.player.reset_swing_timer()
 			end
 			addon_data.player.extra_attacks_flag = false
         elseif (event == "SWING_MISSED") then
-			addon_data.player.reset_swing_timer()
+            if (addon_data.player.extra_attacks_flag == false) then
+			    addon_data.player.reset_swing_timer()
+            end
         end
     -- Handle all relevant events where the player is the target
     elseif (dest_guid == addon_data.player.guid) then
