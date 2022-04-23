@@ -37,6 +37,7 @@ addon_data.bar.default_settings = {
     bar_color_cant_twist = {0.7, 0.7, 0.01, 1.0},
     twist_window = 0.4,
     grace_period = 0.2,
+    enable_twist_bar_color = true,
 }
 
 -- the following should be flagged when the swing speed changes to
@@ -548,7 +549,7 @@ addon_data.bar.set_bar_color = function()
         return
     end   
     -- if we're currently twisting return twist color
-    if addon_data.player.n_active_seals == 2 then
+    if addon_data.player.n_active_seals == 2 and character_bar_settings.enable_twist_bar_color then
         addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_twisting"]))
         return
     end
