@@ -247,7 +247,7 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         "IsTwistColorEnabledCheckbox",
         panel,
         " Twist Color Enabled",
-        -- "When enabled, turns the bar a special color when the player has two active seals i.e is twisting." ..
+        "When enabled, turns the bar a special color when the player has two active seals i.e is twisting." ..
         " Defaults to purple.",
         addon_data.bar.TwistColorEnabledBoxOnClick
         -- addon_data.bar.TwistColorEnabledBoxOnClick
