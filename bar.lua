@@ -552,7 +552,7 @@ addon_data.bar.set_bar_color = function()
     end
 
     -- if we're only under SoB, return the blood color
-    if addon_data.player.active_seals["Seal of Blood"] ~= nil then
+    if addon_data.player.active_seals["Seal of Blood"] ~= nil or addon_data.player.active_seals["Seal of the Martyr"] ~= nil then
         addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_blood"]))
         return
     end
