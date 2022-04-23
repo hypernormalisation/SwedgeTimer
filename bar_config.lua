@@ -39,6 +39,13 @@ addon_data.bar.UpdateConfigPanelValues = function()
     panel.x_offset_editbox:SetCursorPosition(0)
     panel.y_offset_editbox:SetText(tostring(settings.y_offset))
     panel.y_offset_editbox:SetCursorPosition(0)
+
+    panel.twist_window_editbox:SetText(tostring(settings.twist_window))
+    panel.twist_window_editbox:SetCursorPosition(0)
+
+    panel.grace_period_editbox:SetText(tostring(settings.grace_period))
+    panel.grace_period_editbox:SetCursorPosition(0)
+
     -- panel.main_color_picker.foreground:SetColorTexture(
     --     settings.main_r, settings.main_g, settings.main_b, settings.main_a)
     -- panel.main_text_color_picker.foreground:SetColorTexture(
@@ -156,7 +163,13 @@ addon_data.bar.LagThresholdOnEnter = function(self)
     character_player_settings.lag_threshold = tonumber(self:GetText())    
 end
 
+addon_data.bar.TwistWindowOnEnter = function(self)
+    character_bar_settings.twist_window = tonumber(self:GetText())
+end
 
+addon_data.bar.GracePeriodOnEnter = function(self)
+    character_bar_settings.grace_period = tonumber(self:GetText())
+end
 
 addon_data.bar.CreateConfigPanel = function(parent_panel)
     addon_data.bar.config_frame = CreateFrame("Frame", addon_name .. "PlayerConfigPanel", parent_panel)
@@ -317,7 +330,7 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
     )
     panel.lag_multiplier_editbox:SetPoint("TOPLEFT", 200, -60, "BOTTOMRIGHT", 355, 30)
 
-    -- Lag multiplier EditBox
+    -- Lag threshold EditBox
     panel.lag_threshold_editbox = addon_data.config.EditBoxFactory(
         "LagThresholdEditBox",
         panel,
@@ -328,7 +341,27 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         25,
         addon_data.bar.LagThresholdOnEnter
     )
-    panel.lag_threshold_editbox:SetPoint("TOPLEFT", 335, -60, "BOTTOMRIGHT", 355, 30)
+    panel.lag_threshold_editbox:SetPoint("TOPLEFT", 315, -60, "BOTTOMRIGHT", 355, 30)
+
+    panel.twist_window_editbox = addon_data.config.EditBoxFactory(
+        "TwistWindowEditBox",
+        panel,
+        "Twist Window (s)",
+        75,
+        25,
+        addon_data.bar.TwistWindowOnEnter
+    )
+    panel.twist_window_editbox:SetPoint("TOPLEFT", 200, -100, "BOTTOMRIGHT", 355, 30)
+
+    panel.grace_period_editbox = addon_data.config.EditBoxFactory(
+        "GracePeriodEditBox",
+        panel,
+        "Grace Period (s)",
+        75,
+        25,
+        addon_data.bar.GracePeriodOnEnter
+    )
+    panel.grace_period_editbox:SetPoint("TOPLEFT", 315, -100, "BOTTOMRIGHT", 355, 30)
 
     -- Twist bar color picker
     -- panel.main_color_picker = addon_data.config.color_picker_factory(

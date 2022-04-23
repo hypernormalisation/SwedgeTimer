@@ -501,7 +501,7 @@ end
 addon_data.bar.set_twist_tick_offset = function()
 -- Set the offset position of the twist window
     local settings = character_bar_settings
-    local bar_fraction = (0.4 / addon_data.player.current_weapon_speed)
+    local bar_fraction = (settings.twist_window / addon_data.player.current_weapon_speed)
     local offset = bar_fraction * settings.width * -1
     -- print('twist tick time = ' .. time_value)
     addon_data.bar.twist_tick_offset = offset
