@@ -203,7 +203,7 @@ addon_data.bar.init_bar_visuals = function()
     frame.gcd1_line:SetThickness(3)
     
     frame.gcd2_line = frame:CreateLine()
-    frame.gcd2_line:SetColorTexture(1,1,1,1)
+    frame.gcd2_line:SetColorTexture(0.4,0.4,1,1)
     frame.gcd2_line:SetDrawLayer("OVERLAY", -1)
     frame.gcd2_line:SetThickness(3)
     
@@ -512,7 +512,6 @@ end
 -- Get the offset position of the first gcd window tick
 addon_data.bar.set_gcd1_tick_offset = function()
     local settings = character_bar_settings
-    -- dummy for the actual gcd value, which we will figure out later
     local gcd_duration = addon_data.player.spell_gcd_duration
     local grace_period = character_bar_settings["grace_period"]
     local time_before_swing = gcd_duration + grace_period
@@ -526,7 +525,6 @@ end
 -- Get the offset position of the second gcd window tick
 addon_data.bar.set_gcd2_tick_offset = function()
     local settings = character_bar_settings
-    -- dummy for the actual gcd value, which we will figure out later
     local gcd_duration = addon_data.player.spell_gcd_duration
     local grace_period = character_bar_settings["grace_period"]
     local time_before_swing = (2 * gcd_duration) + grace_period

@@ -76,6 +76,9 @@ addon_data.player.gcd_cooldown_poll_max = nil -- container for the first returne
 addon_data.player.spell_gcd_duration = 1.5
 addon_data.player.base_gcd_duration = 1.5 -- should never change, use this for CS
 
+-- counter for periodic repolls
+addon_data.player.periodic_repoll_counter = 0.0
+
 -- flag to run a double poll after 0.1s on aura change to catch bad API calls
 addon_data.player.aura_repoll_counter = 0.0
 addon_data.player.repoll_on_aura_change = true
@@ -132,6 +135,9 @@ end
 -- Called when the swing timer reaches zero
 addon_data.player.swing_timer_complete = function()
     -- handle seal of the crusader snapshotting for new crusader buffs
+    if addon_data.crusader_lock then
+        -- print('releasing crusader lock')
+    end
     addon_data.crusader_lock = false
     -- print('Swing timer complete.')
     addon_data.player.update_weapon_speed()
@@ -140,10 +146,15 @@ end
 
 -- Called when the swing timer should be reset
 addon_data.player.reset_swing_timer = function()
+    if addon_data.crusader_lock then
+        -- print('releasing crusader lock')
+    end
+
     addon_data.crusader_lock = false
     addon_data.player.twist_impossible = false
     -- addon_data.player.update_weapon_speed() -- NOT SURE IF THIS IS NEEDED
     addon_data.player.swing_timer = addon_data.player.current_weapon_speed
+    -- print('releasing double timer check')
     addon_data.player.reported_swing_timer_complete = false
     addon_data.bar.update_bar_on_swing_reset()
 end
@@ -191,7 +202,7 @@ addon_data.player.update_weapon_speed = function()
 
     -- Handle crusader snapshotting
     if addon_data.crusader_lock == true then
-        print('Locking speed change because of crusader snapshot.')
+        -- print('Locking speed change because of crusader snapshot.')
         addon_data.player.speed_changed = false
         return
     end
@@ -234,17 +245,17 @@ end
 addon_data.player.OnCombatLogUnfiltered = function(combat_info)
 	local _, event, _, source_guid, _, _, _, dest_guid, _, _, _, _, spell_name, _ = unpack(combat_info)
 	
-    -- addon_data.player.extra_attacks_flag = false
-    
+    -- print(event)
+
     -- Handle all relevant events where the player is the action source
     if (source_guid == addon_data.player.guid) then
-	-- check for extra attacks that would accidently reset the swing timer
+
+	-- Check for extra attacks that would accidently reset the swing timer.
+    -- If we find any, set a flag that lets the code know to expect two attack events to come 
+    -- through later, and that we should ignore the first of these.
 		if (event == "SPELL_EXTRA_ATTACKS") then
 			addon_data.player.extra_attacks_flag = true
 		end
-        if event == "SWING_EXTRA_ATTACKS" then
-            addon_data.player.extra_attacks_flag = true
-        end
         if (event == "SWING_DAMAGE") then
 			if (addon_data.player.extra_attacks_flag == false) then
 				addon_data.player.reset_swing_timer()
@@ -254,6 +265,7 @@ addon_data.player.OnCombatLogUnfiltered = function(combat_info)
             if (addon_data.player.extra_attacks_flag == false) then
 			    addon_data.player.reset_swing_timer()
             end
+            addon_data.player.extra_attacks_flag = false
         end
     -- Handle all relevant events where the player is the target
     elseif (dest_guid == addon_data.player.guid) then
@@ -280,6 +292,7 @@ addon_data.player.calculate_spell_GCD_duration = function()
     local base = addon_data.player.base_gcd_duration
     local current = base * (100 / (100+rating_percent_reduction))
     if addon_data.player.has_bloodlust then
+        
         current = current * (1/1.3)
     end
     -- minimum GCD for paladins in 1s
@@ -289,6 +302,7 @@ addon_data.player.calculate_spell_GCD_duration = function()
     -- round to 3 decimal places
     current = floor(current, 0.001)
     addon_data.player.spell_gcd_duration = current
+    -- print('current spell GCD: ' .. current)
     return current
 end
 
@@ -320,6 +334,7 @@ addon_data.player.parse_auras = function()
             end
         -- Catch bloodlust or heroism
         elseif spell_id == 2825 or spell_id == 32182 then
+            -- print('player has lust!')
             has_bloodlust = true
         end
         counter = counter + 1
@@ -591,21 +606,32 @@ addon_data.player.frame_on_update = function(self, elapsed)
         addon_data.bar.update_bar_on_timer_full()
         addon_data.player.reported_swing_timer_complete = true
         addon_data.player.twist_impossible = false
-        -- addon_data.player.reported_swing_timer_complete_double = false
+        addon_data.player.reported_swing_timer_complete_double = false
         addon_data.player.time_since_swing_completion = 0
     end
 
         -- -- Ensure the player's swing timer is re-polled a short time after swing completion 
         -- -- to catch late API updates.
-        -- if not addon_data.player.reported_swing_timer_complete_double then
-        --     if addon_data.player.time_since_swing_completion < 0.1 then
-        --         addon_data.player.time_since_swing_completion = addon_data.player.time_since_swing_completion + elapsed
-        --     else
-        --         print('additional check')
-        --         addon_data.player.update_weapon_speed()
-        --         addon_data.player.reported_swing_timer_complete_double = true
-        --     end
-        -- end
+    -- if not addon_data.player.reported_swing_timer_complete_double then
+    --     if addon_data.player.time_since_swing_completion < 0.3 then
+    --         addon_data.player.time_since_swing_completion = addon_data.player.time_since_swing_completion + elapsed
+    --     else
+    --         print('additional check on swing ending')
+    --         addon_data.player.update_weapon_speed()
+    --         addon_data.player.reported_swing_timer_complete_double = true
+    --         addon_data.player.time_since_swing_completion = 0.0
+    --     end
+    -- end
+
+    -- At the latest, repoll the attack speed every 0.2s
+    if addon_data.player.periodic_repoll_counter > 0.2 then
+        addon_data.player.update_weapon_speed()
+        -- print('periodic repoll')
+        addon_data.player.periodic_repoll_counter = 0.0
+    else
+        addon_data.player.periodic_repoll_counter = addon_data.player.periodic_repoll_counter + elapsed
+    end
+
             
     -- addon_data.player.update_weapon_speed()
     -- print(addon_data.player.current_weapon_speed)
