@@ -642,7 +642,7 @@ addon_data.player.frame_on_update = function(self, elapsed)
   
     -- Repoll the attack speed a short while after an aura change
     if addon_data.player.repoll_on_aura_change then
-        if addon_data.player.aura_repoll_counter > 0.3 then
+        if addon_data.player.aura_repoll_counter > 0.1 then
             -- print('SECONDARY API POLL ON AURA CHANGE')
             addon_data.player.update_weapon_speed()
             addon_data.player.aura_repoll_counter = 0.0
