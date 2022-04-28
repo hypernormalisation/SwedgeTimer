@@ -124,7 +124,6 @@ local function init_addon(self)
     -- Attach the events and widget handlers for the player stats frame
     addon_data.player_frame:SetScript("OnEvent", addon_data.player.frame_on_event)
     addon_data.player_frame:SetScript("OnUpdate", addon_data.player.frame_on_update)
-    -- addon_data.player_frame:RegisterEvent("PLAYER_TARGET_CHANGED")
     addon_data.player_frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
     addon_data.player_frame:RegisterEvent("UNIT_INVENTORY_CHANGED")
     addon_data.player_frame:RegisterUnitEvent("UNIT_AURA", "player")
@@ -133,23 +132,18 @@ local function init_addon(self)
     addon_data.player_frame:RegisterEvent("UNIT_SPELLCAST_SENT")
     addon_data.player_frame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
     addon_data.player_frame:RegisterEvent("SPELL_UPDATE_COOLDOWN")
-	-- Load the settings for the core and all timers
-	-- addon_data.player.LoadSettings()
-	-- addon_data.core.LoadSettings()
-    -- print('... settings loaded successfully')
 
-    -- Some settings that have to be set after the bar is initialised
-    addon_data.bar.UpdateVisualsOnSettingsChange()
-    addon_data.bar.update_visuals_on_update()
-    addon_data.bar.set_bar_color()
-
-    -- Any other misc operations that happen at the start
+    -- Any operations to initialise the player state
     addon_data.player.swing_timer = 0.00001
     addon_data.player.update_weapon_speed()
     addon_data.player.calculate_spell_GCD_duration()
     addon_data.player.on_player_aura_change()
     addon_data.player.update_lag()
 
+    -- Some settings that have to be set after the bar is initialised
+    addon_data.bar.UpdateVisualsOnSettingsChange()
+    addon_data.bar.update_visuals_on_update()
+    addon_data.bar.set_bar_color()
     
     addon_data.bar.update_bar_on_combat()
     -- addon_data.bar.update_bar_on_aura_change()

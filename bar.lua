@@ -28,12 +28,12 @@ addon_data.bar.default_settings = {
     -- fill_empty = true,
     main_r = 0.1, main_g = 0.1, main_b = 0.9, main_a = 1.0,
     main_text_r = 1.0, main_text_g = 1.0, main_text_b = 1.0, main_text_a = 1.0,
-    bar_color_default = {0.4, 0.4, 0.4, 1.0},
+    bar_color_default = {0.5, 0.5, 0.5, 1.0},
     bar_color_twisting = {0.51, 0.04, 0.73, 1.0},
     bar_color_twist_ready = {0., 0.68, 0., 1.0},
     bar_color_blood = {0.7, 0.27, 0.0, 1.0},
     bar_color_warning = {1.0, 0.0, 0.0, 1.0}, -- when if you cast SoC, you can't twist out of it that swing
-    bar_color_gcd = {0.2, 0.2, 0.2, 1.0},
+    bar_color_gcd = {0.3, 0.3, 0.3, 1.0},
     bar_color_cant_twist = {0.7, 0.7, 0.01, 1.0},
     twist_window = 0.4,
     grace_period = 0.2,
@@ -308,21 +308,22 @@ addon_data.bar.update_visuals_on_update = function()
     end
 
     -- If SoC, bar colour is time sensitive. Deal with that here.
-    if addon_data.player.active_seals["Seal of Command"] ~= nil and addon_data.player.n_active_seals == 1 then
-        if addon_data.player.twist_impossible then
-            addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_cant_twist"]))
-        elseif addon_data.player.swing_timer < character_bar_settings["twist_window"] then 
-            addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_twist_ready"]))
-        else
-            local min_time = addon_data.player.spell_gcd_duration + character_bar_settings["grace_period"]
-            if addon_data.player.swing_timer > min_time then            
+    if addon_data.player.is_twist_seal_active() then
+        if addon_data.player.n_active_seals == 1 then
+            if addon_data.player.twist_impossible then
+                addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_cant_twist"]))
+            elseif addon_data.player.swing_timer < character_bar_settings["twist_window"] then 
                 addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_twist_ready"]))
             else
-                addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_warning"]))
-            end
-        end        
+                local min_time = addon_data.player.spell_gcd_duration + character_bar_settings["grace_period"]
+                if addon_data.player.swing_timer > min_time then            
+                    addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_twist_ready"]))
+                else
+                    addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_warning"]))
+                end
+            end        
+        end
     end
-    
 end
 
 
@@ -474,7 +475,7 @@ end
 -- Determine wether or not to draw the twist line
 -- Hide if we are not in SoC or the swing bar is full
 addon_data.bar.should_draw_twist_window = function()
-    if addon_data.player.active_seals["Seal of Command"] ~= nil then
+    if addon_data.player.is_twist_seal_active() then
         return true
     end
     return false

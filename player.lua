@@ -7,28 +7,9 @@ local floor = addon_data.utils.SimpleRound
 --=========================================================================================
 addon_data.player = {}
 addon_data.player.default_settings = {
-	-- enabled = true,
     lag_detection_enabled = true,
     lag_threshold = 0.00,
     lag_multiplier = 1.5,
-	-- width = 400,
-	-- height = 20,
-	-- fontsize = 12,
-    -- point = "CENTER",
-	-- rel_point = "CENTER",
-	-- x_offset = 0,
-	-- y_offset = -180,
-	-- in_combat_alpha = 1.0,
-	-- ooc_alpha = 0.65,
-	-- backplane_alpha = 0.5,
-	-- is_locked = false,
-    -- show_left_text = true,
-    -- show_right_text = true,
-    -- show_border = false,
-    -- classic_bars = true,
-    -- fill_empty = true,
-    -- main_r = 0.1, main_g = 0.1, main_b = 0.9, main_a = 1.0,
-    -- main_text_r = 1.0, main_text_g = 1.0, main_text_b = 1.0, main_text_a = 1.0,
 }
 
 addon_data.player.guid = UnitGUID("player")
@@ -56,17 +37,11 @@ addon_data.player.twist_impossible = false
 -- does the player have heroism/lust buff active
 addon_data.player.has_bloodlust = false
 
- -- a flag for any non-instant cast we pick up that doesn't trigger GCD on cast start,
- -- but instead will trigger gcd on the cast finish
-addon_data.player.spell_guid_awaiting_gcd = nil
-
 -- containers for GCD information
 addon_data.player.active_gcd_full_duration = 0.0 -- length of the currently active GCD
 addon_data.player.active_gcd_remaining = 0.0 -- timer on currently active GCD.
 addon_data.reported_gcd_lockout = true
-addon_data.player.new_cast_flag = false
 addon_data.player.gcd_lockout = false -- lock for when we have an active GCD ticking
-addon_data.player.gcd_cooldown_poll_max = nil -- container for the first returned result of the GCD poll
 addon_data.player.spell_gcd_duration = 1.5
 addon_data.player.base_gcd_duration = 1.5 -- should never change, use this for CS
 
@@ -218,6 +193,15 @@ addon_data.player.update_weapon_speed = function()
 
 end
 
+-- Function to return a bool indicating if we're in a seal we can twist from.
+addon_data.player.is_twist_seal_active = function()
+    if addon_data.player.active_seals["Seal of Command"] ~= nil or addon_data.player.active_seals["Seal of Righteousness"] ~= nil then
+        return true
+    else
+        return false
+    end
+end
+
 -- Function run when we intercept an event indicating the player's equipment has changed.
 addon_data.player.on_equipment_change = function()
     local new_guid = GetInventoryItemID("player", 16)
@@ -306,7 +290,6 @@ addon_data.player.parse_auras = function()
     local end_iter = false
     local counter = 1
     addon_data.player.n_active_seals = 0
-    -- print('-------------')
     -- print('Processing auras on change...')
 
     -- copy the previous seals
@@ -378,69 +361,23 @@ addon_data.player.on_player_aura_change = function()
     -- print(addon_data.player.n_active_seals)
     addon_data.player.calculate_spell_GCD_duration()
     addon_data.player.update_weapon_speed()
+    addon_data.player.check_impossible_twists()
     addon_data.bar.update_bar_on_aura_change()
     
 end
 
-
--- addon_data.player.trigger_gcd = function()
---     -- Function to trigger a new GCD in the addon's internal code.
---     local _, duration = GetSpellCooldown(29515)
---     print('detected GCD going off, setting internally: ' .. tostring(duration))
---     addon_data.player.gcd_lockout = true
---     addon_data.player.active_gcd_full_duration = duration
---     addon_data.player.active_gcd_remaining = duration
---     -- tell the bar to update
---     addon_data.bar.update_bar_on_new_gcd()
--- end
-
-
 -- Function to detect any spell casts like repentance that would reset
--- the swing timer, and to handle GCD tracking
+-- the swing timer. GCD tracking handled elsewhere by other event triggers.
 addon_data.player.OnPlayerSpellCast = function(event, args)
-    
     -- print('detected spell cast')
     -- only process player casts
     if not args[1] == "player" then
         return
     end
-    
-    -- poll the GCD immediately for the max duration
-    -- local _, duration = GetSpellCooldown(29515)
-    
-    -- if spell is not judgement, check if we're not on GCD.
+   
     local spell_id = args[4] -- universal for a given spell type
     local spell_guid = args[3] -- completely unique 
 
-    -- if not addon_data.player.gcd_lockout and spell_id ~= 20271 then
-    --     local _, duration = GetSpellCooldown(29515)
-
-    --     if duration == 0 then
-    --         print('found a delayed GCD cast, GUID: ' .. spell_guid)
-    --         addon_data.player.spell_guid_awaiting_gcd = spell_guid
-    --     else
-    --         print('detected GCD going off: ' .. tostring(duration))
-    --         addon_data.player.trigger_gcd()
-
-    --         -- addon_data.player.gcd_lockout = true
-    --         -- addon_data.player.active_gcd_full_duration = duration
-    --         -- addon_data.player.active_gcd_remaining = duration
-    --     end
-    --     -- addon_data.player.trigger_gcd()
-    -- end
-
-    -- elseif duration == 0 then
-    --     print('Clearing GCD lock, GCD is zero')
-
-    -- print(args)
-    
-    -- print('GCD duration from poll = ' .. tostring(duration))
-    -- our_duration = addon_data.player.calculate_spell_GCD_duration()
-    -- print('GCD duration from calc = ' .. tostring(our_duration))
-
-
-    -- print('Sp Haste rating = ' .. tostring(GetCombatRating(20)))
-    -- print('Sp Haste bonus = ' .. tostring(GetCombatRatingBonus(20)))
     -- detect repentance casts and reset the timer
     if spell_id == 20066 then
         addon_data.player.reset_swing_timer()
@@ -466,40 +403,39 @@ addon_data.player.OnPlayerSpellCompletion = function(event, args)
         -- print('player successfully cast Holy Wrath, resetting swing timer...')
         addon_data.player.reset_swing_timer()
     end
-    -- Catch any previous casts and check for GCD that *didn't* trigger a GCD
-    -- Poll the GCD endpoint to see if we've started one.
-    if args[2] == addon_data.player.spell_guid_awaiting_gcd then          
-        local _, duration = GetSpellCooldown(29515)
-        if duration > 0 then
-            -- print('Received a late GCD from cast completion.')
-        end
-    end
-
 end
-
 
 -- Called when the player's spellcast is interrupt to reset the gcd.
 addon_data.player.on_spell_interrupt = function()
     addon_data.player.active_gcd_remaining = 0
+    addon_data.player.gcd_lockout = false
+    addon_data.bar.hide_gcd_bar()
 end
 
+-- Function to check for impossible twists and set the according flag
+addon_data.player.check_impossible_twists = function()
+    -- if setting is disabled just return
+    if not character_bar_settings.lag_detection_enabled then
+        return
+    end
 
--- -- A function to repoll the GCD that does not respect the lockout
--- -- Used in the onupdate to account for event lag
--- addon_data.player.force_gcd_repoll = function()
---     if addon_data.player.gcd_lockout then
---         -- print('force repolling GCD')
---         -- local time_now = GetTime()
---         local time_now2, duration = GetSpellCooldown(29515)
---         -- print('time_now says: ' .. time_now)
---         -- print('time_now2 says: ' .. time_now)
---         -- print('force repolled GCD: ' .. tostring(duration))
-
---         addon_data.player.active_gcd_full_duration = duration
---         addon_data.player.active_gcd_remaining = duration
---     end
--- end
-
+    local gcd_with_lag = addon_data.player.active_gcd_remaining + addon_data.player.lag_world
+    local time_since_previous_swing = addon_data.player.current_weapon_speed - addon_data.player.swing_timer
+    local gcd_ends_relative_to_swing = time_since_previous_swing + gcd_with_lag
+    -- local gcd_ends_relative_to_swing = time_since_previous_swing + gcd_with_lag
+    -- print('GCD + lag ends relative to swing: ' .. tostring(gcd_ends_relative_to_swing))
+    -- print('Current attack speed: ' .. tostring(addon_data.player.current_weapon_speed))
+    -- print('Lag after calibration: ' .. tostring(addon_data.player.lag_world))
+    
+    if gcd_ends_relative_to_swing > addon_data.player.current_weapon_speed then
+        if addon_data.player.swing_timer > character_bar_settings.twist_window then
+            -- print('SHIT SON WE COULD BE MISSING THIS TWIST')
+            addon_data.player.twist_impossible = true
+        else
+            addon_data.player.twist_impossible = false
+        end
+    end
+end
 
 -- Called when we receive the SPELL_UPDATE_COOLDOWN event
 addon_data.player.process_possible_spell_cooldown = function(force_flag)
@@ -528,19 +464,6 @@ addon_data.player.process_possible_spell_cooldown = function(force_flag)
     addon_data.reported_gcd_lockout = false
     addon_data.player.active_gcd_full_duration = duration
     addon_data.player.active_gcd_remaining = calced_duration_remaining
-    
-    -- -- Figure out if we're lagging
-    -- local gcd_with_lag = time_now + duration
-    -- print('GCD with lag says:' .. tostring(gcd_with_lag))
-    -- local time_since_previous_swing = addon_data.player.current_weapon_speed - addon_data.player.swing_timer
-    -- local gcd_ends_relative_to_swing = time_since_previous_swing + duration
-    -- print('GCD ends relative to swing: ' .. tostring(gcd_ends_relative_to_swing))
-    -- if gcd_ends_relative_to_swing > addon_data.player.current_weapon_speed then
-    --     if addon_data.player.swing_timer > character_bar_settings.twist_window then
-    --         print('SHIT SON WE COULD BE MISSING THIS TWIST')
-    --         addon_data.player.twist_impossible = true
-    --     end
-    -- end
 
     -- Figure out if we're lagging
     addon_data.player.update_lag()
@@ -552,44 +475,18 @@ addon_data.player.process_possible_spell_cooldown = function(force_flag)
     -- local dynamic_lag = duration - calced_duration_remaining
     -- print('Dynamic lag estimate: ' .. tostring(dynamic_lag))
 
-    local gcd_ends_relative_to_swing = 0
-    local time_since_previous_swing = addon_data.player.current_weapon_speed - addon_data.player.swing_timer
-
-    -- if dynamic_lag > 0 then
-    --     print('DETECTED DYNAMIC LAG, using for estimate.')
-    --     local gcd_with_lag = calced_duration_remaining + dynamic_lag
-    --     gcd_ends_relative_to_swing = time_since_previous_swing + gcd_with_lag
-    -- else
-    --     local gcd_with_lag = calced_duration_remaining + addon_data.player.lag_world
-    --     gcd_ends_relative_to_swing = time_since_previous_swing + gcd_with_lag
-    -- end
-
-    local gcd_with_lag = calced_duration_remaining + addon_data.player.lag_world
-    gcd_ends_relative_to_swing = time_since_previous_swing + gcd_with_lag
-    -- local gcd_with_lag = calced_duration_remaining + addon_data.player.lag_world
-    
-    -- local gcd_ends_relative_to_swing = time_since_previous_swing + gcd_with_lag
-    -- print('GCD + lag ends relative to swing: ' .. tostring(gcd_ends_relative_to_swing))
-    -- print('Current attack speed: ' .. tostring(addon_data.player.current_weapon_speed))
-    -- print('Lag after calibration: ' .. tostring(addon_data.player.lag_world))
-       
-    -- local gcd_relative_to_swing_with_threshold = gcd_ends_relative_to_swing + character_player_settings.lag_threshold
-    if character_bar_settings.lag_detection_enabled then
-        if gcd_ends_relative_to_swing > addon_data.player.current_weapon_speed then
-            if addon_data.player.swing_timer > character_bar_settings.twist_window then
-                -- print('SHIT SON WE COULD BE MISSING THIS TWIST')
-                addon_data.player.twist_impossible = true
-            end
-        end
-    end
-
-    -- addon_data.player.update_lag
-
-    -- tell the bar to update
-    -- addon_data.bar.update_bar_on_new_gcd()
+    -- Check for impossible twists
+    addon_data.player.check_impossible_twists()   
 end
 
+addon_data.player.process_gcd_end = function()
+    -- print('reached end of GCD, releasing lock')
+    addon_data.player.active_gcd_remaining = 0
+    addon_data.player.gcd_lockout = false
+    addon_data.bar.hide_gcd_bar() -- i almost don't like this being here
+end
 
+-- CALLED EVERY FRAME
 addon_data.player.frame_on_update = function(self, elapsed)
     
     -- print('elapsed says')
@@ -605,34 +502,13 @@ addon_data.player.frame_on_update = function(self, elapsed)
         addon_data.player.time_since_swing_completion = 0
     end
 
-        -- -- Ensure the player's swing timer is re-polled a short time after swing completion 
-        -- -- to catch late API updates.
-    -- if not addon_data.player.reported_swing_timer_complete_double then
-    --     if addon_data.player.time_since_swing_completion < 0.3 then
-    --         addon_data.player.time_since_swing_completion = addon_data.player.time_since_swing_completion + elapsed
-    --     else
-    --         print('additional check on swing ending')
-    --         addon_data.player.update_weapon_speed()
-    --         addon_data.player.reported_swing_timer_complete_double = true
-    --         addon_data.player.time_since_swing_completion = 0.0
-    --     end
-    -- end
-
-    -- At the latest, repoll the attack speed every 0.2s
-    if addon_data.player.periodic_repoll_counter > 0.2 then
-        addon_data.player.update_weapon_speed()
-        -- print('periodic repoll')
-        addon_data.player.periodic_repoll_counter = 0.0
-    else
-        addon_data.player.periodic_repoll_counter = addon_data.player.periodic_repoll_counter + elapsed
-    end
-
-            
-    -- addon_data.player.update_weapon_speed()
-    -- print(addon_data.player.current_weapon_speed)
-    -- temp fix for div by zero
-    -- if addon_data.player.current_weapon_speed == 0 then
-    --     addon_data.player.current_weapon_speed = 2
+    -- -- At the latest, repoll the attack speed every 0.2s
+    -- if addon_data.player.periodic_repoll_counter > 0.2 then
+    --     addon_data.player.update_weapon_speed()
+    --     -- print('periodic repoll')
+    --     addon_data.player.periodic_repoll_counter = 0.0
+    -- else
+    --     addon_data.player.periodic_repoll_counter = addon_data.player.periodic_repoll_counter + elapsed
     -- end
   
     -- Repoll the attack speed a short while after an aura change
@@ -651,9 +527,7 @@ addon_data.player.frame_on_update = function(self, elapsed)
     if addon_data.player.gcd_lockout then
         addon_data.player.update_active_gcd_timer(elapsed)
         if addon_data.player.active_gcd_remaining == 0 then
-            -- print('reached end of GCD, releasing lock')
-            addon_data.player.gcd_lockout = false
-            addon_data.bar.hide_gcd_bar()
+            addon_data.player.process_gcd_end()
         end
     end
 
@@ -661,8 +535,7 @@ addon_data.player.frame_on_update = function(self, elapsed)
     -- and inform all the UI elements that need things altered or recalculated.   
     if addon_data.player.speed_changed and not addon_data.player.reported_speed_change then
         -- print('swing speed changed, timer updating')
-        -- print(tostring(addon_data.player.prev_weapon_speed) .. " > " .. tostring(addon_data.player.current_weapon_speed))
-        
+        -- print(tostring(addon_data.player.prev_weapon_speed) .. " > " .. tostring(addon_data.player.current_weapon_speed))        
 
         -- Modify swing timer but only if we don't have the equipment flag set because the timer is already reset
         if not addon_data.player.equipment_update_flag then
@@ -672,8 +545,7 @@ addon_data.player.frame_on_update = function(self, elapsed)
             addon_data.player.swing_timer = addon_data.player.swing_timer * multiplier
             -- print('swing timer after multiplier: ' .. tostring(addon_data.player.swing_timer))
             -- print(addon_data.player.swing_timer)
-            -- print('swing timer after update func and elapsed: ' .. tostring(addon_data.player.swing_timer))
-            
+            -- print('swing timer after update func and elapsed: ' .. tostring(addon_data.player.swing_timer))            
         else
             -- print('intercepting redundant speed change from equipment change')
             addon_data.player.equipment_update_flag = false
@@ -682,7 +554,6 @@ addon_data.player.frame_on_update = function(self, elapsed)
         addon_data.bar.update_bar_on_speed_change()
         -- flag so this only runs once on speed change
         addon_data.player.reported_speed_change = true
-
     end
 
     if addon_data.player.gcd_lockout and not addon_data.reported_gcd_lockout then
@@ -690,14 +561,11 @@ addon_data.player.frame_on_update = function(self, elapsed)
         addon_data.reported_gcd_lockout = true
     end 
 
-
     -- Always update the swing timer with how much time has elapsed
     addon_data.player.update_swing_timer(elapsed)
 
-
     -- Always update the bar visuals
     addon_data.bar.update_visuals_on_update()
-
 
 end
 
@@ -710,8 +578,6 @@ addon_data.player.frame_on_event = function(self, event, ...)
     if event == "UNIT_INVENTORY_CHANGED" then
         -- print('INVENTORY CHANGE DETECTED')
         addon_data.player.on_equipment_change()
-        -- addon_data.player.process_possible_spell_cooldown()
-        -- addon_data.player.update_weapon_speed()
 
     elseif event == "UNIT_SPELLCAST_SENT" then
         -- print('INFO: received spellcast trigger')
@@ -725,20 +591,19 @@ addon_data.player.frame_on_event = function(self, event, ...)
         -- print('processing aura change')
         addon_data.player.on_player_aura_change()
 
-        -- Trigger logic to repoll after a small amount of time
-        addon_data.player.repoll_on_aura_change = true
-        -- reset the counter if we're still waiting on a second poll
-        if addon_data.player.aura_repoll_counter > 0.0 then
-            addon_data.player.aura_repoll_counter = 0.0
-        end
+        -- -- Trigger logic to repoll after a small amount of time
+        -- addon_data.player.repoll_on_aura_change = true
+        -- -- reset the counter if we're still waiting on a second poll
+        -- if addon_data.player.aura_repoll_counter > 0.0 then
+        --     addon_data.player.aura_repoll_counter = 0.0
+        -- end
     
     elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
         addon_data.player.OnPlayerSpellCompletion(event, args)
 
     elseif event == "UNIT_SPELLCAST_INTERRUPTED" then
         -- print('found an interruption')
-        addon_data.player.on_spell_interrupt()
-    
+        addon_data.player.process_gcd_end()
 
     elseif event == "SPELL_UPDATE_COOLDOWN" then
         -- print('spell update cd triggering a GCD')
