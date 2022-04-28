@@ -167,8 +167,18 @@ addon_data.core.init_frame = CreateFrame("Frame", addon_name .. "InitFrame", UIP
 local function init_frame_event_handler(self, event, ...)
     local args = {...}
     if event == "ADDON_LOADED" then
-        if args[1] == "SwedgeTimer" then -- and addon_data.player.class == "Paladin" then
+        if args[1] == "SwedgeTimer" then
+            _, english_class = UnitClass("player")
+
+            -- Only load the addon if the player is a paladin
+            if english_class ~= "PALADIN" then
+                addon_data.core.init_frame:SetScript("OnEvent", nil)
+                return
+            end
+        
+            -- else, load it
             init_addon()
+
             -- Now we've loaded, remove the handler from the frame to stop it 
             -- processing events
             addon_data.core.init_frame:SetScript("OnEvent", nil)
