@@ -37,6 +37,10 @@ addon_data.player.twist_impossible = false
 -- does the player have heroism/lust buff active
 addon_data.player.has_bloodlust = false
 
+-- judgement information
+addon_data.player.judgement_on_cooldown = false
+addon_data.player.judgement_cd_remaining = 0.0
+
 -- containers for GCD information
 addon_data.player.active_gcd_full_duration = 0.0 -- length of the currently active GCD
 addon_data.player.active_gcd_remaining = 0.0 -- timer on currently active GCD.
@@ -518,17 +522,17 @@ addon_data.player.frame_on_update = function(self, elapsed)
     end
   
     -- Repoll the attack speed a short while after an aura change
-    if addon_data.player.repoll_on_aura_change then
-        if addon_data.player.aura_repoll_counter > 0.1 then
-            -- print('SECONDARY API POLL ON AURA CHANGE')
-            addon_data.player.update_weapon_speed()
-            addon_data.bar.show_or_hide_bar()
-            addon_data.player.aura_repoll_counter = 0.0
-            addon_data.player.repoll_on_aura_change = false
-        else
-            addon_data.player.aura_repoll_counter = addon_data.player.aura_repoll_counter + elapsed
-        end
-    end
+    -- if addon_data.player.repoll_on_aura_change then
+    --     if addon_data.player.aura_repoll_counter > 0.1 then
+    --         -- print('SECONDARY API POLL ON AURA CHANGE')
+    --         addon_data.player.update_weapon_speed()
+    --         addon_data.bar.show_or_hide_bar()
+    --         addon_data.player.aura_repoll_counter = 0.0
+    --         addon_data.player.repoll_on_aura_change = false
+    --     else
+    --         addon_data.player.aura_repoll_counter = addon_data.player.aura_repoll_counter + elapsed
+    --     end
+    -- end
 
     -- If there is a GCD lock, check if we should clear it.
     if addon_data.player.gcd_lockout then
@@ -618,7 +622,6 @@ addon_data.player.frame_on_event = function(self, event, ...)
     end
 
 end
-
 addon_data.player_frame = CreateFrame("Frame", addon_name .. "PlayerFrame", UIParent)
 
 --=========================================================================================

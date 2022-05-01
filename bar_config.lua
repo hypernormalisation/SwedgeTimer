@@ -45,6 +45,9 @@ addon_data.bar.UpdateConfigPanelValues = function()
     panel.grace_period_editbox:SetText(tostring(settings.grace_period))
     panel.grace_period_editbox:SetCursorPosition(0)
 
+    panel.tick_width_slider:SetValue(tostring(settings.tick_width))
+    panel.tick_width_slider.editbox:SetCursorPosition(0)
+
     -- panel.main_color_picker.foreground:SetColorTexture(
     --     settings.main_r, settings.main_g, settings.main_b, settings.main_a)
     -- panel.main_text_color_picker.foreground:SetColorTexture(
@@ -53,8 +56,8 @@ addon_data.bar.UpdateConfigPanelValues = function()
     -- panel.in_combat_alpha_slider.editbox:SetCursorPosition(0)
     -- panel.ooc_alpha_slider:SetValue(settings.ooc_alpha)
     -- panel.ooc_alpha_slider.editbox:SetCursorPosition(0)
-    -- panel.backplane_alpha_slider:SetValue(settings.backplane_alpha)
-    -- panel.backplane_alpha_slider.editbox:SetCursorPosition(0)
+    panel.backplane_alpha_slider:SetValue(settings.backplane_alpha)
+    panel.backplane_alpha_slider.editbox:SetCursorPosition(0)
 end
 
 addon_data.bar.EnabledCheckBoxOnClick = function(self)
@@ -103,26 +106,6 @@ end
 addon_data.bar.DisableWhenInactiveBoxOnClick = function(self)
     character_bar_settings.hide_when_inactive = self:GetChecked()
 end
-
--- addon_data.bar.ShowOffHandCheckBoxOnClick = function(self)
---     character_bar_settings.show_offhand = self:GetChecked()
---     addon_data.bar.UpdateVisualsOnSettingsChange()
--- end
-
--- addon_data.bar.ShowBorderCheckBoxOnClick = function(self)
---     character_bar_settings.show_border = self:GetChecked()
---     addon_data.bar.UpdateVisualsOnSettingsChange()
--- end
-
--- addon_data.bar.ClassicBarsCheckBoxOnClick = function(self)
---     character_bar_settings.classic_bars = self:GetChecked()
---     addon_data.bar.UpdateVisualsOnSettingsChange()
--- end
-
--- addon_data.bar.FillEmptyCheckBoxOnClick = function(self)
---     character_bar_settings.fill_empty = self:GetChecked()
---     addon_data.bar.UpdateVisualsOnSettingsChange()
--- end
 
 addon_data.bar.ShowLeftTextCheckBoxOnClick = function(self)
     character_bar_settings.show_left_text = self:GetChecked()
@@ -176,6 +159,11 @@ addon_data.bar.GracePeriodOnEnter = function(self)
     character_bar_settings.grace_period = tonumber(self:GetText())
 end
 
+addon_data.bar.TickWidthOnValChange = function(self)
+    character_bar_settings.tick_width = tonumber(self:GetValue())
+    addon_data.bar.UpdateVisualsOnSettingsChange()
+end
+
 addon_data.bar.CreateConfigPanel = function(parent_panel)
     addon_data.bar.config_frame = CreateFrame("Frame", addon_name .. "PlayerConfigPanel", parent_panel)
     local panel = addon_data.bar.config_frame
@@ -203,34 +191,6 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         "Locks the twist bar in place.",
         addon_data.bar.IsLockedCheckBoxOnClick)
     panel.is_locked_checkbox:SetPoint("TOPLEFT", 10, 16)
-
-
-    -- -- Show Border Checkbox
-    -- panel.show_border_checkbox = addon_data.config.CheckBoxFactory(
-    --     "PlayerShowBorderCheckBox",
-    --     panel,
-    --     "Show border",
-    --     "Enables the player bar's border.",
-    --     addon_data.bar.ShowBorderCheckBoxOnClick)
-    -- panel.show_border_checkbox:SetPoint("TOPLEFT", 10, -60)
-    
-    -- -- Show Classic Bars Checkbox
-    -- panel.classic_bars_checkbox = addon_data.config.CheckBoxFactory(
-    --     "PlayerClassicBarsCheckBox",
-    --     panel,
-    --     "Classic bars",
-    --     "Enables the classic texture for the player's bars.",
-    --     addon_data.bar.ClassicBarsCheckBoxOnClick)
-    -- panel.classic_bars_checkbox:SetPoint("TOPLEFT", 10, -100)
-
-    -- -- Fill/Empty Checkbox
-    -- panel.fill_empty_checkbox = addon_data.config.CheckBoxFactory(
-    --     "PlayerFillEmptyCheckBox",
-    --     panel,
-    --     "Fill / Empty",
-    --     "Determines if the bar is full or empty when a swing is ready.",
-    --     addon_data.bar.FillEmptyCheckBoxOnClick)
-    -- panel.fill_empty_checkbox:SetPoint("TOPLEFT", 10, -120)
 
     -- Show Left Text Checkbox
     panel.show_left_text_checkbox = addon_data.config.CheckBoxFactory(
@@ -396,7 +356,15 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
     --     "Twist Bar Text Color",
     --     addon_data.bar.MainTextColorPickerOnClick)
     -- panel.main_text_color_picker:SetPoint('TOPLEFT', 205, -170)
-    
+    panel.tick_width_slider = addon_data.config.SliderFactory(
+        "TickWidthSlider",
+        panel,
+        "Marker Width",
+        0, 5, 1,
+        addon_data.bar.TickWidthOnValChange    
+    )
+    panel.tick_width_slider:SetPoint("TOPLEFT", 405, -60)
+
     -- In Combat Alpha Slider
     -- panel.in_combat_alpha_slider = addon_data.config.SliderFactory(
     --     "PlayerInCombatAlphaSlider",
@@ -419,15 +387,15 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
     --     addon_data.bar.OOCAlphaOnValChange)
     -- panel.ooc_alpha_slider:SetPoint("TOPLEFT", 405, -110)
     -- -- Backplane Alpha Slider
-    -- panel.backplane_alpha_slider = addon_data.config.SliderFactory(
-    --     "PlayerBackplaneAlphaSlider",
-    --     panel,
-    --     "Backplane Opacity",
-    --     0,
-    --     1,
-    --     0.05,
-    --     addon_data.bar.BackplaneAlphaOnValChange)
-    -- panel.backplane_alpha_slider:SetPoint("TOPLEFT", 405, -160)
+    panel.backplane_alpha_slider = addon_data.config.SliderFactory(
+        "PlayerBackplaneAlphaSlider",
+        panel,
+        "Backplane Opacity",
+        0,
+        1,
+        0.05,
+        addon_data.bar.BackplaneAlphaOnValChange)
+    panel.backplane_alpha_slider:SetPoint("TOPLEFT", 405, -110)
     
     -- Return the final panel
     addon_data.bar.UpdateConfigPanelValues()
@@ -498,10 +466,10 @@ end
 --     addon_data.bar.UpdateVisualsOnSettingsChange()
 -- end
 
--- addon_data.bar.BackplaneAlphaOnValChange = function(self)
---     character_bar_settings.backplane_alpha = tonumber(self:GetValue())
---     addon_data.bar.UpdateVisualsOnSettingsChange()
--- end
+addon_data.bar.BackplaneAlphaOnValChange = function(self)
+    character_bar_settings.backplane_alpha = tonumber(self:GetValue())
+    addon_data.bar.UpdateVisualsOnSettingsChange()
+end
 
 
 --=========================================================================================

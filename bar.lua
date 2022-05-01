@@ -20,7 +20,7 @@ addon_data.bar.default_settings = {
 	y_offset = -180,
 	-- in_combat_alpha = 1.0,
 	-- ooc_alpha = 1.0,
-	backplane_alpha = 1.0,
+	backplane_alpha = 0.85,
 	is_locked = false,
     show_left_text = true,
     show_right_text = true,
@@ -39,6 +39,7 @@ addon_data.bar.default_settings = {
     twist_window = 0.4,
     grace_period = 0.2,
     enable_twist_bar_color = true,
+    tick_width = 3,
 }
 
 -- the following should be flagged when the swing speed changes to
@@ -120,6 +121,8 @@ addon_data.bar.init_bar_visuals = function()
         tile = true, tileSize = 16, edgeSize = 16, 
         insets = { left = 8, right = 8, top = 8, bottom = 8}}
     )
+    frame.backplane:SetBackdropColor(0,0,0,settings.backplane_alpha)
+
     -- if settings.show_border then
     --     frame.backplane:SetBackdrop({
     --         bgFile = "Interface/AddOns/SwedgeTimer/Images/Background", 
@@ -194,19 +197,19 @@ addon_data.bar.init_bar_visuals = function()
     frame.twist_line = frame:CreateLine() -- the twist window marker
     frame.twist_line:SetColorTexture(1,1,1,1)
     frame.twist_line:SetDrawLayer("OVERLAY", -1)
-    frame.twist_line:SetThickness(3)
+    frame.twist_line:SetThickness(character_bar_settings.tick_width)
     frame.twist_line:SetStartPoint("TOPRIGHT", 0, 0) -- dummy vars so the line is initialised
     frame.twist_line:SetEndPoint("BOTTOMRIGHT", 0, 0)
 
     frame.gcd1_line = frame:CreateLine() -- the first gcd possible before a twist
     frame.gcd1_line:SetColorTexture(0.4,0.4,1,1)
     frame.gcd1_line:SetDrawLayer("OVERLAY", -1)
-    frame.gcd1_line:SetThickness(3)
+    frame.gcd1_line:SetThickness(character_bar_settings.tick_width)
     
     frame.gcd2_line = frame:CreateLine()
     frame.gcd2_line:SetColorTexture(0.4,0.4,1,1)
     frame.gcd2_line:SetDrawLayer("OVERLAY", -1)
-    frame.gcd2_line:SetThickness(3)
+    frame.gcd2_line:SetThickness(character_bar_settings.tick_width)
     
     -- Run an update to configure the bar appropriately
     -- addon_data.bar.UpdateVisualsOnSettingsChange()
@@ -241,7 +244,12 @@ addon_data.bar.UpdateVisualsOnSettingsChange = function()
 
         frame.bar:SetTexture('Interface/AddOns/SwedgeTimer/Images/Bar')
         frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_default"]))
-        frame.spark:SetSize(16, settings.height)
+
+        frame.twist_line:SetThickness(character_bar_settings.tick_width)
+        frame.gcd1_line:SetThickness(character_bar_settings.tick_width)
+        frame.gcd2_line:SetThickness(character_bar_settings.tick_width)
+
+
         frame.left_text:SetPoint("TOPLEFT", 2, -(settings.height / 2) + (settings.fontsize / 2))
         frame.left_text:SetTextColor(settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a)
 		frame.left_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize, "OUTLINE")
@@ -260,6 +268,9 @@ addon_data.bar.UpdateVisualsOnSettingsChange = function()
         else
             frame.right_text:Hide()
         end
+
+        addon_data.bar.set_bar_color()
+
     else
         frame:Hide()
     end
