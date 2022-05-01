@@ -424,15 +424,15 @@ addon_data.bar.calc_judgement = function()
     local elapsed = addon_data.player.current_weapon_speed - timer
     -- local time_remaining_on_swing = addon_data.player.current_weapon_speed - addon_data.player.swing_timer
     -- print(time_remaining_on_swing)
-    print('judgement time remaining  = ' .. tostring(remaining))
-    print('swing timer remaining     = ' .. tostring(timer))
+    -- print('judgement time remaining  = ' .. tostring(remaining))
+    -- print('swing timer remaining     = ' .. tostring(timer))
     
     if remaining < timer then
-        print('judgement off cd this swing')
+        -- print('judgement off cd this swing')
         local offset = ((remaining + elapsed) / addon_data.player.current_weapon_speed) * character_bar_settings.width
-        print(offset)
-        line:SetStartPoint("TOPLEFT", offset, 10)
-        line:SetEndPoint("BOTTOMLEFT", offset, -10)
+        -- print(offset)
+        line:SetStartPoint("TOPLEFT", offset, 5)
+        line:SetEndPoint("BOTTOMLEFT", offset, -5)
         line:Show()
     else
         line:Hide()
