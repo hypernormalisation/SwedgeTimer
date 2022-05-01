@@ -70,6 +70,7 @@ addon_data.bar.TwistBarToggle = function()
     else
         character_bar_settings.enabled = false
     end
+    addon_data.bar.UpdateConfigPanelValues()
     addon_data.bar.UpdateVisualsOnSettingsChange()
 end
 
@@ -80,6 +81,7 @@ addon_data.bar.TwistBarLockToggle = function()
     else
         character_bar_settings.is_locked = false
     end
+    addon_data.bar.UpdateConfigPanelValues()
     addon_data.bar.UpdateVisualsOnSettingsChange()
 end
 

@@ -80,10 +80,8 @@ SlashCmdList["SWEDGETIMER_HOME"] = function(option)
     -- print(option)
     if option == "bar" then
         addon_data.bar.TwistBarToggle()
-        addon_data.bar.UpdateConfigPanelValues()
     elseif option == "lock" then
         addon_data.bar.TwistBarLockToggle()
-        addon_data.bar.UpdateConfigPanelValues()
         
     -- If no args, bring up the main config window
     elseif option == '' then
@@ -95,8 +93,8 @@ SlashCmdList["SWEDGETIMER_HOME"] = function(option)
         InterfaceOptionsFrame_OpenToCategory(addon_data.config.config_parent_panel)
     else
         print('Recognised SwedgeTimer commands:')
-        print('--  /st lock: toggles bar lock')
-        print('--  /st bar: toggles bar visibility')
+        print('--  /st lock  : toggles bar lock')
+        print('--  /st bar   : toggles bar visibility')
     end
 end
 

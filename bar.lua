@@ -445,11 +445,15 @@ addon_data.bar.update_bar_on_speed_change = function()
     -- This will recalculate all necessary frame element updates here
     -- to keep them out the main onupdate function
     -- print('Recalculating bar visuals on speed change...')
-    addon_data.bar.set_twist_tick_offset()
-    addon_data.bar.set_gcd1_tick_offset()
-    addon_data.bar.set_gcd2_tick_offset()
+    addon_data.bar.set_tick_offsets()
     addon_data.bar.set_gcd_bar_width()
     addon_data.bar.show_or_hide_ticks()
+end
+
+addon_data.bar.set_tick_offsets = function()
+    addon_data.bar.set_twist_tick_offset()
+    addon_data.bar.set_gcd1_tick_offset()
+    addon_data.bar.set_gcd2_tick_offset()   
 end
 
 addon_data.bar.update_bar_on_aura_change = function()
@@ -463,9 +467,7 @@ addon_data.bar.update_bar_on_aura_change = function()
     addon_data.bar.set_bar_color()
 
     -- if the spell haste changes we need to update the tick offsets
-    addon_data.bar.set_twist_tick_offset()
-    addon_data.bar.set_gcd1_tick_offset()
-    addon_data.bar.set_gcd2_tick_offset()
+    addon_data.bar.set_tick_offsets()
 
     -- determine if we should now show or hide the ticks
     addon_data.bar.show_or_hide_ticks()
