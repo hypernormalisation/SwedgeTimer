@@ -16,6 +16,7 @@ addon_data.bar.UpdateConfigPanelValues = function()
     panel.is_lag_detection_enabled_checkbox:SetChecked(settings.lag_detection_enabled)
     panel.is_twist_color_enabled_checkbox:SetChecked(settings.enable_twist_bar_color)
     panel.hide_when_inactive_checkbox:SetChecked(settings.hide_when_inactive)
+    panel.show_judgement_marker_checkbox:SetChecked(settings.judgement_marker)
 
     panel.lag_multiplier_editbox:SetText(tostring(character_player_settings.lag_multiplier))
     panel.lag_multiplier_editbox:SetCursorPosition(0)
@@ -115,6 +116,11 @@ end
 addon_data.bar.ShowRightTextCheckBoxOnClick = function(self)
     character_bar_settings.show_right_text = self:GetChecked()
     addon_data.bar.UpdateVisualsOnSettingsChange()
+end
+
+addon_data.bar.ShowJudgementMarkerOnClick = function(self)
+    character_bar_settings.judgement_marker = self:GetChecked()
+    -- addon_data.bar.UpdateVisualsOnSettingsChange()
 end
 
 addon_data.bar.WidthEditBoxOnEnter = function(self)
@@ -242,6 +248,15 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
     )
     panel.hide_when_inactive_checkbox:SetPoint("TOPLEFT", 10, -84)
 
+    -- Show Judgement Marker Checkbox
+    panel.show_judgement_marker_checkbox = addon_data.config.CheckBoxFactory(
+        "ShowJudgementMarkerCheckbox",
+        panel,
+        " Show Judgement Indicator",
+        "Shows a large yellow line on the bar when the judgement spell is coming off cooldown that swing.",
+        addon_data.bar.ShowJudgementMarkerOnClick
+    )
+    panel.show_judgement_marker_checkbox:SetPoint("TOPLEFT", 10, -104)
 
     -- Width EditBox
     panel.width_editbox = addon_data.config.EditBoxFactory(
@@ -386,7 +401,8 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
     --     0.05,
     --     addon_data.bar.OOCAlphaOnValChange)
     -- panel.ooc_alpha_slider:SetPoint("TOPLEFT", 405, -110)
-    -- -- Backplane Alpha Slider
+    
+    -- Backplane Alpha Slider
     panel.backplane_alpha_slider = addon_data.config.SliderFactory(
         "PlayerBackplaneAlphaSlider",
         panel,

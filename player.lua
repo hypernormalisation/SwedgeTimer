@@ -38,6 +38,8 @@ addon_data.player.twist_impossible = false
 addon_data.player.has_bloodlust = false
 
 -- judgement information
+addon_data.player.new_judgement_cast = false
+addon_data.player.judgement_being_tracked = false
 addon_data.player.judgement_on_cooldown = false
 addon_data.player.judgement_cd_remaining = 0.0
 
@@ -265,9 +267,9 @@ addon_data.player.OnCombatLogUnfiltered = function(combat_info)
                 else
                     addon_data.player.swing_timer = swing_timer_reduced_40p
                 end
-                -- once the swing timer is updated, recalculate any remaining GCD.
+                -- once the swing timer is updated, alter the bar as necessary
                 if addon_data.player.gcd_lockout then
-                    addon_data.bar.set_gcd_bar_width()        
+                    addon_data.bar.update_bar_on_parry()      
                 end
             end
         end
@@ -376,6 +378,7 @@ addon_data.player.on_player_aura_change = function()
     
 end
 
+
 -- Function to detect any spell casts like repentance that would reset
 -- the swing timer. GCD tracking handled elsewhere by other event triggers.
 addon_data.player.OnPlayerSpellCast = function(event, args)
@@ -387,6 +390,11 @@ addon_data.player.OnPlayerSpellCast = function(event, args)
    
     local spell_id = args[4] -- universal for a given spell type
     local spell_guid = args[3] -- completely unique 
+
+    -- detect judgements and track the cooldown
+    if spell_id == 20271 then
+        addon_data.player.new_judgement_cast = true
+    end
 
     -- detect repentance casts and reset the timer
     if spell_id == 20066 then
@@ -496,6 +504,31 @@ addon_data.player.process_gcd_end = function()
     addon_data.bar.hide_gcd_bar() -- i almost don't like this being here
 end
 
+
+addon_data.player.process_new_judgment_cd = function()
+    -- called each frame after judgement is registered until the API
+    -- updates with the proper cooldown information
+    
+    -- print('checking judgement cast')
+    addon_data.player.judgement_on_cooldown = true
+    local start_time, duration = GetSpellCooldown(20271)
+    -- print(start_time)
+    -- print(duration)
+    
+    if duration ~= 0 then
+        -- print('detected cooldown info')
+        -- manipulate flags
+        addon_data.player.new_judgement_cast = false
+        addon_data.player.judgement_being_tracked = true
+        
+        -- calc the duration
+        local time_now = GetTime()
+        local calced_duration_remaining = duration - (time_now - start_time)
+        -- print(calced_duration_remaining)
+        addon_data.player.judgement_cd_remaining = calced_duration_remaining
+    end
+end
+
 -- CALLED EVERY FRAME
 addon_data.player.frame_on_update = function(self, elapsed)
     
@@ -571,6 +604,20 @@ addon_data.player.frame_on_update = function(self, elapsed)
         addon_data.bar.update_bar_on_new_gcd()
         addon_data.reported_gcd_lockout = true
     end 
+
+    -- Track any judgement cooldowns
+    if addon_data.player.new_judgement_cast then
+        addon_data.player.process_new_judgment_cd()
+    end
+
+    if addon_data.player.judgement_being_tracked then
+        addon_data.player.judgement_cd_remaining = addon_data.player.judgement_cd_remaining - elapsed
+        if addon_data.player.judgement_cd_remaining <= 0 then
+            -- print('judgement off cd!')
+            addon_data.player.judgement_being_tracked = false
+            addon_data.bar.frame.judgement_line:Hide()
+        end
+    end
 
     -- Always update the swing timer with how much time has elapsed
     addon_data.player.update_swing_timer(elapsed)

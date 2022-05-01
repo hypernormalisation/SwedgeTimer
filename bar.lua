@@ -40,6 +40,7 @@ addon_data.bar.default_settings = {
     grace_period = 0.2,
     enable_twist_bar_color = true,
     tick_width = 3,
+    judgement_marker = false
 }
 
 -- the following should be flagged when the swing speed changes to
@@ -211,6 +212,11 @@ addon_data.bar.init_bar_visuals = function()
     frame.gcd2_line:SetDrawLayer("OVERLAY", -1)
     frame.gcd2_line:SetThickness(character_bar_settings.tick_width)
     
+    frame.judgement_line = frame:CreateLine()
+    frame.judgement_line:SetColorTexture(1.0,1.0,0.1,1)
+    frame.judgement_line:SetDrawLayer("OVERLAY", -1)
+    frame.judgement_line:SetThickness(character_bar_settings.tick_width+2)
+
     -- Run an update to configure the bar appropriately
     -- addon_data.bar.UpdateVisualsOnSettingsChange()
     -- addon_data.bar.update_visuals_on_update()
@@ -248,6 +254,7 @@ addon_data.bar.UpdateVisualsOnSettingsChange = function()
         frame.twist_line:SetThickness(character_bar_settings.tick_width)
         frame.gcd1_line:SetThickness(character_bar_settings.tick_width)
         frame.gcd2_line:SetThickness(character_bar_settings.tick_width)
+        frame.judgement_line:SetThickness(character_bar_settings.tick_width+1)
 
 
         frame.left_text:SetPoint("TOPLEFT", 2, -(settings.height / 2) + (settings.fontsize / 2))
@@ -336,20 +343,11 @@ end
 --=========================================================================================
 addon_data.bar.update_bar_on_combat = function()
     -- Function called to update bar when entering/leaving combat.
-        -- Update the alpha
-        -- if addon_data.core.in_combat then
-        --     addon_data.bar.frame:SetAlpha(character_bar_settings.in_combat_alpha)
-        -- else
-        --     addon_data.bar.frame:SetAlpha(character_bar_settings.ooc_alpha)
-        -- end
     addon_data.bar.show_or_hide_bar()
 end
 
 addon_data.bar.update_bar_on_timer_full = function()
     -- Function called when the bar fills up to change any bar visuals
-    -- addon_data.bar.frame.twist_line:Hide()
-    -- addon_data.bar.frame.gcd1_line:Hide()
-    -- addon_data.bar.frame.gcd2_line:Hide()
     addon_data.bar.set_gcd_bar_width()
     addon_data.bar.frame.twist_line:Hide()
     addon_data.bar.frame.gcd1_line:Hide()
@@ -362,6 +360,8 @@ addon_data.bar.update_bar_on_swing_reset = function()
     addon_data.bar.show_or_hide_ticks()
     -- Recalculate the gcd bar width
     addon_data.bar.set_gcd_bar_width()
+    -- calc any judgements
+    addon_data.bar.calc_judgement()
 end
 
 addon_data.bar.update_bar_on_new_gcd = function()
@@ -387,11 +387,6 @@ end
 addon_data.bar.update_bar_on_aura_change = function()
     -- A function to be run once upon the player's auras changing.
     -- Aura changes determine if the twist line should be drawn or not.
-    -- if addon_data.player.swing_timer ~= 0 and addon_data.bar.should_draw_twist_window() then
-    --     addon_data.bar.frame.twist_line:Show()
-    -- else
-    --     addon_data.bar.frame.twist_line:Hide()
-    -- end
     addon_data.bar.set_bar_color()
 
     -- if the spell haste changes we need to update the tick offsets
@@ -402,11 +397,52 @@ addon_data.bar.update_bar_on_aura_change = function()
 
     -- determine if the bar should be auto hidden
     addon_data.bar.show_or_hide_bar()
+
+    -- check for judgements if necessary
+    addon_data.bar.calc_judgement()
 end
+
+addon_data.bar.update_bar_on_parry = function()
+    -- called whenever the player parries an attack
+    addon_data.bar.set_gcd_bar_width()  
+    addon_data.bar.calc_judgement()
+end
+
 
 --=========================================================================================
 -- Funcs to recalculate/show/hide etc bar elements
 --=========================================================================================
+addon_data.bar.calc_judgement = function()
+    -- Function to check if we need to draw the judgement line
+    -- and then to calulate its position. Called when the speed or timer changes.
+    -- addon_data.player.judgement_cd_remaining
+    if not addon_data.player.judgement_being_tracked or not character_bar_settings.judgement_marker then return end
+
+    local line = addon_data.bar.frame.judgement_line
+    local remaining = addon_data.player.judgement_cd_remaining
+    local timer = addon_data.player.swing_timer
+    local elapsed = addon_data.player.current_weapon_speed - timer
+    -- local time_remaining_on_swing = addon_data.player.current_weapon_speed - addon_data.player.swing_timer
+    -- print(time_remaining_on_swing)
+    print('judgement time remaining  = ' .. tostring(remaining))
+    print('swing timer remaining     = ' .. tostring(timer))
+    
+    if remaining < timer then
+        print('judgement off cd this swing')
+        local offset = ((remaining + elapsed) / addon_data.player.current_weapon_speed) * character_bar_settings.width
+        print(offset)
+        line:SetStartPoint("TOPLEFT", offset, 10)
+        line:SetEndPoint("BOTTOMLEFT", offset, -10)
+        line:Show()
+    else
+        line:Hide()
+    end
+
+    -- if addon_data.player.judgement_cd_remaining < addon_data.player.current_weapon_speed then
+    --     print('judgement off cd ')
+    -- end
+end
+
 addon_data.bar.show_or_hide_bar = function()
     -- Function called to show or hide the bar
     local frame = addon_data.bar.frame
