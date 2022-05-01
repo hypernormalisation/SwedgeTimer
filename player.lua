@@ -57,6 +57,8 @@ addon_data.player.reported_swing_timer_complete = false
 addon_data.player.reported_swing_timer_complete_double = false
 addon_data.player.time_since_swing_completion = 0.0
 
+-- addon_data.player.new_parry = false
+
 -- a flag to ensure the code on speed change only runs once per change
 addon_data.player.reported_speed_change = true
 
@@ -258,7 +260,11 @@ addon_data.player.OnCombatLogUnfiltered = function(combat_info)
                     addon_data.player.swing_timer = min_swing_time
                 else
                     addon_data.player.swing_timer = swing_timer_reduced_40p
-                end        
+                end
+                -- once the swing timer is updated, recalculate any remaining GCD.
+                if addon_data.player.gcd_lockout then
+                    addon_data.bar.set_gcd_bar_width()        
+                end
             end
         end
     end
@@ -503,19 +509,20 @@ addon_data.player.frame_on_update = function(self, elapsed)
     end
 
     -- -- At the latest, repoll the attack speed every 0.2s
-    -- if addon_data.player.periodic_repoll_counter > 0.2 then
-    --     addon_data.player.update_weapon_speed()
-    --     -- print('periodic repoll')
-    --     addon_data.player.periodic_repoll_counter = 0.0
-    -- else
-    --     addon_data.player.periodic_repoll_counter = addon_data.player.periodic_repoll_counter + elapsed
-    -- end
+    if addon_data.player.periodic_repoll_counter > 0.2 then
+        addon_data.player.update_weapon_speed()
+        -- print('periodic repoll')
+        addon_data.player.periodic_repoll_counter = 0.0
+    else
+        addon_data.player.periodic_repoll_counter = addon_data.player.periodic_repoll_counter + elapsed
+    end
   
     -- Repoll the attack speed a short while after an aura change
     if addon_data.player.repoll_on_aura_change then
         if addon_data.player.aura_repoll_counter > 0.1 then
             -- print('SECONDARY API POLL ON AURA CHANGE')
             addon_data.player.update_weapon_speed()
+            addon_data.bar.show_or_hide_bar()
             addon_data.player.aura_repoll_counter = 0.0
             addon_data.player.repoll_on_aura_change = false
         else

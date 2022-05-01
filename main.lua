@@ -142,12 +142,11 @@ local function init_addon(self)
     addon_data.bar.UpdateVisualsOnSettingsChange()
     addon_data.bar.update_visuals_on_update()
     addon_data.bar.set_bar_color()
-    
-    addon_data.bar.update_bar_on_combat()
     -- addon_data.bar.update_bar_on_aura_change()
     
     addon_data.bar.set_gcd_bar_width()
     addon_data.bar.set_bar_color()
+    addon_data.bar.show_or_hide_bar()
 
     -- If appropriate show welcome message
     if addon_data.debug then print('... complete!') end

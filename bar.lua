@@ -9,6 +9,7 @@ local print = addon_data.utils.print_msg
 addon_data.bar = {}
 addon_data.bar.default_settings = {
 	enabled = true,
+    hide_when_inactive = true,
     lag_detection_enabled = true,
 	width = 345,
 	height = 32,
@@ -221,6 +222,7 @@ addon_data.bar.UpdateVisualsOnSettingsChange = function()
     local settings = character_bar_settings
     -- print("enabled says: " .. tostring(settings.enabled))
     -- print("show_border says : " .. tostring(settings.show_border))
+
     if settings.enabled then
         frame:Show()
         frame:ClearAllPoints()
@@ -273,30 +275,22 @@ addon_data.bar.update_visuals_on_update = function()
     -- Func is called by the player frame OnUpdate (maybe we should change this).
     -- As such it should be kept as minimal as possible to avoid wasting resources.
 
+
+    addon_data.bar.show_or_hide_bar()
+    if not addon_data.bar.should_show_bar() then return end 
+
     local settings = character_bar_settings
     local frame = addon_data.bar.frame
-    if not settings.enabled then return end 
-
     local speed = addon_data.player.current_weapon_speed
     local timer = addon_data.player.swing_timer
 
     -- Update the main bar's width
     local timer_width = math.min(settings.width - (settings.width * (timer / speed)), settings.width)
-    -- if not settings.fill_empty then
-    --     timer_width = settings.width - timer_width + 0.001
-    -- end
     
     frame.bar:SetWidth(timer_width)
-    frame.spark:SetPoint('TOPLEFT', timer_width - 8, 0)
+    -- frame.spark:SetPoint('TOPLEFT', timer_width - 8, 0)
     
-    -- frame.gcd_bar:SetWidth(settings.width/2)
     frame.gcd_bar:Show()
-
-    -- if timer_width == settings.width or not settings.classic_bars or timer_width == 0.001 then
-    --     frame.spark:Hide()
-    -- else
-    --     frame.spark:Show()
-    -- end
 
     -- Update the main bars text, hide right text if bar full
     frame.left_text:SetText(tostring(addon_data.utils.SimpleRound(speed, 0.1)))
@@ -326,57 +320,9 @@ addon_data.bar.update_visuals_on_update = function()
     end
 end
 
-
-addon_data.bar.hide_gcd_bar = function()
-    -- function to "hide" the gcd bar by reducing the width to zero
-    -- instead of using the dedicated Hide method
-    addon_data.bar.gcd_bar_width = 0
-    addon_data.bar.frame.gcd_bar:SetWidth(0)
-end
-
-addon_data.bar.set_gcd_bar_width = function()
-
-    if not addon_data.player.gcd_lockout then
-        addon_data.bar.gcd_bar_width = 0
-        addon_data.bar.frame.gcd_bar:SetWidth(0)
-    end
-
-    local settings = character_bar_settings
-    local attack_speed = addon_data.player.current_weapon_speed
-    local swing_timer = addon_data.player.swing_timer
-    -- print(attack_speed)
-    -- print(swing_timer)
-    -- print(addon_data.player.active_gcd_remaining)
-    local time_since_bar_start = addon_data.player.current_weapon_speed - addon_data.player.swing_timer
-
-
-    local time_gcd_ends = time_since_bar_start + addon_data.player.active_gcd_remaining
-    -- print("Time relative to bar the GCD ends = " .. tostring(time_gcd_ends))
-
-    if time_gcd_ends > attack_speed then
-        time_gcd_ends = attack_speed
-    end
-    -- print("Modified time relative to bar the GCD ends = " .. tostring(time_gcd_ends))
-
-
-    -- local gcd_bar_width = settings.width - (time_gcd_ends / attack_speed)
-
-    local gcd_bar_width = (time_gcd_ends / attack_speed) * settings.width
-    -- print('offset says ' .. tostring(offset))
-
-    -- -- if it exceeds the bar width, max it out.
-    -- if offset > settings.width then
-    --     gcd_bar_width = settings.width - 0.001
-    -- elseif gcd_bar_width < 0 then
-    --     gcd_bar_width = 0.001
-    -- end
-        
-    -- print('gcd bar width says ' .. gcd_bar_width)
-    addon_data.bar.gcd_bar_width = gcd_bar_width
-    addon_data.bar.frame.gcd_bar:SetWidth(gcd_bar_width)
-end
-
-
+--=========================================================================================
+-- Funcs to trigger updates to the bar's conditions on certain events.
+--=========================================================================================
 addon_data.bar.update_bar_on_combat = function()
     -- Function called to update bar when entering/leaving combat.
         -- Update the alpha
@@ -385,6 +331,7 @@ addon_data.bar.update_bar_on_combat = function()
         -- else
         --     addon_data.bar.frame:SetAlpha(character_bar_settings.ooc_alpha)
         -- end
+    addon_data.bar.show_or_hide_bar()
 end
 
 addon_data.bar.update_bar_on_timer_full = function()
@@ -398,36 +345,6 @@ addon_data.bar.update_bar_on_timer_full = function()
     addon_data.bar.frame.gcd2_line:Hide()
 end
 
-addon_data.bar.show_or_hide_ticks = function()
-    local frame = addon_data.bar.frame
-
-    -- always hide ticks at full swing timer
-    if addon_data.player.swing_timer == 0 then
-        addon_data.bar.frame.twist_line:Hide()
-        addon_data.bar.frame.gcd1_line:Hide()
-        addon_data.bar.frame.gcd2_line:Hide()
-        return
-    end
-
-    -- Twist line
-    if addon_data.bar.should_draw_twist_window() then
-        frame.twist_line:Show()
-    else
-        frame.twist_line:Hide()
-    end
-    -- First GCD line
-    if addon_data.bar.should_draw_gcd1_window() then
-        frame.gcd1_line:Show()
-    else
-        frame.gcd1_line:Hide()
-    end
-    -- Second GCD line
-    if addon_data.bar.should_draw_gcd2_window() then
-        frame.gcd2_line:Show()
-    else
-        frame.gcd2_line:Hide()
-    end
-end
 
 addon_data.bar.update_bar_on_swing_reset = function()
     -- Function called when the swing timer resets to change any bar visuals
@@ -472,6 +389,114 @@ addon_data.bar.update_bar_on_aura_change = function()
     -- determine if we should now show or hide the ticks
     addon_data.bar.show_or_hide_ticks()
 
+    -- determine if the bar should be auto hidden
+    addon_data.bar.show_or_hide_bar()
+end
+
+--=========================================================================================
+-- Funcs to recalculate/show/hide etc bar elements
+--=========================================================================================
+addon_data.bar.show_or_hide_bar = function()
+    -- Function called to show or hide the bar
+    local frame = addon_data.bar.frame
+    if addon_data.bar.should_show_bar() then
+        frame:Show()
+    else
+        frame:Hide()
+    end
+end
+
+addon_data.bar.should_show_bar = function()
+    -- Logic for if the bar should be visible
+    if character_bar_settings.enabled then
+        if character_bar_settings.hide_when_inactive then
+            if addon_data.player.n_active_seals == 0 and not addon_data.core.in_combat then
+                return false
+            end
+        end
+        return true
+    end
+    return false
+end
+
+addon_data.bar.hide_gcd_bar = function()
+    -- function to "hide" the gcd bar by reducing the width to zero
+    -- instead of using the dedicated Hide method
+    addon_data.bar.gcd_bar_width = 0
+    addon_data.bar.frame.gcd_bar:SetWidth(0)
+end
+
+addon_data.bar.set_gcd_bar_width = function()
+
+    if not addon_data.player.gcd_lockout then
+        addon_data.bar.hide_gcd_bar()
+    end
+
+    local settings = character_bar_settings
+    local attack_speed = addon_data.player.current_weapon_speed
+    local swing_timer = addon_data.player.swing_timer
+    -- print(attack_speed)
+    -- print(swing_timer)
+    -- print(addon_data.player.active_gcd_remaining)
+    local time_since_bar_start = addon_data.player.current_weapon_speed - addon_data.player.swing_timer
+
+
+    local time_gcd_ends = time_since_bar_start + addon_data.player.active_gcd_remaining
+    -- print("Time relative to bar the GCD ends = " .. tostring(time_gcd_ends))
+
+    if time_gcd_ends > attack_speed then
+        time_gcd_ends = attack_speed
+    end
+    -- print("Modified time relative to bar the GCD ends = " .. tostring(time_gcd_ends))
+
+
+    -- local gcd_bar_width = settings.width - (time_gcd_ends / attack_speed)
+
+    local gcd_bar_width = (time_gcd_ends / attack_speed) * settings.width
+    -- print('offset says ' .. tostring(offset))
+
+    -- -- if it exceeds the bar width, max it out.
+    -- if offset > settings.width then
+    --     gcd_bar_width = settings.width - 0.001
+    -- elseif gcd_bar_width < 0 then
+    --     gcd_bar_width = 0.001
+    -- end
+        
+    -- print('gcd bar width says ' .. gcd_bar_width)
+    addon_data.bar.gcd_bar_width = gcd_bar_width
+    addon_data.bar.frame.gcd_bar:SetWidth(gcd_bar_width)
+end
+
+-- Func to figure out if the ticks should be
+addon_data.bar.show_or_hide_ticks = function()
+    local frame = addon_data.bar.frame
+
+    -- always hide ticks at full swing timer
+    if addon_data.player.swing_timer == 0 then
+        addon_data.bar.frame.twist_line:Hide()
+        addon_data.bar.frame.gcd1_line:Hide()
+        addon_data.bar.frame.gcd2_line:Hide()
+        return
+    end
+
+    -- Twist line
+    if addon_data.bar.should_draw_twist_window() then
+        frame.twist_line:Show()
+    else
+        frame.twist_line:Hide()
+    end
+    -- First GCD line
+    if addon_data.bar.should_draw_gcd1_window() then
+        frame.gcd1_line:Show()
+    else
+        frame.gcd1_line:Hide()
+    end
+    -- Second GCD line
+    if addon_data.bar.should_draw_gcd2_window() then
+        frame.gcd2_line:Show()
+    else
+        frame.gcd2_line:Hide()
+    end
 end
 
 -- Determine wether or not to draw the twist line
@@ -538,12 +563,9 @@ addon_data.bar.set_gcd2_tick_offset = function()
     addon_data.bar.frame.gcd2_line:SetEndPoint("BOTTOMRIGHT", offset, 0)
 end
 
-
-
+-- This function sets the bar colour for all cases outside of seal of command, which has
+-- a time sensitive component and must be handled on-update.
 addon_data.bar.set_bar_color = function()
-    -- This function sets the bar colour for all cases outside of seal of command, which has
-    -- a time sensitive component and must be handled on-update.
-    -- print('CALL TO SET COLOUR')
     -- if no seal return default color
     if addon_data.player.n_active_seals == 0 then
         addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_default"]))
@@ -554,13 +576,11 @@ addon_data.bar.set_bar_color = function()
         addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_twisting"]))
         return
     end
-
     -- if we're only under SoB, return the blood color
     if addon_data.player.active_seals["Seal of Blood"] ~= nil or addon_data.player.active_seals["Seal of the Martyr"] ~= nil then
         addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_blood"]))
         return
     end
-
     -- if we get to the end return the default color
     addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_default"]))
 end

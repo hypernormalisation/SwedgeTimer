@@ -14,9 +14,8 @@ addon_data.bar.UpdateConfigPanelValues = function()
     panel.is_locked_checkbox:SetChecked(settings.is_locked)
 
     panel.is_lag_detection_enabled_checkbox:SetChecked(settings.lag_detection_enabled)
-
     panel.is_twist_color_enabled_checkbox:SetChecked(settings.enable_twist_bar_color)
-
+    panel.hide_when_inactive_checkbox:SetChecked(settings.hide_when_inactive)
 
     panel.lag_multiplier_editbox:SetText(tostring(character_player_settings.lag_multiplier))
     panel.lag_multiplier_editbox:SetCursorPosition(0)
@@ -99,6 +98,10 @@ end
 
 addon_data.bar.TwistColorEnabledBoxOnClick = function(self)
     character_bar_settings.enable_twist_bar_color = self:GetChecked()
+end
+
+addon_data.bar.DisableWhenInactiveBoxOnClick = function(self)
+    character_bar_settings.hide_when_inactive = self:GetChecked()
 end
 
 -- addon_data.bar.ShowOffHandCheckBoxOnClick = function(self)
@@ -268,6 +271,17 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         -- addon_data.bar.TwistColorEnabledBoxOnClick
     )
     panel.is_twist_color_enabled_checkbox:SetPoint("TOPLEFT", 10, -64)
+
+    -- Hide When Inactive Checkbox
+    panel.hide_when_inactive_checkbox = addon_data.config.CheckBoxFactory(
+        "HideWhenInactiveCheckbox",
+        panel,
+        " Hide When Inactive",
+        "Hides the bar when the player is both out of combat, and has no active seals.",
+        addon_data.bar.DisableWhenInactiveBoxOnClick
+    )
+    panel.hide_when_inactive_checkbox:SetPoint("TOPLEFT", 10, -84)
+
 
     -- Width EditBox
     panel.width_editbox = addon_data.config.EditBoxFactory(
