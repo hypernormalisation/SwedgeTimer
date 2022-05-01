@@ -3,7 +3,7 @@ local addon_name, addon_data = ...
 local L = addon_data.localization_table
 
 -- local name = UnitName("player")
-local version = "v0.1.5"
+local version = "v0.1.6"
 local load_message = "version " .. version .. " loaded!"
 
 -- shorthand
