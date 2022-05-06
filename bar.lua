@@ -115,7 +115,7 @@ addon_data.bar.init_bar_visuals = function()
     frame.backplane = CreateFrame("Frame", addon_name .. "BarBackdropFrame", frame, "BackdropTemplate")
     frame.backplane:SetPoint('TOPLEFT', -9, 9)
     frame.backplane:SetPoint('BOTTOMRIGHT', 9, -9)
-    frame.backplane:SetFrameStrata('BACKGROUND')
+    frame.backplane:SetFrameStrata('LOW')
     frame.backplane:SetBackdrop({
         bgFile = "Interface/AddOns/SwedgeTimer/Images/Background", 
         edgeFile = nil, 
@@ -123,6 +123,7 @@ addon_data.bar.init_bar_visuals = function()
         insets = { left = 8, right = 8, top = 8, bottom = 8}}
     )
     frame.backplane:SetBackdropColor(0,0,0,settings.backplane_alpha)
+    -- frame.backplane:SetDrawLayer("ARTWORK", -2)
 
     -- if settings.show_border then
     --     frame.backplane:SetBackdrop({
