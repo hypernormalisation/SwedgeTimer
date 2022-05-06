@@ -611,6 +611,20 @@ addon_data.bar.set_gcd2_tick_offset = function()
     addon_data.bar.frame.gcd2_line:SetEndPoint("BOTTOMRIGHT", offset, 0)
 end
 
+-- function to determine if any seal we are happy to run with is up
+-- i.e blood justice or vengeance
+addon_data.bar.is_running_seal_active = function()
+    if addon_data.player.active_seals["Seal of Blood"] ~= nil then
+        return true
+    elseif addon_data.player.active_seals["Seal of Justice"] ~= nil then
+        return true
+    elseif addon_data.player.active_seals["Seal of Vengeance"] ~= nil then
+        return true
+    end
+    return false
+end
+
+
 -- This function sets the bar colour for all cases outside of seal of command, which has
 -- a time sensitive component and must be handled on-update.
 addon_data.bar.set_bar_color = function()
@@ -625,7 +639,7 @@ addon_data.bar.set_bar_color = function()
         return
     end
     -- if we're only under SoB, return the blood color
-    if addon_data.player.active_seals["Seal of Blood"] ~= nil or addon_data.player.active_seals["Seal of the Martyr"] ~= nil then
+    if addon_data.bar.is_running_seal_active() then
         addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_blood"]))
         return
     end
