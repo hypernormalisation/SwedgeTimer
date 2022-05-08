@@ -9,9 +9,9 @@ Based on some code and assets from the WeaponSwingTimer addon.
 SwedgeTimer is a standalone swing timer bar to help Retribution Paladins seal twist more effectively.
 It is not a WeakAura, it is built from the ground up in lua, and does not use the WeakAura API in any way.
 
-SwedgeTimer replicates all the standard features of the current WeakAura state-of-the-art, including the GCD overlay, timing markers, and colour coding.
+SwedgeTimer replicates all the standard features of the current WeakAura state-of-the-art, including the GCD overlay, timing markers, and colour coding based on active seals.
 
-It does not aim to replace any of the other components of a typical Ret UI or heads-up-display; it is simply a moderately configurable swing timer bar at present, meant to be used in conjunction with more conventional weak auras for Retribution paladins like seal indicators and cooldown/proc trackers.
+It does not aim to replace any of the other components of a typical Ret UI or heads-up-display; it is very simply a configurable swing timer bar at present, meant to be used in conjunction with more conventional weak auras for Retribution paladins like seal indicators and cooldown/proc trackers.
 
 ## Why use this over a WeakAura swing timer?
 
@@ -20,6 +20,8 @@ There are some advantages in using the SwedgeTimer addon over a traditional weak
 ### Seal of the Crusader snapshotting
 
 Seal of the Crusader uses haste snapshotting to prevent taking advantage of the shortened attack timer by switching to (or from) another seal mid-swing.
+The WeakAuras swing timer does not account for this, and will update your haste as soon as you switch seals, showing the wrong swing timer information until the next swing when the snapshotting falls off.
+
 This has been brought to the attention of the weak aura developers by members of the ret community but they refuse to incorporate a fix.
 As such, rets commonly use a patched version of weak auras, with the patched `generictrigger.lua` file being available on the Light Club and other paladin discords.
 
@@ -75,4 +77,3 @@ The bar itself can be clicked and dragged, and then locked inplace when the play
 The lag detection settings are experimental, but to ensure the best result a player may wish to experiment with the following options:
 - "Lag Multiplier" is the value the world latency roundtrip can be multiplied by, defaulting to 1.5. In internal testing, this value was found to result in the most consistent prediction of impossible twists that the client and traditional weak aura bars believed possible.
 - "Lag Threshold" is a flat value of latency the player can add, in seconds, defaulting to 0.0. This might be useful in fine tuning for some player's connections to the game world.
-

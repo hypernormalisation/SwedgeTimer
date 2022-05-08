@@ -14,7 +14,7 @@ end
 addon_data.config.InitializeVisuals = function()
 
     -- Add the parent panel
-    addon_data.config.config_parent_panel = CreateFrame("Frame", "MyFrame", UIParent)
+    addon_data.config.config_parent_panel = CreateFrame("Frame", addon_name .. "MyConfigFrame", UIParent)
     local panel = addon_data.config.config_parent_panel
     panel:SetSize(1, 1)
     panel.global_panel = addon_data.config.CreateConfigPanel(panel)
@@ -150,20 +150,20 @@ end
 
 addon_data.config.UpdateConfigValues = function()
     local panel = addon_data.config.config_frame
-    -- local settings = character_player_settings
-    local settings_core = character_core_settings
+    -- local settings = swedgetimer_player_settings
+    local settings_core = swedgetimer_core_settings
 	panel.welcome_checkbox:SetChecked(settings_core.welcome_message)
 end
 
 addon_data.config.WelcomeCheckBoxOnClick = function(self)
-	character_core_settings.welcome_message = self:GetChecked()
+	swedgetimer_core_settings.welcome_message = self:GetChecked()
     addon_data.core.UpdateAllVisualsOnSettingsChange()
 end
 
 addon_data.config.CreateConfigPanel = function(parent_panel)
     addon_data.config.config_frame = CreateFrame("Frame", addon_name .. "GlobalConfigPanel", parent_panel)
     local panel = addon_data.config.config_frame
-    local settings = character_player_settings
+    local settings = swedgetimer_player_settings
     -- Title Text
     panel.title_text = addon_data.config.TextFactory(panel, "Settings", 18)
     panel.title_text:SetPoint("TOPLEFT", 0, 0)

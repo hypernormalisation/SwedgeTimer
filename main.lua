@@ -3,7 +3,7 @@ local addon_name, addon_data = ...
 local L = addon_data.localization_table
 
 -- local name = UnitName("player")
-local version = "v0.1.7"
+local version = "0.1.8"
 local load_message = "version " .. version .. " loaded!"
 
 -- shorthand
@@ -39,20 +39,20 @@ addon_data.core.default_settings = {
 
 addon_data.core.LoadSettings = function()
     -- If the carried over settings dont exist then make them
-    if not character_core_settings then
-        character_core_settings = {}
+    if not swedgetimer_core_settings then
+        swedgetimer_core_settings = {}
     end
     -- If the carried over settings aren't set then set them to the defaults
     for setting, value in pairs(addon_data.core.default_settings) do
-        if character_core_settings[setting] == nil then
-            character_core_settings[setting] = value
+        if swedgetimer_core_settings[setting] == nil then
+            swedgetimer_core_settings[setting] = value
         end
     end
 end
 
 addon_data.core.RestoreDefaults = function()
     for setting, value in pairs(addon_data.core.default_settings) do
-        character_core_settings[setting] = value
+        swedgetimer_core_settings[setting] = value
     end
 end
 
@@ -130,6 +130,7 @@ local function init_addon(self)
     addon_data.player_frame:RegisterEvent("UNIT_SPELLCAST_SENT")
     addon_data.player_frame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
     addon_data.player_frame:RegisterEvent("SPELL_UPDATE_COOLDOWN")
+    addon_data.player_frame:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
 
     -- Any operations to initialise the player state
     addon_data.player.swing_timer = 0.00001
@@ -142,15 +143,13 @@ local function init_addon(self)
     addon_data.bar.UpdateVisualsOnSettingsChange()
     addon_data.bar.update_visuals_on_update()
     addon_data.bar.set_bar_color()
-    -- addon_data.bar.update_bar_on_aura_change()
-    
     addon_data.bar.set_gcd_bar_width()
     addon_data.bar.set_bar_color()
     addon_data.bar.show_or_hide_bar()
 
     -- If appropriate show welcome message
     if addon_data.debug then print('... complete!') end
-    if character_core_settings.welcome_message then	print(load_message)	end
+    if swedgetimer_core_settings.welcome_message then	print(load_message)	end
 end
 
 -- The frame responsible for loading the addon at the appropriate time
@@ -159,8 +158,7 @@ local function init_frame_event_handler(self, event, ...)
     local args = {...}
     if event == "ADDON_LOADED" then
         if args[1] == "SwedgeTimer" then
-            _, english_class = UnitClass("player")
-
+            local english_class = select(2, UnitClass("player"))
             -- Only load the addon if the player is a paladin
             if english_class ~= "PALADIN" then
                 addon_data.core.init_frame:SetScript("OnEvent", nil)

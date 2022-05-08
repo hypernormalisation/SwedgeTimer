@@ -81,6 +81,9 @@ addon_data.player.extra_attacks_flag = false
 -- flag for when we update equipment without double counting the 
 addon_data.player.equipment_update_flag = false
 
+addon_data.player.is_mounted = false
+
+
 -- containers for seal information
 addon_data.player.n_active_seals = 0
 addon_data.player.active_seals = {}
@@ -124,7 +127,7 @@ addon_data.player.reported_swing_timer_complete = false
 addon_data.player.reported_swing_timer_complete_double = false
 addon_data.player.time_since_swing_completion = 0.0
 
--- addon_data.player.new_parry = false
+addon_data.player.currently_casting_spell_guid = nil
 
 -- a flag to ensure the code on speed change only runs once per change
 addon_data.player.reported_speed_change = true
@@ -144,26 +147,26 @@ addon_data.player.lag_world = 0.0
 addon_data.player.update_lag = function()
     local _, _, _, lag = GetNetStats()
     -- print('lag before calibration: ' .. tostring(lag))
-    -- print('lag multiplier: ' .. tostring(character_player_settings.lag_multiplier))
-    -- print('lag threshold: ' .. tostring(character_player_settings.lag_threshold))
-    lag = (lag * character_player_settings.lag_multiplier) + character_player_settings.lag_threshold
+    -- print('lag multiplier: ' .. tostring(swedgetimer_player_settings.lag_multiplier))
+    -- print('lag threshold: ' .. tostring(swedgetimer_player_settings.lag_threshold))
+    lag = (lag * swedgetimer_player_settings.lag_multiplier) + swedgetimer_player_settings.lag_threshold
     -- print('lag after calibration: ' .. tostring(lag))
     addon_data.player.lag_world = lag / 1000.0
 end
 
 addon_data.player.lag_detection_enabled = function()
-    return character_player_settings.lag_detection_enabled
+    return swedgetimer_player_settings.lag_detection_enabled
 end
 
 addon_data.player.LoadSettings = function()
     -- If the carried over settings dont exist then make them
-    if not character_player_settings then
-        character_player_settings = {}
+    if not swedgetimer_player_settings then
+        swedgetimer_player_settings = {}
     end
     -- If the carried over settings aren't set then set them to the defaults
     for setting, value in pairs(addon_data.player.default_settings) do
-        if character_player_settings[setting] == nil then
-            character_player_settings[setting] = value
+        if swedgetimer_player_settings[setting] == nil then
+            swedgetimer_player_settings[setting] = value
         end
     end
     -- Update settings that dont change unless the interface is reloaded
@@ -247,7 +250,7 @@ addon_data.player.update_weapon_speed = function()
 
     addon_data.player.prev_weapon_speed = addon_data.player.current_weapon_speed
     -- Poll the API for the attack speed
-    addon_data.player.current_weapon_speed, _ = UnitAttackSpeed("player")
+    addon_data.player.current_weapon_speed = UnitAttackSpeed("player")
     -- print('API speed says: ' .. tostring(addon_data.player.current_weapon_speed))
 
 
@@ -375,7 +378,7 @@ addon_data.player.parse_auras = function()
         -- print(spell_id)
         -- print(addon_data.soc_lookup[spell_id])
         if name == nil then
-            end_iter = True
+            end_iter = true
             break
         end
 
@@ -478,10 +481,9 @@ addon_data.player.on_player_aura_change = function()
     
 end
 
-
 -- Function to detect any spell casts like repentance that would reset
 -- the swing timer. GCD tracking handled elsewhere by other event triggers.
-addon_data.player.OnPlayerSpellCast = function(event, args)
+addon_data.player.OnPlayerSpellCast = function(args)
     -- print('detected spell cast')
     -- only process player casts
     if not args[1] == "player" then
@@ -512,7 +514,7 @@ end
 
 -- function to detect the player's successful casts that reset the 
 -- swing timer
-addon_data.player.OnPlayerSpellCompletion = function(event, args)
+addon_data.player.OnPlayerSpellCompletion = function(args)
     -- print('Spell completed')
     if args[2] == addon_data.player.how_cast_guid then
         -- print('player successfully cast HoW, resetting swing timer')
@@ -533,7 +535,7 @@ end
 -- Function to check for impossible twists and set the according flag
 addon_data.player.check_impossible_twists = function()
     -- if setting is disabled just return
-    if not character_bar_settings.lag_detection_enabled then
+    if not swedgetimer_bar_settings.lag_detection_enabled then
         return
     end
 
@@ -546,7 +548,7 @@ addon_data.player.check_impossible_twists = function()
     -- print('Lag after calibration: ' .. tostring(addon_data.player.lag_world))
     
     if gcd_ends_relative_to_swing > addon_data.player.current_weapon_speed then
-        if addon_data.player.swing_timer > character_bar_settings.twist_window then
+        if addon_data.player.swing_timer > swedgetimer_bar_settings.twist_window then
             -- print('SHIT SON WE COULD BE MISSING THIS TWIST')
             addon_data.player.twist_impossible = true
         else
@@ -737,9 +739,14 @@ addon_data.player.frame_on_event = function(self, event, ...)
         -- print('INVENTORY CHANGE DETECTED')
         addon_data.player.on_equipment_change()
 
+    elseif event == "PLAYER_MOUNT_DISPLAY_CHANGED" then
+        if IsMounted() then
+            addon_data.player.reset_swing_timer()
+        end
+
     elseif event == "UNIT_SPELLCAST_SENT" then
         -- print('INFO: received spellcast trigger')
-        addon_data.player.OnPlayerSpellCast(event, args)        
+        addon_data.player.OnPlayerSpellCast(args)        
 
     elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
         local combat_info = {CombatLogGetCurrentEventInfo()}
@@ -757,7 +764,7 @@ addon_data.player.frame_on_event = function(self, event, ...)
         -- end
     
     elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
-        addon_data.player.OnPlayerSpellCompletion(event, args)
+        addon_data.player.OnPlayerSpellCompletion(args)
 
     elseif event == "UNIT_SPELLCAST_INTERRUPTED" then
         -- print('found an interruption')

@@ -54,14 +54,14 @@ addon_data.bar.gcd_bar_width = 0.0
 
 addon_data.bar.LoadSettings = function()
     -- If the carried over settings dont exist then make them
-    if not character_bar_settings then
-        character_bar_settings = {}
+    if not swedgetimer_bar_settings then
+        swedgetimer_bar_settings = {}
     end
-    -- character_bar_settings = {} -- REMOVE ME THIS IS FOR TESTING
+    -- swedgetimer_bar_settings = {} -- REMOVE ME THIS IS FOR TESTING
     -- If the carried over settings aren't set then set them to the defaults
     for setting, value in pairs(addon_data.bar.default_settings) do
-        if character_bar_settings[setting] == nil then
-            character_bar_settings[setting] = value
+        if swedgetimer_bar_settings[setting] == nil then
+            swedgetimer_bar_settings[setting] = value
         end
     end
 
@@ -71,16 +71,16 @@ end
 -- Drag and drop settings
 --=========================================================================================
 addon_data.bar.OnFrameDragStart = function()
-    if not character_bar_settings.is_locked then
+    if not swedgetimer_bar_settings.is_locked then
         addon_data.bar.frame:StartMoving()
     end
 end
 
 addon_data.bar.OnFrameDragStop = function()
     local frame = addon_data.bar.frame
-    local settings = character_bar_settings
+    local settings = swedgetimer_bar_settings
     frame:StopMovingOrSizing()
-    point, _, rel_point, x_offset, y_offset = frame:GetPoint()
+    local point, _, rel_point, x_offset, y_offset = frame:GetPoint()
     -- if x_offset < 5 and x_offset > -5 then
     --     x_offset = 0
     -- end
@@ -99,7 +99,7 @@ end
 
 -- this function is called once to initialise all the graphics of the bar
 addon_data.bar.init_bar_visuals = function()
-    local settings = character_bar_settings
+    local settings = swedgetimer_bar_settings
     addon_data.bar.frame = CreateFrame("Frame", addon_name .. "BarFrame", UIParent)   
     local frame = addon_data.bar.frame
 
@@ -166,14 +166,14 @@ addon_data.bar.init_bar_visuals = function()
     frame.bar:SetPoint("TOPLEFT", 0, 0)
     frame.bar:SetHeight(settings.height)
     frame.bar:SetTexture('Interface/AddOns/SwedgeTimer/Images/Bar')
-    frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_default"]))
+    frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_default"]))
 
     -- Create the GCD timer bar
     frame.gcd_bar = frame:CreateTexture(nil, "ARTWORK")
     frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
     frame.gcd_bar:SetHeight(settings.height)
     frame.gcd_bar:SetTexture('Interface/AddOns/SwedgeTimer/Images/Bar')
-    frame.gcd_bar:SetVertexColor(unpack(character_bar_settings["bar_color_gcd"]))
+    frame.gcd_bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_gcd"]))
     frame.gcd_bar:SetDrawLayer("ARTWORK", -1)
 
     -- Create the spark for the timer
@@ -199,24 +199,24 @@ addon_data.bar.init_bar_visuals = function()
     frame.twist_line = frame:CreateLine() -- the twist window marker
     frame.twist_line:SetColorTexture(1,1,1,1)
     frame.twist_line:SetDrawLayer("OVERLAY", -1)
-    frame.twist_line:SetThickness(character_bar_settings.tick_width)
+    frame.twist_line:SetThickness(swedgetimer_bar_settings.tick_width)
     frame.twist_line:SetStartPoint("TOPRIGHT", 0, 0) -- dummy vars so the line is initialised
     frame.twist_line:SetEndPoint("BOTTOMRIGHT", 0, 0)
 
     frame.gcd1_line = frame:CreateLine() -- the first gcd possible before a twist
     frame.gcd1_line:SetColorTexture(0.4,0.4,1,1)
     frame.gcd1_line:SetDrawLayer("OVERLAY", -1)
-    frame.gcd1_line:SetThickness(character_bar_settings.tick_width)
+    frame.gcd1_line:SetThickness(swedgetimer_bar_settings.tick_width)
     
     frame.gcd2_line = frame:CreateLine()
     frame.gcd2_line:SetColorTexture(0.4,0.4,1,1)
     frame.gcd2_line:SetDrawLayer("OVERLAY", -1)
-    frame.gcd2_line:SetThickness(character_bar_settings.tick_width)
+    frame.gcd2_line:SetThickness(swedgetimer_bar_settings.tick_width)
     
     frame.judgement_line = frame:CreateLine()
     frame.judgement_line:SetColorTexture(1.0,1.0,0.1,1)
     frame.judgement_line:SetDrawLayer("OVERLAY", -1)
-    frame.judgement_line:SetThickness(character_bar_settings.tick_width+2)
+    frame.judgement_line:SetThickness(swedgetimer_bar_settings.tick_width+2)
 
     -- Run an update to configure the bar appropriately
     -- addon_data.bar.UpdateVisualsOnSettingsChange()
@@ -229,7 +229,7 @@ end
 -- this function is called when a setting related to bar visuals is changed
 addon_data.bar.UpdateVisualsOnSettingsChange = function()
     local frame = addon_data.bar.frame
-    local settings = character_bar_settings
+    local settings = swedgetimer_bar_settings
     -- print("enabled says: " .. tostring(settings.enabled))
     -- print("show_border says : " .. tostring(settings.show_border))
 
@@ -250,12 +250,12 @@ addon_data.bar.UpdateVisualsOnSettingsChange = function()
         frame.gcd_bar:SetWidth(settings.width)
 
         frame.bar:SetTexture('Interface/AddOns/SwedgeTimer/Images/Bar')
-        frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_default"]))
+        frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_default"]))
 
-        frame.twist_line:SetThickness(character_bar_settings.tick_width)
-        frame.gcd1_line:SetThickness(character_bar_settings.tick_width)
-        frame.gcd2_line:SetThickness(character_bar_settings.tick_width)
-        frame.judgement_line:SetThickness(character_bar_settings.tick_width+1)
+        frame.twist_line:SetThickness(swedgetimer_bar_settings.tick_width)
+        frame.gcd1_line:SetThickness(swedgetimer_bar_settings.tick_width)
+        frame.gcd2_line:SetThickness(swedgetimer_bar_settings.tick_width)
+        frame.judgement_line:SetThickness(swedgetimer_bar_settings.tick_width+1)
 
 
         frame.left_text:SetPoint("TOPLEFT", 2, -(settings.height / 2) + (settings.fontsize / 2))
@@ -298,7 +298,7 @@ addon_data.bar.update_visuals_on_update = function()
     addon_data.bar.show_or_hide_bar()
     if not addon_data.bar.should_show_bar() then return end 
 
-    local settings = character_bar_settings
+    local settings = swedgetimer_bar_settings
     local frame = addon_data.bar.frame
     local speed = addon_data.player.current_weapon_speed
     local timer = addon_data.player.swing_timer
@@ -324,15 +324,15 @@ addon_data.bar.update_visuals_on_update = function()
     if addon_data.player.is_twist_seal_active() then
         if addon_data.player.n_active_seals == 1 then
             if addon_data.player.twist_impossible then
-                addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_cant_twist"]))
-            elseif addon_data.player.swing_timer < character_bar_settings["twist_window"] then 
-                addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_twist_ready"]))
+                addon_data.bar.frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_cant_twist"]))
+            elseif addon_data.player.swing_timer < swedgetimer_bar_settings["twist_window"] then 
+                addon_data.bar.frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_twist_ready"]))
             else
-                local min_time = addon_data.player.spell_gcd_duration + character_bar_settings["grace_period"]
+                local min_time = addon_data.player.spell_gcd_duration + swedgetimer_bar_settings["grace_period"]
                 if addon_data.player.swing_timer > min_time then            
-                    addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_twist_ready"]))
+                    addon_data.bar.frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_twist_ready"]))
                 else
-                    addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_warning"]))
+                    addon_data.bar.frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_warning"]))
                 end
             end        
         end
@@ -417,7 +417,7 @@ addon_data.bar.calc_judgement = function()
     -- Function to check if we need to draw the judgement line
     -- and then to calulate its position. Called when the speed or timer changes.
     -- addon_data.player.judgement_cd_remaining
-    if not addon_data.player.judgement_being_tracked or not character_bar_settings.judgement_marker then return end
+    if not addon_data.player.judgement_being_tracked or not swedgetimer_bar_settings.judgement_marker then return end
 
     local line = addon_data.bar.frame.judgement_line
     local remaining = addon_data.player.judgement_cd_remaining
@@ -430,7 +430,7 @@ addon_data.bar.calc_judgement = function()
     
     if remaining < timer then
         -- print('judgement off cd this swing')
-        local offset = ((remaining + elapsed) / addon_data.player.current_weapon_speed) * character_bar_settings.width
+        local offset = ((remaining + elapsed) / addon_data.player.current_weapon_speed) * swedgetimer_bar_settings.width
         -- print(offset)
         line:SetStartPoint("TOPLEFT", offset, 5)
         line:SetEndPoint("BOTTOMLEFT", offset, -5)
@@ -456,8 +456,8 @@ end
 
 addon_data.bar.should_show_bar = function()
     -- Logic for if the bar should be visible
-    if character_bar_settings.enabled then
-        if character_bar_settings.hide_when_inactive then
+    if swedgetimer_bar_settings.enabled then
+        if swedgetimer_bar_settings.hide_when_inactive then
             if addon_data.player.n_active_seals == 0 and not addon_data.core.in_combat then
                 return false
             end
@@ -480,7 +480,7 @@ addon_data.bar.set_gcd_bar_width = function()
         addon_data.bar.hide_gcd_bar()
     end
 
-    local settings = character_bar_settings
+    local settings = swedgetimer_bar_settings
     local attack_speed = addon_data.player.current_weapon_speed
     local swing_timer = addon_data.player.swing_timer
     -- print(attack_speed)
@@ -558,7 +558,7 @@ end
 
 -- determine wether or not to draw the gcd1 line
 addon_data.bar.should_draw_gcd1_window = function()
-    local settings = character_bar_settings
+    local settings = swedgetimer_bar_settings
     if math.abs(addon_data.bar.gcd1_tick_offset) > settings.width then
         return false
     end
@@ -567,7 +567,7 @@ end
 
 -- determine wether or not to draw the gcd2 line
 addon_data.bar.should_draw_gcd2_window = function()
-    local settings = character_bar_settings
+    local settings = swedgetimer_bar_settings
     if math.abs(addon_data.bar.gcd2_tick_offset) > settings.width then
         return false
     end
@@ -576,7 +576,7 @@ end
 
 addon_data.bar.set_twist_tick_offset = function()
 -- Set the offset position of the twist window
-    local settings = character_bar_settings
+    local settings = swedgetimer_bar_settings
     local bar_fraction = (settings.twist_window / addon_data.player.current_weapon_speed)
     local offset = bar_fraction * settings.width * -1
     -- print('twist tick time = ' .. time_value)
@@ -587,12 +587,12 @@ end
 
 -- Get the offset position of the first gcd window tick
 addon_data.bar.set_gcd1_tick_offset = function()
-    local settings = character_bar_settings
+    local settings = swedgetimer_bar_settings
     local gcd_duration = addon_data.player.spell_gcd_duration
-    local grace_period = character_bar_settings["grace_period"]
+    local grace_period = swedgetimer_bar_settings["grace_period"]
     local time_before_swing = gcd_duration + grace_period
     -- print('GCD1 tick time = ' .. time_before_swing)
-    offset = (time_before_swing / addon_data.player.current_weapon_speed) * settings.width * -1
+    local offset = (time_before_swing / addon_data.player.current_weapon_speed) * settings.width * -1
     addon_data.bar.gcd1_tick_offset = offset
     addon_data.bar.frame.gcd1_line:SetStartPoint("TOPRIGHT", offset, 0)
     addon_data.bar.frame.gcd1_line:SetEndPoint("BOTTOMRIGHT", offset, 0)
@@ -600,12 +600,12 @@ end
 
 -- Get the offset position of the second gcd window tick
 addon_data.bar.set_gcd2_tick_offset = function()
-    local settings = character_bar_settings
+    local settings = swedgetimer_bar_settings
     local gcd_duration = addon_data.player.spell_gcd_duration
-    local grace_period = character_bar_settings["grace_period"]
+    local grace_period = swedgetimer_bar_settings["grace_period"]
     local time_before_swing = (2 * gcd_duration) + grace_period
     -- print('GCD2 tick time = ' .. time_before_swing)
-    offset = (time_before_swing / addon_data.player.current_weapon_speed) * settings.width * -1
+    local offset = (time_before_swing / addon_data.player.current_weapon_speed) * settings.width * -1
     addon_data.bar.gcd2_tick_offset = offset
     addon_data.bar.frame.gcd2_line:SetStartPoint("TOPRIGHT", offset, 0)
     addon_data.bar.frame.gcd2_line:SetEndPoint("BOTTOMRIGHT", offset, 0)
@@ -630,26 +630,26 @@ end
 addon_data.bar.set_bar_color = function()
     -- if no seal return default color
     if addon_data.player.n_active_seals == 0 then
-        addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_default"]))
+        addon_data.bar.frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_default"]))
         return
     end   
     -- if we're currently twisting return twist color
-    if addon_data.player.n_active_seals == 2 and character_bar_settings.enable_twist_bar_color then
-        addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_twisting"]))
+    if addon_data.player.n_active_seals == 2 and swedgetimer_bar_settings.enable_twist_bar_color then
+        addon_data.bar.frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_twisting"]))
         return
     end
     -- if we're only under SoB, return the blood color
     if addon_data.bar.is_running_seal_active() then
-        addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_blood"]))
+        addon_data.bar.frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_blood"]))
         return
     end
     -- if we get to the end return the default color
-    addon_data.bar.frame.bar:SetVertexColor(unpack(character_bar_settings["bar_color_default"]))
+    addon_data.bar.frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_default"]))
 end
 
 -- draw the right text or not
 addon_data.bar.draw_right_text = function()
-    if not character_bar_settings.show_right_text then
+    if not swedgetimer_bar_settings.show_right_text then
         return false
     end
     if addon_data.player.swing_timer == 0 then

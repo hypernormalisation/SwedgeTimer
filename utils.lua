@@ -26,8 +26,8 @@ end
 
 addon_data.utils.TablePrinter = function(table)
 	for key, value in pairs(table) do
-        print('key ' .. key)
-        print(value)
+        addon_data.utils.print_msg('key ' .. key)
+        addon_data.utils.print_msg(value)
     end
 end
 
