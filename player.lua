@@ -1,64 +1,7 @@
 local addon_name, addon_data = ...
 local print = addon_data.utils.print_msg
 local floor = addon_data.utils.SimpleRound
--- print('parsing player')
 
--- Seal of Blood/the Martyr IDs
-addon_data.sob_seal_ids = {
-    31892, 348700
-}
-addon_data.sob_lookup = {}
-for _, id in ipairs(addon_data.sob_seal_ids) do addon_data.sob_lookup[id] = true end
-
--- Seal of Command ids
-addon_data.soc_seal_ids = {
-    20375, 20915, 20918, 20919, 20920, 27170
-}
-addon_data.soc_lookup = {}
-for _, id in ipairs(addon_data.soc_seal_ids) do addon_data.soc_lookup[id] = true end
-
--- Seal of Righteousness ids
-addon_data.sor_seal_ids = {
-    20154, 20287, 20288, 20289, 20290, 20291, 20292, 20293, 27155
-}
-addon_data.sor_lookup = {}
-for _, id in ipairs(addon_data.sor_seal_ids) do addon_data.sor_lookup[id] = true end
-
--- Seal of the Crusader IDs
-addon_data.sotc_seal_ids = {
-    21082, 20162, 20305, 20306, 20307, 20308, 27158
-}
-addon_data.sotc_lookup = {}
-for _, id in ipairs(addon_data.sotc_seal_ids) do addon_data.sotc_lookup[id] = true end
-
--- Seal of Justice IDs
-addon_data.soj_seal_ids = {
-    20164, 31895
-}
-addon_data.soj_lookup = {}
-for _, id in ipairs(addon_data.soj_seal_ids) do addon_data.soj_lookup[id] = true end
-
--- Seal of Wisdom IDs
-addon_data.sow_seal_ids = {
-    20166, 20356, 20357, 27166
-}
-addon_data.sow_lookup = {}
-for _, id in ipairs(addon_data.sow_seal_ids) do addon_data.sow_lookup[id] = true end
-
--- Seal of Light IDs
-addon_data.sol_seal_ids = {
-    20165, 20347, 20348, 20349, 27160
-}
-addon_data.sol_lookup = {}
-for _, id in ipairs(addon_data.sol_seal_ids) do addon_data.sol_lookup[id] = true end
-
--- Seal of Vengeance/Corruption IDs
-addon_data.sov_seal_ids = {
-    31801, 348704
-}
-addon_data.sov_lookup = {}
-for _, id in ipairs(addon_data.sov_seal_ids) do addon_data.sov_lookup[id] = true end
--- print('parsed lookups')
 --=========================================================================================
 -- PLAYER SETTINGS 
 --=========================================================================================
@@ -385,36 +328,36 @@ addon_data.player.parse_auras = function()
         -- process each spell id
         -- local end_seal_iter = false
         -- while not end_seal_iter do
-        if addon_data.sob_lookup[spell_id] ~= nil then
+        if addon_data.data.sob_ids[spell_id] ~= nil then
             addon_data.player.active_seals['Seal of Blood'] = true
             addon_data.player.n_active_seals = addon_data.player.n_active_seals + 1
 
-        elseif addon_data.soc_lookup[spell_id] ~= nil then
+        elseif addon_data.data.soc_ids[spell_id] ~= nil then
             addon_data.player.active_seals['Seal of Command'] = true
             addon_data.player.n_active_seals = addon_data.player.n_active_seals + 1
 
-        elseif addon_data.sotc_seal_ids[spell_id] ~= nil then
+        elseif addon_data.data.sotc_ids[spell_id] ~= nil then
             addon_data.player.active_seals['Seal of the Crusader'] = true
             addon_data.player.crusader_currently_active = true
             addon_data.player.n_active_seals = addon_data.player.n_active_seals + 1
 
-        elseif addon_data.sor_seal_ids[spell_id] ~= nil then
+        elseif addon_data.data.sor_ids[spell_id] ~= nil then
             addon_data.player.active_seals['Seal of Righteousness'] = true         
             addon_data.player.n_active_seals = addon_data.player.n_active_seals + 1
 
-        elseif addon_data.sow_lookup[spell_id] ~= nil then
+        elseif addon_data.data.sow_ids[spell_id] ~= nil then
             addon_data.player.active_seals['Seal of Wisdom'] = true
             addon_data.player.n_active_seals = addon_data.player.n_active_seals + 1
 
-        elseif addon_data.sol_lookup[spell_id] ~= nil then
+        elseif addon_data.data.sol_ids[spell_id] ~= nil then
             addon_data.player.active_seals['Seal of Light'] = true
             addon_data.player.n_active_seals = addon_data.player.n_active_seals + 1
 
-        elseif addon_data.soj_lookup[spell_id] ~= nil then
+        elseif addon_data.data.soj_ids[spell_id] ~= nil then
             addon_data.player.active_seals['Seal of Justice'] = true
             addon_data.player.n_active_seals = addon_data.player.n_active_seals + 1
 
-        elseif addon_data.sov_lookup[spell_id] ~= nil then
+        elseif addon_data.data.sov_ids[spell_id] ~= nil then
             addon_data.player.active_seals['Seal of Vengeance'] = true
             addon_data.player.n_active_seals = addon_data.player.n_active_seals + 1
         

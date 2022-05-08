@@ -8,6 +8,7 @@
 ## SavedVariables: swedgetimer_core_settings, swedgetimer_player_settings, swedgetimer_bar_settings
 
 utils.lua
+st_data.lua
 player.lua
 bar.lua
 bar_config.lua
