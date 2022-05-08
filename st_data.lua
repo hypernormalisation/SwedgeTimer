@@ -1,6 +1,5 @@
 local addon_name, st = ...
 local print = st.utils.print_msg
-local floor = st.utils.simple_round
 local get_tab = st.utils.convert_lookup_table
 st.data = {}
 

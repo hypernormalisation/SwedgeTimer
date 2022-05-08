@@ -1,8 +1,6 @@
 local addon_name, st = ...
-local L = st.localization_table
-
+-- local L = st.localization_table
 local print = st.utils.print_msg
-
 
 st.config = {}
 
