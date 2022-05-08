@@ -1,6 +1,6 @@
 -- main.lua ============================================================================
 local addon_name, st = ...
-local L = st.localization_table
+-- local L = st.localization_table
 
 -- local name = UnitName("player")
 local version = "0.1.8"
