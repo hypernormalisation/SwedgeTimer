@@ -1,8 +1,7 @@
 local addon_name, addon_data = ...
-
 addon_data.debug_counter = 0
-
 addon_data.utils = {}
+
 -- Sends the given message to the chat frame with the addon name in front.
 addon_data.utils.print_msg = function(msg)
 	-- print(type(msg))
@@ -19,7 +18,7 @@ addon_data.utils.print_msg = function(msg)
 	DEFAULT_CHAT_FRAME:AddMessage(chat_msg)
 end
 
-
+-- Rounds down, e.g. if step=0.1 will round down to 1dp.
 addon_data.utils.SimpleRound = function(num, step)
     return floor(num / step) * step
 end
@@ -29,6 +28,13 @@ addon_data.utils.TablePrinter = function(table)
         addon_data.utils.print_msg('key ' .. key)
         addon_data.utils.print_msg(value)
     end
+end
+
+-- Converts a list to a lookup table.
+addon_data.utils.convert_lookup_table = function(list)
+	local my_table = {}
+	for _, id in ipairs(list) do my_table[id] = true end
+	return my_table
 end
 
 --=======================================================================================
