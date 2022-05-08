@@ -413,11 +413,26 @@ end
 --=========================================================================================
 -- Funcs to recalculate/show/hide etc bar elements
 --=========================================================================================
+st.bar.has_judgement_seal = function()
+    -- returns true if the player has a seal they typically want to judge
+    if st.player.active_seals['blood'] ~= nil then
+        return true
+    elseif st.player.active_seals['righteousness'] then
+        return true
+    elseif st.player.active_seals['vengeance'] then
+        return true
+    elseif st.player.active_seals['justice'] then
+        return true
+    end
+    return false
+end
+
 st.bar.calc_judgement = function()
     -- Function to check if we need to draw the judgement line
     -- and then to calulate its position. Called when the speed or timer changes.
-    -- st.player.judgement_cd_remaining
-    if not st.player.judgement_being_tracked or not swedgetimer_bar_settings.judgement_marker then return end
+    if not st.player.judgement_being_tracked or not swedgetimer_bar_settings.judgement_marker then
+        return
+    end
 
     local line = st.bar.frame.judgement_line
     local remaining = st.player.judgement_cd_remaining
@@ -430,18 +445,19 @@ st.bar.calc_judgement = function()
     
     if remaining < timer then
         -- print('judgement off cd this swing')
-        local offset = ((remaining + elapsed) / st.player.current_weapon_speed) * swedgetimer_bar_settings.width
-        -- print(offset)
-        line:SetStartPoint("TOPLEFT", offset, 5)
-        line:SetEndPoint("BOTTOMLEFT", offset, -5)
-        line:Show()
+        if st.bar.has_judgement_seal() then
+            local offset = ((remaining + elapsed) / st.player.current_weapon_speed) * swedgetimer_bar_settings.width
+            -- print(offset)
+            line:SetStartPoint("TOPLEFT", offset, 5)
+            line:SetEndPoint("BOTTOMLEFT", offset, -5)
+            line:Show()
+        else
+            line:Hide()
+        end
     else
         line:Hide()
     end
 
-    -- if st.player.judgement_cd_remaining < st.player.current_weapon_speed then
-    --     print('judgement off cd ')
-    -- end
 end
 
 st.bar.show_or_hide_bar = function()
@@ -482,7 +498,7 @@ st.bar.set_gcd_bar_width = function()
 
     local settings = swedgetimer_bar_settings
     local attack_speed = st.player.current_weapon_speed
-    local swing_timer = st.player.swing_timer
+    -- local swing_timer = st.player.swing_timer
     -- print(attack_speed)
     -- print(swing_timer)
     -- print(st.player.active_gcd_remaining)

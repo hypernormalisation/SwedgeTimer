@@ -163,7 +163,7 @@ end
 st.config.CreateConfigPanel = function(parent_panel)
     st.config.config_frame = CreateFrame("Frame", addon_name .. "GlobalConfigPanel", parent_panel)
     local panel = st.config.config_frame
-    local settings = swedgetimer_player_settings
+    -- local settings = swedgetimer_player_settings
     -- Title Text
     panel.title_text = st.config.TextFactory(panel, "Settings", 18)
     panel.title_text:SetPoint("TOPLEFT", 0, 0)

@@ -173,7 +173,7 @@ end
 st.bar.CreateConfigPanel = function(parent_panel)
     st.bar.config_frame = CreateFrame("Frame", addon_name .. "PlayerConfigPanel", parent_panel)
     local panel = st.bar.config_frame
-    local settings = swedgetimer_bar_settings
+    -- local settings = swedgetimer_bar_settings
     
     -- Title Text
     panel.title_text = st.config.TextFactory(panel, "Twist Bar", 18)

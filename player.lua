@@ -238,7 +238,7 @@ end
 
 -- Function run when we intercept an unfiltered combatlog event.
 st.player.OnCombatLogUnfiltered = function(combat_info)
-	local _, event, _, source_guid, _, _, _, dest_guid, _, _, _, _, spell_name, _ = unpack(combat_info)
+	local _, event, _, source_guid, _, _, _, dest_guid, _, _, _, _, _, _ = unpack(combat_info)
 	
     -- print(event)
 
@@ -265,7 +265,7 @@ st.player.OnCombatLogUnfiltered = function(combat_info)
     -- Handle all relevant events where the player is the target
     elseif (dest_guid == st.player.guid) then
         if (event == "SWING_MISSED") then
-            local miss_type, is_offhand = select(12, unpack(combat_info))
+            local miss_type = select(12, unpack(combat_info))
             if miss_type == "PARRY" then
                 -- parry reduces your swing timer by 40%, but cannot go below 20%.
                 local swing_timer_reduced_40p = st.player.swing_timer - (0.4 * st.player.current_weapon_speed)
@@ -318,7 +318,7 @@ st.player.parse_auras = function()
     -- iterate over the current player auras and process seals
     st.player.active_seals = {}
     while not end_iter do
-        local name, icon, count, _, duration, expiration_time, _, _, _, spell_id = UnitAura("player", counter)
+        local name, _, _, _, _, _, _, _, _, spell_id = UnitAura("player", counter)
         -- print(spell_id)
         -- print(st.soc_lookup[spell_id])
         if name == nil then
