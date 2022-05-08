@@ -21,11 +21,12 @@ st.player.weapon_id = GetInventoryItemID("player", 16)
 st.player.speed_changed = false
 st.player.extra_attacks_flag = false
 
--- flag for when we update equipment without double counting the 
+-- Flag for when we update equipment without double counting the reset
+-- from any gear-related aura change triggers.
 st.player.equipment_update_flag = false
 
+-- Flag to detect when to reset the timer from the player mounting up.
 st.player.is_mounted = false
-
 
 -- containers for seal information
 st.player.n_active_seals = 0
@@ -35,9 +36,9 @@ st.player.active_seal_1_remaining = 0
 st.player.active_seal_2 = nil
 st.player.active_seal_2_remaining = 0
 
-st.player.blood_active = false
-st.player.command_active = false
-st.player.crusader_active = false
+-- st.player.blood_active = false
+-- st.player.command_active = false
+-- st.player.crusader_active = false
 
 st.player.twist_impossible = false
 
