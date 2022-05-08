@@ -1,14 +1,14 @@
 -- bar_config.lua =============================================================================
-local addon_name, addon_data = ...
-local print = addon_data.utils.print_msg
+local addon_name, st = ...
+local print = st.utils.print_msg
 
 
 --[[============================================================================================]]--
 --[[================================== CONFIG WINDOW RELATED ===================================]]--
 --[[============================================================================================]]--
 
-addon_data.bar.UpdateConfigPanelValues = function()
-    local panel = addon_data.bar.config_frame
+st.bar.UpdateConfigPanelValues = function()
+    local panel = st.bar.config_frame
     local settings = swedgetimer_bar_settings
     panel.enabled_checkbox:SetChecked(settings.enabled)
     panel.is_locked_checkbox:SetChecked(settings.is_locked)
@@ -61,255 +61,255 @@ addon_data.bar.UpdateConfigPanelValues = function()
     panel.backplane_alpha_slider.editbox:SetCursorPosition(0)
 end
 
-addon_data.bar.EnabledCheckBoxOnClick = function(self)
+st.bar.EnabledCheckBoxOnClick = function(self)
     swedgetimer_bar_settings.enabled = self:GetChecked()
-    addon_data.bar.UpdateVisualsOnSettingsChange()
+    st.bar.UpdateVisualsOnSettingsChange()
 end
 
-addon_data.bar.TwistBarToggle = function()
+st.bar.TwistBarToggle = function()
     local currently_on = swedgetimer_bar_settings.enabled == true
     if not currently_on then
         swedgetimer_bar_settings.enabled = true
     else
         swedgetimer_bar_settings.enabled = false
     end
-    addon_data.bar.UpdateConfigPanelValues()
-    addon_data.bar.UpdateVisualsOnSettingsChange()
+    st.bar.UpdateConfigPanelValues()
+    st.bar.UpdateVisualsOnSettingsChange()
 end
 
-addon_data.bar.TwistBarLockToggle = function()
+st.bar.TwistBarLockToggle = function()
     local currently_on = swedgetimer_bar_settings.is_locked == true
     if not currently_on then
         swedgetimer_bar_settings.is_locked = true
     else
         swedgetimer_bar_settings.is_locked = false
     end
-    addon_data.bar.UpdateConfigPanelValues()
-    addon_data.bar.UpdateVisualsOnSettingsChange()
+    st.bar.UpdateConfigPanelValues()
+    st.bar.UpdateVisualsOnSettingsChange()
 end
 
 
-addon_data.bar.IsLockedCheckBoxOnClick = function(self)
+st.bar.IsLockedCheckBoxOnClick = function(self)
     swedgetimer_bar_settings.is_locked = self:GetChecked()
-    addon_data.bar.frame:EnableMouse(not swedgetimer_bar_settings.is_locked)
-    addon_data.bar.UpdateVisualsOnSettingsChange()
+    st.bar.frame:EnableMouse(not swedgetimer_bar_settings.is_locked)
+    st.bar.UpdateVisualsOnSettingsChange()
 end
 
-addon_data.bar.LagDetectionEnabledBoxOnClick = function(self)
+st.bar.LagDetectionEnabledBoxOnClick = function(self)
     swedgetimer_bar_settings.lag_detection_enabled = self:GetChecked()
-    addon_data.bar.UpdateVisualsOnSettingsChange()
+    st.bar.UpdateVisualsOnSettingsChange()
 end
 
-addon_data.bar.TwistColorEnabledBoxOnClick = function(self)
+st.bar.TwistColorEnabledBoxOnClick = function(self)
     swedgetimer_bar_settings.enable_twist_bar_color = self:GetChecked()
 end
 
-addon_data.bar.DisableWhenInactiveBoxOnClick = function(self)
+st.bar.DisableWhenInactiveBoxOnClick = function(self)
     swedgetimer_bar_settings.hide_when_inactive = self:GetChecked()
 end
 
-addon_data.bar.ShowLeftTextCheckBoxOnClick = function(self)
+st.bar.ShowLeftTextCheckBoxOnClick = function(self)
     swedgetimer_bar_settings.show_left_text = self:GetChecked()
-    addon_data.bar.UpdateVisualsOnSettingsChange()
+    st.bar.UpdateVisualsOnSettingsChange()
 end
 
-addon_data.bar.ShowRightTextCheckBoxOnClick = function(self)
+st.bar.ShowRightTextCheckBoxOnClick = function(self)
     swedgetimer_bar_settings.show_right_text = self:GetChecked()
-    addon_data.bar.UpdateVisualsOnSettingsChange()
+    st.bar.UpdateVisualsOnSettingsChange()
 end
 
-addon_data.bar.ShowJudgementMarkerOnClick = function(self)
+st.bar.ShowJudgementMarkerOnClick = function(self)
     swedgetimer_bar_settings.judgement_marker = self:GetChecked()
-    -- addon_data.bar.UpdateVisualsOnSettingsChange()
+    -- st.bar.UpdateVisualsOnSettingsChange()
 end
 
-addon_data.bar.WidthEditBoxOnEnter = function(self)
+st.bar.WidthEditBoxOnEnter = function(self)
     swedgetimer_bar_settings.width = tonumber(self:GetText())
-    addon_data.bar.UpdateVisualsOnSettingsChange()
+    st.bar.UpdateVisualsOnSettingsChange()
 end
 
-addon_data.bar.HeightEditBoxOnEnter = function(self)
+st.bar.HeightEditBoxOnEnter = function(self)
     swedgetimer_bar_settings.height = tonumber(self:GetText())
-    addon_data.bar.UpdateVisualsOnSettingsChange()
+    st.bar.UpdateVisualsOnSettingsChange()
 end
 
-addon_data.bar.FontSizeEditBoxOnEnter = function(self)
+st.bar.FontSizeEditBoxOnEnter = function(self)
     swedgetimer_bar_settings.fontsize = tonumber(self:GetText())
-    addon_data.bar.UpdateVisualsOnSettingsChange()
+    st.bar.UpdateVisualsOnSettingsChange()
 end
 
-addon_data.bar.XOffsetEditBoxOnEnter = function(self)
+st.bar.XOffsetEditBoxOnEnter = function(self)
     swedgetimer_bar_settings.x_offset = tonumber(self:GetText())
-    addon_data.bar.UpdateVisualsOnSettingsChange()
+    st.bar.UpdateVisualsOnSettingsChange()
 end
 
-addon_data.bar.YOffsetEditBoxOnEnter = function(self)
+st.bar.YOffsetEditBoxOnEnter = function(self)
     swedgetimer_bar_settings.y_offset = tonumber(self:GetText())
-    addon_data.bar.UpdateVisualsOnSettingsChange()
+    st.bar.UpdateVisualsOnSettingsChange()
 end
 
 
-addon_data.bar.LagMultiplierOnEnter = function(self)
+st.bar.LagMultiplierOnEnter = function(self)
     swedgetimer_player_settings.lag_multiplier = tonumber(self:GetText())    
 end
 
-addon_data.bar.LagThresholdOnEnter = function(self)
+st.bar.LagThresholdOnEnter = function(self)
     swedgetimer_player_settings.lag_threshold = tonumber(self:GetText())    
 end
 
-addon_data.bar.TwistWindowOnEnter = function(self)
+st.bar.TwistWindowOnEnter = function(self)
     swedgetimer_bar_settings.twist_window = tonumber(self:GetText())
 end
 
-addon_data.bar.GracePeriodOnEnter = function(self)
+st.bar.GracePeriodOnEnter = function(self)
     swedgetimer_bar_settings.grace_period = tonumber(self:GetText())
 end
 
-addon_data.bar.TickWidthOnValChange = function(self)
+st.bar.TickWidthOnValChange = function(self)
     swedgetimer_bar_settings.tick_width = tonumber(self:GetValue())
-    addon_data.bar.UpdateVisualsOnSettingsChange()
+    st.bar.UpdateVisualsOnSettingsChange()
 end
 
-addon_data.bar.CreateConfigPanel = function(parent_panel)
-    addon_data.bar.config_frame = CreateFrame("Frame", addon_name .. "PlayerConfigPanel", parent_panel)
-    local panel = addon_data.bar.config_frame
+st.bar.CreateConfigPanel = function(parent_panel)
+    st.bar.config_frame = CreateFrame("Frame", addon_name .. "PlayerConfigPanel", parent_panel)
+    local panel = st.bar.config_frame
     local settings = swedgetimer_bar_settings
     
     -- Title Text
-    panel.title_text = addon_data.config.TextFactory(panel, "Twist Bar", 18)
+    panel.title_text = st.config.TextFactory(panel, "Twist Bar", 18)
     panel.title_text:SetPoint("TOPLEFT", 0, 60)
     panel.title_text:SetTextColor(1, 0.82, 0, 1)
     
     -- Enabled Checkbox
-    panel.enabled_checkbox = addon_data.config.CheckBoxFactory(
+    panel.enabled_checkbox = st.config.CheckBoxFactory(
         "PlayerEnabledCheckBox",
         panel,
         " Enable",
         "Enables the twist bar.",
-        addon_data.bar.EnabledCheckBoxOnClick)
+        st.bar.EnabledCheckBoxOnClick)
     panel.enabled_checkbox:SetPoint("TOPLEFT", 10, 36)
     
     -- Is Locked Checkbox
-    panel.is_locked_checkbox = addon_data.config.CheckBoxFactory(
+    panel.is_locked_checkbox = st.config.CheckBoxFactory(
         "IsLockedCheckBox",
         panel,
         " Lock Bar",
         "Locks the twist bar in place.",
-        addon_data.bar.IsLockedCheckBoxOnClick)
+        st.bar.IsLockedCheckBoxOnClick)
     panel.is_locked_checkbox:SetPoint("TOPLEFT", 10, 16)
 
     -- Show Left Text Checkbox
-    panel.show_left_text_checkbox = addon_data.config.CheckBoxFactory(
+    panel.show_left_text_checkbox = st.config.CheckBoxFactory(
         "PlayerShowLeftTextCheckBox",
         panel,
         "Show Attack Speed Text",
         "Shows the player's attack speed on the left of the bar.",
-        addon_data.bar.ShowLeftTextCheckBoxOnClick)
+        st.bar.ShowLeftTextCheckBoxOnClick)
     panel.show_left_text_checkbox:SetPoint("TOPLEFT", 10, -4)
 
     -- Show Right Text Checkbox
-    panel.show_right_text_checkbox = addon_data.config.CheckBoxFactory(
+    panel.show_right_text_checkbox = st.config.CheckBoxFactory(
         "PlayerShowRightTextCheckBox",
         panel,
         "Show Swing Timer Text",
         "Shows the player's swing timer on the right of the bar.",
-        addon_data.bar.ShowRightTextCheckBoxOnClick)
+        st.bar.ShowRightTextCheckBoxOnClick)
     panel.show_right_text_checkbox:SetPoint("TOPLEFT", 10, -24)
     
     -- lag detection enabled checkbox
-    panel.is_lag_detection_enabled_checkbox = addon_data.config.CheckBoxFactory(
+    panel.is_lag_detection_enabled_checkbox = st.config.CheckBoxFactory(
         "IsLagDetectionEnabledCheckbox",
         panel,
         " Lag Detection",
         "Enables experimental lag detection, changing the bar colour to yellow when lag might ruin a twist attempt.",
-        addon_data.bar.LagDetectionEnabledBoxOnClick
+        st.bar.LagDetectionEnabledBoxOnClick
     )
     panel.is_lag_detection_enabled_checkbox:SetPoint("TOPLEFT", 10, -44)
 
     -- twist color enabled checkbox
-    panel.is_twist_color_enabled_checkbox = addon_data.config.CheckBoxFactory(
+    panel.is_twist_color_enabled_checkbox = st.config.CheckBoxFactory(
         "IsTwistColorEnabledCheckbox",
         panel,
         " Twist Color Enabled",
         "When enabled, turns the bar a special color when the player has two active seals i.e is twisting." ..
         " Defaults to purple.",
-        addon_data.bar.TwistColorEnabledBoxOnClick
-        -- addon_data.bar.TwistColorEnabledBoxOnClick
+        st.bar.TwistColorEnabledBoxOnClick
+        -- st.bar.TwistColorEnabledBoxOnClick
     )
     panel.is_twist_color_enabled_checkbox:SetPoint("TOPLEFT", 10, -64)
 
     -- Hide When Inactive Checkbox
-    panel.hide_when_inactive_checkbox = addon_data.config.CheckBoxFactory(
+    panel.hide_when_inactive_checkbox = st.config.CheckBoxFactory(
         "HideWhenInactiveCheckbox",
         panel,
         " Hide When Inactive",
         "Hides the bar when the player is both out of combat, and has no active seals.",
-        addon_data.bar.DisableWhenInactiveBoxOnClick
+        st.bar.DisableWhenInactiveBoxOnClick
     )
     panel.hide_when_inactive_checkbox:SetPoint("TOPLEFT", 10, -84)
 
     -- Show Judgement Marker Checkbox
-    panel.show_judgement_marker_checkbox = addon_data.config.CheckBoxFactory(
+    panel.show_judgement_marker_checkbox = st.config.CheckBoxFactory(
         "ShowJudgementMarkerCheckbox",
         panel,
         " Show Judgement Indicator",
         "Shows a large yellow line on the bar when the judgement spell is coming off cooldown that swing.",
-        addon_data.bar.ShowJudgementMarkerOnClick
+        st.bar.ShowJudgementMarkerOnClick
     )
     panel.show_judgement_marker_checkbox:SetPoint("TOPLEFT", 10, -104)
 
     -- Width EditBox
-    panel.width_editbox = addon_data.config.EditBoxFactory(
+    panel.width_editbox = st.config.EditBoxFactory(
         "PlayerWidthEditBox",
         panel,
         "Bar Width",
         75,
         25,
-        addon_data.bar.WidthEditBoxOnEnter)
+        st.bar.WidthEditBoxOnEnter)
     panel.width_editbox:SetPoint("TOPLEFT", 220, -15, "BOTTOMRIGHT", 275, -85)
 
     -- Height EditBox
-    panel.height_editbox = addon_data.config.EditBoxFactory(
+    panel.height_editbox = st.config.EditBoxFactory(
         "PlayerHeightEditBox",
         panel,
         "Bar Height",
         75,
         25,
-        addon_data.bar.HeightEditBoxOnEnter)
+        st.bar.HeightEditBoxOnEnter)
     panel.height_editbox:SetPoint("TOPLEFT", 300, -15, "BOTTOMRIGHT", 355, -85)
 
 	-- Font Size EditBox
-	panel.fontsize_editbox = addon_data.config.EditBoxFactory(
+	panel.fontsize_editbox = st.config.EditBoxFactory(
         "FontSizeEditBox",
         panel,
         "Font Size",
         75,
         25,
-        addon_data.bar.FontSizeEditBoxOnEnter)
+        st.bar.FontSizeEditBoxOnEnter)
     panel.fontsize_editbox:SetPoint("TOPLEFT", 180, 30)
 
     -- X Offset EditBox
-    panel.x_offset_editbox = addon_data.config.EditBoxFactory(
+    panel.x_offset_editbox = st.config.EditBoxFactory(
         "PlayerXOffsetEditBox",
         panel,
         "X Offset",
         75,
         25,
-        addon_data.bar.XOffsetEditBoxOnEnter)
+        st.bar.XOffsetEditBoxOnEnter)
     panel.x_offset_editbox:SetPoint("TOPLEFT", 260, 30, "BOTTOMRIGHT", 240, 30)
 
     -- Y Offset EditBox
-    panel.y_offset_editbox = addon_data.config.EditBoxFactory(
+    panel.y_offset_editbox = st.config.EditBoxFactory(
         "PlayerYOffsetEditBox",
         panel,
         "Y Offset",
         75,
         25,
-        addon_data.bar.YOffsetEditBoxOnEnter)
+        st.bar.YOffsetEditBoxOnEnter)
     panel.y_offset_editbox:SetPoint("TOPLEFT", 340, 30, "BOTTOMRIGHT", 355, 30)
     
     -- Lag multiplier EditBox
-    panel.lag_multiplier_editbox = addon_data.config.EditBoxFactory(
+    panel.lag_multiplier_editbox = st.config.EditBoxFactory(
         "LagMultiplierEditBox",
         panel,
         "Lag Multiplier (s)",
@@ -317,12 +317,12 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         -- " will be compared to the time left on your swing to detect impossible twists.",
         75,
         25,
-        addon_data.bar.LagMultiplierOnEnter
+        st.bar.LagMultiplierOnEnter
     )
     panel.lag_multiplier_editbox:SetPoint("TOPLEFT", 200, -60, "BOTTOMRIGHT", 355, 30)
 
     -- Lag threshold EditBox
-    panel.lag_threshold_editbox = addon_data.config.EditBoxFactory(
+    panel.lag_threshold_editbox = st.config.EditBoxFactory(
         "LagThresholdEditBox",
         panel,
         "Lag Threshold (s)",
@@ -330,96 +330,96 @@ addon_data.bar.CreateConfigPanel = function(parent_panel)
         -- " will be compared to the time left on your swing to detect impossible twists.",
         75,
         25,
-        addon_data.bar.LagThresholdOnEnter
+        st.bar.LagThresholdOnEnter
     )
     panel.lag_threshold_editbox:SetPoint("TOPLEFT", 315, -60, "BOTTOMRIGHT", 355, 30)
 
-    panel.twist_window_editbox = addon_data.config.EditBoxFactory(
+    panel.twist_window_editbox = st.config.EditBoxFactory(
         "TwistWindowEditBox",
         panel,
         "Twist Window (s)",
         75,
         25,
-        addon_data.bar.TwistWindowOnEnter
+        st.bar.TwistWindowOnEnter
     )
     panel.twist_window_editbox:SetPoint("TOPLEFT", 200, -100, "BOTTOMRIGHT", 355, 30)
 
-    panel.grace_period_editbox = addon_data.config.EditBoxFactory(
+    panel.grace_period_editbox = st.config.EditBoxFactory(
         "GracePeriodEditBox",
         panel,
         "Grace Period (s)",
         75,
         25,
-        addon_data.bar.GracePeriodOnEnter
+        st.bar.GracePeriodOnEnter
     )
     panel.grace_period_editbox:SetPoint("TOPLEFT", 315, -100, "BOTTOMRIGHT", 355, 30)
 
     -- Twist bar color picker
-    -- panel.main_color_picker = addon_data.config.color_picker_factory(
+    -- panel.main_color_picker = st.config.color_picker_factory(
     --     'PlayerMainColorPicker',
     --     panel,
     --     settings.main_r, settings.main_g, settings.main_b, settings.main_a,
     --     "Twist Bar Color",
-    --     addon_data.bar.MainColorPickerOnClick)
+    --     st.bar.MainColorPickerOnClick)
     -- panel.main_color_picker:SetPoint('TOPLEFT', 205, -150)
 
     -- -- Twist bar text color picker
-    -- panel.main_text_color_picker = addon_data.config.color_picker_factory(
+    -- panel.main_text_color_picker = st.config.color_picker_factory(
     --     'PlayerMainTextColorPicker',
     --     panel,
     --     settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a,
     --     "Twist Bar Text Color",
-    --     addon_data.bar.MainTextColorPickerOnClick)
+    --     st.bar.MainTextColorPickerOnClick)
     -- panel.main_text_color_picker:SetPoint('TOPLEFT', 205, -170)
-    panel.tick_width_slider = addon_data.config.SliderFactory(
+    panel.tick_width_slider = st.config.SliderFactory(
         "TickWidthSlider",
         panel,
         "Marker Width",
         0, 5, 1,
-        addon_data.bar.TickWidthOnValChange    
+        st.bar.TickWidthOnValChange    
     )
     panel.tick_width_slider:SetPoint("TOPLEFT", 405, -60)
 
     -- In Combat Alpha Slider
-    -- panel.in_combat_alpha_slider = addon_data.config.SliderFactory(
+    -- panel.in_combat_alpha_slider = st.config.SliderFactory(
     --     "PlayerInCombatAlphaSlider",
     --     panel,
     --     "In Combat Opacity",
     --     0,
     --     1,
     --     0.05,
-    --     addon_data.bar.CombatAlphaOnValChange)
+    --     st.bar.CombatAlphaOnValChange)
     -- panel.in_combat_alpha_slider:SetPoint("TOPLEFT", 405, -60)
 
     -- -- Out Of Combat Alpha Slider
-    -- panel.ooc_alpha_slider = addon_data.config.SliderFactory(
+    -- panel.ooc_alpha_slider = st.config.SliderFactory(
     --     "PlayerOOCAlphaSlider",
     --     panel,
     --     "Out of Combat Opacity",
     --     0,
     --     1,
     --     0.05,
-    --     addon_data.bar.OOCAlphaOnValChange)
+    --     st.bar.OOCAlphaOnValChange)
     -- panel.ooc_alpha_slider:SetPoint("TOPLEFT", 405, -110)
     
     -- Backplane Alpha Slider
-    panel.backplane_alpha_slider = addon_data.config.SliderFactory(
+    panel.backplane_alpha_slider = st.config.SliderFactory(
         "PlayerBackplaneAlphaSlider",
         panel,
         "Backplane Opacity",
         0,
         1,
         0.05,
-        addon_data.bar.BackplaneAlphaOnValChange)
+        st.bar.BackplaneAlphaOnValChange)
     panel.backplane_alpha_slider:SetPoint("TOPLEFT", 405, -110)
     
     -- Return the final panel
-    addon_data.bar.UpdateConfigPanelValues()
+    st.bar.UpdateConfigPanelValues()
     return panel
 end
 
 
--- addon_data.bar.MainColorPickerOnClick = function()
+-- st.bar.MainColorPickerOnClick = function()
 --     local settings = swedgetimer_bar_settings
 --     local function MainOnActionFunc(restore)
 --         local settings = swedgetimer_bar_settings
@@ -430,9 +430,9 @@ end
 --             new_a, new_r, new_g, new_b = 1 - OpacitySliderFrame:GetValue(), ColorPickerFrame:GetColorRGB()
 --         end
 --         settings.main_r, settings.main_g, settings.main_b, settings.main_a = new_r, new_g, new_b, new_a
---         addon_data.bar.frame.bar:SetVertexColor(
+--         st.bar.frame.bar:SetVertexColor(
 --             settings.main_r, settings.main_g, settings.main_b, settings.main_a)
---         addon_data.bar.config_frame.main_color_picker.foreground:SetColorTexture(
+--         st.bar.config_frame.main_color_picker.foreground:SetColorTexture(
 --             settings.main_r, settings.main_g, settings.main_b, settings.main_a)
 --     end
 --     ColorPickerFrame.func, ColorPickerFrame.opacityFunc, ColorPickerFrame.cancelFunc = 
@@ -444,7 +444,7 @@ end
 --     ColorPickerFrame:Show()
 -- end
 
--- addon_data.bar.MainTextColorPickerOnClick = function()
+-- st.bar.MainTextColorPickerOnClick = function()
 --     local settings = swedgetimer_bar_settings
 --     local function MainTextOnActionFunc(restore)
 --         local settings = swedgetimer_bar_settings
@@ -455,11 +455,11 @@ end
 --             new_a, new_r, new_g, new_b = 1 - OpacitySliderFrame:GetValue(), ColorPickerFrame:GetColorRGB()
 --         end
 --         settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a = new_r, new_g, new_b, new_a
---         addon_data.bar.frame.left_text:SetTextColor(
+--         st.bar.frame.left_text:SetTextColor(
 --             settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a)
---         addon_data.bar.frame.right_text:SetTextColor(
+--         st.bar.frame.right_text:SetTextColor(
 --             settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a)
---         addon_data.bar.config_frame.main_text_color_picker.foreground:SetColorTexture(
+--         st.bar.config_frame.main_text_color_picker.foreground:SetColorTexture(
 --             settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a)
 --     end
 --     ColorPickerFrame.func, ColorPickerFrame.opacityFunc, ColorPickerFrame.cancelFunc = 
@@ -472,23 +472,23 @@ end
 -- end
 
 
--- addon_data.bar.CombatAlphaOnValChange = function(self)
+-- st.bar.CombatAlphaOnValChange = function(self)
 --     swedgetimer_bar_settings.in_combat_alpha = tonumber(self:GetValue())
---     addon_data.bar.UpdateVisualsOnSettingsChange()
+--     st.bar.UpdateVisualsOnSettingsChange()
 -- end
 
--- addon_data.bar.OOCAlphaOnValChange = function(self)
+-- st.bar.OOCAlphaOnValChange = function(self)
 --     swedgetimer_bar_settings.ooc_alpha = tonumber(self:GetValue())
---     addon_data.bar.UpdateVisualsOnSettingsChange()
+--     st.bar.UpdateVisualsOnSettingsChange()
 -- end
 
-addon_data.bar.BackplaneAlphaOnValChange = function(self)
+st.bar.BackplaneAlphaOnValChange = function(self)
     swedgetimer_bar_settings.backplane_alpha = tonumber(self:GetValue())
-    addon_data.bar.UpdateVisualsOnSettingsChange()
+    st.bar.UpdateVisualsOnSettingsChange()
 end
 
 
 --=========================================================================================
 -- End, if debug verify module was read.
 --=========================================================================================
-if addon_data.debug then print('-- Parsed bar_config.lua module correctly') end
+if st.debug then print('-- Parsed bar_config.lua module correctly') end

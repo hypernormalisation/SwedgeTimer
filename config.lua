@@ -1,42 +1,42 @@
-local addon_name, addon_data = ...
-local L = addon_data.localization_table
+local addon_name, st = ...
+local L = st.localization_table
 
-local print = addon_data.utils.print_msg
+local print = st.utils.print_msg
 
 
-addon_data.config = {}
+st.config = {}
 
-addon_data.config.OnDefault = function()
-    addon_data.core.RestoreAllDefaults()
-    addon_data.config.UpdateConfigValues()
+st.config.OnDefault = function()
+    st.core.RestoreAllDefaults()
+    st.config.UpdateConfigValues()
 end
 
-addon_data.config.InitializeVisuals = function()
+st.config.InitializeVisuals = function()
 
     -- Add the parent panel
-    addon_data.config.config_parent_panel = CreateFrame("Frame", addon_name .. "MyConfigFrame", UIParent)
-    local panel = addon_data.config.config_parent_panel
+    st.config.config_parent_panel = CreateFrame("Frame", addon_name .. "MyConfigFrame", UIParent)
+    local panel = st.config.config_parent_panel
     panel:SetSize(1, 1)
-    panel.global_panel = addon_data.config.CreateConfigPanel(panel)
+    panel.global_panel = st.config.CreateConfigPanel(panel)
     panel.global_panel:SetPoint('TOPLEFT', 10, -10)
     panel.global_panel:SetSize(1, 1)
 
     panel.name = "SwedgeTimer"
-    panel.default = addon_data.config.OnDefault
+    panel.default = st.config.OnDefault
     InterfaceOptions_AddCategory(panel)
     
     -- Add the melee panel
     panel.config_melee_panel = CreateFrame("Frame", nil, panel)
     panel.config_melee_panel:SetSize(1, 1)
-    panel.config_melee_panel.player_panel = addon_data.bar.CreateConfigPanel(panel.global_panel)
+    panel.config_melee_panel.player_panel = st.bar.CreateConfigPanel(panel.global_panel)
     panel.config_melee_panel.player_panel:SetPoint('TOPLEFT', 0, -120)
     panel.config_melee_panel.player_panel:SetSize(1, 1)
     panel.config_melee_panel.name = "Twist Bar Settings"
     panel.config_melee_panel.parent = panel.name
-    panel.config_melee_panel.default = addon_data.config.OnDefault
+    panel.config_melee_panel.default = st.config.OnDefault
 end
 
-addon_data.config.TextFactory = function(parent, text, size)
+st.config.TextFactory = function(parent, text, size)
     local text_obj = parent:CreateFontString(nil, "ARTWORK")
     text_obj:SetFont("Fonts/FRIZQT__.ttf", size)
     text_obj:SetJustifyV("CENTER")
@@ -45,7 +45,7 @@ addon_data.config.TextFactory = function(parent, text, size)
     return text_obj
 end
 
-addon_data.config.CheckBoxFactory = function(g_name, parent, checkbtn_text, tooltip_text, on_click_func)
+st.config.CheckBoxFactory = function(g_name, parent, checkbtn_text, tooltip_text, on_click_func)
     local checkbox = CreateFrame("CheckButton", addon_name .. g_name, parent, "ChatConfigCheckButtonTemplate")
     getglobal(checkbox:GetName() .. 'Text'):SetText(checkbtn_text)
     checkbox.tooltip = tooltip_text
@@ -56,9 +56,9 @@ addon_data.config.CheckBoxFactory = function(g_name, parent, checkbtn_text, tool
     return checkbox
 end
 
-addon_data.config.EditBoxFactory = function(g_name, parent, title, w, h, enter_func)
+st.config.EditBoxFactory = function(g_name, parent, title, w, h, enter_func)
     local edit_box_obj = CreateFrame("EditBox", addon_name .. g_name, parent, "BackdropTemplate")
-    edit_box_obj.title_text = addon_data.config.TextFactory(edit_box_obj, title, 12)
+    edit_box_obj.title_text = st.config.TextFactory(edit_box_obj, title, 12)
     edit_box_obj.title_text:SetPoint("TOP", 0, 12)
     edit_box_obj:SetBackdrop({
         bgFile = "Interface/Tooltips/UI-Tooltip-Background",
@@ -91,7 +91,7 @@ addon_data.config.EditBoxFactory = function(g_name, parent, title, w, h, enter_f
     return edit_box_obj
 end
 
-addon_data.config.SliderFactory = function(g_name, parent, title, min_val, max_val, val_step, func)
+st.config.SliderFactory = function(g_name, parent, title, min_val, max_val, val_step, func)
     local slider = CreateFrame("Slider", addon_name .. g_name, parent, "OptionsSliderTemplate")
     local editbox = CreateFrame("EditBox", "$parentEditBox", slider, "InputBoxTemplate")
     slider:SetMinMaxValues(min_val, max_val)
@@ -111,7 +111,7 @@ addon_data.config.SliderFactory = function(g_name, parent, title, min_val, max_v
     editbox:SetText(slider:GetValue())
     editbox:SetAutoFocus(false)
     slider:SetScript("OnValueChanged", function(self)
-        editbox:SetText(tostring(addon_data.utils.SimpleRound(self:GetValue(), val_step)))
+        editbox:SetText(tostring(st.utils.simple_round(self:GetValue(), val_step)))
         func(self)
     end)
     editbox:SetScript("OnTextChanged", function(self)
@@ -131,7 +131,7 @@ addon_data.config.SliderFactory = function(g_name, parent, title, min_val, max_v
     return slider
 end
 
-addon_data.config.color_picker_factory = function(g_name, parent, r, g, b, a, text, on_click_func)
+st.config.color_picker_factory = function(g_name, parent, r, g, b, a, text, on_click_func)
     local color_picker = CreateFrame('Button', addon_name .. g_name, parent)
     color_picker:SetSize(15, 15)
     color_picker.normal = color_picker:CreateTexture(nil, 'BACKGROUND')
@@ -143,50 +143,47 @@ addon_data.config.color_picker_factory = function(g_name, parent, r, g, b, a, te
     color_picker.foreground:SetAllPoints()
     color_picker:SetNormalTexture(color_picker.foreground)
     color_picker:SetScript('OnClick', on_click_func)
-    color_picker.text = addon_data.config.TextFactory(color_picker, text, 12)
+    color_picker.text = st.config.TextFactory(color_picker, text, 12)
     color_picker.text:SetPoint('LEFT', 25, 0)
     return color_picker
 end
 
-addon_data.config.UpdateConfigValues = function()
-    local panel = addon_data.config.config_frame
+st.config.UpdateConfigValues = function()
+    local panel = st.config.config_frame
     -- local settings = swedgetimer_player_settings
     local settings_core = swedgetimer_core_settings
 	panel.welcome_checkbox:SetChecked(settings_core.welcome_message)
 end
 
-addon_data.config.WelcomeCheckBoxOnClick = function(self)
+st.config.WelcomeCheckBoxOnClick = function(self)
 	swedgetimer_core_settings.welcome_message = self:GetChecked()
-    addon_data.core.UpdateAllVisualsOnSettingsChange()
+    st.core.UpdateAllVisualsOnSettingsChange()
 end
 
-addon_data.config.CreateConfigPanel = function(parent_panel)
-    addon_data.config.config_frame = CreateFrame("Frame", addon_name .. "GlobalConfigPanel", parent_panel)
-    local panel = addon_data.config.config_frame
+st.config.CreateConfigPanel = function(parent_panel)
+    st.config.config_frame = CreateFrame("Frame", addon_name .. "GlobalConfigPanel", parent_panel)
+    local panel = st.config.config_frame
     local settings = swedgetimer_player_settings
     -- Title Text
-    panel.title_text = addon_data.config.TextFactory(panel, "Settings", 18)
+    panel.title_text = st.config.TextFactory(panel, "Settings", 18)
     panel.title_text:SetPoint("TOPLEFT", 0, 0)
     panel.title_text:SetTextColor(1, 0.9, 0, 1)
     	
     -- Welcome message checkbox
-    panel.welcome_checkbox = addon_data.config.CheckBoxFactory(
+    panel.welcome_checkbox = st.config.CheckBoxFactory(
         "WelcomeCheckBox",
         panel,
         " Welcome Message",
         "Displays the welcome message upon login/reload.",
-        addon_data.config.WelcomeCheckBoxOnClick)
+        st.config.WelcomeCheckBoxOnClick)
     panel.welcome_checkbox:SetPoint("TOPLEFT", 0, -20)
     
     -- Return the final panel
-    addon_data.config.UpdateConfigValues()
+    st.config.UpdateConfigValues()
     return panel
 end
-
-
-
 
 --=========================================================================================
 -- End, if debug verify module was read.
 --=========================================================================================
-if addon_data.debug then print('-- Parsed config.lua module correctly') end
+if st.debug then print('-- Parsed config.lua module correctly') end

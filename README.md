@@ -17,15 +17,15 @@ It does not aim to replace any of the other components of a typical Ret UI or he
 
 There are some advantages in using the SwedgeTimer addon over a traditional weak aura bar.
 
-### Seal of the Crusader snapshotting
+### crusader snapshotting
 
-Seal of the Crusader uses haste snapshotting to prevent taking advantage of the shortened attack timer by switching to (or from) another seal mid-swing.
+crusader uses haste snapshotting to prevent taking advantage of the shortened attack timer by switching to (or from) another seal mid-swing.
 The WeakAuras swing timer does not account for this, and will update your haste as soon as you switch seals, showing the wrong swing timer information until the next swing when the snapshotting falls off.
 
 This has been brought to the attention of the weak aura developers by members of the ret community but they refuse to incorporate a fix.
 As such, rets commonly use a patched version of weak auras, with the patched `generictrigger.lua` file being available on the Light Club and other paladin discords.
 
-SwedgeTimer handles Seal of the Crusader haste snapshotting implicitly, meaning no need to manually patch weak auras after every release, and no need for the patch maintainers to ensure compatibility with new WeakAura versions.
+SwedgeTimer handles crusader haste snapshotting implicitly, meaning no need to manually patch weak auras after every release, and no need for the patch maintainers to ensure compatibility with new WeakAura versions.
 
 ### Accurate in Retribution edge cases
 
@@ -52,10 +52,10 @@ In a future update, font and bar texture customisation will also be implemented.
 
 ### Lag Detection
 
-At high haste, many rets will be familiar with the experience of attempting a twist that your swing timer indicates that you can make, only to end up landing a Seal of Command swing due to lag, with the Seal of Blood cast taking you out of SoC and denying your ability to twist.
+At high haste, many rets will be familiar with the experience of attempting a twist that your swing timer indicates that you can make, only to end up landing a command swing due to lag, with the blood cast taking you out of SoC and denying your ability to twist.
 
 SwedgeTimer features an experimental lag detection feature, whereby the roundtrip latency to the world server is cross-checked against the time window for a twist to be made at the end of a close swing.
-When the addon detects that lag is likely to push the Seal of Blood cast into the next swing, the bar turns yellow.
+When the addon detects that lag is likely to push the blood cast into the next swing, the bar turns yellow.
 This indicates to the player that they should either stopattack to land the twist, or to instead filler and ride the SoC swing into a twist on the next attempt, optimising dps output.
 
 This feature works best on connections where the latency is relatively stable, as it relies on the WoW API's `GetNetStats` endpoint which only updates once every 30s.

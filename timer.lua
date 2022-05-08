@@ -1,5 +1,5 @@
-local addon_name, addon_data = ...
-local L = addon_data.localization_table
+local addon_name, st = ...
+local L = st.localization_table
 
-addon_data.player = {}
+st.player = {}
 
