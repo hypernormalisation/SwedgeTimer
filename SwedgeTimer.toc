@@ -6,6 +6,7 @@
 ## DefaultState: enabled
 ## OptDeps: BugSack, !Swatter, Ace3, LibSharedMedia-3.0
 ## SavedVariables: swedgetimer_core_settings, swedgetimer_player_settings, swedgetimer_bar_settings
+## X-Wago-ID: 9rN4dMND
 
 utils.lua
 st_data.lua
