@@ -110,7 +110,8 @@ SwedgeTimer.defaults = {
         
 		-- Font settings
 		font_size = 16,
-
+		font_color = {1.0, 1.0, 1.0, 1.0},
+		text_font = SML.DefaultMedia.font,
         
 
         -- bar_fontsize = 16,
@@ -128,9 +129,14 @@ SwedgeTimer.defaults = {
 
         -- bar_twist_color_enabled = true,
 
+		marker_width = 3,
+		gcd_marker_color = {0.2, 0.3, 0.2, 1.0},
+		twist_marker_color = {0.9,0.9,0.9,1.0},
+		judgement_marker_color = {0.9,0.9,0.01,1.0},
+
         -- bar_line_width = 3,
 
-		-- Color Settings
+		-- Seal color settings
         bar_color_default = {0.5, 0.5, 0.5, 1.0},
         bar_color_twist_ready = {0., 0.68, 0., 1.0},
         bar_color_blood = {0.7, 0.27, 0.0, 1.0},
@@ -141,12 +147,13 @@ SwedgeTimer.defaults = {
 		bar_color_vengeance = {0.8, 0.5, 0.4, 1.0},
 		bar_color_righteousness = {0., 0.68, 0., 1.0},
 
-
+		-- Special bar colors
+        bar_color_cant_twist = {0.7, 0.7, 0.01, 1.0},
         bar_color_warning = {1.0, 0.0, 0.0, 1.0}, -- when if you cast SoC, you can't twist out of it that swing
         
-		
+		-- GCD underlay bar colors
 		bar_color_gcd = {0.3, 0.3, 0.3, 1.0},
-        bar_color_cant_twist = {0.7, 0.7, 0.01, 1.0},
+
     },
 
 }
@@ -170,13 +177,67 @@ end
 local set_bar_position = function()
 	local db = SwedgeTimer.db.profile
 	local frame = st.bar.frame
+	frame:ClearAllPoints()
 	frame:SetPoint("CENTER", UIParent, "CENTER", db.bar_x_offset, db.bar_y_offset)
 	frame.bar:SetPoint("TOPLEFT", 0, 0)
-	frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
-	
-	frame.left_text:SetPoint("TOPLEFT", 2, -(db.bar_height / 2) + (db.font_size / 2))
-	frame.right_text:SetPoint("TOPRIGHT", -5, -(db.bar_height / 2) + (db.font_size / 2))
 
+	frame.bar:SetPoint("TOPLEFT", 0, 0)
+	frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
+	frame.left_text:SetPoint("TOPLEFT", 2, -(db.bar_height / 2) + (db.font_size / 2))
+	frame.right_text:SetPoint("TOPRIGHT", 2, -(db.bar_height / 2) + (db.font_size / 2))
+end
+st.set_bar_position = set_bar_position
+
+
+local set_fonts = function()
+	local db = SwedgeTimer.db.profile
+	local frame = st.bar.frame
+	local font_path = SML:Fetch('font', db.text_font)
+	-- print(font_path)
+	frame.left_text:SetFont(font_path, db.font_size, "OUTLINE")
+	frame.right_text:SetFont(font_path, db.font_size, "OUTLINE")
+	frame.left_text:SetPoint("TOPLEFT", 2, -(db.bar_height / 2) + (db.font_size / 2))
+	frame.right_text:SetPoint("TOPLEFT", 2, -(db.bar_height / 2) + (db.font_size / 2))
+	frame.left_text:SetTextColor(unpack(db.font_color))
+	frame.right_text:SetTextColor(unpack(db.font_color))
+end
+st.set_fonts = set_fonts
+
+local set_bar_size = function()
+	local db = SwedgeTimer.db.profile
+	local frame = st.bar.frame
+	frame:SetWidth(db.bar_width)
+	frame:SetHeight(db.bar_height)
+	frame.bar:SetWidth(db.bar_width)
+	frame.bar:SetHeight(db.bar_height)
+	frame.gcd_bar:SetWidth(db.bar_width)
+	frame.gcd_bar:SetHeight(db.bar_height)
+	set_fonts()
+end
+
+local set_marker_widths = function()
+	local frame = st.bar.frame
+	local db = SwedgeTimer.db.profile
+	frame.twist_line:SetThickness(db.marker_width)
+	frame.gcd1_line:SetThickness(db.marker_width)
+	frame.gcd2_line:SetThickness(db.marker_width)
+	frame.judgement_line:SetThickness(db.marker_width)
+end
+st.set_marker_widths = set_marker_widths
+
+local set_marker_colors = function()
+	local frame = st.bar.frame
+	local db = SwedgeTimer.db.profile
+	frame.twist_line:SetColorTexture(unpack(SwedgeTimer.db.profile.twist_marker_color))
+	frame.gcd1_line:SetColorTexture(unpack(SwedgeTimer.db.profile.gcd_marker_color))
+	frame.gcd2_line:SetColorTexture(unpack(SwedgeTimer.db.profile.gcd_marker_color))
+	frame.judgement_line:SetColorTexture(unpack(SwedgeTimer.db.profile.judgement_marker_color))
+end
+st.set_marker_colors = set_marker_colors
+
+st.set_markers = function()
+	st.set_marker_colors()
+	st.set_marker_widths()
 end
 
 SwedgeTimer.options = {
@@ -242,13 +303,54 @@ SwedgeTimer.options = {
 		-- Positioning
 		positioning = {
 			type = "group",
-			name = "Positioning",
+			name = "Size and position",
 			handler = SwedgeTimer,
 			order = 2,
 			args = {
+
+				size_header = {
+					type='header',
+					name='Size',
+					order=1,
+				},
+
+				bar_width = {
+					type = "range",
+					order = 2,
+					name = "Width",
+					desc = "The width of the swing timer bar.",
+					min = 100, max = 600,
+					step = 1,
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.bar_width = key
+						set_bar_size()
+					end,
+				},
+
+				bar_height = {
+					type = "range",
+					order = 3,
+					name = "Height",
+					desc = "The height of the swing timer bar.",
+					min = 6, max = 60,
+					step = 1,
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.bar_height = key
+						set_bar_size()
+					end,
+				},
+
+				position_header = {
+					type = 'header',
+					name = 'Position',
+					order = 4,
+				},
+
 				bar_x_offset = {
 					type = "input",
-					order = 1,
+					order = 5,
 					name = "Bar x offset",
 					desc = "The x position of the bar.",
 					get = "GetValue",
@@ -260,7 +362,7 @@ SwedgeTimer.options = {
 		
 				bar_y_offset = {
 					type = "input",
-					order = 2,
+					order = 6,
 					name = "Bar y offset",
 					desc = "The y position of the bar.",
 					get = "GetValue",
@@ -271,7 +373,7 @@ SwedgeTimer.options = {
 				},
 				bar_locked = {
 					type = "toggle",
-					order = 3,
+					order = 7,
 					name = "Bar locked",
 					desc = "Locks the swing bar in-place.",
 					get = "GetValue",
@@ -280,23 +382,6 @@ SwedgeTimer.options = {
 			}
 		},
 
-
-
-		-- bar_y_offset = {
-		-- 	type = "slider",
-		-- 	order = 1,
-		-- 	name = "Bar x offset",
-		-- 	desc = "The x position of the bar.",
-		-- 	get = "GetValue",
-		-- 	step = 0.01,
-		-- 	bigStep = 0.1
-		-- 	set = function(self, input)
-		-- 		local db = SwedgeTimer.db.profile
-		-- 		-- SwedgeTimer.db.profile.bar_x_offset = input
-		-- 		db.bar_x_offset = input
-		-- 		st.bar.frame:SetPoint("CENTER", UIParent, "CENTER", db.bar_x_offset, db.bar_y_offset)
-		-- 	end			
-		-- },
 		bar_appearance = {
 			type = "group",
 			name = "Appearance",
@@ -352,8 +437,6 @@ SwedgeTimer.options = {
 						st.bar.frame.backplane.backdropInfo.bgFile = SML:Fetch('statusbar', key)
 						st.bar.frame.backplane:ApplyBackdrop()
 						st.bar.frame.backplane:SetBackdropColor(0,0,0, SwedgeTimer.db.profile.backplane_alpha)
-
-						-- st.bar.frame.bar:SetTexture(SML:Fetch('statusbar', key))
 					end
 				},
 				
@@ -371,7 +454,6 @@ SwedgeTimer.options = {
 					hasAlpha=false,
 					get = function()
 						local tab = SwedgeTimer.db.profile.bar_color_default
-						print(tab)
 						return tab[1], tab[2], tab[3], tab[4]
 					end,
 					set = function(self,r,g,b,a)
@@ -516,13 +598,153 @@ SwedgeTimer.options = {
 					end
 				},
 
+				gcd_header = {
+					order=17,
+					type="header",
+					name="GCD underlay",
+				},
+
+				bar_color_gcd = {
+					order=18,
+					type="color",
+					name="Underlay color",
+					desc="The color of the GCD underlay.",
+					hasAlpha=false,
+					get = function()
+						local tab = SwedgeTimer.db.profile.bar_color_gcd
+						return tab[1], tab[2], tab[3], tab[4]
+					end,
+					set = function(self,r,g,b,a)
+						SwedgeTimer.db.profile.bar_color_gcd = {r,g,b,a}
+						st.bar.frame.gcd_bar:SetVertexColor(unpack(SwedgeTimer.db.profile.bar_color_gcd))
+					end
+				},
+
 				fonts_header = {
 					order=20,
 					type="header",
 					name="Fonts",
 				},
 
+				font_size = {
+					type = "range",
+					order = 23,
+					name = "Font size",
+					desc = "The size of the swing timer and attack speed fonts.",
+					min = 10, max = 40, softMin = 8, softMax = 24,
+					step = 1,
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.font_size = key
+						set_fonts()
+					end,
+				},
+				font_color = {
+					order=22,
+					type="color",
+					name="Font color",
+					desc="The color of the addon texts.",
+					hasAlpha=false,
+					get = function()
+						return unpack(SwedgeTimer.db.profile.font_color)
+					end,
+					set = function(self,r,g,b,a)
+						SwedgeTimer.db.profile.font_color = {r,g,b,a}
+						set_fonts()
+					end
+				},
+				text_font = {
+					order = 21,
+					type = "select",
+					name = "Font",
+					desc = "The font to use in the swing timer and attack speed text.",
+					dialogControl = "LSM30_Font",
+					-- values = getMediaData,
+					values = SML:HashTable("font"),
+					get = function(info) return SwedgeTimer.db.profile.text_font or SML.DefaultMedia.font end,
+					set = function(self, key)
+						SwedgeTimer.db.profile.text_font = key
+						set_fonts()
+					end
+				},
 
+				markers_header = {
+					order=30,
+					type="header",
+					name="Markers",
+				},
+
+				marker_width = {
+					type = "range",
+					order = 31,
+					name = "Marker width",
+					desc = "The width of the twist window GCD, and judgement markers.",
+					min = 1, max = 6,
+					step = 1,
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.marker_width = key
+						set_marker_widths()
+					end,
+				},
+				gcd_marker_color = {
+					order=33,
+					type="color",
+					name="GCD",
+					desc="The color of the GCD markers.",
+					hasAlpha=false,
+					get = function()
+						return unpack(SwedgeTimer.db.profile.gcd_marker_color)
+					end,
+					set = function(self,r,g,b,a)
+						SwedgeTimer.db.profile.gcd_marker_color = {r,g,b,a}
+						set_marker_colors()
+					end
+				},
+				twist_marker_color = {
+					order=32,
+					type="color",
+					name="Twist window",
+					desc="The color of the twist window marker.",
+					hasAlpha=false,
+					get = function()
+						return unpack(SwedgeTimer.db.profile.twist_marker_color)
+					end,
+					set = function(self,r,g,b,a)
+						SwedgeTimer.db.profile.twist_marker_color = {r,g,b,a}
+						set_marker_colors()
+					end
+				},
+				judgement_marker_color = {
+					order=34,
+					type="color",
+					name="Judgement indicator",
+					desc="The color of the judgement indicator marker, which shows when judgement will come off cooldown"..
+					" on the player's swing timer.",
+					hasAlpha=false,
+					get = function()
+						return unpack(SwedgeTimer.db.profile.judgement_marker_color)
+					end,
+					set = function(self,r,g,b,a)
+						SwedgeTimer.db.profile.judgement_marker_color = {r,g,b,a}
+						set_marker_colors()
+					end
+				},
+		-- bar_y_offset = {
+		-- 	type = "slider",
+		-- 	order = 1,
+		-- 	name = "Bar x offset",
+		-- 	desc = "The x position of the bar.",
+		-- 	get = "GetValue",
+		-- 	step = 0.01,
+		-- 	bigStep = 0.1
+		-- 	set = function(self, input)
+		-- 		local db = SwedgeTimer.db.profile
+		-- 		-- SwedgeTimer.db.profile.bar_x_offset = input
+		-- 		db.bar_x_offset = input
+		-- 		st.bar.frame:SetPoint("CENTER", UIParent, "CENTER", db.bar_x_offset, db.bar_y_offset)
+		-- 	end			
+		-- },
 
 			}
 		},

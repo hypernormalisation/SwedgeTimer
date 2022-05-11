@@ -4,6 +4,7 @@ local addon_name, st = ...
 local print = st.utils.print_msg
 local SML = LibStub("LibSharedMedia-3.0")
 local ST = LibStub("AceAddon-3.0"):GetAddon("SwedgeTimer")
+-- local db = ST.db.profile
 
 --=========================================================================================
 -- BAR SETTINGS 
@@ -80,18 +81,16 @@ end
 
 st.bar.OnFrameDragStop = function()
     local frame = st.bar.frame
-    local settings = swedgetimer_bar_settings
+    local db = ST.db.profile
+
     frame:StopMovingOrSizing()
     local point, _, rel_point, x_offset, y_offset = frame:GetPoint()
     -- if x_offset < 5 and x_offset > -5 then
     --     x_offset = 0
     -- end
-    settings.point = "CENTER"
-    settings.rel_point = "CENTER"
-    settings.x_offset = st.utils.simple_round(x_offset, 0.1)
-    settings.y_offset = st.utils.simple_round(y_offset, 0.1)
-    st.bar.UpdateVisualsOnSettingsChange()
-    st.bar.UpdateConfigPanelValues()
+    db.bar_x_offset = st.utils.simple_round(x_offset, 0.1)
+    db.bar_y_offset = st.utils.simple_round(y_offset, 0.1)
+    st.set_bar_position()
     st.bar.set_bar_color()
 end
 
@@ -109,12 +108,22 @@ st.bar.init_bar_visuals = function()
 
     -- Set initial frame properties
     frame:SetPoint("CENTER")
+    
+    if db.bar_enabled then
+        frame:Show()
+    end
     frame:SetMovable(true)
-    frame:EnableMouse(not settings.is_locked)
+    frame:EnableMouse(not db.bar_locked)
     frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnDragStart", st.bar.OnFrameDragStart)
     frame:SetScript("OnDragStop", st.bar.OnFrameDragStop)
-    
+
+    frame:SetHeight(db.bar_height)
+    frame:SetWidth(db.bar_width)
+
+    frame:ClearAllPoints()
+    frame:SetPoint("CENTER", UIParent, "CENTER", db.bar_x_offset, db.bar_y_offset)
+
     -- Create the backplane and border
     frame.backplane = CreateFrame("Frame", addon_name .. "BarBackdropFrame", frame, "BackdropTemplate")
     frame.backplane:SetPoint('TOPLEFT', -10, 10)
@@ -122,77 +131,54 @@ st.bar.init_bar_visuals = function()
     frame.backplane:SetFrameStrata('LOW')
 
     frame.backplane.backdropInfo = {
-        bgFile = SML:Fetch('statusbar', "Solid"),
+        bgFile = SML:Fetch('statusbar', db.backplane_texture_key),
         edgeFile = nil,
         tile = true, tileSize = 16, edgeSize = 16, 
         insets = { left = 8, right = 8, top = 8, bottom = 8}
     }
     frame.backplane:ApplyBackdrop()
-    -- frame.backplane:SetBackdrop()
-    frame.backplane:SetBackdropColor(0,0,0,settings.backplane_alpha)
-    -- frame.backplane:SetDrawLayer("ARTWORK", -2)
+    frame.backplane:SetBackdropColor(0, 0, 0, db.backplane_alpha)
 
     -- Create the swing timer bar
     frame.bar = frame:CreateTexture(nil,"ARTWORK")
-    frame:SetHeight(settings.height)
     frame.bar:SetPoint("TOPLEFT", 0, 0)
-    frame.bar:SetHeight(settings.height)
+    frame.bar:SetHeight(db.bar_height)
     frame.bar:SetTexture(SML:Fetch('statusbar', db.bar_texture))
-    frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_default"]))
+    frame.bar:SetVertexColor(unpack(db.bar_color_default))
 
     -- Create the GCD timer bar
     frame.gcd_bar = frame:CreateTexture(nil, "ARTWORK")
     frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
-    frame.gcd_bar:SetHeight(settings.height)
+    frame.gcd_bar:SetHeight(db.bar_height)
     frame.gcd_bar:SetTexture(SML:Fetch('statusbar', "Solid"))
-    frame.gcd_bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_gcd"]))
+    frame.gcd_bar:SetVertexColor(unpack(db.bar_color_gcd))
     frame.gcd_bar:SetDrawLayer("ARTWORK", -1)
 
-    -- Create the spark for the timer
-    frame.spark = frame:CreateTexture(nil,"OVERLAY")
-    -- frame.spark:SetTexture('Interface/AddOns/SwedgeTimer/Images/Spark')
-
-    -- Create the bar left text
+    -- Create the attack speed/swing timer texts and init them
     frame.left_text = frame:CreateFontString(nil, "OVERLAY")
-    frame.left_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize, "OUTLINE")
     frame.left_text:SetShadowColor(0.0,0.0,0.0,1.0)
     frame.left_text:SetShadowOffset(1,-1)
     frame.left_text:SetJustifyV("CENTER")
     frame.left_text:SetJustifyH("LEFT")
-    -- Create the bar right text
     frame.right_text = frame:CreateFontString(nil, "OVERLAY")
-    frame.right_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize, "OUTLINE")
     frame.right_text:SetShadowColor(0.0,0.0,0.0,1.0)
     frame.right_text:SetShadowOffset(1,-1)
     frame.right_text:SetJustifyV("CENTER")
     frame.right_text:SetJustifyH("RIGHT")
+    st.set_fonts()
 
     -- Create the line markers
     frame.twist_line = frame:CreateLine() -- the twist window marker
-    frame.twist_line:SetColorTexture(1,1,1,1)
     frame.twist_line:SetDrawLayer("OVERLAY", -1)
-    frame.twist_line:SetThickness(swedgetimer_bar_settings.tick_width)
-    frame.twist_line:SetStartPoint("TOPRIGHT", 0, 0) -- dummy vars so the line is initialised
-    frame.twist_line:SetEndPoint("BOTTOMRIGHT", 0, 0)
-
     frame.gcd1_line = frame:CreateLine() -- the first gcd possible before a twist
-    frame.gcd1_line:SetColorTexture(0.4,0.4,1,1)
     frame.gcd1_line:SetDrawLayer("OVERLAY", -1)
-    frame.gcd1_line:SetThickness(swedgetimer_bar_settings.tick_width)
-    
     frame.gcd2_line = frame:CreateLine()
-    frame.gcd2_line:SetColorTexture(0.4,0.4,1,1)
     frame.gcd2_line:SetDrawLayer("OVERLAY", -1)
-    frame.gcd2_line:SetThickness(swedgetimer_bar_settings.tick_width)
-    
+    frame.gcd2_line:SetColorTexture(0.4,0.4,1,1)
+    frame.gcd2_line:SetThickness(db.marker_width)
     frame.judgement_line = frame:CreateLine()
-    frame.judgement_line:SetColorTexture(1.0,1.0,0.1,1)
     frame.judgement_line:SetDrawLayer("OVERLAY", -1)
-    frame.judgement_line:SetThickness(swedgetimer_bar_settings.tick_width+2)
-
-    -- Run an update to configure the bar appropriately
-    -- st.bar.UpdateVisualsOnSettingsChange()
-    -- st.bar.update_visuals_on_update()
+    st.set_markers()
 
     -- print('Successfully initialised all bar visuals.')
 	frame:Show()
@@ -200,60 +186,65 @@ end
 
 -- this function is called when a setting related to bar visuals is changed
 st.bar.UpdateVisualsOnSettingsChange = function()
+
+
+    
     local frame = st.bar.frame
     local settings = swedgetimer_bar_settings
+    local db = ST.db.profile
+
     -- print("enabled says: " .. tostring(settings.enabled))
     -- print("show_border says : " .. tostring(settings.show_border))
 
-    if settings.enabled then
-        frame:Show()
-        frame:ClearAllPoints()
-        frame:SetPoint(settings.point, UIParent, settings.rel_point, settings.x_offset, settings.y_offset)
-        frame:SetWidth(settings.width)
-        frame:SetHeight(settings.height)
+    -- if settings.enabled then
+    --     -- frame:Show()
+    --     -- frame:ClearAllPoints()
+    --     -- frame:SetPoint(settings.point, UIParent, settings.rel_point, settings.x_offset, settings.y_offset)
+    --     -- frame:SetWidth(settings.width)
+    --     -- frame:SetHeight(settings.height)
 
-        frame.backplane:SetBackdropColor(0,0,0,settings.backplane_alpha)
-        frame.bar:SetPoint("TOPLEFT", 0, 0)
-        frame.bar:SetHeight(settings.height)
-        frame.bar:SetWidth(settings.width)
+    --     -- frame.backplane:SetBackdropColor(0,0,0,settings.backplane_alpha)
+    --     -- frame.bar:SetPoint("TOPLEFT", 0, 0)
+    --     -- frame.bar:SetHeight(settings.height)
+    --     -- frame.bar:SetWidth(settings.width)
 
-        frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
-        frame.gcd_bar:SetHeight(settings.height)
-        frame.gcd_bar:SetWidth(settings.width)
+    --     -- frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
+    --     -- frame.gcd_bar:SetHeight(db.bar_height)
+    --     -- frame.gcd_bar:SetWidth(db.bar_width)
 
-        frame.bar:SetTexture(SML:Fetch('statusbar', "Solid"))
-        frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_default"]))
+    --     -- frame.bar:SetTexture(SML:Fetch('statusbar', "Solid"))
+    --     -- frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_default"]))
 
-        frame.twist_line:SetThickness(swedgetimer_bar_settings.tick_width)
-        frame.gcd1_line:SetThickness(swedgetimer_bar_settings.tick_width)
-        frame.gcd2_line:SetThickness(swedgetimer_bar_settings.tick_width)
-        frame.judgement_line:SetThickness(swedgetimer_bar_settings.tick_width+1)
+    --     -- frame.twist_line:SetThickness(swedgetimer_bar_settings.tick_width)
+    --     -- frame.gcd1_line:SetThickness(swedgetimer_bar_settings.tick_width)
+    --     -- frame.gcd2_line:SetThickness(swedgetimer_bar_settings.tick_width)
+    --     -- frame.judgement_line:SetThickness(swedgetimer_bar_settings.tick_width+1)
 
 
-        frame.left_text:SetPoint("TOPLEFT", 2, -(settings.height / 2) + (settings.fontsize / 2))
-        frame.left_text:SetTextColor(settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a)
-		frame.left_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize, "OUTLINE")
+    --     -- frame.left_text:SetPoint("TOPLEFT", 2, -(settings.height / 2) + (settings.fontsize / 2))
+    --     -- frame.left_text:SetTextColor(settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a)
+	-- 	-- frame.left_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize, "OUTLINE")
 	
-        frame.right_text:SetPoint("TOPRIGHT", -5, -(settings.height / 2) + (settings.fontsize / 2))
-        frame.right_text:SetTextColor(settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a)
-		frame.right_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize, "OUTLINE")
+    --     -- frame.right_text:SetPoint("TOPRIGHT", -5, -(settings.height / 2) + (settings.fontsize / 2))
+    --     -- frame.right_text:SetTextColor(settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a)
+	-- 	-- frame.right_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize, "OUTLINE")
 
-        if settings.show_left_text then
-            frame.left_text:Show()
-        else
-            frame.left_text:Hide()
-        end
-        if settings.show_right_text then
-            frame.right_text:Show()
-        else
-            frame.right_text:Hide()
-        end
+    --     -- if settings.show_left_text then
+    --     --     frame.left_text:Show()
+    --     -- else
+    --     --     frame.left_text:Hide()
+    --     -- end
+    --     -- if settings.show_right_text then
+    --     --     frame.right_text:Show()
+    --     -- else
+    --     --     frame.right_text:Hide()
+    --     -- end
 
-        st.bar.set_bar_color()
+    --     -- st.bar.set_bar_color()
 
-    else
-        frame:Hide()
-    end
+    -- else
+    --     frame:Hide()
+    -- end
 end
 
 --=========================================================================================
@@ -274,13 +265,11 @@ st.bar.update_visuals_on_update = function()
     local frame = st.bar.frame
     local speed = st.player.current_weapon_speed
     local timer = st.player.swing_timer
+    local db = ST.db.profile
 
     -- Update the main bar's width
-    local timer_width = math.min(settings.width - (settings.width * (timer / speed)), settings.width)
-    
+    local timer_width = math.min(db.bar_width - (db.bar_width * (timer / speed)), db.bar_width)
     frame.bar:SetWidth(timer_width)
-    -- frame.spark:SetPoint('TOPLEFT', timer_width - 8, 0)
-    
     frame.gcd_bar:Show()
 
     -- Update the main bars text, hide right text if bar full
@@ -410,6 +399,8 @@ st.bar.calc_judgement = function()
     local remaining = st.player.judgement_cd_remaining
     local timer = st.player.swing_timer
     local elapsed = st.player.current_weapon_speed - timer
+    local db = ST.db.profile
+
     -- local time_remaining_on_swing = st.player.current_weapon_speed - st.player.swing_timer
     -- print(time_remaining_on_swing)
     -- print('judgement time remaining  = ' .. tostring(remaining))
@@ -418,7 +409,7 @@ st.bar.calc_judgement = function()
     if remaining < timer then
         -- print('judgement off cd this swing')
         if st.bar.has_judgement_seal() then
-            local offset = ((remaining + elapsed) / st.player.current_weapon_speed) * swedgetimer_bar_settings.width
+            local offset = ((remaining + elapsed) / st.player.current_weapon_speed) * db.bar_width
             -- print(offset)
             line:SetStartPoint("TOPLEFT", offset, 5)
             line:SetEndPoint("BOTTOMLEFT", offset, -5)
@@ -475,6 +466,7 @@ st.bar.set_gcd_bar_width = function()
     -- print(swing_timer)
     -- print(st.player.active_gcd_remaining)
     local time_since_bar_start = st.player.current_weapon_speed - st.player.swing_timer
+    local db = ST.db.profile
 
 
     local time_gcd_ends = time_since_bar_start + st.player.active_gcd_remaining
@@ -488,7 +480,7 @@ st.bar.set_gcd_bar_width = function()
 
     -- local gcd_bar_width = settings.width - (time_gcd_ends / attack_speed)
 
-    local gcd_bar_width = (time_gcd_ends / attack_speed) * settings.width
+    local gcd_bar_width = (time_gcd_ends / attack_speed) * db.bar_width
     -- print('offset says ' .. tostring(offset))
 
     -- -- if it exceeds the bar width, max it out.
@@ -546,8 +538,8 @@ end
 
 -- determine wether or not to draw the gcd1 line
 st.bar.should_draw_gcd1_window = function()
-    local settings = swedgetimer_bar_settings
-    if math.abs(st.bar.gcd1_tick_offset) > settings.width then
+    local db = ST.db.profile
+    if math.abs(st.bar.gcd1_tick_offset) > db.bar_width then
         return false
     end
     return true
@@ -555,8 +547,8 @@ end
 
 -- determine wether or not to draw the gcd2 line
 st.bar.should_draw_gcd2_window = function()
-    local settings = swedgetimer_bar_settings
-    if math.abs(st.bar.gcd2_tick_offset) > settings.width then
+    local db = ST.db.profile
+    if math.abs(st.bar.gcd2_tick_offset) > db.bar_width then
         return false
     end
     return true
@@ -565,8 +557,9 @@ end
 st.bar.set_twist_tick_offset = function()
 -- Set the offset position of the twist window
     local settings = swedgetimer_bar_settings
+    local db = ST.db.profile
     local bar_fraction = (settings.twist_window / st.player.current_weapon_speed)
-    local offset = bar_fraction * settings.width * -1
+    local offset = bar_fraction * db.bar_width * -1
     -- print('twist tick time = ' .. time_value)
     st.bar.twist_tick_offset = offset
     st.bar.frame.twist_line:SetStartPoint("TOPRIGHT", offset, 0)
@@ -579,8 +572,10 @@ st.bar.set_gcd1_tick_offset = function()
     local gcd_duration = st.player.spell_gcd_duration
     local grace_period = swedgetimer_bar_settings["grace_period"]
     local time_before_swing = gcd_duration + grace_period
+    local db = ST.db.profile
+
     -- print('GCD1 tick time = ' .. time_before_swing)
-    local offset = (time_before_swing / st.player.current_weapon_speed) * settings.width * -1
+    local offset = (time_before_swing / st.player.current_weapon_speed) * db.bar_width * -1
     st.bar.gcd1_tick_offset = offset
     st.bar.frame.gcd1_line:SetStartPoint("TOPRIGHT", offset, 0)
     st.bar.frame.gcd1_line:SetEndPoint("BOTTOMRIGHT", offset, 0)
@@ -592,8 +587,10 @@ st.bar.set_gcd2_tick_offset = function()
     local gcd_duration = st.player.spell_gcd_duration
     local grace_period = swedgetimer_bar_settings["grace_period"]
     local time_before_swing = (2 * gcd_duration) + grace_period
+    local db = ST.db.profile
+
     -- print('GCD2 tick time = ' .. time_before_swing)
-    local offset = (time_before_swing / st.player.current_weapon_speed) * settings.width * -1
+    local offset = (time_before_swing / st.player.current_weapon_speed) * db.bar_width * -1
     st.bar.gcd2_tick_offset = offset
     st.bar.frame.gcd2_line:SetStartPoint("TOPRIGHT", offset, 0)
     st.bar.frame.gcd2_line:SetEndPoint("BOTTOMRIGHT", offset, 0)
