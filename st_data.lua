@@ -42,13 +42,13 @@ local sow_ids = {
 }
 st.data.sow_ids = get_tab(sow_ids)
 
--- light IDs
+-- light
 local sol_ids = {
     20165, 20347, 20348, 20349, 27160
 }
 st.data.sol_ids = get_tab(sol_ids)
 
--- vengeance/Corruption IDs
+-- vengeance/corruption
 local sov_ids = {
     31801, 348704
 }

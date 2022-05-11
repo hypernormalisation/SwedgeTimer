@@ -4,12 +4,19 @@
 ## Author: Swedge
 ## Version: 0.1.8
 ## DefaultState: enabled
-## OptDeps: BugSack, !Swatter, Ace3, LibSharedMedia-3.0
-## SavedVariables: swedgetimer_core_settings, swedgetimer_player_settings, swedgetimer_bar_settings
+## OptDeps: BugSack, !Swatter, Ace3, LibSharedMedia-3.0, LibStub
+## SavedVariables: SwedgeTimerDB
 ## X-Wago-ID: 9rN4dMND
+
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
+Libs\LibSharedMedia-3.0\lib.xml
+Libs\AceAddon-3.0\AceAddon-3.0.xml
+Libs\AceConfig-3.0\AceConfig-3.0.xml
 
 utils.lua
 st_data.lua
+core.lua
 player.lua
 bar.lua
 bar_config.lua

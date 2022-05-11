@@ -1,14 +1,15 @@
 -- main.lua ============================================================================
 local addon_name, st = ...
 -- local L = st.localization_table
-
--- local name = UnitName("player")
 local version = "0.1.8"
 local load_message = "version " .. version .. " loaded!"
+
 
 -- shorthand
 local print = st.utils.print_msg
 
+print(addon_name)
+print(type(st))
 
 -- CORE =================================================================================
 st.core = {}
@@ -73,30 +74,30 @@ local function InitializeAllVisuals()
 end
 
 -- SLASH COMMANDS ===================================================================
-SLASH_SWEDGETIMER_HOME1 = "/swedgetimer"
-SLASH_SWEDGETIMER_HOME2 = "/SWEDGETIMER"
-SLASH_SWEDGETIMER_HOME3 = "/st"
-SlashCmdList["SWEDGETIMER_HOME"] = function(option)
-    -- print(option)
-    if option == "bar" then
-        st.bar.TwistBarToggle()
-    elseif option == "lock" then
-        st.bar.TwistBarLockToggle()
+-- SLASH_SWEDGETIMER_HOME1 = "/swedgetimer"
+-- SLASH_SWEDGETIMER_HOME2 = "/SWEDGETIMER"
+-- SLASH_SWEDGETIMER_HOME3 = "/st"
+-- SlashCmdList["SWEDGETIMER_HOME"] = function(option)
+--     -- print(option)
+--     if option == "bar" then
+--         st.bar.TwistBarToggle()
+--     elseif option == "lock" then
+--         st.bar.TwistBarLockToggle()
         
-    -- If no args, bring up the main config window
-    elseif option == '' then
-        -- Doing it twice works around the longstanding Blizzard bug
-	    -- that fails to actually open the requested panel if it's
-	    -- not currently visible in the lefthand list, and scrolling
-	    -- is required to bring it into view.
-        InterfaceOptionsFrame_OpenToCategory(st.config.config_parent_panel)
-        InterfaceOptionsFrame_OpenToCategory(st.config.config_parent_panel)
-    else
-        print('Recognised SwedgeTimer commands:')
-        print('--  /st lock  : toggles bar lock')
-        print('--  /st bar   : toggles bar visibility')
-    end
-end
+--     -- If no args, bring up the main config window
+--     elseif option == '' then
+--         -- Doing it twice works around the longstanding Blizzard bug
+-- 	    -- that fails to actually open the requested panel if it's
+-- 	    -- not currently visible in the lefthand list, and scrolling
+-- 	    -- is required to bring it into view.
+--         InterfaceOptionsFrame_OpenToCategory(st.config.config_parent_panel)
+--         InterfaceOptionsFrame_OpenToCategory(st.config.config_parent_panel)
+--     else
+--         print('Recognised SwedgeTimer commands:')
+--         print('--  /st lock  : toggles bar lock')
+--         print('--  /st bar   : toggles bar visibility')
+--     end
+-- end
 
 --=========================================================================================
 -- Now, a frame to load the addon upon intercepting the ADDON_LOADED event trigger
@@ -140,7 +141,7 @@ local function init_addon(self)
     st.player.update_lag()
 
     -- Some settings that have to be set after the bar is initialised
-    st.bar.UpdateVisualsOnSettingsChange()
+    -- st.bar.UpdateVisualsOnSettingsChange()
     st.bar.update_visuals_on_update()
     st.bar.set_bar_color()
     st.bar.set_gcd_bar_width()

@@ -2,6 +2,8 @@
 -- bar.lua =============================================================================
 local addon_name, st = ...
 local print = st.utils.print_msg
+local SML = LibStub("LibSharedMedia-3.0")
+local ST = LibStub("AceAddon-3.0"):GetAddon("SwedgeTimer")
 
 --=========================================================================================
 -- BAR SETTINGS 
@@ -9,7 +11,7 @@ local print = st.utils.print_msg
 st.bar = {}
 st.bar.default_settings = {
 	enabled = true,
-    hide_when_inactive = true,
+    hide_when_inactive = false,
     lag_detection_enabled = true,
 	width = 345,
 	height = 32,
@@ -71,7 +73,7 @@ end
 -- Drag and drop settings
 --=========================================================================================
 st.bar.OnFrameDragStart = function()
-    if not swedgetimer_bar_settings.is_locked then
+    if not ST.db.profile.bar_locked then
         st.bar.frame:StartMoving()
     end
 end
@@ -84,8 +86,8 @@ st.bar.OnFrameDragStop = function()
     -- if x_offset < 5 and x_offset > -5 then
     --     x_offset = 0
     -- end
-    settings.point = point
-    settings.rel_point = rel_point
+    settings.point = "CENTER"
+    settings.rel_point = "CENTER"
     settings.x_offset = st.utils.simple_round(x_offset, 0.1)
     settings.y_offset = st.utils.simple_round(y_offset, 0.1)
     st.bar.UpdateVisualsOnSettingsChange()
@@ -103,6 +105,8 @@ st.bar.init_bar_visuals = function()
     st.bar.frame = CreateFrame("Frame", addon_name .. "BarFrame", UIParent)   
     local frame = st.bar.frame
 
+    local db = ST.db.profile
+
     -- Set initial frame properties
     frame:SetPoint("CENTER")
     frame:SetMovable(true)
@@ -113,66 +117,34 @@ st.bar.init_bar_visuals = function()
     
     -- Create the backplane and border
     frame.backplane = CreateFrame("Frame", addon_name .. "BarBackdropFrame", frame, "BackdropTemplate")
-    frame.backplane:SetPoint('TOPLEFT', -9, 9)
-    frame.backplane:SetPoint('BOTTOMRIGHT', 9, -9)
+    frame.backplane:SetPoint('TOPLEFT', -10, 10)
+    frame.backplane:SetPoint('BOTTOMRIGHT', 10, -10)
     frame.backplane:SetFrameStrata('LOW')
-    frame.backplane:SetBackdrop({
-        bgFile = "Interface/AddOns/SwedgeTimer/Images/Background", 
-        edgeFile = nil, 
+
+    frame.backplane.backdropInfo = {
+        bgFile = SML:Fetch('statusbar', "Solid"),
+        edgeFile = nil,
         tile = true, tileSize = 16, edgeSize = 16, 
-        insets = { left = 8, right = 8, top = 8, bottom = 8}}
-    )
+        insets = { left = 8, right = 8, top = 8, bottom = 8}
+    }
+    frame.backplane:ApplyBackdrop()
+    -- frame.backplane:SetBackdrop()
     frame.backplane:SetBackdropColor(0,0,0,settings.backplane_alpha)
     -- frame.backplane:SetDrawLayer("ARTWORK", -2)
-
-    -- if settings.show_border then
-    --     frame.backplane:SetBackdrop({
-    --         bgFile = "Interface/AddOns/SwedgeTimer/Images/Background", 
-    --         edgeFile = "Interface/AddOns/SwedgeTimer/Images/Border", 
-    --         tile = true, tileSize = 16, edgeSize = 12, 
-    --         insets = { left = 8, right = 8, top = 8, bottom = 8}})
-    -- else
-    --     frame.backplane:SetBackdrop({
-    --         bgFile = "Interface/AddOns/SwedgeTimer/Images/Background", 
-    --         edgeFile = nil, 
-    --         tile = true, tileSize = 16, edgeSize = 16, 
-    --         insets = { left = 8, right = 8, top = 8, bottom = 8}})
-    -- end
-
-    -- if settings.show_border then
-    --     frame.backplane:SetBackdrop({
-    --         bgFile = "Interface/Tooltips/UI-Tooltip-Background",
-    --         edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
-    --         edgeSize = 16,
-    --         insets = { left = 4, right = 4, top = 4, bottom = 4 },
-    --     })
-    --     -- frame.backplane:SetBackdrop({
-    --     --     bgFile = "Interface/AddOns/Hurricane/Images/Background", 
-    --     --     edgeFile = "Interface/buttons/white8x8", 
-    --     --     tile = true, tileSize = 16,
-    --     --     edgeSize = 16, 
-    --     --     insets = { left = 8, right = 8, top = 8, bottom = 8}})
-    -- else
-    --     frame.backplane:SetBackdrop({
-    --         bgFile = "Interface/AddOns/Hurricane/Images/Background", 
-    --         edgeFile = nil, 
-    --         tile = true, tileSize = 16, edgeSize = 16, 
-    --         insets = { left = 8, right = 8, top = 8, bottom = 8}})
-    -- end
 
     -- Create the swing timer bar
     frame.bar = frame:CreateTexture(nil,"ARTWORK")
     frame:SetHeight(settings.height)
     frame.bar:SetPoint("TOPLEFT", 0, 0)
     frame.bar:SetHeight(settings.height)
-    frame.bar:SetTexture('Interface/AddOns/SwedgeTimer/Images/Bar')
+    frame.bar:SetTexture(SML:Fetch('statusbar', db.bar_texture))
     frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_default"]))
 
     -- Create the GCD timer bar
     frame.gcd_bar = frame:CreateTexture(nil, "ARTWORK")
     frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
     frame.gcd_bar:SetHeight(settings.height)
-    frame.gcd_bar:SetTexture('Interface/AddOns/SwedgeTimer/Images/Bar')
+    frame.gcd_bar:SetTexture(SML:Fetch('statusbar', "Solid"))
     frame.gcd_bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_gcd"]))
     frame.gcd_bar:SetDrawLayer("ARTWORK", -1)
 
@@ -249,7 +221,7 @@ st.bar.UpdateVisualsOnSettingsChange = function()
         frame.gcd_bar:SetHeight(settings.height)
         frame.gcd_bar:SetWidth(settings.width)
 
-        frame.bar:SetTexture('Interface/AddOns/SwedgeTimer/Images/Bar')
+        frame.bar:SetTexture(SML:Fetch('statusbar', "Solid"))
         frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_default"]))
 
         frame.twist_line:SetThickness(swedgetimer_bar_settings.tick_width)
