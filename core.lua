@@ -95,6 +95,7 @@ SwedgeTimer.defaults = {
 		-- Marker position settings
 		gcd_padding_mode = "Dynamic",
 		gcd_static_padding_ms = 100,
+		twist_padding_mode = "None",
 		twist_window_ms = 400,
 
 		-- Bar dimensions
@@ -105,8 +106,8 @@ SwedgeTimer.defaults = {
 		bar_locked = true,
 		bar_x_offset = 0,
 		bar_y_offset = -180,
-		point = "CENTER",
-		rel_point = "CENTER",
+		bar_point = "CENTER",
+		bar_rel_point = "CENTER",
 
 		-- Bar textures
         bar_texture_key = SML.DefaultMedia.statusbar,
@@ -114,6 +115,9 @@ SwedgeTimer.defaults = {
         backplane_texture_key = SML.DefaultMedia.statusbar,
 		backplane_alpha = 0.85,
         
+		backplane_outline_offset = 10,
+		backplane_outline_name = "Medium",
+
 		-- Font settings
 		font_size = 16,
 		font_color = {1.0, 1.0, 1.0, 1.0},
@@ -121,18 +125,13 @@ SwedgeTimer.defaults = {
         show_attack_speed_text = true,
         show_swing_timer_text = true,
 
-
-
-
+		-- Marker settings
 		marker_width = 3,
 		gcd_marker_color = {0.2, 0.3, 0.2, 1.0},
 		twist_marker_color = {0.9,0.9,0.9,1.0},
 		judgement_marker_color = {0.9,0.9,0.01,1.0},
 
-        -- bar_line_width = 3,
-
 		-- Seal color settings
-        -- bar_color_twist_ready = {0., 0.68, 0., 1.0},
         bar_color_blood = {0.7, 0.27, 0.0, 1.0},
 		bar_color_command = {0., 0.68, 0., 1.0},
 		bar_color_wisdom = {0., 0.4, 0.7, 1.0},
@@ -160,6 +159,34 @@ local gcd_padding_modes = {
 	None="None",
 }
 
+local valid_anchor_points = {
+	TOPLEFT="TOPLEFT",
+    TOPRIGHT="TOPRIGHT",
+    BOTTOMLEFT="BOTTOMLEFT",
+    BOTTOMRIGHT="BOTTOMRIGHT",
+    TOP="TOP",
+    BOTTOM="BOTTOM",
+    LEFT="LEFT",
+    RIGHT="RIGHT",
+    CENTER="CENTER",
+}
+
+st.bar_outline_names = {
+	None="None",
+	Thin="Thin",
+	Medium="Medium",
+	Thick="Thick",
+	Thicc="Thicc",
+}
+
+st.bar_outline_thicknesses = {
+	None=8,
+	Thin=9,
+	Medium=10,
+	Thick=11,
+	Thicc=12,
+}
+
 local MediaList = {}
 local function getMediaData(info)
     local mediaType = info[#(info)]
@@ -181,7 +208,7 @@ local set_bar_position = function()
 	local db = SwedgeTimer.db.profile
 	local frame = st.bar.frame
 	frame:ClearAllPoints()
-	frame:SetPoint(db.point, UIParent, db.rel_point, db.bar_x_offset, db.bar_y_offset)
+	frame:SetPoint(db.bar_point, UIParent, db.bar_rel_point, db.bar_x_offset, db.bar_y_offset)
 	frame.bar:SetPoint("TOPLEFT", 0, 0)
 	frame.bar:SetPoint("TOPLEFT", 0, 0)
 	frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
@@ -199,7 +226,7 @@ local set_fonts = function()
 	frame.left_text:SetFont(font_path, db.font_size, "OUTLINE")
 	frame.right_text:SetFont(font_path, db.font_size, "OUTLINE")
 	frame.left_text:SetPoint("TOPLEFT", 2, -(db.bar_height / 2) + (db.font_size / 2))
-	frame.right_text:SetPoint("TOPLEFT", 2, -(db.bar_height / 2) + (db.font_size / 2))
+	frame.right_text:SetPoint("TOPRIGHT", 2, -(db.bar_height / 2) + (db.font_size / 2))
 	frame.left_text:SetTextColor(unpack(db.font_color))
 	frame.right_text:SetTextColor(unpack(db.font_color))
 end
@@ -327,7 +354,7 @@ SwedgeTimer.options = {
 					type="description",
 					name="When GCD offset mode is not None, the GCD markers are pushed back "..
 					"some amount from the end of the swing. When the mode is set to dynamic, this value is the "..
-					"player's lag. When the mode is set to fixed, it is the value set below."
+					"player's lag. When the mode is set to fixed, it is the value set below in Static GCD padding."
 				},
 				gcd_padding_mode = {
 					order=8,
@@ -354,9 +381,29 @@ SwedgeTimer.options = {
 						SwedgeTimer.db.profile.gcd_static_padding_ms = key
 					end,
 				},
+
+				twist_window_descriptions = {
+					order=10.1,
+					type="description",
+					name="The twist window mode can also be set to the same modes. When the offset mode is set to Fixed, the twist window is the amount of time in"..
+					" ms before the swing that the twist window marker will appear.",
+				},
+				twist_padding_mode = {
+					order=10.2,
+					type="select",
+					values=gcd_padding_modes,
+					style="dropdown",
+					desc="The type of twist window padding, if any, to use to offset the twist window marker.",
+					name="Twist window offset mode",
+					get = "GetValue",
+					set = "SetValue",
+					-- set = function(self, key)
+					-- 	SwedgeTimer.db.profile.twist=key
+					-- end,
+				},
 				twist_window_ms = {
 					type = "range",
-					order = 10,
+					order = 10.3,
 					name = "Twist window (ms)",
 					desc = "The time before the end of the swing that the twist indicator marker will be placed. Players with high "..
 					"latency may wish to increase this value.",
@@ -364,7 +411,7 @@ SwedgeTimer.options = {
 					step=1,
 					get = "GetValue",
 					set = "SetValue",
-				}
+				},
 			},
 		},
 
@@ -420,12 +467,19 @@ SwedgeTimer.options = {
 					name = 'Position',
 					order = 4,
 				},
+				position_description = {
+					order=4.1,
+					type="description",
+					name="When the bar is not locked, it can be clicked and dragged with the mouse.",
+				},
 				bar_x_offset = {
 					type = "input",
 					order = 5,
 					name = "Bar x offset",
 					desc = "The x position of the bar.",
-					get = "GetValue",
+					get = function()
+						return tostring(SwedgeTimer.db.profile.bar_x_offset)
+					end,
 					set = function(self, input)
 						SwedgeTimer.db.profile.bar_x_offset = input
 						set_bar_position()
@@ -436,11 +490,37 @@ SwedgeTimer.options = {
 					order = 6,
 					name = "Bar y offset",
 					desc = "The y position of the bar.",
-					get = "GetValue",
+					get = function()
+						return tostring(SwedgeTimer.db.profile.bar_y_offset)
+					end,
 					set = function(self, input)
 						SwedgeTimer.db.profile.bar_y_offset = input
 						set_bar_position()
 					end			
+				},
+				bar_point = {
+					order = 6.1,
+					type="select",
+					name = "Anchor",
+					desc = "One of the region's anchors.",
+					values = valid_anchor_points,
+					get = "GetValue",
+					set = function(self, input)
+						SwedgeTimer.db.profile.bar_point = input
+						set_bar_position()
+					end,
+				},
+				bar_rel_point = {
+					order = 6.2,
+					type="select",
+					name = "Relative anchor",
+					desc = "Anchor point on region to align against.",
+					values = valid_anchor_points,
+					get = "GetValue",
+					set = function(self, input)
+						SwedgeTimer.db.profile.bar_rel_point = input
+						set_bar_position()
+					end,
 				},
 				bar_locked = {
 					type = "toggle",
@@ -524,6 +604,104 @@ SwedgeTimer.options = {
 					set = function(self, key)
 						SwedgeTimer.db.profile.backplane_alpha = key
 						st.bar.frame.backplane:SetBackdropColor(0, 0, 0, key)
+					end,
+				},
+				backplane_outline_offset = {
+					type = "select",
+					order = 5.1,
+					name = "Outline",
+					desc = "The thickness of the outline around the swing timer bar.",
+					values=st.bar_outline_names,
+					sorting={"None", "Thin", "Medium", "Thick", "Thicc"},
+					get = function() return tostring(SwedgeTimer.db.profile.backplane_outline_name) end,
+					set = function(self, key)
+						SwedgeTimer.db.profile.backplane_outline_name = key
+						local val = st.bar_outline_thicknesses[key]
+						SwedgeTimer.db.profile.backplane_outline_offset = val
+						-- print(val)
+						st.bar.frame.backplane:SetPoint('TOPLEFT', -1*val, val)
+						st.bar.frame.backplane:SetPoint('BOTTOMRIGHT', val, -1*val)
+					end
+				},
+
+				------------------------------------------------------------------------------------
+				-- font settings
+				fonts_header = {
+					order=9,
+					type="header",
+					name="Fonts",
+				},
+				font_size = {
+					type = "range",
+					order = 9.02,
+					name = "Font size",
+					desc = "The size of the swing timer and attack speed fonts.",
+					min = 10, max = 40, softMin = 8, softMax = 24,
+					step = 1,
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.font_size = key
+						set_fonts()
+					end,
+				},
+				font_color = {
+					order=9.9,
+					type="color",
+					name="Font color",
+					desc="The color of the addon texts.",
+					hasAlpha=false,
+					get = function()
+						return unpack(SwedgeTimer.db.profile.font_color)
+					end,
+					set = function(self,r,g,b,a)
+						SwedgeTimer.db.profile.font_color = {r,g,b,a}
+						set_fonts()
+					end
+				},
+				text_font = {
+					order = 9.01,
+					type = "select",
+					name = "Font",
+					desc = "The font to use in the swing timer and attack speed text.",
+					dialogControl = "LSM30_Font",
+					-- values = getMediaData,
+					values = SML:HashTable("font"),
+					get = function(info) return SwedgeTimer.db.profile.text_font or SML.DefaultMedia.font end,
+					set = function(self, key)
+						SwedgeTimer.db.profile.text_font = key
+						set_fonts()
+					end
+				},
+				show_attack_speed_text = {
+					type="toggle",
+					order = 9.1,
+					name = "Attack speed text",
+					desc = "Shows the player's current attack speed at the left of the swing timer bar.",
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.show_attack_speed_text = key
+						print(key)
+						if key then
+							st.bar.frame.left_text:Show()
+						else
+							st.bar.frame.left_text:Hide()
+						end
+					end,
+				},
+				show_swing_timer_text = {
+					type="toggle",
+					order = 9.12,
+					name = "Swing timer text",
+					desc = "Shows the remaining time on the player's swing on the right of the swing bar.",
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.show_swing_timer_text = key
+						print(key)
+						if key then
+							st.bar.frame.right_text:Show()
+						else
+							st.bar.frame.right_text:Hide()
+						end
 					end,
 				},
 				
@@ -707,9 +885,6 @@ SwedgeTimer.options = {
 					end
 				},
 
-
-
-
 				------------------------------------------------------------------------------------
 				-- GCD settings
 				gcd_header = {
@@ -733,86 +908,6 @@ SwedgeTimer.options = {
 					end
 				},
 
-				------------------------------------------------------------------------------------
-				-- font settings
-				fonts_header = {
-					order=40,
-					type="header",
-					name="Fonts",
-				},
-				font_size = {
-					type = "range",
-					order = 44,
-					name = "Font size",
-					desc = "The size of the swing timer and attack speed fonts.",
-					min = 10, max = 40, softMin = 8, softMax = 24,
-					step = 1,
-					get = "GetValue",
-					set = function(self, key)
-						SwedgeTimer.db.profile.font_size = key
-						set_fonts()
-					end,
-				},
-				font_color = {
-					order=45,
-					type="color",
-					name="Font color",
-					desc="The color of the addon texts.",
-					hasAlpha=false,
-					get = function()
-						return unpack(SwedgeTimer.db.profile.font_color)
-					end,
-					set = function(self,r,g,b,a)
-						SwedgeTimer.db.profile.font_color = {r,g,b,a}
-						set_fonts()
-					end
-				},
-				text_font = {
-					order = 43,
-					type = "select",
-					name = "Font",
-					desc = "The font to use in the swing timer and attack speed text.",
-					dialogControl = "LSM30_Font",
-					-- values = getMediaData,
-					values = SML:HashTable("font"),
-					get = function(info) return SwedgeTimer.db.profile.text_font or SML.DefaultMedia.font end,
-					set = function(self, key)
-						SwedgeTimer.db.profile.text_font = key
-						set_fonts()
-					end
-				},
-				show_attack_speed_text = {
-					type="toggle",
-					order = 41,
-					name = "Attack speed text",
-					desc = "Shows the player's current attack speed at the left of the swing timer bar.",
-					get = "GetValue",
-					set = function(self, key)
-						SwedgeTimer.db.profile.show_attack_speed_text = key
-						print(key)
-						if key then
-							frame.left_text:Show()
-						else
-							frame.left_text:Hide()
-						end
-					end,
-				},
-				show_swing_timer_text = {
-					type="toggle",
-					order = 42,
-					name = "Swing timer text",
-					desc = "Shows the remaining time on the player's swing on the right of the swing bar.",
-					get = "GetValue",
-					set = function(self, key)
-						SwedgeTimer.db.profile.show_swing_timer_text = key
-						print(key)
-						if key then
-							frame.right_text:Show()
-						else
-							frame.right_text:Hide()
-						end
-					end,
-				},
 
 				------------------------------------------------------------------------------------
 				-- Marker appearance settings

@@ -88,8 +88,8 @@ st.bar.OnFrameDragStop = function()
     local point, _, rel_point, x_offset, y_offset = frame:GetPoint()
     db.bar_x_offset = st.utils.simple_round(x_offset, 0.1)
     db.bar_y_offset = st.utils.simple_round(y_offset, 0.1)
-    db.point = point
-    db.rel_point = rel_point
+    db.bar_point = point
+    db.bar_rel_point = rel_point
     st.set_bar_position()
     st.bar.set_bar_color()
 end
@@ -120,7 +120,7 @@ st.bar.init_bar_visuals = function()
     frame:SetWidth(db.bar_width)
 
     frame:ClearAllPoints()
-    frame:SetPoint("CENTER", UIParent, "CENTER", db.bar_x_offset, db.bar_y_offset)
+    frame:SetPoint(db.bar_point, UIParent, db.bar_rel_point, db.bar_x_offset, db.bar_y_offset)
 
     -- Create the backplane and border
     frame.backplane = CreateFrame("Frame", addon_name .. "BarBackdropFrame", frame, "BackdropTemplate")
@@ -158,11 +158,18 @@ st.bar.init_bar_visuals = function()
     frame.left_text:SetShadowOffset(1,-1)
     frame.left_text:SetJustifyV("CENTER")
     frame.left_text:SetJustifyH("LEFT")
+    if not db.show_attack_speed_text then
+        frame.left_text:Hide()
+    end
+
     frame.right_text = frame:CreateFontString(nil, "OVERLAY")
     frame.right_text:SetShadowColor(0.0,0.0,0.0,1.0)
     frame.right_text:SetShadowOffset(1,-1)
     frame.right_text:SetJustifyV("CENTER")
     frame.right_text:SetJustifyH("RIGHT")
+    if not db.show_swing_timer_text then
+        frame.right_text:Hide()
+    end
     st.set_fonts()
 
     -- Create the line markers
@@ -224,15 +231,15 @@ st.bar.update_visuals_on_update = function()
     if st.player.is_twist_seal_active() then
         if st.player.n_active_seals == 1 then
             if st.player.twist_impossible then
-                st.bar.frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_cant_twist"]))
+                st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_cant_twist))
             elseif st.player.swing_timer < swedgetimer_bar_settings["twist_window"] then 
-                st.bar.frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_twist_ready"]))
+                st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_command))
             else
                 local min_time = st.player.spell_gcd_duration + swedgetimer_bar_settings["grace_period"]
                 if st.player.swing_timer > min_time then            
-                    st.bar.frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_twist_ready"]))
+                    st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_command))
                 else
-                    st.bar.frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_warning"]))
+                    st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_warning))
                 end
             end        
         end
@@ -281,8 +288,9 @@ end
 
 st.bar.set_tick_offsets = function()
     st.bar.set_twist_tick_offset()
-    st.bar.set_gcd1_tick_offset()
-    st.bar.set_gcd2_tick_offset()   
+    st.bar.set_gcd_marker_offsets()
+    -- st.bar.set_gcd1_tick_offset()
+    -- st.bar.set_gcd2_tick_offset()   
 end
 
 st.bar.update_bar_on_aura_change = function()
@@ -374,8 +382,9 @@ end
 
 st.bar.should_show_bar = function()
     -- Logic for if the bar should be visible
-    if swedgetimer_bar_settings.enabled then
-        if swedgetimer_bar_settings.hide_when_inactive then
+    local db = ST.db.profile
+    if db.bar_enabled then
+        if db.hide_bar_when_inactive then
             if st.player.n_active_seals == 0 and not st.core.in_combat then
                 return false
             end
@@ -495,9 +504,9 @@ end
 
 st.bar.set_twist_tick_offset = function()
 -- Set the offset position of the twist window
-    local settings = swedgetimer_bar_settings
     local db = ST.db.profile
-    local bar_fraction = (settings.twist_window / st.player.current_weapon_speed)
+    local twist_s = db.twist_window_ms / 1000.0
+    local bar_fraction = (twist_s / st.player.current_weapon_speed)
     local offset = bar_fraction * db.bar_width * -1
     -- print('twist tick time = ' .. time_value)
     st.bar.twist_tick_offset = offset
@@ -505,35 +514,73 @@ st.bar.set_twist_tick_offset = function()
     st.bar.frame.twist_line:SetEndPoint("BOTTOMRIGHT", offset, 0)
 end
 
--- Get the offset position of the first gcd window tick
-st.bar.set_gcd1_tick_offset = function()
-    local settings = swedgetimer_bar_settings
-    local gcd_duration = st.player.spell_gcd_duration
-    local grace_period = swedgetimer_bar_settings["grace_period"]
-    local time_before_swing = gcd_duration + grace_period
+st.bar.get_gcd_times_before_swing = function()
+    -- Returns the time before the swing that the GCD1 marker should be,
+    -- including padding, in seconds.
     local db = ST.db.profile
+    local gcd_duration = st.player.spell_gcd_duration
 
-    -- print('GCD1 tick time = ' .. time_before_swing)
-    local offset = (time_before_swing / st.player.current_weapon_speed) * db.bar_width * -1
+    -- Determine the gcd padding mode.
+    local padding = 0.0
+    if db.gcd_padding_mode == "Dynamic" then
+        padding = st.player.lag_world
+    elseif db.gcd_padding_mode == "Fixed" then
+        padding = db.gcd_static_padding_ms / 1000.0
+    end
+    print(padding)
+    local gcd1 = gcd_duration + padding
+    local gcd2 = (2 * gcd_duration) + padding
+    return gcd1, gcd2
+end
+
+st.bar.set_gcd_marker_offsets = function()
+    local db = ST.db.profile
+    -- Get the times before the swing the gcd markers should be
+    local gcd_1_before, gcd_2_before = st.bar.get_gcd_times_before_swing()
+
+    -- GCD 1
+    local offset = (gcd_1_before / st.player.current_weapon_speed) * db.bar_width * -1
     st.bar.gcd1_tick_offset = offset
     st.bar.frame.gcd1_line:SetStartPoint("TOPRIGHT", offset, 0)
     st.bar.frame.gcd1_line:SetEndPoint("BOTTOMRIGHT", offset, 0)
-end
 
--- Get the offset position of the second gcd window tick
-st.bar.set_gcd2_tick_offset = function()
-    local settings = swedgetimer_bar_settings
-    local gcd_duration = st.player.spell_gcd_duration
-    local grace_period = swedgetimer_bar_settings["grace_period"]
-    local time_before_swing = (2 * gcd_duration) + grace_period
-    local db = ST.db.profile
-
-    -- print('GCD2 tick time = ' .. time_before_swing)
-    local offset = (time_before_swing / st.player.current_weapon_speed) * db.bar_width * -1
+    -- GCD 2
+    local offset = (gcd_2_before / st.player.current_weapon_speed) * db.bar_width * -1
     st.bar.gcd2_tick_offset = offset
     st.bar.frame.gcd2_line:SetStartPoint("TOPRIGHT", offset, 0)
     st.bar.frame.gcd2_line:SetEndPoint("BOTTOMRIGHT", offset, 0)
+
 end
+
+-- Get the offset position of the first gcd window tick
+-- st.bar.set_gcd1_tick_offset = function()
+--     local settings = swedgetimer_bar_settings
+--     local gcd_duration = st.player.spell_gcd_duration
+--     local grace_period = swedgetimer_bar_settings["grace_period"]
+--     local time_before_swing = gcd_duration + grace_period
+--     local db = ST.db.profile
+
+--     -- print('GCD1 tick time = ' .. time_before_swing)
+--     local offset = (time_before_swing / st.player.current_weapon_speed) * db.bar_width * -1
+--     st.bar.gcd1_tick_offset = offset
+--     st.bar.frame.gcd1_line:SetStartPoint("TOPRIGHT", offset, 0)
+--     st.bar.frame.gcd1_line:SetEndPoint("BOTTOMRIGHT", offset, 0)
+-- end
+
+-- -- Get the offset position of the second gcd window tick
+-- st.bar.set_gcd2_tick_offset = function()
+--     local settings = swedgetimer_bar_settings
+--     local gcd_duration = st.player.spell_gcd_duration
+--     local grace_period = swedgetimer_bar_settings["grace_period"]
+--     local time_before_swing = (2 * gcd_duration) + grace_period
+--     local db = ST.db.profile
+
+--     -- print('GCD2 tick time = ' .. time_before_swing)
+--     local offset = (time_before_swing / st.player.current_weapon_speed) * db.bar_width * -1
+--     st.bar.gcd2_tick_offset = offset
+--     st.bar.frame.gcd2_line:SetStartPoint("TOPRIGHT", offset, 0)
+--     st.bar.frame.gcd2_line:SetEndPoint("BOTTOMRIGHT", offset, 0)
+-- end
 
 -- function to determine if any seal we are happy to run with is up
 -- i.e blood justice or vengeance

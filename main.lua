@@ -1,8 +1,9 @@
 -- main.lua ============================================================================
 local addon_name, st = ...
 -- local L = st.localization_table
-local version = "0.1.8"
+local version = "1.0.0"
 local load_message = "version " .. version .. " loaded!"
+local ST = LibStub("AceAddon-3.0"):GetAddon("SwedgeTimer")
 
 
 -- shorthand
@@ -65,39 +66,13 @@ end
 local function LoadAllSettings(self)
     st.player.LoadSettings()
 	st.bar.LoadSettings()
-    st.core.LoadSettings()
+    -- st.core.LoadSettings()
 end
 
 local function InitializeAllVisuals()
     st.bar.init_bar_visuals()
-    st.config.InitializeVisuals()
+    -- st.config.InitializeVisuals()
 end
-
--- SLASH COMMANDS ===================================================================
--- SLASH_SWEDGETIMER_HOME1 = "/swedgetimer"
--- SLASH_SWEDGETIMER_HOME2 = "/SWEDGETIMER"
--- SLASH_SWEDGETIMER_HOME3 = "/st"
--- SlashCmdList["SWEDGETIMER_HOME"] = function(option)
---     -- print(option)
---     if option == "bar" then
---         st.bar.TwistBarToggle()
---     elseif option == "lock" then
---         st.bar.TwistBarLockToggle()
-        
---     -- If no args, bring up the main config window
---     elseif option == '' then
---         -- Doing it twice works around the longstanding Blizzard bug
--- 	    -- that fails to actually open the requested panel if it's
--- 	    -- not currently visible in the lefthand list, and scrolling
--- 	    -- is required to bring it into view.
---         InterfaceOptionsFrame_OpenToCategory(st.config.config_parent_panel)
---         InterfaceOptionsFrame_OpenToCategory(st.config.config_parent_panel)
---     else
---         print('Recognised SwedgeTimer commands:')
---         print('--  /st lock  : toggles bar lock')
---         print('--  /st bar   : toggles bar visibility')
---     end
--- end
 
 --=========================================================================================
 -- Now, a frame to load the addon upon intercepting the ADDON_LOADED event trigger
@@ -150,7 +125,7 @@ local function init_addon(self)
 
     -- If appropriate show welcome message
     if st.debug then print('... complete!') end
-    if swedgetimer_core_settings.welcome_message then	print(load_message)	end
+    if ST.db.profile.welcome_message then print(load_message) end
 end
 
 -- The frame responsible for loading the addon at the appropriate time
