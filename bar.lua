@@ -184,6 +184,18 @@ st.bar.init_bar_visuals = function()
     st.set_markers()
 
     -- print('Successfully initialised all bar visuals.')
+
+    -- -- Create the seal cooldown frame.
+    -- local myFrame = CreateFrame("Frame", nil, UIParent)
+    -- myFrame:SetSize(80, 80)
+    -- myFrame:SetPoint("CENTER")
+    -- local myTexture = myFrame:CreateTexture()
+    -- myTexture:SetAllPoints()
+    -- myTexture:SetTexture(132347)
+    -- myTexture:SetTexCoord(0.1, 0.9, 0.1, 0.9);
+    -- local myCooldown = CreateFrame("Cooldown", "myCooldown", myFrame, "CooldownFrameTemplate")
+    -- myCooldown:SetAllPoints()
+
 	frame:Show()
 end
 

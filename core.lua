@@ -387,6 +387,9 @@ SwedgeTimer.options = {
 						SwedgeTimer.db.profile.gcd_static_padding_ms = key
 						st.bar.set_gcd_marker_offsets()
 					end,
+					disabled = function()
+						return SwedgeTimer.db.profile.gcd_padding_mode ~= "Fixed"
+					end,
 				},
 
 				twist_window_descriptions = {
@@ -409,6 +412,7 @@ SwedgeTimer.options = {
 						SwedgeTimer.db.profile.twist_padding_mode = key
 						st.bar.set_twist_tick_offset()
 					end,
+
 				},
 				twist_window_padding_ms = {
 					type = "range",
@@ -424,6 +428,9 @@ SwedgeTimer.options = {
 						st.bar.set_twist_tick_offset()
 					end
 					,
+					disabled = function()
+						return SwedgeTimer.db.profile.twist_padding_mode ~= "Fixed"
+					end,
 				},
 			},
 		},
@@ -693,7 +700,6 @@ SwedgeTimer.options = {
 					get = "GetValue",
 					set = function(self, key)
 						SwedgeTimer.db.profile.show_attack_speed_text = key
-						print(key)
 						if key then
 							st.bar.frame.left_text:Show()
 						else
@@ -709,7 +715,6 @@ SwedgeTimer.options = {
 					get = "GetValue",
 					set = function(self, key)
 						SwedgeTimer.db.profile.show_swing_timer_text = key
-						print(key)
 						if key then
 							st.bar.frame.right_text:Show()
 						else
