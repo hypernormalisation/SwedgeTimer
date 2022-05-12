@@ -74,7 +74,7 @@ end
 -- Drag and drop settings
 --=========================================================================================
 st.bar.OnFrameDragStart = function()
-    -- print(ST.db.profile.bar_locked)
+    print(ST.db.profile.bar_locked)
     if not ST.db.profile.bar_locked then
         st.bar.frame:StartMoving()
     end
@@ -107,11 +107,11 @@ st.bar.init_bar_visuals = function()
     -- Set initial frame properties
     frame:SetPoint("CENTER")
     
-    if db.bar_enabled then
-        frame:Show()
-    end
+    -- if db.bar_enabled then
+    --     frame:Show()
+    -- end
     frame:SetMovable(true)
-    frame:EnableMouse(not db.bar_locked)
+    frame:EnableMouse()
     frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnDragStart", st.bar.OnFrameDragStart)
     frame:SetScript("OnDragStop", st.bar.OnFrameDragStop)
@@ -500,6 +500,20 @@ st.bar.should_draw_gcd2_window = function()
         return false
     end
     return true
+end
+
+st.bar.get_twist_window_time_before_swing = function()
+    local db = ST.db.profile
+    local twist_s = db.twist_window_ms / 1000.0
+    local padding = 0.0
+    if db.twist_padding_mode == "Dynamic" then
+        padding = st.player.lag_world
+    elseif db.twist_padding_mode == "Fixed" then
+        twist_s = db.twist_window_ms
+    end
+        
+    return twist_s + padding
+
 end
 
 st.bar.set_twist_tick_offset = function()

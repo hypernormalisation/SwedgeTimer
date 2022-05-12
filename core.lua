@@ -139,6 +139,8 @@ SwedgeTimer.defaults = {
 		bar_color_justice = {0.8, 0.1, 0.7, 1.0},
 		bar_color_vengeance = {0.8, 0.5, 0.4, 1.0},
 		bar_color_righteousness = {0., 0.68, 0., 1.0},
+		bar_color_crusader = {0.5, 0.9, 0.9, 1.0},
+
 
 		-- Special bar colors
         bar_color_cant_twist = {0.7, 0.7, 0.01, 1.0},
@@ -869,7 +871,20 @@ SwedgeTimer.options = {
 						SwedgeTimer.db.profile.bar_color_justice = {r,g,b,a}
 					end
 				},
-
+				bar_color_crusader = {
+					order=27.1,
+					type="color",
+					name="Crusader",
+					desc="Seal of the Crusader",
+					hasAlpha=false,
+					get = function()
+						local tab = SwedgeTimer.db.profile.bar_color_crusader
+						return tab[1], tab[2], tab[3], tab[4]
+					end,
+					set = function(self,r,g,b,a)
+						SwedgeTimer.db.profile.bar_color_crusader = {r,g,b,a}
+					end
+				},
 				bar_color_vengeance = {
 					order=24,
 					type="color",
