@@ -81,6 +81,9 @@ end
 -- sets up the various frames and elements.
 local function init_addon(self)
 
+    -- Sort out character information
+    st.player.get_twohand_spec_points()
+
     if st.debug then print('Loading all settings...') end
     LoadAllSettings()
 
@@ -102,7 +105,7 @@ local function init_addon(self)
     st.player_frame:RegisterEvent("UNIT_INVENTORY_CHANGED")
     st.player_frame:RegisterUnitEvent("UNIT_AURA", "player")
     st.player_frame:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTED", "player")
-
+    st.player_frame:RegisterEvent("CHARACTER_POINTS_CHANGED")
     st.player_frame:RegisterEvent("UNIT_SPELLCAST_SENT")
     st.player_frame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
     st.player_frame:RegisterEvent("SPELL_UPDATE_COOLDOWN")

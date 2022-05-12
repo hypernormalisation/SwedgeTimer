@@ -122,8 +122,9 @@ st.bar.init_bar_visuals = function()
 
     -- Create the backplane and border
     frame.backplane = CreateFrame("Frame", addon_name .. "BarBackdropFrame", frame, "BackdropTemplate")
-    frame.backplane:SetPoint('TOPLEFT', -10, 10)
-    frame.backplane:SetPoint('BOTTOMRIGHT', 10, -10)
+    local tv = st.get_thickness_value()
+    frame.backplane:SetPoint('TOPLEFT', -1*tv, tv)
+    frame.backplane:SetPoint('BOTTOMRIGHT', tv, -1*tv)
     frame.backplane:SetFrameStrata('LOW')
 
     frame.backplane.backdropInfo = {
@@ -195,6 +196,13 @@ st.bar.init_bar_visuals = function()
     -- myTexture:SetTexCoord(0.1, 0.9, 0.1, 0.9);
     -- local myCooldown = CreateFrame("Cooldown", "myCooldown", myFrame, "CooldownFrameTemplate")
     -- myCooldown:SetAllPoints()
+
+    -- frame.seal_frame = CreateFrame("Frame", addon_name .. "SealFrame", frame, "CooldownFrameTemplate")
+    -- frame.seal_frame:SetSize(30, 30)
+    -- frame.seal_frame:SetPoint("RIGHT", 100, 0)
+    -- frame.seal_frame.texture = seal_frame.CreateTexture()
+    -- frame.seal_frame.texture:
+
 
 	frame:Show()
 end
@@ -335,13 +343,13 @@ end
 --=========================================================================================
 st.bar.has_judgement_seal = function()
     -- returns true if the player has a seal they typically want to judge
-    if st.player.active_seals['blood'] ~= nil then
+    if st.player.match_seal('blood') then
         return true
-    elseif st.player.active_seals['righteousness'] then
+    elseif st.player.match_seal('righteousness') then
         return true
-    elseif st.player.active_seals['vengeance'] then
+    elseif st.player.match_seal('vengeance') then
         return true
-    elseif st.player.active_seals['justice'] then
+    elseif st.player.match_seal('justice') then
         return true
     end
     return false
@@ -350,7 +358,9 @@ end
 st.bar.calc_judgement = function()
     -- Function to check if we need to draw the judgement line
     -- and then to calulate its position. Called when the speed or timer changes.
-    if not st.player.judgement_being_tracked or not swedgetimer_bar_settings.judgement_marker then
+    local db = ST.db.profile
+
+    if not st.player.judgement_being_tracked or not db.judgement_marker_enabled then
         return
     end
 
@@ -358,7 +368,7 @@ st.bar.calc_judgement = function()
     local remaining = st.player.judgement_cd_remaining
     local timer = st.player.swing_timer
     local elapsed = st.player.current_weapon_speed - timer
-    local db = ST.db.profile
+
 
     -- local time_remaining_on_swing = st.player.current_weapon_speed - st.player.swing_timer
     -- print(time_remaining_on_swing)
@@ -400,6 +410,9 @@ st.bar.should_show_bar = function()
             if st.player.n_active_seals == 0 and not st.core.in_combat then
                 return false
             end
+        end
+        if not st.player.is_player_ret() and db.hide_when_not_ret then
+            return false
         end
         return true
     end

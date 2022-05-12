@@ -1,6 +1,7 @@
 local addon_name, st = ...
 local print = st.utils.print_msg
 local floor = st.utils.simple_round
+local ST = LibStub("AceAddon-3.0"):GetAddon("SwedgeTimer")
 
 --=========================================================================================
 -- PLAYER SETTINGS 
@@ -79,21 +80,40 @@ st.player.reported_speed_change = true
 st.crusader_lock = false
 st.crusader_currently_active = false
 
+-- The points in two-handed weapon specialisation
+st.player.twohand_spec_points = 0
+
 -- A measure of the player's ping
 st.player.lag_world = 0.0
 
+-- Updates the player's lag according to the specified calibration.
 st.player.update_lag = function()
-    local _, _, _, lag = GetNetStats()
-    -- print('lag before calibration: ' .. tostring(lag))
-    -- print('lag multiplier: ' .. tostring(swedgetimer_player_settings.lag_multiplier))
-    -- print('lag threshold: ' .. tostring(swedgetimer_player_settings.lag_threshold))
-    lag = (lag * swedgetimer_player_settings.lag_multiplier) + swedgetimer_player_settings.lag_threshold
-    -- print('lag after calibration: ' .. tostring(lag))
+    local db = ST.db.profile
+    local lag = select(4, GetNetStats())
+    print('lag before calibration: ' .. tostring(lag))
+    print('lag multiplier: ' .. tostring(db.lag_multiplier))
+    print('lag offset: ' .. tostring(db.lag_offset))
+    lag = (lag * db.lag_multiplier) + db.lag_offset
+    print('lag after calibration: ' .. tostring(lag))
     st.player.lag_world = lag / 1000.0
 end
 
 st.player.lag_detection_enabled = function()
-    return swedgetimer_player_settings.lag_detection_enabled
+    local db = ST.db.profile
+    return db.lag_detection_enabled
+end
+
+st.player.get_twohand_spec_points = function()
+    st.player.twohand_spec_points = select(5,GetTalentInfo(3, 13))
+    -- print(st.player.twohand_spec_points)
+end
+
+-- Returns true if any points in 2h weapon spec
+st.player.is_player_ret = function()
+    if st.player.twohand_spec_points > 0 then
+        return true
+    end
+    return false
 end
 
 st.player.LoadSettings = function()
@@ -681,6 +701,11 @@ st.player.frame_on_event = function(self, event, ...)
         if IsMounted() then
             st.player.reset_swing_timer()
         end
+
+    -- Check talent point changes.
+    elseif event == "CHARACTER_POINTS_CHANGED" then
+        st.player.get_twohand_spec_points()
+        
 
     elseif event == "UNIT_SPELLCAST_SENT" then
         -- print('INFO: received spellcast trigger')

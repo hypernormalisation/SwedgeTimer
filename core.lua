@@ -94,6 +94,11 @@ SwedgeTimer.defaults = {
         hide_bar_when_inactive = true,
 		judgement_marker_enabled = true,
         bar_twist_color_enabled = true,
+		hide_when_not_ret = true,
+
+		-- Lag calibration
+		lag_multiplier = 1.2,
+		lag_offset = 10,
 
 		-- Marker position settings
 		gcd_padding_mode = "Dynamic",
@@ -192,6 +197,11 @@ st.bar_outline_thicknesses = {
 	Thicc=12,
 }
 
+st.get_thickness_value = function()
+	local db = SwedgeTimer.db.profile
+	return db.backplane_outline_offset
+end
+
 local MediaList = {}
 local function getMediaData(info)
     local mediaType = info[#(info)]
@@ -219,6 +229,7 @@ local set_bar_position = function()
 	frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
 	frame.left_text:SetPoint("TOPLEFT", 2, -(db.bar_height / 2) + (db.font_size / 2))
 	frame.right_text:SetPoint("TOPRIGHT", 2, -(db.bar_height / 2) + (db.font_size / 2))
+	st.set_outline_thickness()
 end
 st.set_bar_position = set_bar_position
 
@@ -274,6 +285,13 @@ st.set_markers = function()
 	st.set_marker_widths()
 end
 
+st.set_outline_thickness = function()
+	local db = SwedgeTimer.db.profile
+	local val = SwedgeTimer.db.profile.backplane_outline_offset
+	-- print(val)
+	st.bar.frame.backplane:SetPoint('TOPLEFT', -1*val, val)
+	st.bar.frame.backplane:SetPoint('BOTTOMRIGHT', val, -1*val)
+end
 
 ------------------------------------------------------------------------------------
 -- Now configure the option table for our settings interface.
@@ -287,7 +305,7 @@ SwedgeTimer.options = {
 		-- top-level settings
 		welcome_message = {
 			type = "toggle",
-			order = 1,
+			order = 1.1,
 			name = "Welcome message",
 			desc = "Displays a login message showing the addon version on player login or reload.",
 			get = "GetValue",
@@ -296,13 +314,10 @@ SwedgeTimer.options = {
 		bar_enabled = {
 			type = "toggle",
 			order = 1,
-			name = "Bar Enabled",
-			desc = "Enables or disables the swing timer bar.",
+			name = "Enabled",
+			desc = "Enables or disables SwedgeTimer.",
 			get = "GetValue",
 			set = "SetValue",
-			-- inline getter/setter example
-			-- get = function(info) return SwedgeTimer.db.profile.bar_enabled end,
-			-- set = function(info, value) SwedgeTimer.db.profile.bar_enabled = value end,
 		},
 
 		------------------------------------------------------------------------------------
@@ -313,21 +328,20 @@ SwedgeTimer.options = {
 			handler = SwedgeTimer,
 			order = 1,
 			args = {
-				
-				lag_detection_enabled = {
-					type = "toggle",
-					order = 3,
-					name = "Lag detection",
-					desc = "When enabled, the swing timer bar turns a special colour when the player is in Seal of Command"..
-					" and the time remaining to cast a spell at the end of their GCD is lower than the current lag.",
-					get = "GetValue",
-					set = "SetValue",
-				},
 				hide_bar_when_inactive = {
 					type = "toggle",
 					order = 1,
 					name = "Auto-hide bar",
 					desc = "When enabled, hides the bar when there is no active seal or the player is out of combat.",
+					get = "GetValue",
+					set = "SetValue",
+				},
+				hide_when_not_ret = {
+					type = "toggle",
+					order = 1,
+					name = "Hide when not Ret",
+					desc = "When enabled, hides the bar when the player is not specced as retribution (determined by the presence of any "..
+					"points in the Two-handed Weapon Specialization talent).",
 					get = "GetValue",
 					set = "SetValue",
 				},
@@ -349,6 +363,83 @@ SwedgeTimer.options = {
 					get = "GetValue",
 					set = "SetValue",
 				},
+				
+				------------------------------------------------------------------------------------
+				-- Lag detection
+				lag_settings = {
+					order=5.01,
+					type="header",
+					name="Lag detection",
+				},
+				lag_descriptions = {
+					order=5.02,
+					type="description",
+					name="SwedgeTimer includes a lag detection suite, that attempts to detect instances where the player will not be "..
+					"able to twist out of their seal after their GCD expires and before their swing goes off, accounting for latency. The calculation compares the "..
+					"remaining time on a swing to the time after the current GCD elapses combined with a calibrated latency measurement. "..
+					" The bar will then turn a special colour when the player is locked into their beginning swing, letting them know to "..
+					"either ride the command swing or to stopattack."
+				},
+				lag_detection_enabled = {
+					type = "toggle",
+					order = 5.1,
+					name = "Lag detection",
+					desc = "When enabled, the swing timer bar turns a special colour when the player is in Seal of Command"..
+					" and the time remaining to cast a spell at the end of their GCD is lower than the current lag.",
+					get = "GetValue",
+					set = "SetValue",
+					},
+				bar_color_cant_twist = {
+					order=5.2,
+					type="color",
+					name="Can't twist color",
+					desc="The color the bar turns when the player is in a good seal to twist from, but "..
+					"their GCD combined with their lag will mean they cannot twist this swing unless they stopattack.",
+					hasAlpha=false,
+					get = function()
+						local tab = SwedgeTimer.db.profile.bar_color_cant_twist
+						return tab[1], tab[2], tab[3], tab[4]
+					end,
+					set = function(self,r,g,b,a)
+						SwedgeTimer.db.profile.bar_color_cant_twist = {r,g,b,a}
+					end
+				},
+				lag_descriptions_2 = {
+					order=5.22,
+					type="description",
+					name="The figure used in lag comparisons is equal to ax + b, where x is the base latency, a is the multipler, and b is the offset."
+				},
+				lag_multiplier = {
+					type = "range",
+					order = 5.3,
+					name = "Lag multiplier",
+					desc = "The player's world trip latency is multiplied by this value in the lag detection calibration.",
+					min = 0, max = 2.0,
+					step = 0.05,
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.lag_multiplier = key
+						st.bar.set_gcd_marker_offsets()
+						st.bar.set_twist_tick_offset()
+					end,
+				},
+				lag_offset = {
+					type = "range",
+					order = 5.3,
+					name = "Lag offset (ms)",
+					desc = "The player's world trip latency has this value added to it in the lag detection calibration.",
+					min = 0, max = 200,
+					step = 1,
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.lag_offset = key
+						st.bar.set_gcd_marker_offsets()
+						st.bar.set_twist_tick_offset()
+					end,
+				},
+
+				------------------------------------------------------------------------------------
+				-- marker options
 				marker_settings = {
 					order=6,
 					type="header",
@@ -358,15 +449,15 @@ SwedgeTimer.options = {
 					order=7,
 					type="description",
 					name="When GCD offset mode is Dynamic or Fixed, the GCD markers are pushed back "..
-					"from the end of the swing to account for player input/lag. When the mode is set to dynamic, this value is 65% of the "..
-					"player's world roundtrip latency (roughly, the lag). When the mode is set to fixed, it is the value set in Static GCD padding."
+					"from the end of the swing to account for player input/lag. When the mode is set to dynamic, this value uses the calibrated lag "..
+					"derived above."
 				},
 				gcd_padding_mode = {
 					order=8,
 					type="select",
 					values=gcd_padding_modes,
 					style="dropdown",
-					desc="The type of GCD padding, if any, to use to offset the GCD markers.",
+					desc="The type of GCD offset, if any, to use.",
 					name="GCD offset mode",
 					get = "GetValue",
 					set = function(self, key)
@@ -377,9 +468,8 @@ SwedgeTimer.options = {
 				gcd_static_padding_ms = {
 					type = "range",
 					order = 9,
-					name = "Fixed GCD padding (ms)",
-					desc = "When Twist window offset mode is Dynamic or Fixed, the GCD markers are pushed back "..
-					"from the end of the swing, to account for player input delay and/or lag.",
+					name = "Fixed GCD offset (ms)",
+					desc = "The GCD markers are set at one and two standard GCDs before the swing ends, plus this offset.",
 					min = 0, max = 400,
 					step = 1,
 					get = "GetValue",
@@ -396,15 +486,15 @@ SwedgeTimer.options = {
 					order=10.1,
 					type="description",
 					name="When Twist window offset mode is Dynamic or Fixed, the twist window marker is pushed back "..
-					"from the end of the swing to account for player input/lag. When the mode is set to dynamic, this value is 65% of the "..
-					"player's world roundtrip latency (roughly, the lag). When the mode is set to fixed, it is the value set in Fixed twist padding.",
+					"from the end of the swing to account for player input/lag. When the mode is set to dynamic, this value uses the calibrated lag "..
+					"derived above."
 				},
 				twist_padding_mode = {
 					order=10.2,
 					type="select",
 					values=gcd_padding_modes,
 					style="dropdown",
-					desc="The type of twist window padding, if any, to use to offset the twist window marker.",
+					desc="The type of twist window offset, if any, to use.",
 					name="Twist window offset mode",
 					get = "GetValue",
 					-- set = "SetValue",
@@ -417,7 +507,7 @@ SwedgeTimer.options = {
 				twist_window_padding_ms = {
 					type = "range",
 					order = 10.3,
-					name = "Fixed twist padding (ms)",
+					name = "Fixed twist offset (ms)",
 					desc = "The time before the end of the swing that the twist indicator marker will be placed. Players with high "..
 					"latency may wish to increase this value.",
 					min = 0, max=400,
@@ -775,21 +865,21 @@ SwedgeTimer.options = {
 						SwedgeTimer.db.profile.bar_color_warning = {r,g,b,a}
 					end
 				},
-				bar_color_cant_twist = {
-					order=14,
-					type="color",
-					name="Can't twist",
-					desc="The color the bar turns when the player is in a good seal to twist from, but "..
-					"their GCD combined with their lag will mean they cannot twist this swing unless they stopattack.",
-					hasAlpha=false,
-					get = function()
-						local tab = SwedgeTimer.db.profile.bar_color_cant_twist
-						return tab[1], tab[2], tab[3], tab[4]
-					end,
-					set = function(self,r,g,b,a)
-						SwedgeTimer.db.profile.bar_color_cant_twist = {r,g,b,a}
-					end
-				},
+				-- bar_color_cant_twist = {
+				-- 	order=14,
+				-- 	type="color",
+				-- 	name="Can't twist (lag)",
+				-- 	desc="The color the bar turns when the player is in a good seal to twist from, but "..
+				-- 	"their GCD combined with their lag will mean they cannot twist this swing unless they stopattack.",
+				-- 	hasAlpha=false,
+				-- 	get = function()
+				-- 		local tab = SwedgeTimer.db.profile.bar_color_cant_twist
+				-- 		return tab[1], tab[2], tab[3], tab[4]
+				-- 	end,
+				-- 	set = function(self,r,g,b,a)
+				-- 		SwedgeTimer.db.profile.bar_color_cant_twist = {r,g,b,a}
+				-- 	end
+				-- },
 
 				------------------------------------------------------------------------------------
 				-- Seal color settings
