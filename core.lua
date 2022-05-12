@@ -19,12 +19,12 @@ function SwedgeTimer:OnInitialize()
 	-- registers an options table and adds it to the Blizzard options window
 	-- https://www.wowace.com/projects/ace3/pages/api/ace-config-3-0
 	AC:RegisterOptionsTable("SwedgeTimer_Options", self.options)
-	self.optionsFrame = ACD:AddToBlizOptions("SwedgeTimer_Options", "SwedgeTimer (label 1)")
+	self.optionsFrame = ACD:AddToBlizOptions("SwedgeTimer_Options", "SwedgeTimer")
 
 	-- adds a child options table, in this case our profiles panel
 	local profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
 	AC:RegisterOptionsTable("SwedgeTimer_Profiles", profiles)
-	ACD:AddToBlizOptions("SwedgeTimer_Profiles", "Profiles", "SwedgeTimer (label 1)")
+	ACD:AddToBlizOptions("SwedgeTimer_Profiles", "Profiles", "SwedgeTimer")
 
 	-- https://www.wowace.com/projects/ace3/pages/api/ace-console-3-0
 	self:RegisterChatCommand("st", "SlashCommand")
@@ -64,8 +64,11 @@ function SwedgeTimer:SlashCommand(input, editbox)
 		-- self:Print("Some useful help message.")
 
 		-- https://github.com/Stanzilla/WoWUIBugs/issues/89
-		InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)
-		InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)
+		-- InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)
+		-- InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)
+
+		ACD:Open("SwedgeTimer_Options")
+
 
 		--[[ or as a standalone window
 		if ACD.OpenFrames["SwedgeTimer_Options"] then
@@ -96,7 +99,7 @@ SwedgeTimer.defaults = {
 		gcd_padding_mode = "Dynamic",
 		gcd_static_padding_ms = 100,
 		twist_padding_mode = "None",
-		twist_window_ms = 400,
+		twist_window_padding_ms = 0,
 
 		-- Bar dimensions
 		bar_height = 32,
@@ -354,9 +357,9 @@ SwedgeTimer.options = {
 				marker_descriptions = {
 					order=7,
 					type="description",
-					name="When GCD offset mode is not None, the GCD markers are pushed back "..
-					"some amount from the end of the swing. When the mode is set to dynamic, this value is the "..
-					"player's lag. When the mode is set to fixed, it is the value set below in Static GCD padding."
+					name="When GCD offset mode is not Dynamic or Fixed, the GCD markers are pushed back "..
+					"from the end of the swing to account for player input/lag. When the mode is set to dynamic, this value is 65% of the "..
+					"player's world latency roundtrip (roughly, the lag). When the mode is set to fixed, it is the value set in Static GCD padding."
 				},
 				gcd_padding_mode = {
 					order=8,
@@ -368,27 +371,30 @@ SwedgeTimer.options = {
 					get = "GetValue",
 					set = function(self, key)
 						SwedgeTimer.db.profile.gcd_padding_mode=key
+						st.bar.set_gcd_marker_offsets()
 					end,
 				},
 				gcd_static_padding_ms = {
 					type = "range",
 					order = 9,
 					name = "Static GCD padding (ms)",
-					desc = "If GCD padding is in static mode, this is the amount in milliseconds that the GCD markers will be pushed back "..
+					desc = "When Twist window offset mode is not Dynamic or Fixed, the GCD markers are pushed back "..
 					"from the end of the swing, to account for player input delay and/or lag.",
 					min = 0, max = 400,
 					step = 1,
 					get = "GetValue",
 					set = function(self, key)
 						SwedgeTimer.db.profile.gcd_static_padding_ms = key
+						st.bar.set_gcd_marker_offsets()
 					end,
 				},
 
 				twist_window_descriptions = {
 					order=10.1,
 					type="description",
-					name="The twist window mode can also be set to the same modes. When the offset mode is set to Fixed, the twist window is the amount of time in"..
-					" ms before the swing that the twist window marker will appear.",
+					name="When Twist window offset mode is not Dynamic or Fixed, the twist window marker is pushed back "..
+					"from the end of the swing to account for player input/lag. When the mode is set to dynamic, this value is 65% of the "..
+					"player's world latency roundtrip (roughly, the lag). When the mode is set to fixed, it is the value set in Twist window padding.",
 				},
 				twist_padding_mode = {
 					order=10.2,
@@ -398,21 +404,26 @@ SwedgeTimer.options = {
 					desc="The type of twist window padding, if any, to use to offset the twist window marker.",
 					name="Twist window offset mode",
 					get = "GetValue",
-					set = "SetValue",
-					-- set = function(self, key)
-					-- 	SwedgeTimer.db.profile.twist=key
-					-- end,
+					-- set = "SetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.twist_padding_mode = key
+						st.bar.set_twist_tick_offset()
+					end,
 				},
-				twist_window_ms = {
+				twist_window_padding_ms = {
 					type = "range",
 					order = 10.3,
 					name = "Twist window (ms)",
 					desc = "The time before the end of the swing that the twist indicator marker will be placed. Players with high "..
 					"latency may wish to increase this value.",
-					min = 400, max=600,
+					min = 0, max=400,
 					step=1,
 					get = "GetValue",
-					set = "SetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.twist_window_padding_ms = key
+						st.bar.set_twist_tick_offset()
+					end
+					,
 				},
 			},
 		},
@@ -933,7 +944,7 @@ SwedgeTimer.options = {
 				},
 				marker_width = {
 					type = "range",
-					order = 51,
+					order = 55,
 					name = "Marker width",
 					desc = "The width of the twist window GCD, and judgement markers.",
 					min = 1, max = 6,

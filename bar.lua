@@ -111,7 +111,7 @@ st.bar.init_bar_visuals = function()
     --     frame:Show()
     -- end
     frame:SetMovable(true)
-    frame:EnableMouse()
+    frame:EnableMouse(true)
     frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnDragStart", st.bar.OnFrameDragStart)
     frame:SetScript("OnDragStop", st.bar.OnFrameDragStop)
@@ -206,12 +206,13 @@ st.bar.update_visuals_on_update = function()
 
     st.bar.show_or_hide_bar()
     if not st.bar.should_show_bar() then return end 
-
-    local settings = swedgetimer_bar_settings
     local frame = st.bar.frame
     local speed = st.player.current_weapon_speed
     local timer = st.player.swing_timer
     local db = ST.db.profile
+
+    -- print(ST.db.profile.bar_locked)
+
 
     -- Update the main bar's width
     local timer_width = math.min(db.bar_width - (db.bar_width * (timer / speed)), db.bar_width)
@@ -230,13 +231,14 @@ st.bar.update_visuals_on_update = function()
     -- If SoC, bar colour is time sensitive. Deal with that here.
     if st.player.is_twist_seal_active() then
         if st.player.n_active_seals == 1 then
+            local twist_window_time = st.bar.get_twist_window_time_before_swing()
+            local gcd1_time = select(1, st.bar.get_gcd_times_before_swing())
             if st.player.twist_impossible then
                 st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_cant_twist))
-            elseif st.player.swing_timer < swedgetimer_bar_settings["twist_window"] then 
+            elseif st.player.swing_timer < twist_window_time then 
                 st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_command))
             else
-                local min_time = st.player.spell_gcd_duration + swedgetimer_bar_settings["grace_period"]
-                if st.player.swing_timer > min_time then            
+                if st.player.swing_timer > gcd1_time then            
                     st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_command))
                 else
                     st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_warning))
@@ -504,16 +506,14 @@ end
 
 st.bar.get_twist_window_time_before_swing = function()
     local db = ST.db.profile
-    local twist_s = 400 / 1000.0
+    local twist_s = 400 / 1000.0 -- 400ms standard
     local padding = 0.0
     if db.twist_padding_mode == "Dynamic" then
-        padding = st.player.lag_world
+        padding = st.player.lag_world * 0.65
     elseif db.twist_padding_mode == "Fixed" then
-        twist_s = db.twist_window_ms / 1000.0
+        padding = db.twist_window_padding_ms / 1000.0
     end
-        
     return twist_s + padding
-
 end
 
 st.bar.set_twist_tick_offset = function()
@@ -538,11 +538,10 @@ st.bar.get_gcd_times_before_swing = function()
     -- Determine the gcd padding mode.
     local padding = 0.0
     if db.gcd_padding_mode == "Dynamic" then
-        padding = st.player.lag_world
+        padding = st.player.lag_world * 0.65
     elseif db.gcd_padding_mode == "Fixed" then
         padding = db.gcd_static_padding_ms / 1000.0
     end
-    print(padding)
     local gcd1 = gcd_duration + padding
     local gcd2 = (2 * gcd_duration) + padding
     return gcd1, gcd2
@@ -567,36 +566,6 @@ st.bar.set_gcd_marker_offsets = function()
 
 end
 
--- Get the offset position of the first gcd window tick
--- st.bar.set_gcd1_tick_offset = function()
---     local settings = swedgetimer_bar_settings
---     local gcd_duration = st.player.spell_gcd_duration
---     local grace_period = swedgetimer_bar_settings["grace_period"]
---     local time_before_swing = gcd_duration + grace_period
---     local db = ST.db.profile
-
---     -- print('GCD1 tick time = ' .. time_before_swing)
---     local offset = (time_before_swing / st.player.current_weapon_speed) * db.bar_width * -1
---     st.bar.gcd1_tick_offset = offset
---     st.bar.frame.gcd1_line:SetStartPoint("TOPRIGHT", offset, 0)
---     st.bar.frame.gcd1_line:SetEndPoint("BOTTOMRIGHT", offset, 0)
--- end
-
--- -- Get the offset position of the second gcd window tick
--- st.bar.set_gcd2_tick_offset = function()
---     local settings = swedgetimer_bar_settings
---     local gcd_duration = st.player.spell_gcd_duration
---     local grace_period = swedgetimer_bar_settings["grace_period"]
---     local time_before_swing = (2 * gcd_duration) + grace_period
---     local db = ST.db.profile
-
---     -- print('GCD2 tick time = ' .. time_before_swing)
---     local offset = (time_before_swing / st.player.current_weapon_speed) * db.bar_width * -1
---     st.bar.gcd2_tick_offset = offset
---     st.bar.frame.gcd2_line:SetStartPoint("TOPRIGHT", offset, 0)
---     st.bar.frame.gcd2_line:SetEndPoint("BOTTOMRIGHT", offset, 0)
--- end
-
 -- function to determine if any seal we are happy to run with is up
 -- i.e blood justice or vengeance
 st.bar.is_running_seal_active = function()
@@ -609,7 +578,6 @@ st.bar.is_running_seal_active = function()
     end
     return false
 end
-
 
 -- This function sets the bar colour for all cases outside of command, which has
 -- a time sensitive component and must be handled on-update.
