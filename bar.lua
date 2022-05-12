@@ -74,6 +74,7 @@ end
 -- Drag and drop settings
 --=========================================================================================
 st.bar.OnFrameDragStart = function()
+    -- print(ST.db.profile.bar_locked)
     if not ST.db.profile.bar_locked then
         st.bar.frame:StartMoving()
     end
@@ -85,11 +86,10 @@ st.bar.OnFrameDragStop = function()
 
     frame:StopMovingOrSizing()
     local point, _, rel_point, x_offset, y_offset = frame:GetPoint()
-    -- if x_offset < 5 and x_offset > -5 then
-    --     x_offset = 0
-    -- end
     db.bar_x_offset = st.utils.simple_round(x_offset, 0.1)
     db.bar_y_offset = st.utils.simple_round(y_offset, 0.1)
+    db.point = point
+    db.rel_point = rel_point
     st.set_bar_position()
     st.bar.set_bar_color()
 end
@@ -100,10 +100,8 @@ end
 
 -- this function is called once to initialise all the graphics of the bar
 st.bar.init_bar_visuals = function()
-    local settings = swedgetimer_bar_settings
     st.bar.frame = CreateFrame("Frame", addon_name .. "BarFrame", UIParent)   
     local frame = st.bar.frame
-
     local db = ST.db.profile
 
     -- Set initial frame properties
@@ -186,65 +184,6 @@ end
 
 -- this function is called when a setting related to bar visuals is changed
 st.bar.UpdateVisualsOnSettingsChange = function()
-
-
-    
-    local frame = st.bar.frame
-    local settings = swedgetimer_bar_settings
-    local db = ST.db.profile
-
-    -- print("enabled says: " .. tostring(settings.enabled))
-    -- print("show_border says : " .. tostring(settings.show_border))
-
-    -- if settings.enabled then
-    --     -- frame:Show()
-    --     -- frame:ClearAllPoints()
-    --     -- frame:SetPoint(settings.point, UIParent, settings.rel_point, settings.x_offset, settings.y_offset)
-    --     -- frame:SetWidth(settings.width)
-    --     -- frame:SetHeight(settings.height)
-
-    --     -- frame.backplane:SetBackdropColor(0,0,0,settings.backplane_alpha)
-    --     -- frame.bar:SetPoint("TOPLEFT", 0, 0)
-    --     -- frame.bar:SetHeight(settings.height)
-    --     -- frame.bar:SetWidth(settings.width)
-
-    --     -- frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
-    --     -- frame.gcd_bar:SetHeight(db.bar_height)
-    --     -- frame.gcd_bar:SetWidth(db.bar_width)
-
-    --     -- frame.bar:SetTexture(SML:Fetch('statusbar', "Solid"))
-    --     -- frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_default"]))
-
-    --     -- frame.twist_line:SetThickness(swedgetimer_bar_settings.tick_width)
-    --     -- frame.gcd1_line:SetThickness(swedgetimer_bar_settings.tick_width)
-    --     -- frame.gcd2_line:SetThickness(swedgetimer_bar_settings.tick_width)
-    --     -- frame.judgement_line:SetThickness(swedgetimer_bar_settings.tick_width+1)
-
-
-    --     -- frame.left_text:SetPoint("TOPLEFT", 2, -(settings.height / 2) + (settings.fontsize / 2))
-    --     -- frame.left_text:SetTextColor(settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a)
-	-- 	-- frame.left_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize, "OUTLINE")
-	
-    --     -- frame.right_text:SetPoint("TOPRIGHT", -5, -(settings.height / 2) + (settings.fontsize / 2))
-    --     -- frame.right_text:SetTextColor(settings.main_text_r, settings.main_text_g, settings.main_text_b, settings.main_text_a)
-	-- 	-- frame.right_text:SetFont("Fonts/FRIZQT__.ttf", settings.fontsize, "OUTLINE")
-
-    --     -- if settings.show_left_text then
-    --     --     frame.left_text:Show()
-    --     -- else
-    --     --     frame.left_text:Hide()
-    --     -- end
-    --     -- if settings.show_right_text then
-    --     --     frame.right_text:Show()
-    --     -- else
-    --     --     frame.right_text:Hide()
-    --     -- end
-
-    --     -- st.bar.set_bar_color()
-
-    -- else
-    --     frame:Hide()
-    -- end
 end
 
 --=========================================================================================
@@ -634,7 +573,8 @@ end
 
 -- draw the right text or not
 st.bar.draw_right_text = function()
-    if not swedgetimer_bar_settings.show_right_text then
+    local db = ST.db.profile
+    if not db.show_swing_timer_text then
         return false
     end
     if st.player.swing_timer == 0 then

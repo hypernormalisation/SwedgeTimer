@@ -77,21 +77,25 @@ function SwedgeTimer:SlashCommand(input, editbox)
 	-- end
 end
 
+------------------------------------------------------------------------------------
+-- Default settings for the addon.
 SwedgeTimer.defaults = {
-	-- profile = {
-	-- 	someToggle = true,
-	-- 	someRange = 7,
-	-- 	someInput = "Hello World",
-	-- 	someSelect = 2, -- Banana
-	-- },
     profile = {
 
-		-- Behaviour toggles
+		-- Top level
 		welcome_message = true,
 		bar_enabled = true,
-        lag_detection_enabled = true,
+
+		-- Behaviour toggles
+		lag_detection_enabled = true,
         hide_bar_when_inactive = true,
 		judgement_marker_enabled = true,
+        bar_twist_color_enabled = true,
+
+		-- Marker position settings
+		gcd_padding_mode = "Dynamic",
+		gcd_static_padding_ms = 100,
+		twist_window_ms = 400,
 
 		-- Bar dimensions
 		bar_height = 32,
@@ -101,6 +105,8 @@ SwedgeTimer.defaults = {
 		bar_locked = true,
 		bar_x_offset = 0,
 		bar_y_offset = -180,
+		point = "CENTER",
+		rel_point = "CENTER",
 
 		-- Bar textures
         bar_texture_key = SML.DefaultMedia.statusbar,
@@ -111,23 +117,12 @@ SwedgeTimer.defaults = {
 		-- Font settings
 		font_size = 16,
 		font_color = {1.0, 1.0, 1.0, 1.0},
-		text_font = SML.DefaultMedia.font,
-        
+		text_font = SML.DefaultMedia.font,       
+        show_attack_speed_text = true,
+        show_swing_timer_text = true,
 
-        -- bar_fontsize = 16,
-        -- bar_width = 345,
-        -- bar_height = 32,
-        -- bar_x_offset = 0,
-        -- bar_y_offset = -180,
-        -- bar_backplane_alpha = 0.85,
-        -- bar_is_locked = false,
-        -- bar_show_attack_speed = true,
-        -- bar_show_swing_timer = true,
 
-        -- bar_twist_window_ms = 400,
-        -- bar_gcd_padding_ms = 100,
 
-        -- bar_twist_color_enabled = true,
 
 		marker_width = 3,
 		gcd_marker_color = {0.2, 0.3, 0.2, 1.0},
@@ -137,8 +132,7 @@ SwedgeTimer.defaults = {
         -- bar_line_width = 3,
 
 		-- Seal color settings
-        bar_color_default = {0.5, 0.5, 0.5, 1.0},
-        bar_color_twist_ready = {0., 0.68, 0., 1.0},
+        -- bar_color_twist_ready = {0., 0.68, 0., 1.0},
         bar_color_blood = {0.7, 0.27, 0.0, 1.0},
 		bar_color_command = {0., 0.68, 0., 1.0},
 		bar_color_wisdom = {0., 0.4, 0.7, 1.0},
@@ -150,12 +144,20 @@ SwedgeTimer.defaults = {
 		-- Special bar colors
         bar_color_cant_twist = {0.7, 0.7, 0.01, 1.0},
         bar_color_warning = {1.0, 0.0, 0.0, 1.0}, -- when if you cast SoC, you can't twist out of it that swing
-        
+        bar_color_twisting = {0.7,0.1,0.6,1.0},
+		bar_color_default = {0.5, 0.5, 0.5, 1.0},
+
 		-- GCD underlay bar colors
 		bar_color_gcd = {0.3, 0.3, 0.3, 1.0},
 
     },
 
+}
+
+local gcd_padding_modes = {
+	Dynamic="Dynamic",
+	Fixed="Fixed",
+	None="None",
 }
 
 local MediaList = {}
@@ -173,14 +175,14 @@ local function getMediaData(info)
 end
 
 
-
+------------------------------------------------------------------------------------
+-- Functions to apply settings to the UI elements.
 local set_bar_position = function()
 	local db = SwedgeTimer.db.profile
 	local frame = st.bar.frame
 	frame:ClearAllPoints()
-	frame:SetPoint("CENTER", UIParent, "CENTER", db.bar_x_offset, db.bar_y_offset)
+	frame:SetPoint(db.point, UIParent, db.rel_point, db.bar_x_offset, db.bar_y_offset)
 	frame.bar:SetPoint("TOPLEFT", 0, 0)
-
 	frame.bar:SetPoint("TOPLEFT", 0, 0)
 	frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
 	frame.left_text:SetPoint("TOPLEFT", 2, -(db.bar_height / 2) + (db.font_size / 2))
@@ -240,11 +242,17 @@ st.set_markers = function()
 	st.set_marker_widths()
 end
 
+
+------------------------------------------------------------------------------------
+-- Now configure the option table for our settings interface.
 SwedgeTimer.options = {
 	type = "group",
 	name = "SwedgeTimer",
 	handler = SwedgeTimer,
 	args = {
+
+		------------------------------------------------------------------------------------
+		-- top-level settings
 		welcome_message = {
 			type = "toggle",
 			order = 1,
@@ -265,15 +273,18 @@ SwedgeTimer.options = {
 			-- set = function(info, value) SwedgeTimer.db.profile.bar_enabled = value end,
 		},
 
+		------------------------------------------------------------------------------------
+		-- addon feature behaviour
 		bar_behaviour = {
 			type = "group",
-			name = "Features",
+			name = "Behaviour",
 			handler = SwedgeTimer,
 			order = 1,
 			args = {
+				
 				lag_detection_enabled = {
 					type = "toggle",
-					order = 1,
+					order = 3,
 					name = "Lag detection",
 					desc = "When enabled, the swing timer bar turns a special colour when the player is in Seal of Command"..
 					" and the time remaining to cast a spell at the end of their GCD is lower than the current lag.",
@@ -290,17 +301,75 @@ SwedgeTimer.options = {
 				},
 				judgement_marker_enabled = {
 					type = "toggle",
-					order = 1,
+					order = 2,
 					name = "Judgement Marker",
 					desc = "When enabled, indicates where on the swing timer judgement will come off cooldown (if in "..
 					"a high value spell to judge like Seal of Blood).",
 					get = "GetValue",
 					set = "SetValue",
 				},
-			}
+				bar_twist_color_enabled = {
+					type="toggle",
+					order=4,
+					name="Twist color",
+					desc="When the player is actively twisting, and two seals are active, the bar will turn a special color "..
+					"dictated in the settings.",
+					get = "GetValue",
+					set = "SetValue",
+				},
+				marker_settings = {
+					order=6,
+					type="header",
+					name="Marker settings",
+				},
+				marker_descriptions = {
+					order=7,
+					type="description",
+					name="When GCD offset mode is not None, the GCD markers are pushed back "..
+					"some amount from the end of the swing. When the mode is set to dynamic, this value is the "..
+					"player's lag. When the mode is set to fixed, it is the value set below."
+				},
+				gcd_padding_mode = {
+					order=8,
+					type="select",
+					values=gcd_padding_modes,
+					style="dropdown",
+					desc="The type of GCD padding, if any, to use to offset the GCD markers.",
+					name="GCD offset mode",
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.gcd_padding_mode=key
+					end,
+				},
+				gcd_static_padding_ms = {
+					type = "range",
+					order = 9,
+					name = "Static GCD padding (ms)",
+					desc = "If GCD padding is in static mode, this is the amount in milliseconds that the GCD markers will be pushed back "..
+					"from the end of the swing, to account for player input delay and/or lag.",
+					min = 0, max = 400,
+					step = 1,
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.gcd_static_padding_ms = key
+					end,
+				},
+				twist_window_ms = {
+					type = "range",
+					order = 10,
+					name = "Twist window (ms)",
+					desc = "The time before the end of the swing that the twist indicator marker will be placed. Players with high "..
+					"latency may wish to increase this value.",
+					min = 400, max=600,
+					step=1,
+					get = "GetValue",
+					set = "SetValue",
+				}
+			},
 		},
 
-		-- Positioning
+		------------------------------------------------------------------------------------
+		-- Size/position options
 		positioning = {
 			type = "group",
 			name = "Size and position",
@@ -308,6 +377,8 @@ SwedgeTimer.options = {
 			order = 2,
 			args = {
 
+				------------------------------------------------------------------------------------
+				-- size options
 				size_header = {
 					type='header',
 					name='Size',
@@ -342,12 +413,13 @@ SwedgeTimer.options = {
 					end,
 				},
 
+				------------------------------------------------------------------------------------
+				-- position options
 				position_header = {
 					type = 'header',
 					name = 'Position',
 					order = 4,
 				},
-
 				bar_x_offset = {
 					type = "input",
 					order = 5,
@@ -359,7 +431,6 @@ SwedgeTimer.options = {
 						set_bar_position()
 					end			
 				},
-		
 				bar_y_offset = {
 					type = "input",
 					order = 6,
@@ -382,6 +453,8 @@ SwedgeTimer.options = {
 			}
 		},
 
+		------------------------------------------------------------------------------------
+		-- All appearance options
 		bar_appearance = {
 			type = "group",
 			name = "Appearance",
@@ -389,12 +462,13 @@ SwedgeTimer.options = {
 			order = 3,
 			args = {
 
+				------------------------------------------------------------------------------------
+				-- texture options
 				texture_header = {
 					order=1,
 					type="header",
 					name="Textures",
 				},
-
 				bar_texture = {
 					order = 2,
 					type = "select",
@@ -439,15 +513,29 @@ SwedgeTimer.options = {
 						st.bar.frame.backplane:SetBackdropColor(0,0,0, SwedgeTimer.db.profile.backplane_alpha)
 					end
 				},
-				
-				colors_header = {
-					order=5,
-					type="header",
-					name="Seal colors",
+				backplane_alpha = {
+					type = "range",
+					order = 5,
+					name = "Backplane alpha",
+					desc = "The opacity of the swing bar's backplane.",
+					min = 0.0, max = 1.0,
+					step = 0.05,
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.backplane_alpha = key
+						st.bar.frame.backplane:SetBackdropColor(0, 0, 0, key)
+					end,
 				},
-
+				
+				------------------------------------------------------------------------------------
+				-- Contextual color settings
+				context_colors_header = {
+					type="header",
+					order = 10,
+					name = "Contextual bar colors",
+				},
 				bar_color_default = {
-					order=6,
+					order=11,
 					type="color",
 					name="No seal",
 					desc="No seal active on the player.",
@@ -460,111 +548,18 @@ SwedgeTimer.options = {
 						SwedgeTimer.db.profile.bar_color_default = {r,g,b,a}
 					end
 				},
-				
-				bar_color_blood = {
-					order=7,
-					type="color",
-					name="Blood",
-					desc="Seal of Blood/Seal of the Martyr",
-					hasAlpha=false,
-					get = function()
-						local tab = SwedgeTimer.db.profile.bar_color_blood
-						return tab[1], tab[2], tab[3], tab[4]
-					end,
-					set = function(self,r,g,b,a)
-						SwedgeTimer.db.profile.bar_color_blood = {r,g,b,a}
-					end
-				},
-
-				bar_color_command = {
-					order=8,
-					type="color",
-					name="Command",
-					desc="Seal of Command (when the player can safely cast a GCD if near the beginning "..
-					"of their swing, or should twist into another seal if at the end of their swing).",
-					hasAlpha=false,
-					get = function()
-						local tab = SwedgeTimer.db.profile.bar_color_command
-						return tab[1], tab[2], tab[3], tab[4]
-					end,
-					set = function(self,r,g,b,a)
-						SwedgeTimer.db.profile.bar_color_command = {r,g,b,a}
-					end
-				},
-
-				bar_color_wisdom = {
-					order=10,
-					type="color",
-					name="Wisdom",
-					desc="Seal of Wisdom",
-					hasAlpha=false,
-					get = function()
-						local tab = SwedgeTimer.db.profile.bar_color_wisdom
-						return tab[1], tab[2], tab[3], tab[4]
-					end,
-					set = function(self,r,g,b,a)
-						SwedgeTimer.db.profile.bar_color_wisdom = {r,g,b,a}
-					end
-				},
-
-				bar_color_light = {
-					order=11,
-					type="color",
-					name="Light",
-					desc="Seal of Light",
-					hasAlpha=false,
-					get = function()
-						local tab = SwedgeTimer.db.profile.bar_color_light
-						return tab[1], tab[2], tab[3], tab[4]
-					end,
-					set = function(self,r,g,b,a)
-						SwedgeTimer.db.profile.bar_color_light = {r,g,b,a}
-					end
-				},
-
-				bar_color_justice = {
+				bar_color_twisting = {
 					order=12,
 					type="color",
-					name="Justice",
-					desc="Seal of Justice",
+					name="Active twist",
+					desc="The player is mid-twist and has multiple seals active.",
 					hasAlpha=false,
 					get = function()
-						local tab = SwedgeTimer.db.profile.bar_color_justice
+						local tab = SwedgeTimer.db.profile.bar_color_twisting
 						return tab[1], tab[2], tab[3], tab[4]
 					end,
 					set = function(self,r,g,b,a)
-						SwedgeTimer.db.profile.bar_color_justice = {r,g,b,a}
-					end
-				},
-
-				bar_color_vengeance = {
-					order=12,
-					type="color",
-					name="Vengeance",
-					desc="Seal of Vengeance/Seal of Corruption",
-					hasAlpha=false,
-					get = function()
-						local tab = SwedgeTimer.db.profile.bar_color_vengeance
-						return tab[1], tab[2], tab[3], tab[4]
-					end,
-					set = function(self,r,g,b,a)
-						SwedgeTimer.db.profile.bar_color_vengeance = {r,g,b,a}
-					end
-				},
-
-				bar_color_righteousness = {
-					order=9,
-					type="color",
-					name="Righteousness",
-					desc="Seal of Righteousness (when the player can safely cast a GCD if near the beginning "..
-					"of their swing, or should twist into another seal if at the end of their swing).",
-					hasAlpha=false,
-					get = function()
-						local tab = SwedgeTimer.db.profile.bar_color_righteousness
-						return tab[1], tab[2], tab[3], tab[4]
-					end,
-					set = function(self,r,g,b,a)
-						SwedgeTimer.db.profile.bar_color_righteousness = {r,g,b,a}
+						SwedgeTimer.db.profile.bar_color_twisting = {r,g,b,a}
 					end
 				},
 				bar_color_warning = {
@@ -598,14 +593,132 @@ SwedgeTimer.options = {
 					end
 				},
 
+				------------------------------------------------------------------------------------
+				-- Seal color settings
+				seal_colors_header = {
+					order=20,
+					type="header",
+					name="Seal colors",
+				},
+
+
+
+				bar_color_command = {
+					order=21,
+					type="color",
+					name="Command",
+					desc="Seal of Command (when the player can safely cast a GCD if near the beginning "..
+					"of their swing, or should twist into another seal if at the end of their swing).",
+					hasAlpha=false,
+					get = function()
+						local tab = SwedgeTimer.db.profile.bar_color_command
+						return tab[1], tab[2], tab[3], tab[4]
+					end,
+					set = function(self,r,g,b,a)
+						SwedgeTimer.db.profile.bar_color_command = {r,g,b,a}
+					end
+				},
+				bar_color_righteousness = {
+					order=22,
+					type="color",
+					name="Righteousness",
+					desc="Seal of Righteousness (when the player can safely cast a GCD if near the beginning "..
+					"of their swing, or should twist into another seal if at the end of their swing).",
+					hasAlpha=false,
+					get = function()
+						local tab = SwedgeTimer.db.profile.bar_color_righteousness
+						return tab[1], tab[2], tab[3], tab[4]
+					end,
+					set = function(self,r,g,b,a)
+						SwedgeTimer.db.profile.bar_color_righteousness = {r,g,b,a}
+					end
+				},				
+				bar_color_blood = {
+					order=23,
+					type="color",
+					name="Blood",
+					desc="Seal of Blood/Seal of the Martyr",
+					hasAlpha=false,
+					get = function()
+						local tab = SwedgeTimer.db.profile.bar_color_blood
+						return tab[1], tab[2], tab[3], tab[4]
+					end,
+					set = function(self,r,g,b,a)
+						SwedgeTimer.db.profile.bar_color_blood = {r,g,b,a}
+					end
+				},
+				bar_color_wisdom = {
+					order=25,
+					type="color",
+					name="Wisdom",
+					desc="Seal of Wisdom",
+					hasAlpha=false,
+					get = function()
+						local tab = SwedgeTimer.db.profile.bar_color_wisdom
+						return tab[1], tab[2], tab[3], tab[4]
+					end,
+					set = function(self,r,g,b,a)
+						SwedgeTimer.db.profile.bar_color_wisdom = {r,g,b,a}
+					end
+				},
+
+				bar_color_light = {
+					order=26,
+					type="color",
+					name="Light",
+					desc="Seal of Light",
+					hasAlpha=false,
+					get = function()
+						local tab = SwedgeTimer.db.profile.bar_color_light
+						return tab[1], tab[2], tab[3], tab[4]
+					end,
+					set = function(self,r,g,b,a)
+						SwedgeTimer.db.profile.bar_color_light = {r,g,b,a}
+					end
+				},
+
+				bar_color_justice = {
+					order=27,
+					type="color",
+					name="Justice",
+					desc="Seal of Justice",
+					hasAlpha=false,
+					get = function()
+						local tab = SwedgeTimer.db.profile.bar_color_justice
+						return tab[1], tab[2], tab[3], tab[4]
+					end,
+					set = function(self,r,g,b,a)
+						SwedgeTimer.db.profile.bar_color_justice = {r,g,b,a}
+					end
+				},
+
+				bar_color_vengeance = {
+					order=24,
+					type="color",
+					name="Vengeance",
+					desc="Seal of Vengeance/Seal of Corruption",
+					hasAlpha=false,
+					get = function()
+						local tab = SwedgeTimer.db.profile.bar_color_vengeance
+						return tab[1], tab[2], tab[3], tab[4]
+					end,
+					set = function(self,r,g,b,a)
+						SwedgeTimer.db.profile.bar_color_vengeance = {r,g,b,a}
+					end
+				},
+
+
+
+
+				------------------------------------------------------------------------------------
+				-- GCD settings
 				gcd_header = {
-					order=17,
+					order=30,
 					type="header",
 					name="GCD underlay",
 				},
-
 				bar_color_gcd = {
-					order=18,
+					order=31,
 					type="color",
 					name="Underlay color",
 					desc="The color of the GCD underlay.",
@@ -620,15 +733,16 @@ SwedgeTimer.options = {
 					end
 				},
 
+				------------------------------------------------------------------------------------
+				-- font settings
 				fonts_header = {
-					order=20,
+					order=40,
 					type="header",
 					name="Fonts",
 				},
-
 				font_size = {
 					type = "range",
-					order = 23,
+					order = 44,
 					name = "Font size",
 					desc = "The size of the swing timer and attack speed fonts.",
 					min = 10, max = 40, softMin = 8, softMax = 24,
@@ -640,7 +754,7 @@ SwedgeTimer.options = {
 					end,
 				},
 				font_color = {
-					order=22,
+					order=45,
 					type="color",
 					name="Font color",
 					desc="The color of the addon texts.",
@@ -654,7 +768,7 @@ SwedgeTimer.options = {
 					end
 				},
 				text_font = {
-					order = 21,
+					order = 43,
 					type = "select",
 					name = "Font",
 					desc = "The font to use in the swing timer and attack speed text.",
@@ -667,16 +781,49 @@ SwedgeTimer.options = {
 						set_fonts()
 					end
 				},
+				show_attack_speed_text = {
+					type="toggle",
+					order = 41,
+					name = "Attack speed text",
+					desc = "Shows the player's current attack speed at the left of the swing timer bar.",
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.show_attack_speed_text = key
+						print(key)
+						if key then
+							frame.left_text:Show()
+						else
+							frame.left_text:Hide()
+						end
+					end,
+				},
+				show_swing_timer_text = {
+					type="toggle",
+					order = 42,
+					name = "Swing timer text",
+					desc = "Shows the remaining time on the player's swing on the right of the swing bar.",
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.show_swing_timer_text = key
+						print(key)
+						if key then
+							frame.right_text:Show()
+						else
+							frame.right_text:Hide()
+						end
+					end,
+				},
 
+				------------------------------------------------------------------------------------
+				-- Marker appearance settings
 				markers_header = {
-					order=30,
+					order=50,
 					type="header",
 					name="Markers",
 				},
-
 				marker_width = {
 					type = "range",
-					order = 31,
+					order = 51,
 					name = "Marker width",
 					desc = "The width of the twist window GCD, and judgement markers.",
 					min = 1, max = 6,
@@ -688,7 +835,7 @@ SwedgeTimer.options = {
 					end,
 				},
 				gcd_marker_color = {
-					order=33,
+					order=53,
 					type="color",
 					name="GCD",
 					desc="The color of the GCD markers.",
@@ -702,7 +849,7 @@ SwedgeTimer.options = {
 					end
 				},
 				twist_marker_color = {
-					order=32,
+					order=52,
 					type="color",
 					name="Twist window",
 					desc="The color of the twist window marker.",
@@ -716,7 +863,7 @@ SwedgeTimer.options = {
 					end
 				},
 				judgement_marker_color = {
-					order=34,
+					order=54,
 					type="color",
 					name="Judgement indicator",
 					desc="The color of the judgement indicator marker, which shows when judgement will come off cooldown"..
@@ -730,22 +877,6 @@ SwedgeTimer.options = {
 						set_marker_colors()
 					end
 				},
-		-- bar_y_offset = {
-		-- 	type = "slider",
-		-- 	order = 1,
-		-- 	name = "Bar x offset",
-		-- 	desc = "The x position of the bar.",
-		-- 	get = "GetValue",
-		-- 	step = 0.01,
-		-- 	bigStep = 0.1
-		-- 	set = function(self, input)
-		-- 		local db = SwedgeTimer.db.profile
-		-- 		-- SwedgeTimer.db.profile.bar_x_offset = input
-		-- 		db.bar_x_offset = input
-		-- 		st.bar.frame:SetPoint("CENTER", UIParent, "CENTER", db.bar_x_offset, db.bar_y_offset)
-		-- 	end			
-		-- },
-
 			}
 		},
 
