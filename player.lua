@@ -36,10 +36,7 @@ st.player.active_seal_1_remaining = 0
 st.player.active_seal_2 = nil
 st.player.active_seal_2_remaining = 0
 
--- st.player.blood_active = false
--- st.player.command_active = false
--- st.player.crusader_active = false
-
+-- A flag for when lag is likely to 
 st.player.twist_impossible = false
 
 -- does the player have heroism/lust buff active
@@ -81,10 +78,6 @@ st.player.reported_speed_change = true
 -- timers to account for haste snapshotting
 st.crusader_lock = false
 st.crusader_currently_active = false
-
--- Flags to detect any spell casts that would reset the swing timer.
-st.player.how_cast_guid = nil
-st.player.holy_wrath_cast_guid = nil
 
 -- A measure of the player's ping
 st.player.lag_world = 0.0
@@ -304,6 +297,15 @@ st.player.calculate_spell_GCD_duration = function()
     st.player.spell_gcd_duration = current
     -- print('current spell GCD: ' .. current)
     return current
+end
+
+-- Simple func to match a seal label.
+st.player.match_seal = function(seal_label)
+    if st.player.active_seals[seal_label] ~= nil then
+        return true
+    end
+    return false
+    
 end
 
 -- Function to iterate over the player's auras and record any active Seals.

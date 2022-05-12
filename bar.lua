@@ -71,10 +71,9 @@ st.bar.LoadSettings = function()
 end
 
 --=========================================================================================
--- Drag and drop settings
+-- Drag and drop handlers
 --=========================================================================================
 st.bar.OnFrameDragStart = function()
-    print(ST.db.profile.bar_locked)
     if not ST.db.profile.bar_locked then
         st.bar.frame:StartMoving()
     end
@@ -83,7 +82,6 @@ end
 st.bar.OnFrameDragStop = function()
     local frame = st.bar.frame
     local db = ST.db.profile
-
     frame:StopMovingOrSizing()
     local point, _, rel_point, x_offset, y_offset = frame:GetPoint()
     db.bar_x_offset = st.utils.simple_round(x_offset, 0.1)
@@ -582,23 +580,37 @@ end
 -- This function sets the bar colour for all cases outside of command, which has
 -- a time sensitive component and must be handled on-update.
 st.bar.set_bar_color = function()
+
+    local db = ST.db.profile
+    
     -- if no seal return default color
     if st.player.n_active_seals == 0 then
-        st.bar.frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_default"]))
-        return
-    end   
+        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_default))
     -- if we're currently twisting return twist color
-    if st.player.n_active_seals == 2 and swedgetimer_bar_settings.enable_twist_bar_color then
-        st.bar.frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_twisting"]))
-        return
+    elseif st.player.n_active_seals == 2 and db.bar_twist_color_enabled then
+        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_twisting))
+
+    -- if no special condition, match a seal color.
+    elseif st.player.match_seal('command') then
+        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_command))
+    elseif st.player.match_seal('righteousness') then
+        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_righteousness))
+    elseif st.player.match_seal('blood') then
+        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_blood))
+    elseif st.player.match_seal('vengeance') then
+        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_vengeance))
+    elseif st.player.match_seal('wisdom') then
+        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_wisdom))
+    elseif st.player.match_seal('light') then
+        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_light))        
+    elseif st.player.match_seal('justice') then
+        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_justice))
+    elseif st.player.match_seal('crusader') then
+        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_crusader))
+    else
+        -- if we get to the end return the default color
+        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_default))
     end
-    -- if we're only under SoB, return the blood color
-    if st.bar.is_running_seal_active() then
-        st.bar.frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_blood"]))
-        return
-    end
-    -- if we get to the end return the default color
-    st.bar.frame.bar:SetVertexColor(unpack(swedgetimer_bar_settings["bar_color_default"]))
 end
 
 -- draw the right text or not

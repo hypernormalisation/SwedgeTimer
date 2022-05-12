@@ -357,9 +357,9 @@ SwedgeTimer.options = {
 				marker_descriptions = {
 					order=7,
 					type="description",
-					name="When GCD offset mode is not Dynamic or Fixed, the GCD markers are pushed back "..
+					name="When GCD offset mode is Dynamic or Fixed, the GCD markers are pushed back "..
 					"from the end of the swing to account for player input/lag. When the mode is set to dynamic, this value is 65% of the "..
-					"player's world latency roundtrip (roughly, the lag). When the mode is set to fixed, it is the value set in Static GCD padding."
+					"player's world roundtrip latency (roughly, the lag). When the mode is set to fixed, it is the value set in Static GCD padding."
 				},
 				gcd_padding_mode = {
 					order=8,
@@ -377,8 +377,8 @@ SwedgeTimer.options = {
 				gcd_static_padding_ms = {
 					type = "range",
 					order = 9,
-					name = "Static GCD padding (ms)",
-					desc = "When Twist window offset mode is not Dynamic or Fixed, the GCD markers are pushed back "..
+					name = "Fixed GCD padding (ms)",
+					desc = "When Twist window offset mode is Dynamic or Fixed, the GCD markers are pushed back "..
 					"from the end of the swing, to account for player input delay and/or lag.",
 					min = 0, max = 400,
 					step = 1,
@@ -392,9 +392,9 @@ SwedgeTimer.options = {
 				twist_window_descriptions = {
 					order=10.1,
 					type="description",
-					name="When Twist window offset mode is not Dynamic or Fixed, the twist window marker is pushed back "..
+					name="When Twist window offset mode is Dynamic or Fixed, the twist window marker is pushed back "..
 					"from the end of the swing to account for player input/lag. When the mode is set to dynamic, this value is 65% of the "..
-					"player's world latency roundtrip (roughly, the lag). When the mode is set to fixed, it is the value set in Twist window padding.",
+					"player's world roundtrip latency (roughly, the lag). When the mode is set to fixed, it is the value set in Fixed twist padding.",
 				},
 				twist_padding_mode = {
 					order=10.2,
@@ -413,7 +413,7 @@ SwedgeTimer.options = {
 				twist_window_padding_ms = {
 					type = "range",
 					order = 10.3,
-					name = "Twist window (ms)",
+					name = "Fixed twist padding (ms)",
 					desc = "The time before the end of the swing that the twist indicator marker will be placed. Players with high "..
 					"latency may wish to increase this value.",
 					min = 0, max=400,
@@ -539,7 +539,7 @@ SwedgeTimer.options = {
 					type = "toggle",
 					order = 7,
 					name = "Bar locked",
-					desc = "Locks the swing bar in-place.",
+					desc = "Prevents the swing bar from being dragged with the mouse.",
 					get = "GetValue",
 					set = "SetValue",
 				},
@@ -737,6 +737,7 @@ SwedgeTimer.options = {
 					end,
 					set = function(self,r,g,b,a)
 						SwedgeTimer.db.profile.bar_color_default = {r,g,b,a}
+						st.bar.set_bar_color()
 					end
 				},
 				bar_color_twisting = {
@@ -751,6 +752,7 @@ SwedgeTimer.options = {
 					end,
 					set = function(self,r,g,b,a)
 						SwedgeTimer.db.profile.bar_color_twisting = {r,g,b,a}
+						st.bar.set_bar_color()
 					end
 				},
 				bar_color_warning = {
@@ -807,6 +809,7 @@ SwedgeTimer.options = {
 					end,
 					set = function(self,r,g,b,a)
 						SwedgeTimer.db.profile.bar_color_command = {r,g,b,a}
+						st.bar.set_bar_color()
 					end
 				},
 				bar_color_righteousness = {
@@ -822,6 +825,7 @@ SwedgeTimer.options = {
 					end,
 					set = function(self,r,g,b,a)
 						SwedgeTimer.db.profile.bar_color_righteousness = {r,g,b,a}
+						st.bar.set_bar_color()
 					end
 				},				
 				bar_color_blood = {
@@ -836,6 +840,7 @@ SwedgeTimer.options = {
 					end,
 					set = function(self,r,g,b,a)
 						SwedgeTimer.db.profile.bar_color_blood = {r,g,b,a}
+						st.bar.set_bar_color()
 					end
 				},
 				bar_color_wisdom = {
@@ -850,6 +855,7 @@ SwedgeTimer.options = {
 					end,
 					set = function(self,r,g,b,a)
 						SwedgeTimer.db.profile.bar_color_wisdom = {r,g,b,a}
+						st.bar.set_bar_color()
 					end
 				},
 
@@ -865,6 +871,7 @@ SwedgeTimer.options = {
 					end,
 					set = function(self,r,g,b,a)
 						SwedgeTimer.db.profile.bar_color_light = {r,g,b,a}
+						st.bar.set_bar_color()
 					end
 				},
 
@@ -880,6 +887,7 @@ SwedgeTimer.options = {
 					end,
 					set = function(self,r,g,b,a)
 						SwedgeTimer.db.profile.bar_color_justice = {r,g,b,a}
+						st.bar.set_bar_color()
 					end
 				},
 				bar_color_crusader = {
@@ -894,6 +902,7 @@ SwedgeTimer.options = {
 					end,
 					set = function(self,r,g,b,a)
 						SwedgeTimer.db.profile.bar_color_crusader = {r,g,b,a}
+						st.bar.set_bar_color()
 					end
 				},
 				bar_color_vengeance = {
@@ -908,6 +917,7 @@ SwedgeTimer.options = {
 					end,
 					set = function(self,r,g,b,a)
 						SwedgeTimer.db.profile.bar_color_vengeance = {r,g,b,a}
+						st.bar.set_bar_color()
 					end
 				},
 
