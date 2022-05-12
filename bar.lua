@@ -504,12 +504,12 @@ end
 
 st.bar.get_twist_window_time_before_swing = function()
     local db = ST.db.profile
-    local twist_s = db.twist_window_ms / 1000.0
+    local twist_s = 400 / 1000.0
     local padding = 0.0
     if db.twist_padding_mode == "Dynamic" then
         padding = st.player.lag_world
     elseif db.twist_padding_mode == "Fixed" then
-        twist_s = db.twist_window_ms
+        twist_s = db.twist_window_ms / 1000.0
     end
         
     return twist_s + padding
@@ -519,7 +519,8 @@ end
 st.bar.set_twist_tick_offset = function()
 -- Set the offset position of the twist window
     local db = ST.db.profile
-    local twist_s = db.twist_window_ms / 1000.0
+    -- local twist_s = db.twist_window_ms / 1000.0
+    local twist_s = st.bar.get_twist_window_time_before_swing()
     local bar_fraction = (twist_s / st.player.current_weapon_speed)
     local offset = bar_fraction * db.bar_width * -1
     -- print('twist tick time = ' .. time_value)
