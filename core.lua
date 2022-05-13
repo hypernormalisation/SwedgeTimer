@@ -1,15 +1,18 @@
 local addon_name, st = ...
 local SwedgeTimer = LibStub("AceAddon-3.0"):NewAddon(addon_name, "AceEvent-3.0", "AceConsole-3.0")
-local AC = LibStub("AceConfig-3.0")
-local ACD = LibStub("AceConfigDialog-3.0")
 local SML = LibStub("LibSharedMedia-3.0")
 local print = st.utils.print_msg
-
+-- print(type(SML.DefaultMedia.statusbar))
+-- print(SML.DefaultMedia.statusbar)
 
 function SwedgeTimer:OnInitialize()
 	-- uses the "Default" profile instead of character-specific profiles
 	-- https://www.wowace.com/projects/ace3/pages/api/ace-db-3-0
-	SwedgeTimerDB = LibStub("AceDB-3.0"):New("SwedgeTimerDB", self.defaults, true)
+
+	local AC = LibStub("AceConfig-3.0")
+	local ACD = LibStub("AceConfigDialog-3.0")
+
+	local SwedgeTimerDB = LibStub("AceDB-3.0"):New("SwedgeTimerDB", self.defaults, true)
 	self.db = SwedgeTimerDB
 
 	-- registers an options table and adds it to the Blizzard options window
@@ -26,63 +29,19 @@ function SwedgeTimer:OnInitialize()
 	self:RegisterChatCommand("st", "SlashCommand")
 	self:RegisterChatCommand("swedgetimer", "SlashCommand")
 
-	-- self:GetCharacterInfo()
 end
 
 function SwedgeTimer:OnEnable()
-	
 	-- Sort out character information
 	st.player.get_twohand_spec_points()
 	st.player.guid = UnitGUID("player")
 	st.player.weapon_id = GetInventoryItemID("player", 16)
-
-
 	-- print("Talent points on load says: "..tostring(select(5,GetTalentInfo(3, 13))))
-
-	-- self:RegisterEvent("PLAYER_STARTED_MOVING")
 end
 
--- function SwedgeTimer:PLAYER_STARTED_MOVING(event)
--- 	print(event)
--- end
-
--- function SwedgeTimer:GetCharacterInfo()
--- 	-- stores character-specific data
--- 	self.db.char.level = UnitLevel("player")
--- end
-
 function SwedgeTimer:SlashCommand(input, editbox)
-    -- if input == "bar" then
-    --     st.bar.TwistBarToggle()
-    -- elseif input == "lock" then
-    --     st.bar.TwistBarLockToggle()
-	-- if input == "enable" then
-	-- 	self:Enable()
-	-- 	self:Print("Enabled.")
-	-- elseif input == "disable" then
-	-- 	-- unregisters all events and calls SwedgeTimer:OnDisable() if you defined that
-	-- 	self:Disable()
-	-- 	self:Print("Disabled.")
-	-- elseif input == "message" then
-	-- 	print("this is our saved message:", self.db.profile.someInput)
-	-- else
-		-- self:Print("Some useful help message.")
-
-		-- https://github.com/Stanzilla/WoWUIBugs/issues/89
-		-- InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)
-		-- InterfaceOptionsFrame_OpenToCategory(self.optionsFrame)
-
-		ACD:Open("SwedgeTimer_Options")
-
-
-		--[[ or as a standalone window
-		if ACD.OpenFrames["SwedgeTimer_Options"] then
-			ACD:Close("SwedgeTimer_Options")
-		else
-			ACD:Open("SwedgeTimer_Options")
-		end
-		]]
-	-- end
+	local ACD = LibStub("AceConfigDialog-3.0")
+	ACD:Open("SwedgeTimer_Options")
 end
 
 ------------------------------------------------------------------------------------
@@ -96,14 +55,14 @@ SwedgeTimer.defaults = {
 
 		-- Behaviour toggles
 		lag_detection_enabled = true,
-        hide_bar_when_inactive = true,
+        hide_bar_when_inactive = false,
 		judgement_marker_enabled = true,
-        bar_twist_color_enabled = true,
+        bar_twist_color_enabled = false,
 		hide_when_not_ret = true,
 
 		-- Lag calibration
-		lag_multiplier = 1.2,
-		lag_offset = 10,
+		lag_multiplier = 1.4,
+		lag_offset = 15,
 
 		-- Marker position settings
 		gcd_padding_mode = "Dynamic",
@@ -123,9 +82,13 @@ SwedgeTimer.defaults = {
 		bar_rel_point = "CENTER",
 
 		-- Bar textures
-        bar_texture_key = SML.DefaultMedia.statusbar,
-        gcd_texture_key = SML.DefaultMedia.statusbar,
-        backplane_texture_key = SML.DefaultMedia.statusbar,
+		-- bar_texture_key = SML.DefaultMedia.statusbar,
+        -- gcd_texture_key = SML.DefaultMedia.statusbar,
+        -- backplane_texture_key = SML.DefaultMedia.statusbar,
+		bar_texture_key = "Solid",
+        gcd_texture_key = "Solid",
+        backplane_texture_key = "Solid",
+
 		backplane_alpha = 0.85,
         
 		backplane_outline_offset = 10,
@@ -134,38 +97,52 @@ SwedgeTimer.defaults = {
 		-- Font settings
 		font_size = 16,
 		font_color = {1.0, 1.0, 1.0, 1.0},
-		text_font = SML.DefaultMedia.font,       
+		text_font = SML.DefaultMedia.font,
+		font_outline_key = "outline",
         show_attack_speed_text = true,
         show_swing_timer_text = true,
 
 		-- Marker settings
 		marker_width = 3,
-		gcd_marker_color = {0.2, 0.3, 0.2, 1.0},
+		gcd_marker_color = {0.9, 0.9, 0.9, 1.0},
 		twist_marker_color = {0.9,0.9,0.9,1.0},
 		judgement_marker_color = {0.9,0.9,0.01,1.0},
 
 		-- Seal color settings
-        bar_color_blood = {0.7, 0.27, 0.0, 1.0},
-		bar_color_command = {0., 0.68, 0., 1.0},
-		bar_color_wisdom = {0., 0.4, 0.7, 1.0},
-		bar_color_light = {0., 0.8, 0.4, 1.0},
-		bar_color_justice = {0.8, 0.1, 0.7, 1.0},
+
+		bar_color_command = {0.14, 0.66, 0.14, 1.0},
+		bar_color_righteousness = {0.14, 0.66, 0.14, 1.0},
+        bar_color_blood = {0.86, 0.38, 0.11, 1.0},
 		bar_color_vengeance = {0.8, 0.5, 0.4, 1.0},
-		bar_color_righteousness = {0., 0.68, 0., 1.0},
-		bar_color_crusader = {0.5, 0.9, 0.9, 1.0},
+		bar_color_wisdom = {0., 0.4, 0.7, 1.0},
+		bar_color_light = {0.67, 0.92, 0.859, 1.0},
+		bar_color_justice = {0.77, 0.31, 0.48, 1.0},
+		bar_color_crusader = {0.9, 0.75, 0.42, 1.0},
 
 
 		-- Special bar colors
-        bar_color_cant_twist = {0.7, 0.7, 0.01, 1.0},
+        bar_color_cant_twist = {0.83, 0.83, 0.01, 1.0},
         bar_color_warning = {1.0, 0.0, 0.0, 1.0}, -- when if you cast SoC, you can't twist out of it that swing
         bar_color_twisting = {0.7,0.1,0.6,1.0},
-		bar_color_default = {0.5, 0.5, 0.5, 1.0},
+		bar_color_default = {0.53, 0.43, 0.53, 1.0},
 
 		-- GCD underlay bar colors
-		bar_color_gcd = {0.3, 0.3, 0.3, 1.0},
+		bar_color_gcd = {0.48, 0.48, 0.48, 1.0},
 
     },
 
+}
+
+local outline_map = {
+	none="",
+	outline="OUTLINE",
+	thick_outline="THICKOUTLINE",
+}
+
+local outlines = {
+	none="None",
+	outline="Outline",
+	thick_outline="Thick Outline",
 }
 
 local gcd_padding_modes = {
@@ -196,8 +173,8 @@ st.bar_outline_names = {
 
 st.bar_outline_thicknesses = {
 	None=8,
-	Thin=9,
-	Medium=10,
+	Thin=9.5,
+	Medium=10.5,
 	Thick=11,
 	Thicc=12,
 }
@@ -238,14 +215,14 @@ local set_bar_position = function()
 end
 st.set_bar_position = set_bar_position
 
-
 local set_fonts = function()
 	local db = SwedgeTimer.db.profile
 	local frame = st.bar.frame
 	local font_path = SML:Fetch('font', db.text_font)
-	-- print(font_path)
-	frame.left_text:SetFont(font_path, db.font_size, "OUTLINE")
-	frame.right_text:SetFont(font_path, db.font_size, "OUTLINE")
+
+	local opt_string = outline_map[db.font_outline_key]
+	frame.left_text:SetFont(font_path, db.font_size, opt_string)
+	frame.right_text:SetFont(font_path, db.font_size, opt_string)
 	frame.left_text:SetPoint("TOPLEFT", 2, -(db.bar_height / 2) + (db.font_size / 2))
 	frame.right_text:SetPoint("TOPRIGHT", 2, -(db.bar_height / 2) + (db.font_size / 2))
 	frame.left_text:SetTextColor(unpack(db.font_color))
@@ -260,9 +237,10 @@ local set_bar_size = function()
 	frame:SetHeight(db.bar_height)
 	frame.bar:SetWidth(db.bar_width)
 	frame.bar:SetHeight(db.bar_height)
-	frame.gcd_bar:SetWidth(db.bar_width)
+	-- frame.gcd_bar:SetWidth(db.bar_width)
 	frame.gcd_bar:SetHeight(db.bar_height)
 	set_fonts()
+	st.set_markers()
 end
 
 local set_marker_widths = function()
@@ -288,6 +266,7 @@ st.set_marker_colors = set_marker_colors
 st.set_markers = function()
 	st.set_marker_colors()
 	st.set_marker_widths()
+	st.bar.set_marker_offsets()
 end
 
 st.set_outline_thickness = function()
@@ -364,7 +343,7 @@ SwedgeTimer.options = {
 					order=4,
 					name="Twist color",
 					desc="When the player is actively twisting, and two seals are active, the bar will turn a special color "..
-					"dictated in the settings.",
+					"dictated in the Appearance settings.",
 					get = "GetValue",
 					set = "SetValue",
 				},
@@ -381,7 +360,7 @@ SwedgeTimer.options = {
 					order=7,
 					type="description",
 					name="When GCD offset mode is Dynamic or Fixed, the GCD markers are pushed back "..
-					"from the end of the swing to account for player input/lag. When the mode is set to Dynamic, this value uses the calibrated lag "..
+					"from the end of the swing to account for player input/lag. When the mode is set to Dynamic, this uses the calibrated lag "..
 					"described in Lag Compensation."
 				},
 				gcd_padding_mode = {
@@ -418,7 +397,7 @@ SwedgeTimer.options = {
 					order=10.1,
 					type="description",
 					name="When Twist window offset mode is Dynamic or Fixed, the twist window marker is pushed back "..
-					"from the end of the swing to account for player input/lag. When the mode is set to Dynamic, this value uses the calibrated lag "..
+					"from the end of the swing to account for player input/lag. When the mode is set to Dynamic, this uses the calibrated lag "..
 					"described in Lag Compensation."
 				},
 				twist_padding_mode = {
@@ -440,7 +419,7 @@ SwedgeTimer.options = {
 					type = "range",
 					order = 10.3,
 					name = "Fixed twist offset (ms)",
-					desc = "The time before the end of the swing that the twist indicator marker will be placed. Players with high "..
+					desc = "The twist window indicator is placed (400ms plus the offset value) before the end of the swing. Players with high "..
 					"latency may wish to increase this value.",
 					min = 0, max=400,
 					step=1,
@@ -463,7 +442,7 @@ SwedgeTimer.options = {
 			type = "group",
 			name = "Lag Compensation",
 			handler = SwedgeTimer,
-			order = 2,			
+			order = 9,			
 			args = {
 				lag_settings = {
 					order=5.01,
@@ -681,6 +660,12 @@ SwedgeTimer.options = {
 					type="description",
 					name="When the bar is not locked, it can be clicked and dragged with the mouse.",
 				},
+				position_description2 = {
+					order=4.2,
+					type="description",
+					name="If you don't understand how UI frames anchor, then either keep both anchors on "..
+					"CENTRE and enter offsets manually, or position the bar with the mouse.",
+				},
 				bar_x_offset = {
 					type = "input",
 					order = 5,
@@ -707,6 +692,7 @@ SwedgeTimer.options = {
 						set_bar_position()
 					end			
 				},
+
 				bar_point = {
 					order = 6.1,
 					type="select",
@@ -733,7 +719,7 @@ SwedgeTimer.options = {
 				},
 				bar_locked = {
 					type = "toggle",
-					order = 7,
+					order = 4.15,
 					name = "Bar locked",
 					desc = "Prevents the swing bar from being dragged with the mouse.",
 					get = "GetValue",
@@ -758,36 +744,35 @@ SwedgeTimer.options = {
 					type="header",
 					name="Textures",
 				},
-				bar_texture = {
+				bar_texture_key = {
 					order = 2,
 					type = "select",
 					name = "Bar",
 					desc = "test description",
 					dialogControl = "LSM30_Statusbar",
-					-- values = getMediaData,
 					values = SML:HashTable("statusbar"),
-					get = function(info) return SwedgeTimer.db.profile.bar_texture or SML.DefaultMedia.statusbar end,
+					get = function(info) return SwedgeTimer.db.profile.bar_texture_key or SML.DefaultMedia.statusbar end,
 					set = function(self, key)
-						SwedgeTimer.db.profile.bar_texture = key
+						SwedgeTimer.db.profile.bar_texture_key = key
 						st.bar.frame.bar:SetTexture(SML:Fetch('statusbar', key))
 					end
 				},
 				
-				gcd_texture = {
+				gcd_texture_key = {
 					order = 3,
 					type = "select",
 					name = "GCD underlay",
 					dialogControl = "LSM30_Statusbar",
-					-- values = getMediaData,
 					values = SML:HashTable("statusbar"),
-					get = function(info) return SwedgeTimer.db.profile.gcd_texture or SML.DefaultMedia.statusbar end,
+					get = function(info) return SwedgeTimer.db.profile.gcd_texture_key or SML.DefaultMedia.statusbar end,
 					set = function(self, key)
-						SwedgeTimer.db.profile.gcd_texture = key
+						SwedgeTimer.db.profile.gcd_texture_key = key
 						st.bar.frame.gcd_bar:SetTexture(SML:Fetch('statusbar', key))
+						st.bar.set_gcd_bar_width()
 					end
 				},
 		
-				backplane_texture = {
+				backplane_texture_key = {
 					order = 4,
 					type = "select",
 					name = "Backplane",
@@ -881,6 +866,19 @@ SwedgeTimer.options = {
 						set_fonts()
 					end
 				},
+				font_outline_key = {
+					order=9.02,
+					type="select",
+					values=outlines,
+					style="dropdown",
+					desc="The outline type to use with the font.",
+					name="Font outline",
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.font_outline_key = key
+						set_fonts()
+					end,
+				},
 				show_attack_speed_text = {
 					type="toggle",
 					order = 9.1,
@@ -938,7 +936,7 @@ SwedgeTimer.options = {
 					order=12,
 					type="color",
 					name="Active twist",
-					desc="The player is mid-twist and has multiple seals active.",
+					desc="The player is mid-twist and has multiple seals active. Only is used if the relevant option is checked in the Behaviour settings.",
 					hasAlpha=false,
 					get = function()
 						local tab = SwedgeTimer.db.profile.bar_color_twisting
@@ -964,21 +962,6 @@ SwedgeTimer.options = {
 						SwedgeTimer.db.profile.bar_color_warning = {r,g,b,a}
 					end
 				},
-				-- bar_color_cant_twist = {
-				-- 	order=14,
-				-- 	type="color",
-				-- 	name="Can't twist (lag)",
-				-- 	desc="The color the bar turns when the player is in a good seal to twist from, but "..
-				-- 	"their GCD combined with their lag will mean they cannot twist this swing unless they stopattack.",
-				-- 	hasAlpha=false,
-				-- 	get = function()
-				-- 		local tab = SwedgeTimer.db.profile.bar_color_cant_twist
-				-- 		return tab[1], tab[2], tab[3], tab[4]
-				-- 	end,
-				-- 	set = function(self,r,g,b,a)
-				-- 		SwedgeTimer.db.profile.bar_color_cant_twist = {r,g,b,a}
-				-- 	end
-				-- },
 
 				------------------------------------------------------------------------------------
 				-- Seal color settings
@@ -1136,7 +1119,6 @@ SwedgeTimer.options = {
 					end
 				},
 
-
 				------------------------------------------------------------------------------------
 				-- Marker appearance settings
 				markers_header = {
@@ -1190,7 +1172,8 @@ SwedgeTimer.options = {
 					type="color",
 					name="Judgement indicator",
 					desc="The color of the judgement indicator marker, which shows when judgement will come off cooldown"..
-					" on the player's swing timer.",
+					" on the player's swing timer. This marker only shows when the player is in a high-value spell to judge, "..
+					"e.g. Blood, Vengeance, Justice.",
 					hasAlpha=false,
 					get = function()
 						return unpack(SwedgeTimer.db.profile.judgement_marker_color)
@@ -1202,56 +1185,8 @@ SwedgeTimer.options = {
 				},
 			}
 		},
-
-        -- Textures
-
-		-- someRange = {
-		-- 	type = "range",
-		-- 	order = 2,
-		-- 	name = "a slider",
-		-- 	-- this will look for a getter/setter on our handler object
-		-- 	get = "GetSomeRange",
-		-- 	set = "SetSomeRange",
-		-- 	min = 1, max = 10, step = 1,
-		-- },
-		-- group1 = {
-		-- 	type = "group",
-		-- 	order = 3,
-		-- 	name = "a group",
-		-- 	inline = true,
-		-- 	-- getters/setters can be inherited through the table tree
-		-- 	get = "GetValue",
-		-- 	set = "SetValue",
-		-- 	args = {
-		-- 		someInput = {
-		-- 			type = "input",
-		-- 			order = 1,
-		-- 			name = "an input box",
-		-- 			width = "double",
-		-- 		},
-		-- 		someDescription = {
-		-- 			type = "description",
-		-- 			order = 2,
-		-- 			name = function() return format("The current time is: |cff71d5ff%s|r", date("%X")) end,
-		-- 			fontSize = "large",
-		-- 		},
-		-- 		someSelect = {
-		-- 			type = "select",
-		-- 			order = 3,
-		-- 			name = "a dropdown",
-		-- 			values = {"Apple", "Banana", "Strawberry"},
-		-- 		},
-		-- 	},
-	},
+	}
 }
-
--- function SwedgeTimer:GetSomeRange(info)
--- 	return self.db.profile.someRange
--- end
-
--- function SwedgeTimer:SetSomeRange(info, value)
--- 	self.db.profile.someRange = value
--- end
 
 -- -- https://www.wowace.com/projects/ace3/pages/ace-config-3-0-options-tables#title-4-1
 function SwedgeTimer:GetValue(info)

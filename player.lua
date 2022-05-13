@@ -7,18 +7,10 @@ local ST = LibStub("AceAddon-3.0"):GetAddon("SwedgeTimer")
 -- PLAYER SETTINGS 
 --=========================================================================================
 st.player = {}
-st.player.default_settings = {
-    lag_detection_enabled = true,
-    lag_threshold = 0.00,
-    lag_multiplier = 1.5,
-}
-
-st.player.guid = UnitGUID("player")
 
 st.player.swing_timer = 0.00001
 st.player.prev_weapon_speed = 0.1
 st.player.current_weapon_speed = 4.0
-st.player.weapon_id = GetInventoryItemID("player", 16)
 st.player.speed_changed = false
 st.player.extra_attacks_flag = false
 
@@ -84,18 +76,20 @@ st.crusader_currently_active = false
 st.player.twohand_spec_points = 0
 
 -- A measure of the player's ping
-st.player.lag_world = 0.0
+st.player.lag_world_ms = 0.0
+st.player.lag_calibrated_ms = 0.0
 
 -- Updates the player's lag according to the specified calibration.
 st.player.update_lag = function()
     local db = ST.db.profile
     local lag = select(4, GetNetStats())
+    st.player.lag_world_ms = lag
     -- print('lag before calibration: ' .. tostring(lag))
     -- print('lag multiplier: ' .. tostring(db.lag_multiplier))
     -- print('lag offset: ' .. tostring(db.lag_offset))
     lag = (lag * db.lag_multiplier) + db.lag_offset
     -- print('lag after calibration: ' .. tostring(lag))
-    st.player.lag_world = lag / 1000.0
+    st.player.lag_calibrated_ms = lag
 end
 
 st.player.lag_detection_enabled = function()
@@ -114,21 +108,6 @@ st.player.is_player_ret = function()
         return true
     end
     return false
-end
-
-st.player.LoadSettings = function()
-    -- If the carried over settings dont exist then make them
-    if not swedgetimer_player_settings then
-        swedgetimer_player_settings = {}
-    end
-    -- If the carried over settings aren't set then set them to the defaults
-    for setting, value in pairs(st.player.default_settings) do
-        if swedgetimer_player_settings[setting] == nil then
-            swedgetimer_player_settings[setting] = value
-        end
-    end
-    -- Update settings that dont change unless the interface is reloaded
-    st.player.guid = UnitGUID("player")
 end
 
 -- Called when the swing timer reaches zero
@@ -499,7 +478,7 @@ st.player.check_impossible_twists = function()
         return
     end
 
-    local gcd_with_lag = st.player.active_gcd_remaining + st.player.lag_world
+    local gcd_with_lag = st.player.active_gcd_remaining + (st.player.lag_calibrated_ms * 0.001)
     local time_since_previous_swing = st.player.current_weapon_speed - st.player.swing_timer
     local gcd_ends_relative_to_swing = time_since_previous_swing + gcd_with_lag
     -- local gcd_ends_relative_to_swing = time_since_previous_swing + gcd_with_lag
@@ -547,13 +526,6 @@ st.player.process_possible_spell_cooldown = function(force_flag)
 
     -- Figure out if we're lagging
     st.player.update_lag()
-
-    -- This is the lag derived from the difference in the duration remaining from the API
-    -- and when we are first aware of the GCD. This is most often zero but sometimes there
-    -- will be a pronounced difference that I theorise is due to lag, and is more likely
-    -- to be accurate that the ping from the GetNetStats API, which only repolls every 30s.
-    -- local dynamic_lag = duration - calced_duration_remaining
-    -- print('Dynamic lag estimate: ' .. tostring(dynamic_lag))
 
     -- Check for impossible twists
     st.player.check_impossible_twists()   
@@ -607,27 +579,13 @@ st.player.frame_on_update = function(self, elapsed)
         st.player.time_since_swing_completion = 0
     end
 
-    -- -- At the latest, repoll the attack speed every 0.2s
-    if st.player.periodic_repoll_counter > 0.2 then
+    -- -- At the latest, repoll the attack speed every 0.1s
+    if st.player.periodic_repoll_counter > 0.1 then
         st.player.update_weapon_speed()
-        -- print('periodic repoll')
         st.player.periodic_repoll_counter = 0.0
     else
         st.player.periodic_repoll_counter = st.player.periodic_repoll_counter + elapsed
     end
-  
-    -- Repoll the attack speed a short while after an aura change
-    -- if st.player.repoll_on_aura_change then
-    --     if st.player.aura_repoll_counter > 0.1 then
-    --         -- print('SECONDARY API POLL ON AURA CHANGE')
-    --         st.player.update_weapon_speed()
-    --         st.bar.show_or_hide_bar()
-    --         st.player.aura_repoll_counter = 0.0
-    --         st.player.repoll_on_aura_change = false
-    --     else
-    --         st.player.aura_repoll_counter = st.player.aura_repoll_counter + elapsed
-    --     end
-    -- end
 
     -- If there is a GCD lock, check if we should clear it.
     if st.player.gcd_lockout then
@@ -707,7 +665,6 @@ st.player.frame_on_event = function(self, event, ...)
     -- Check talent point changes.
     elseif event == "CHARACTER_POINTS_CHANGED" then
         st.player.get_twohand_spec_points()
-        
 
     elseif event == "UNIT_SPELLCAST_SENT" then
         -- print('INFO: received spellcast trigger')
@@ -720,13 +677,6 @@ st.player.frame_on_event = function(self, event, ...)
     elseif event == "UNIT_AURA" then
         -- print('processing aura change')
         st.player.on_player_aura_change()
-
-        -- -- Trigger logic to repoll after a small amount of time
-        -- st.player.repoll_on_aura_change = true
-        -- -- reset the counter if we're still waiting on a second poll
-        -- if st.player.aura_repoll_counter > 0.0 then
-        --     st.player.aura_repoll_counter = 0.0
-        -- end
     
     elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
         st.player.OnPlayerSpellCompletion(args)
@@ -741,6 +691,8 @@ st.player.frame_on_event = function(self, event, ...)
     end
 
 end
+
+-- Finally make the playerframe to house the logic.
 st.player_frame = CreateFrame("Frame", addon_name .. "PlayerFrame", UIParent)
 
 --=========================================================================================

@@ -10,41 +10,6 @@ local ST = LibStub("AceAddon-3.0"):GetAddon("SwedgeTimer")
 -- BAR SETTINGS 
 --=========================================================================================
 st.bar = {}
-st.bar.default_settings = {
-	enabled = true,
-    hide_when_inactive = false,
-    lag_detection_enabled = true,
-	width = 345,
-	height = 32,
-	fontsize = 16,
-    point = "CENTER",
-	rel_point = "CENTER",
-	x_offset = 0,
-	y_offset = -180,
-	-- in_combat_alpha = 1.0,
-	-- ooc_alpha = 1.0,
-	backplane_alpha = 0.85,
-	is_locked = false,
-    show_left_text = true,
-    show_right_text = true,
-    -- show_border = false,
-    -- classic_bars = true,
-    -- fill_empty = true,
-    main_r = 0.1, main_g = 0.1, main_b = 0.9, main_a = 1.0,
-    main_text_r = 1.0, main_text_g = 1.0, main_text_b = 1.0, main_text_a = 1.0,
-    bar_color_default = {0.5, 0.5, 0.5, 1.0},
-    bar_color_twisting = {0.51, 0.04, 0.73, 1.0},
-    bar_color_twist_ready = {0., 0.68, 0., 1.0},
-    bar_color_blood = {0.7, 0.27, 0.0, 1.0},
-    bar_color_warning = {1.0, 0.0, 0.0, 1.0}, -- when if you cast SoC, you can't twist out of it that swing
-    bar_color_gcd = {0.3, 0.3, 0.3, 1.0},
-    bar_color_cant_twist = {0.7, 0.7, 0.01, 1.0},
-    twist_window = 0.4,
-    grace_period = 0.12,
-    enable_twist_bar_color = true,
-    tick_width = 3,
-    judgement_marker = false
-}
 
 -- the following should be flagged when the swing speed changes to
 -- evaluate the new offsets for ticks
@@ -52,23 +17,7 @@ st.bar.recalculate_ticks = false
 st.bar.twist_tick_offset = 0.1
 st.bar.gcd1_tick_offset = 0.1
 st.bar.gcd2_tick_offset = 0.1
-
 st.bar.gcd_bar_width = 0.0
-
-st.bar.LoadSettings = function()
-    -- If the carried over settings dont exist then make them
-    if not swedgetimer_bar_settings then
-        swedgetimer_bar_settings = {}
-    end
-    -- swedgetimer_bar_settings = {} -- REMOVE ME THIS IS FOR TESTING
-    -- If the carried over settings aren't set then set them to the defaults
-    for setting, value in pairs(st.bar.default_settings) do
-        if swedgetimer_bar_settings[setting] == nil then
-            swedgetimer_bar_settings[setting] = value
-        end
-    end
-
-end
 
 --=========================================================================================
 -- Drag and drop handlers
@@ -104,10 +53,6 @@ st.bar.init_bar_visuals = function()
 
     -- Set initial frame properties
     frame:SetPoint("CENTER")
-    
-    -- if db.bar_enabled then
-    --     frame:Show()
-    -- end
     frame:SetMovable(true)
     frame:EnableMouse(true)
     frame:RegisterForDrag("LeftButton")
@@ -122,10 +67,14 @@ st.bar.init_bar_visuals = function()
 
     -- Create the backplane and border
     frame.backplane = CreateFrame("Frame", addon_name .. "BarBackdropFrame", frame, "BackdropTemplate")
+    
+    frame.backplane:SetFrameStrata('LOW')
+
+    -- These lines function as the 
     local tv = st.get_thickness_value()
     frame.backplane:SetPoint('TOPLEFT', -1*tv, tv)
     frame.backplane:SetPoint('BOTTOMRIGHT', tv, -1*tv)
-    frame.backplane:SetFrameStrata('LOW')
+    
 
     frame.backplane.backdropInfo = {
         bgFile = SML:Fetch('statusbar', db.backplane_texture_key),
@@ -140,14 +89,14 @@ st.bar.init_bar_visuals = function()
     frame.bar = frame:CreateTexture(nil,"ARTWORK")
     frame.bar:SetPoint("TOPLEFT", 0, 0)
     frame.bar:SetHeight(db.bar_height)
-    frame.bar:SetTexture(SML:Fetch('statusbar', db.bar_texture))
+    frame.bar:SetTexture(SML:Fetch('statusbar', db.bar_texture_key))
     frame.bar:SetVertexColor(unpack(db.bar_color_default))
 
     -- Create the GCD timer bar
     frame.gcd_bar = frame:CreateTexture(nil, "ARTWORK")
     frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
     frame.gcd_bar:SetHeight(db.bar_height)
-    frame.gcd_bar:SetTexture(SML:Fetch('statusbar', "Solid"))
+    frame.gcd_bar:SetTexture(SML:Fetch('statusbar', db.gcd_texture_key))
     frame.gcd_bar:SetVertexColor(unpack(db.bar_color_gcd))
     frame.gcd_bar:SetDrawLayer("ARTWORK", -1)
 
@@ -220,8 +169,6 @@ st.bar.update_visuals_on_update = function()
     -- but before the frame is drawn.
     -- Func is called by the player frame OnUpdate (maybe we should change this).
     -- As such it should be kept as minimal as possible to avoid wasting resources.
-
-
     st.bar.show_or_hide_bar()
     if not st.bar.should_show_bar() then return end 
     local frame = st.bar.frame
@@ -229,13 +176,9 @@ st.bar.update_visuals_on_update = function()
     local timer = st.player.swing_timer
     local db = ST.db.profile
 
-    -- print(ST.db.profile.bar_locked)
-
-
     -- Update the main bar's width
     local timer_width = math.min(db.bar_width - (db.bar_width * (timer / speed)), db.bar_width)
     frame.bar:SetWidth(timer_width)
-    frame.gcd_bar:Show()
 
     -- Update the main bars text, hide right text if bar full
     frame.left_text:SetText(tostring(st.utils.simple_round(speed, 0.1)))
@@ -246,7 +189,7 @@ st.bar.update_visuals_on_update = function()
         frame.right_text:Hide()
     end
 
-    -- If SoC, bar colour is time sensitive. Deal with that here.
+    -- If SoC/SoR, bar colour is time/context sensitive. Deal with that here.
     if st.player.is_twist_seal_active() then
         if st.player.n_active_seals == 1 then
             local twist_window_time = st.bar.get_twist_window_time_before_swing()
@@ -301,12 +244,12 @@ st.bar.update_bar_on_speed_change = function()
     -- This will recalculate all necessary frame element updates here
     -- to keep them out the main onupdate function
     -- print('Recalculating bar visuals on speed change...')
-    st.bar.set_tick_offsets()
+    st.bar.set_marker_offsets()
     st.bar.set_gcd_bar_width()
     st.bar.show_or_hide_ticks()
 end
 
-st.bar.set_tick_offsets = function()
+st.bar.set_marker_offsets = function()
     st.bar.set_twist_tick_offset()
     st.bar.set_gcd_marker_offsets()
     -- st.bar.set_gcd1_tick_offset()
@@ -319,7 +262,7 @@ st.bar.update_bar_on_aura_change = function()
     st.bar.set_bar_color()
 
     -- if the spell haste changes we need to update the tick offsets
-    st.bar.set_tick_offsets()
+    st.bar.set_marker_offsets()
 
     -- determine if we should now show or hide the ticks
     st.bar.show_or_hide_ticks()
@@ -422,17 +365,20 @@ end
 st.bar.hide_gcd_bar = function()
     -- function to "hide" the gcd bar by reducing the width to zero
     -- instead of using the dedicated Hide method
+    -- print('Hiding GCD bar')
     st.bar.gcd_bar_width = 0
     st.bar.frame.gcd_bar:SetWidth(0)
+    st.bar.frame.gcd_bar:Hide()
 end
 
 st.bar.set_gcd_bar_width = function()
 
     if not st.player.gcd_lockout then
         st.bar.hide_gcd_bar()
+        return
     end
 
-    -- local settings = swedgetimer_bar_settings
+
     local attack_speed = st.player.current_weapon_speed
     -- local swing_timer = st.player.swing_timer
     -- print(attack_speed)
@@ -455,17 +401,15 @@ st.bar.set_gcd_bar_width = function()
 
     local gcd_bar_width = (time_gcd_ends / attack_speed) * db.bar_width
     -- print('offset says ' .. tostring(offset))
-
-    -- -- if it exceeds the bar width, max it out.
-    -- if offset > settings.width then
-    --     gcd_bar_width = settings.width - 0.001
-    -- elseif gcd_bar_width < 0 then
-    --     gcd_bar_width = 0.001
-    -- end
         
-    -- print('gcd bar width says ' .. gcd_bar_width)
+    -- print(type(gcd_bar_width))
+    -- print('gcd bar width says : ' .. tostring(gcd_bar_width))
+    -- print('gcd bar width is   : ' .. tostring(st.bar.frame.gcd_bar:GetWidth()))
     st.bar.gcd_bar_width = gcd_bar_width
     st.bar.frame.gcd_bar:SetWidth(gcd_bar_width)
+    -- print('gcd bar width after is   : ' .. tostring(st.bar.frame.gcd_bar:GetWidth()))
+
+    st.bar.frame.gcd_bar:Show()
 end
 
 -- Func to figure out if the ticks should be
@@ -532,7 +476,7 @@ st.bar.get_twist_window_time_before_swing = function()
     local twist_s = 400 / 1000.0 -- 400ms standard
     local padding = 0.0
     if db.twist_padding_mode == "Dynamic" then
-        padding = st.player.lag_world * 0.65
+        padding = st.player.lag_calibrated_ms * 0.6 * 0.001 -- convert to seconds
     elseif db.twist_padding_mode == "Fixed" then
         padding = db.twist_window_padding_ms / 1000.0
     end
@@ -561,7 +505,7 @@ st.bar.get_gcd_times_before_swing = function()
     -- Determine the gcd padding mode.
     local padding = 0.0
     if db.gcd_padding_mode == "Dynamic" then
-        padding = st.player.lag_world * 0.65
+        padding = st.player.lag_calibrated_ms * 0.65 * 0.001 -- convert to seconds
     elseif db.gcd_padding_mode == "Fixed" then
         padding = db.gcd_static_padding_ms / 1000.0
     end

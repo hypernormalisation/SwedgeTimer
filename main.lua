@@ -4,15 +4,8 @@ local addon_name, st = ...
 local version = "1.0.0"
 local load_message = "version " .. version .. " loaded!"
 local ST = LibStub("AceAddon-3.0"):GetAddon("SwedgeTimer")
-
-
--- shorthand
 local print = st.utils.print_msg
 
--- print(addon_name)
--- print(type(st))
-
--- CORE =================================================================================
 st.core = {}
 st.core.in_combat = false
 
@@ -31,48 +24,48 @@ end
 --=========================================================================================
 -- Funcs for loading and initialising all data.
 --=========================================================================================
-st.core.all_timers = {
-    st.bar,
-}
+-- st.core.all_timers = {
+--     st.bar,
+-- }
 
-st.core.default_settings = {
-	welcome_message = true
-}
+-- st.core.default_settings = {
+-- 	welcome_message = true
+-- }
 
-st.core.LoadSettings = function()
-    -- If the carried over settings dont exist then make them
-    if not swedgetimer_core_settings then
-        swedgetimer_core_settings = {}
-    end
-    -- If the carried over settings aren't set then set them to the defaults
-    for setting, value in pairs(st.core.default_settings) do
-        if swedgetimer_core_settings[setting] == nil then
-            swedgetimer_core_settings[setting] = value
-        end
-    end
-end
+-- st.core.LoadSettings = function()
+--     -- If the carried over settings dont exist then make them
+--     if not swedgetimer_core_settings then
+--         swedgetimer_core_settings = {}
+--     end
+--     -- If the carried over settings aren't set then set them to the defaults
+--     for setting, value in pairs(st.core.default_settings) do
+--         if swedgetimer_core_settings[setting] == nil then
+--             swedgetimer_core_settings[setting] = value
+--         end
+--     end
+-- end
 
-st.core.RestoreDefaults = function()
-    for setting, value in pairs(st.core.default_settings) do
-        swedgetimer_core_settings[setting] = value
-    end
-end
+-- st.core.RestoreDefaults = function()
+--     for setting, value in pairs(st.core.default_settings) do
+--         swedgetimer_core_settings[setting] = value
+--     end
+-- end
 
-st.core.UpdateAllVisualsOnSettingsChange = function()
-    st.bar.UpdateVisualsOnSettingsChange()
-end
+-- st.core.UpdateAllVisualsOnSettingsChange = function()
+--     st.bar.UpdateVisualsOnSettingsChange()
+-- end
 
 
-local function LoadAllSettings(self)
-    st.player.LoadSettings()
-	st.bar.LoadSettings()
-    -- st.core.LoadSettings()
-end
+-- local function LoadAllSettings(self)
+--     -- st.player.LoadSettings()
+-- 	st.bar.LoadSettings()
+--     -- st.core.LoadSettings()
+-- end
 
-local function InitializeAllVisuals()
-    st.bar.init_bar_visuals()
-    -- st.config.InitializeVisuals()
-end
+-- local function InitializeAllVisuals()
+--     st.bar.init_bar_visuals()
+--     -- st.config.InitializeVisuals()
+-- end
 
 --=========================================================================================
 -- Now, a frame to load the addon upon intercepting the ADDON_LOADED event trigger
@@ -81,15 +74,10 @@ end
 -- sets up the various frames and elements.
 local function init_addon(self)
 
-
-
-    if st.debug then print('Loading all settings...') end
-    LoadAllSettings()
-
     -- Load visuals
     if st.debug then print('Initialising visuals...') end
     st.bar.recalculate_ticks = true -- force initial draw
-    InitializeAllVisuals()
+    st.bar.init_bar_visuals()
 
     if st.debug then print('Registering events and widget handlers...') end
     -- Register the in-combat events and widget handlers
@@ -118,15 +106,11 @@ local function init_addon(self)
     st.player.update_lag()
 
     -- Some settings that have to be set after the bar is initialised
-    -- st.bar.UpdateVisualsOnSettingsChange()
     st.bar.update_visuals_on_update()
     st.bar.set_bar_color()
     st.bar.set_gcd_bar_width()
     st.bar.set_bar_color()
     st.bar.show_or_hide_bar()
-
-    -- Sort out character information
-    st.player.get_twohand_spec_points()
 
     -- If appropriate show welcome message
     if st.debug then print('... complete!') end
