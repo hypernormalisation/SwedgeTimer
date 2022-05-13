@@ -90,11 +90,11 @@ st.player.lag_world = 0.0
 st.player.update_lag = function()
     local db = ST.db.profile
     local lag = select(4, GetNetStats())
-    print('lag before calibration: ' .. tostring(lag))
-    print('lag multiplier: ' .. tostring(db.lag_multiplier))
-    print('lag offset: ' .. tostring(db.lag_offset))
+    -- print('lag before calibration: ' .. tostring(lag))
+    -- print('lag multiplier: ' .. tostring(db.lag_multiplier))
+    -- print('lag offset: ' .. tostring(db.lag_offset))
     lag = (lag * db.lag_multiplier) + db.lag_offset
-    print('lag after calibration: ' .. tostring(lag))
+    -- print('lag after calibration: ' .. tostring(lag))
     st.player.lag_world = lag / 1000.0
 end
 

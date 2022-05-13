@@ -9,8 +9,8 @@ local ST = LibStub("AceAddon-3.0"):GetAddon("SwedgeTimer")
 -- shorthand
 local print = st.utils.print_msg
 
-print(addon_name)
-print(type(st))
+-- print(addon_name)
+-- print(type(st))
 
 -- CORE =================================================================================
 st.core = {}
@@ -81,8 +81,7 @@ end
 -- sets up the various frames and elements.
 local function init_addon(self)
 
-    -- Sort out character information
-    st.player.get_twohand_spec_points()
+
 
     if st.debug then print('Loading all settings...') end
     LoadAllSettings()
@@ -126,6 +125,9 @@ local function init_addon(self)
     st.bar.set_bar_color()
     st.bar.show_or_hide_bar()
 
+    -- Sort out character information
+    st.player.get_twohand_spec_points()
+
     -- If appropriate show welcome message
     if st.debug then print('... complete!') end
     if ST.db.profile.welcome_message then print(load_message) end
@@ -137,6 +139,7 @@ local function init_frame_event_handler(self, event, ...)
     local args = {...}
     if event == "ADDON_LOADED" then
         if args[1] == "SwedgeTimer" then
+
             local english_class = select(2, UnitClass("player"))
             -- Only load the addon if the player is a paladin
             if english_class ~= "PALADIN" then

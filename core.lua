@@ -34,6 +34,11 @@ function SwedgeTimer:OnInitialize()
 end
 
 function SwedgeTimer:OnEnable()
+	
+	-- Sort out character information
+	st.player.get_twohand_spec_points()
+	-- print("Talent points on load says: "..tostring(select(5,GetTalentInfo(3, 13))))
+
 	-- self:RegisterEvent("PLAYER_STARTED_MOVING")
 end
 
@@ -377,7 +382,7 @@ SwedgeTimer.options = {
 					name="SwedgeTimer includes a lag detection suite, that attempts to detect instances where the player will not be "..
 					"able to twist out of their seal after their GCD expires and before their swing goes off, accounting for latency. The calculation compares the "..
 					"remaining time on a swing to the time after the current GCD elapses combined with a calibrated latency measurement. "..
-					" The bar will then turn a special colour when the player is locked into their beginning swing, letting them know to "..
+					" The bar will then turn a special colour when the player is locked into their seal this swing, letting them know to "..
 					"either ride the command swing or to stopattack."
 				},
 				lag_detection_enabled = {
