@@ -496,8 +496,7 @@ SwedgeTimer.options = {
 					type = "toggle",
 					order = 4.1,
 					name = "Lag compensation",
-					desc = "When enabled, the swing timer bar turns a special colour when the player is in Seal of Command"..
-					" and the time remaining to cast a spell at the end of their GCD is lower than the current lag.",
+					desc = "Enables the lag compensation suite.",
 					get = "GetValue",
 					set = "SetValue",
 					},
@@ -827,7 +826,7 @@ SwedgeTimer.options = {
 				},
 				font_size = {
 					type = "range",
-					order = 9.02,
+					order = 9.03,
 					name = "Font size",
 					desc = "The size of the swing timer and attack speed fonts.",
 					min = 10, max = 40, softMin = 8, softMax = 24,
@@ -839,7 +838,7 @@ SwedgeTimer.options = {
 					end,
 				},
 				font_color = {
-					order=9.9,
+					order=9.04,
 					type="color",
 					name="Font color",
 					desc="The color of the addon texts.",

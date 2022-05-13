@@ -2,9 +2,9 @@
 ## Title: SwedgeTimer
 ## Notes: Seal twisting timer bar for BCC Ret Paladins.
 ## Author: Swedge
-## Version: 0.1.8
+## Version: 1.0.0
 ## DefaultState: enabled
-## OptDeps: BugSack, !Swatter, Ace3, LibSharedMedia-3.0, LibStub
+## OptDeps: Ace3, LibSharedMedia-3.0, LibStub
 ## SavedVariables: SwedgeTimerDB
 ## X-Wago-ID: 9rN4dMND
 
