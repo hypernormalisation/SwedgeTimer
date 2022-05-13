@@ -5,10 +5,6 @@ local ACD = LibStub("AceConfigDialog-3.0")
 local SML = LibStub("LibSharedMedia-3.0")
 local print = st.utils.print_msg
 
--- print(SML.DefaultMedia.statusbar)
--- -- print(SML.DefaultMedia.background)
--- print(SML:Fetch('statusbar', "Solid"))
-
 
 function SwedgeTimer:OnInitialize()
 	-- uses the "Default" profile instead of character-specific profiles
@@ -37,6 +33,10 @@ function SwedgeTimer:OnEnable()
 	
 	-- Sort out character information
 	st.player.get_twohand_spec_points()
+	st.player.guid = UnitGUID("player")
+	st.player.weapon_id = GetInventoryItemID("player", 16)
+
+
 	-- print("Talent points on load says: "..tostring(select(5,GetTalentInfo(3, 13))))
 
 	-- self:RegisterEvent("PLAYER_STARTED_MOVING")
@@ -381,8 +381,8 @@ SwedgeTimer.options = {
 					order=7,
 					type="description",
 					name="When GCD offset mode is Dynamic or Fixed, the GCD markers are pushed back "..
-					"from the end of the swing to account for player input/lag. When the mode is set to dynamic, this value uses the calibrated lag "..
-					"derived above."
+					"from the end of the swing to account for player input/lag. When the mode is set to Dynamic, this value uses the calibrated lag "..
+					"described in Lag Compensation."
 				},
 				gcd_padding_mode = {
 					order=8,
@@ -418,8 +418,8 @@ SwedgeTimer.options = {
 					order=10.1,
 					type="description",
 					name="When Twist window offset mode is Dynamic or Fixed, the twist window marker is pushed back "..
-					"from the end of the swing to account for player input/lag. When the mode is set to dynamic, this value uses the calibrated lag "..
-					"derived above."
+					"from the end of the swing to account for player input/lag. When the mode is set to Dynamic, this value uses the calibrated lag "..
+					"described in Lag Compensation."
 				},
 				twist_padding_mode = {
 					order=10.2,
@@ -576,7 +576,7 @@ SwedgeTimer.options = {
 				lag_descriptions_2 = {
 					order=7.22,
 					type="description",
-					name="The figure compared to the swing timer remaining after GCD is equal to (ax + b), where x is the raw latency, a is the multipler, and b is the offset.",
+					name="The figure compared to the swing time remaining after GCD is equal to (ax + b), where x is the raw latency, a is the multipler, and b is the offset.",
 				},
 				lag_descriptions_22 = {
 					order=7.23,
@@ -994,8 +994,7 @@ SwedgeTimer.options = {
 					order=21,
 					type="color",
 					name="Command",
-					desc="Seal of Command (when the player can safely cast a GCD if near the beginning "..
-					"of their swing, or should twist into another seal if at the end of their swing).",
+					desc="Seal of Command (will turn the \"Don\'t Cast\" color when the player should not cast and wait to twist).",
 					hasAlpha=false,
 					get = function()
 						local tab = SwedgeTimer.db.profile.bar_color_command
@@ -1010,8 +1009,7 @@ SwedgeTimer.options = {
 					order=22,
 					type="color",
 					name="Righteousness",
-					desc="Seal of Righteousness (when the player can safely cast a GCD if near the beginning "..
-					"of their swing, or should twist into another seal if at the end of their swing).",
+					desc="Seal of Righteousness (will turn the \"Don\'t Cast\" color when the player should not cast and wait to twist)",
 					hasAlpha=false,
 					get = function()
 						local tab = SwedgeTimer.db.profile.bar_color_righteousness
