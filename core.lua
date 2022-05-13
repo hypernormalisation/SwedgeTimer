@@ -36,6 +36,7 @@ function SwedgeTimer:OnEnable()
 	st.player.get_twohand_spec_points()
 	st.player.guid = UnitGUID("player")
 	st.player.weapon_id = GetInventoryItemID("player", 16)
+	st.player.reset_swing_timer()
 	-- print("Talent points on load says: "..tostring(select(5,GetTalentInfo(3, 13))))
 end
 
