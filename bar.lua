@@ -432,7 +432,7 @@ st.bar.set_gcd_bar_width = function()
         st.bar.hide_gcd_bar()
     end
 
-    local settings = swedgetimer_bar_settings
+    -- local settings = swedgetimer_bar_settings
     local attack_speed = st.player.current_weapon_speed
     -- local swing_timer = st.player.swing_timer
     -- print(attack_speed)

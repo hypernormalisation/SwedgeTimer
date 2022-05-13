@@ -369,79 +369,6 @@ SwedgeTimer.options = {
 					set = "SetValue",
 				},
 				
-				------------------------------------------------------------------------------------
-				-- Lag detection
-				lag_settings = {
-					order=5.01,
-					type="header",
-					name="Lag detection",
-				},
-				lag_descriptions = {
-					order=5.02,
-					type="description",
-					name="SwedgeTimer includes a lag detection suite, that attempts to detect instances where the player will not be "..
-					"able to twist out of their seal after their GCD expires and before their swing goes off, accounting for latency. The calculation compares the "..
-					"remaining time on a swing to the time after the current GCD elapses combined with a calibrated latency measurement. "..
-					" The bar will then turn a special colour when the player is locked into their seal this swing, letting them know to "..
-					"either ride the command swing or to stopattack."
-				},
-				lag_detection_enabled = {
-					type = "toggle",
-					order = 5.1,
-					name = "Lag detection",
-					desc = "When enabled, the swing timer bar turns a special colour when the player is in Seal of Command"..
-					" and the time remaining to cast a spell at the end of their GCD is lower than the current lag.",
-					get = "GetValue",
-					set = "SetValue",
-					},
-				bar_color_cant_twist = {
-					order=5.2,
-					type="color",
-					name="Can't twist color",
-					desc="The color the bar turns when the player is in a good seal to twist from, but "..
-					"their GCD combined with their lag will mean they cannot twist this swing unless they stopattack.",
-					hasAlpha=false,
-					get = function()
-						local tab = SwedgeTimer.db.profile.bar_color_cant_twist
-						return tab[1], tab[2], tab[3], tab[4]
-					end,
-					set = function(self,r,g,b,a)
-						SwedgeTimer.db.profile.bar_color_cant_twist = {r,g,b,a}
-					end
-				},
-				lag_descriptions_2 = {
-					order=5.22,
-					type="description",
-					name="The figure used in lag comparisons is equal to ax + b, where x is the base latency, a is the multipler, and b is the offset."
-				},
-				lag_multiplier = {
-					type = "range",
-					order = 5.3,
-					name = "Lag multiplier",
-					desc = "The player's world trip latency is multiplied by this value in the lag detection calibration.",
-					min = 0, max = 2.0,
-					step = 0.05,
-					get = "GetValue",
-					set = function(self, key)
-						SwedgeTimer.db.profile.lag_multiplier = key
-						st.bar.set_gcd_marker_offsets()
-						st.bar.set_twist_tick_offset()
-					end,
-				},
-				lag_offset = {
-					type = "range",
-					order = 5.3,
-					name = "Lag offset (ms)",
-					desc = "The player's world trip latency has this value added to it in the lag detection calibration.",
-					min = 0, max = 200,
-					step = 1,
-					get = "GetValue",
-					set = function(self, key)
-						SwedgeTimer.db.profile.lag_offset = key
-						st.bar.set_gcd_marker_offsets()
-						st.bar.set_twist_tick_offset()
-					end,
-				},
 
 				------------------------------------------------------------------------------------
 				-- marker options
@@ -531,10 +458,177 @@ SwedgeTimer.options = {
 		},
 
 		------------------------------------------------------------------------------------
+		-- Lag detection
+		lag_detection_section= {
+			type = "group",
+			name = "Lag Compensation",
+			handler = SwedgeTimer,
+			order = 2,			
+			args = {
+				lag_settings = {
+					order=5.01,
+					type="header",
+					name="What is lag compensation?",
+				},
+				lag_descriptions1 = {
+					order=5.02,
+					type="description",
+					name="Many Ret players are familiar with attempting a close twist after a GCD, only to swing in command.",
+				},
+				lag_descriptions101 = {
+					order=5.03,
+					type="description",
+					image="Interface/AddOns/SwedgeTimer/Images/close_twist4.tga",
+					imageWidth=350,
+					imageHeight=350*0.2,
+					imageCoords={0.00,1.0,0.4,0.6},
+					name="",
+				},
+				lag_descriptions1001 = {
+					order=5.031,
+					type="description",
+					name="In the above image, the player is in SoC, and has a small amount of time after their GCD ends to cast SoB."..
+					" Even with spell queueing, if the player's lag is high enough, the SoB cast can be pushed into the next swing.",
+				},
+				lag_descriptions102 = {
+					order=5.04,
+					type="description",
+					name="SwedgeTimer includes a lag compensation suite, that detects instances where the player will not be "..
+					"able to twist before their swing goes off due to lag.",
+				},
+				lag_descriptions103 = {
+					order=5.05,
+					type="description",
+					name="",
+					image="Interface/AddOns/SwedgeTimer/Images/dont_twist1.blp",
+					imageWidth=350,
+					imageHeight=350*0.2,
+					imageCoords={0.00,1.0,0.4,0.6},
+					name="",
+				},
+				lag_descriptions104 = {
+					order=5.06,
+					type="description",
+					name="If you see the bar turn the color specified above, don't try to twist; either ride the command swing and cast "..
+					"a filler spell like Consecration, or momentarily stopattack before SoB/startattacking.",
+				},
+
+				lag_detection_enabled = {
+					type = "toggle",
+					order = 4.1,
+					name = "Lag compensation",
+					desc = "When enabled, the swing timer bar turns a special colour when the player is in Seal of Command"..
+					" and the time remaining to cast a spell at the end of their GCD is lower than the current lag.",
+					get = "GetValue",
+					set = "SetValue",
+					},
+				bar_color_cant_twist = {
+					order=4.2,
+					type="color",
+					name="Bar color",
+					desc="The color the bar turns when the player is in a good seal to twist from, but "..
+					"their GCD combined with their lag will mean they cannot twist this swing unless they stopattack.",
+					hasAlpha=false,
+					get = function()
+						local tab = SwedgeTimer.db.profile.bar_color_cant_twist
+						return tab[1], tab[2], tab[3], tab[4]
+					end,
+					set = function(self,r,g,b,a)
+						SwedgeTimer.db.profile.bar_color_cant_twist = {r,g,b,a}
+					end
+				},
+				lag_descriptions2001 = {
+					order=5.20,
+					type="header",
+					name="How it works",
+				},
+				lag_descriptions_20002 = {
+					order=5.201,
+					type="description",
+					name="To detect impossible twists, we compare the time left on the player's swing after the GCD expires to some value representing "..
+					"the lag. If the time left after GCD is lower than this lag value, the lag compensation is triggered.",
+				},
+				lag_descriptions_2002 = {
+					order=5.21,
+					type="description",
+					name="The player's raw lag is often not the most accurate predictor of impossible twists. Instead of using the raw lag, we "..
+					"adjust the lag according to the settings below for the best result. SwedgeTimer is pre-calibrated, but everyone's connection is different, "..
+					"and optimal settings may vary among players."
+				},
+
+				lag_descriptions3001 = {
+					order=6.0,
+					type="header",
+					name="Do I need to calibrate?",
+				},
+				lag_descriptions_3002 = {
+					order=6.22,
+					type="description",
+					name="To see if you require calibration, simply try some close twists on a target. Cast any spell when the bar is approaching the middle GCD marker, and try to twist your swing."..
+					" if the special bar color triggers only when you get command swings, and you are able to twist all swings where the bar color does not trigger, you are calibrated correctly."..
+					" If not, you may need to change the settings below.",
+				},
+				lag_descriptions4001 = {
+					order=7.0,
+					type="header",
+					name="Calibration settings",
+				},
+				lag_descriptions_2 = {
+					order=7.22,
+					type="description",
+					name="The figure compared to the swing timer remaining after GCD is equal to (ax + b), where x is the raw latency, a is the multipler, and b is the offset.",
+				},
+				lag_descriptions_22 = {
+					order=7.23,
+					type="description",
+					name="If the special bar color is not triggering when you're forced into command swings, increase the multiplier or the threshold a small amount and try again.",
+				},
+				lag_descriptions_23 = {
+					order=7.24,
+					type="description",
+					name="If the special bar color is triggering when you are able to twist, reduce the multipler or the threshold by a small amount and try again.",
+				},
+				-- lag_descriptions_2 = {
+				-- 	order=7.23,
+				-- 	type="description",
+				-- 	name=""
+				-- },
+				lag_multiplier = {
+					type = "range",
+					order = 7.3,
+					name = "Lag multiplier",
+					desc = "The player's world trip latency is multiplied by this value in the lag detection calibration.",
+					min = 0, max = 2.0,
+					step = 0.05,
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.lag_multiplier = key
+						st.bar.set_gcd_marker_offsets()
+						st.bar.set_twist_tick_offset()
+					end,
+				},
+				lag_offset = {
+					type = "range",
+					order = 7.3,
+					name = "Lag offset (ms)",
+					desc = "The player's world trip latency has this value added to it in the lag detection calibration.",
+					min = 0, max = 200,
+					step = 1,
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.lag_offset = key
+						st.bar.set_gcd_marker_offsets()
+						st.bar.set_twist_tick_offset()
+					end,
+				},
+			},
+		},
+
+		------------------------------------------------------------------------------------
 		-- Size/position options
 		positioning = {
 			type = "group",
-			name = "Size and position",
+			name = "Size and Position",
 			handler = SwedgeTimer,
 			order = 2,
 			args = {

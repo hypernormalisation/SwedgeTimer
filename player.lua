@@ -492,8 +492,10 @@ end
 
 -- Function to check for impossible twists and set the according flag
 st.player.check_impossible_twists = function()
+    
+    local db = ST.db.profile
     -- if setting is disabled just return
-    if not swedgetimer_bar_settings.lag_detection_enabled then
+    if not db.lag_detection_enabled then
         return
     end
 
@@ -506,7 +508,7 @@ st.player.check_impossible_twists = function()
     -- print('Lag after calibration: ' .. tostring(st.player.lag_world))
     
     if gcd_ends_relative_to_swing > st.player.current_weapon_speed then
-        if st.player.swing_timer > swedgetimer_bar_settings.twist_window then
+        if st.player.swing_timer > st.bar.get_twist_window_time_before_swing() then
             -- print('SHIT SON WE COULD BE MISSING THIS TWIST')
             st.player.twist_impossible = true
         else
