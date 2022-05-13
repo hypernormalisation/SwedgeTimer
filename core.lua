@@ -551,7 +551,7 @@ SwedgeTimer.options = {
 				lag_descriptions_2002 = {
 					order=5.21,
 					type="description",
-					name="The player's raw lag is often not the most accurate predictor of impossible twists. Instead of using the raw lag, we "..
+					name="The player's raw latency is often not the most accurate predictor of impossible twists. Instead of using the raw latency, we "..
 					"adjust the lag according to the settings below for the best result. SwedgeTimer is pre-calibrated, but everyone's connection is different, "..
 					"and optimal settings may vary among players."
 				},
