@@ -1,5 +1,5 @@
 local addon_name, st = ...
-local SwedgeTimer = LibStub("AceAddon-3.0"):NewAddon(addon_name, "AceEvent-3.0", "AceConsole-3.0")
+local SwedgeTimer = LibStub("AceAddon-3.0"):NewAddon(addon_name, "AceConsole-3.0")
 local SML = LibStub("LibSharedMedia-3.0")
 local print = st.utils.print_msg
 -- print(type(SML.DefaultMedia.statusbar))
@@ -174,10 +174,10 @@ st.bar_outline_names = {
 
 st.bar_outline_thicknesses = {
 	None=8,
-	Thin=9.5,
-	Medium=10.5,
-	Thick=11,
-	Thicc=12,
+	Thin=9.0,
+	Medium=10.0,
+	Thick=10.5,
+	Thicc=11.0,
 }
 
 st.get_thickness_value = function()
@@ -748,7 +748,7 @@ SwedgeTimer.options = {
 					order = 2,
 					type = "select",
 					name = "Bar",
-					desc = "test description",
+					desc = "The texture of the swing bar.",
 					dialogControl = "LSM30_Statusbar",
 					values = SML:HashTable("statusbar"),
 					get = function(info) return SwedgeTimer.db.profile.bar_texture_key or SML.DefaultMedia.statusbar end,
@@ -762,6 +762,7 @@ SwedgeTimer.options = {
 					order = 3,
 					type = "select",
 					name = "GCD underlay",
+					desc = "The texture of the GCD underlay bar.",
 					dialogControl = "LSM30_Statusbar",
 					values = SML:HashTable("statusbar"),
 					get = function(info) return SwedgeTimer.db.profile.gcd_texture_key or SML.DefaultMedia.statusbar end,
@@ -776,6 +777,7 @@ SwedgeTimer.options = {
 					order = 4,
 					type = "select",
 					name = "Backplane",
+					desc = "The texture of the bar's backplane.",
 					dialogControl = "LSM30_Statusbar",
 					-- values = getMediaData,
 					values = SML:HashTable("statusbar"),
