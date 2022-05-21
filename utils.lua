@@ -37,6 +37,17 @@ st.utils.convert_lookup_table = function(list)
 	return my_table
 end
 
+
+-- Detect if two numbers are within a given tolerance of each other
+st.utils.test_tolerance = function(n1, n2, tolerance)
+	diff = math.abs(n1 - n2)
+	if diff < tolerance then
+		return true
+	else 
+		return false
+	end
+end
+
 --=======================================================================================
 -- a switch to control debug statements in module parsing
 -- NOTE: this does not incur any additional CPU usage in the addon's

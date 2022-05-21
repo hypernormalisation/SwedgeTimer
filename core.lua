@@ -723,7 +723,11 @@ SwedgeTimer.options = {
 					name = "Bar locked",
 					desc = "Prevents the swing bar from being dragged with the mouse.",
 					get = "GetValue",
-					set = "SetValue",
+					set = function(self, input)
+						SwedgeTimer.db.profile.bar_locked = input
+						st.bar.frame:SetMovable(not input)
+						st.bar.frame:EnableMouse(not input)
+					end,
 				},
 			}
 		},

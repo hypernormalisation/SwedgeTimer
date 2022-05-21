@@ -52,8 +52,8 @@ st.bar.init_bar_visuals = function()
 
     -- Set initial frame properties
     frame:SetPoint("CENTER")
-    frame:SetMovable(true)
-    frame:EnableMouse(true)
+    frame:SetMovable(not db.bar_locked)
+    frame:EnableMouse(not db.bar_locked)
     frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnDragStart", st.bar.OnFrameDragStart)
     frame:SetScript("OnDragStop", st.bar.OnFrameDragStop)

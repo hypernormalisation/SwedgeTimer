@@ -1,5 +1,6 @@
 local addon_name, st = ...
 local print = st.utils.print_msg
+local tolerance = st.utils.test_tolerance
 local floor = st.utils.simple_round
 local ST = LibStub("AceAddon-3.0"):GetAddon("SwedgeTimer")
 
@@ -70,12 +71,13 @@ st.player.currently_casting_spell_guid = nil
 -- a flag to ensure the code on speed change only runs once per change
 st.player.reported_speed_change = true
 
--- Flag to detect if we have a new/falling off SotCr aura and need to change swing
+-- Flags to detect if we have a new/falling off SotCr aura and need to change swing
 -- timers to account for haste snapshotting
--- st.crusader_lock = false
 st.crusader_currently_active = false
 st.player.new_crusader_midswing = false
 st.player.crusader_fell_off_midswing = false
+st.increased_first = false
+st.dealt_with_stupid_edgecase = false
 
 -- The points in two-handed weapon specialisation
 st.player.twohand_spec_points = 0
@@ -117,13 +119,12 @@ end
 
 -- Called when the swing timer reaches zero
 st.player.swing_timer_complete = function()
-    -- handle crusader snapshotting for new crusader buffs
-    -- if st.crusader_lock then
-    --     -- print('releasing crusader lock')
-    -- end
-    -- st.crusader_lock = false
+    -- clear SotC flags
     st.player.crusader_fell_off_midswing = false
     st.player.new_crusader_midswing = false
+    st.increased_first = false
+    st.dealt_with_stupid_edgecase = false
+
     -- print('Swing timer complete.')
     st.player.update_weapon_speed()
     st.bar.update_bar_on_timer_full()
@@ -131,13 +132,14 @@ end
 
 -- Called when the swing timer should be reset
 st.player.reset_swing_timer = function()
-    -- if st.crusader_lock then
-    --     -- print('releasing crusader lock')
-    -- end
 
-    -- st.crusader_lock = false
+    -- clear SotC flags
     st.player.crusader_fell_off_midswing = false
     st.player.new_crusader_midswing = false
+    st.increased_first = false
+    st.dealt_with_stupid_edgecase = false
+
+
     st.player.twist_impossible = false
     -- st.player.update_weapon_speed() -- NOT SURE IF THIS IS NEEDED
     st.player.swing_timer = st.player.current_weapon_speed
@@ -182,50 +184,60 @@ st.player.update_weapon_speed = function()
     local old = st.player.current_weapon_speed
     local new = UnitAttackSpeed("player")
     -- print('API speed says: ' .. tostring(new))
-    -- if st.player.crusader_currently_active then
-    --     -- print('old says: '..tostring(old))
-    --     -- print('new says: '..tostring(new))
-    -- end
 
     -- Handle crusader snapshotting *before* we compare old and new speeds
-        -- apply a 1.4 speed multiplier until the next swing
-        -- but only if the speed has actually changed - if it hasn't
-        -- then the UnitAttackSpeed endpoint might be lagging, and we don't
-        -- want to double count the increase or reduction.
+    -- apply a 1.4 speed multiplier until the next swing
+    -- but only if the speed has actually changed - if it hasn't
+    -- then the UnitAttackSpeed endpoint might be lagging, and we don't
+    -- want to double count the increase or reduction.
 
-    if new ~= old then
-        if st.player.new_crusader_midswing then
+    -- SotC has ONLY become active this swing, not fallen off
+    if st.player.new_crusader_midswing and not st.player.crusader_fell_off_midswing then
+        if not tolerance(new, old, 0.004) then
+            st.increased_first = true -- need to record this
             new = new * 1.4
-        elseif st.player.crusader_fell_off_midswing then
+        end
+    -- SotC has ONLY fallen off this swing, not become active
+    elseif st.player.crusader_fell_off_midswing and not st.player.new_crusader_midswing then
+        if not tolerance(new, old, 0.004) then
             new = new / 1.4
         end
+    -- SotC became active then fell off, things can misbehave here!
+    -- (seems fine when it falls off then is reactivated)
+    elseif st.player.new_crusader_midswing and st.increased_first then
+        -- if they are not the same, apply the correction,
+        if not tolerance(new, old, 0.004) then           
+            -- BUT ONLY if we haven't flagged that the API has registered
+            -- the change due to SotC falling off again.
+            if not st.dealt_with_stupid_edgecase then
+                new = new * 1.4
+            end
+        -- if they are substantially different, this is very likely due to the game
+        -- registering the attack speed change from crusader falling off. So enable
+        -- a flag that now prevents the correction from being re-applied.
+        else
+            st.dealt_with_stupid_edgecase = true
+        end
     end
+
     -- print('API speed after correction says: ' .. tostring(new))
-
-    -- if st.crusader_lock == true then
-    --     -- print('Locking speed change because of crusader snapshot.')
-    --     st.player.speed_changed = false
-    --     return
-    -- end
-
     if not st.player.reported_speed_change then 
         -- check the speed isn't the same, and if it is, return 
         -- this check picks up on multiple events between updates
         -- that can trigger attack speed changes
-        if old == new then return end
+        if tolerance(new, old, 0.004) then return end
     end
     
     -- Handle when the API sometimes returns 0, especially on first 
     -- load of the client.
+    -- Not perfect but it prevents infinities appearing in calculations.
     if new == 0 then
-        -- print('Warning! Prevented zero division error.')
         new = 3.0
     end
 
+    -- Update the attack speed and mark if it has changed.
     st.player.prev_weapon_speed = old
     st.player.current_weapon_speed = new   
-
-    -- Update the attack speed and mark if it has changed.
     if st.player.current_weapon_speed ~= st.player.prev_weapon_speed then
         st.player.speed_changed = true
         st.player.reported_speed_change = false
@@ -265,8 +277,6 @@ end
 -- Function run when we intercept an unfiltered combatlog event.
 st.player.OnCombatLogUnfiltered = function(combat_info)
 	local _, event, _, source_guid, _, _, _, dest_guid, _, _, _, _, _, _ = unpack(combat_info)
-	
-    -- print(event)
 
     -- Handle all relevant events where the player is the action source
     if (source_guid == st.player.guid) then
@@ -308,8 +318,6 @@ st.player.OnCombatLogUnfiltered = function(combat_info)
             end
         end
     end
-    -- finally update the attack speed
-    -- st.player.update_weapon_speed()
 end
 
 -- Function to calculate the player's GCD duration of a standard spell
