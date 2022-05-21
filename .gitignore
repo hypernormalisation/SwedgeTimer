@@ -41,3 +41,5 @@ luac.out
 
 # External Libraries
 /Libs/**
+
+.release/**

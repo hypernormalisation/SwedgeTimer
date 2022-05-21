@@ -1,10 +1,8 @@
-
 -- bar.lua =============================================================================
 local addon_name, st = ...
 local print = st.utils.print_msg
 local SML = LibStub("LibSharedMedia-3.0")
 local ST = LibStub("AceAddon-3.0"):GetAddon("SwedgeTimer")
--- local db = ST.db.profile
 
 --=========================================================================================
 -- BAR SETTINGS 
@@ -13,7 +11,7 @@ st.bar = {}
 
 -- the following should be flagged when the swing speed changes to
 -- evaluate the new offsets for ticks
-st.bar.recalculate_ticks = false
+st.bar.recalculate_ticks = true
 st.bar.twist_tick_offset = 0.1
 st.bar.gcd1_tick_offset = 0.1
 st.bar.gcd2_tick_offset = 0.1
@@ -49,6 +47,7 @@ end
 st.bar.init_bar_visuals = function()
     st.bar.frame = CreateFrame("Frame", addon_name .. "BarFrame", UIParent)   
     local frame = st.bar.frame
+
     local db = ST.db.profile
 
     -- Set initial frame properties
@@ -58,16 +57,13 @@ st.bar.init_bar_visuals = function()
     frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnDragStart", st.bar.OnFrameDragStart)
     frame:SetScript("OnDragStop", st.bar.OnFrameDragStop)
-
     frame:SetHeight(db.bar_height)
     frame:SetWidth(db.bar_width)
-
     frame:ClearAllPoints()
     frame:SetPoint(db.bar_point, UIParent, db.bar_rel_point, db.bar_x_offset, db.bar_y_offset)
 
     -- Create the backplane and border
     frame.backplane = CreateFrame("Frame", addon_name .. "BarBackdropFrame", frame, "BackdropTemplate")
-    
     frame.backplane:SetFrameStrata('LOW')
 
     -- These lines function as the 
@@ -76,6 +72,7 @@ st.bar.init_bar_visuals = function()
     frame.backplane:SetPoint('BOTTOMRIGHT', tv, -1*tv)
     
 
+    -- print(SML:Fetch('statusbar', db.backplane_texture_key))
     frame.backplane.backdropInfo = {
         bgFile = SML:Fetch('statusbar', db.backplane_texture_key),
         edgeFile = nil,
@@ -84,6 +81,7 @@ st.bar.init_bar_visuals = function()
     }
     frame.backplane:ApplyBackdrop()
     frame.backplane:SetBackdropColor(0, 0, 0, db.backplane_alpha)
+
 
     -- Create the swing timer bar
     frame.bar = frame:CreateTexture(nil,"ARTWORK")
@@ -133,7 +131,6 @@ st.bar.init_bar_visuals = function()
     frame.judgement_line:SetDrawLayer("OVERLAY", -1)
     st.set_markers()
 
-    -- print('Successfully initialised all bar visuals.')
 
     -- -- Create the seal cooldown frame.
     -- local myFrame = CreateFrame("Frame", nil, UIParent)
@@ -151,9 +148,8 @@ st.bar.init_bar_visuals = function()
     -- frame.seal_frame:SetPoint("RIGHT", 100, 0)
     -- frame.seal_frame.texture = seal_frame.CreateTexture()
     -- frame.seal_frame.texture:
-
-
 	frame:Show()
+    if st.debug then print('Successfully initialised all bar visuals.') end
 end
 
 -- this function is called when a setting related to bar visuals is changed

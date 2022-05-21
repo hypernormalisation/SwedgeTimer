@@ -41,6 +41,6 @@ end
 -- a switch to control debug statements in module parsing
 -- NOTE: this does not incur any additional CPU usage in the addon's
 --       typical operation, just in parsing the code.
-st.debug = false
+st.debug = true
 
 if st.debug then st.utils.print_msg('-- Parsed util.lua module correctly') end

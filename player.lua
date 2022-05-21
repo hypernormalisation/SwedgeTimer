@@ -35,6 +35,9 @@ st.player.twist_impossible = false
 -- does the player have heroism/lust buff active
 st.player.has_bloodlust = false
 
+-- does the player have KJ breath buff
+st.player.has_breath_haste = false
+
 -- judgement information
 st.player.new_judgement_cast = false
 st.player.judgement_being_tracked = false
@@ -69,8 +72,10 @@ st.player.reported_speed_change = true
 
 -- Flag to detect if we have a new/falling off SotCr aura and need to change swing
 -- timers to account for haste snapshotting
-st.crusader_lock = false
+-- st.crusader_lock = false
 st.crusader_currently_active = false
+st.player.new_crusader_midswing = false
+st.player.crusader_fell_off_midswing = false
 
 -- The points in two-handed weapon specialisation
 st.player.twohand_spec_points = 0
@@ -113,10 +118,12 @@ end
 -- Called when the swing timer reaches zero
 st.player.swing_timer_complete = function()
     -- handle crusader snapshotting for new crusader buffs
-    if st.crusader_lock then
-        -- print('releasing crusader lock')
-    end
-    st.crusader_lock = false
+    -- if st.crusader_lock then
+    --     -- print('releasing crusader lock')
+    -- end
+    -- st.crusader_lock = false
+    st.player.crusader_fell_off_midswing = false
+    st.player.new_crusader_midswing = false
     -- print('Swing timer complete.')
     st.player.update_weapon_speed()
     st.bar.update_bar_on_timer_full()
@@ -124,11 +131,13 @@ end
 
 -- Called when the swing timer should be reset
 st.player.reset_swing_timer = function()
-    if st.crusader_lock then
-        -- print('releasing crusader lock')
-    end
+    -- if st.crusader_lock then
+    --     -- print('releasing crusader lock')
+    -- end
 
-    st.crusader_lock = false
+    -- st.crusader_lock = false
+    st.player.crusader_fell_off_midswing = false
+    st.player.new_crusader_midswing = false
     st.player.twist_impossible = false
     -- st.player.update_weapon_speed() -- NOT SURE IF THIS IS NEEDED
     st.player.swing_timer = st.player.current_weapon_speed
@@ -169,28 +178,52 @@ st.player.update_weapon_speed = function()
     -- exactly once during a player frame update, because multiple events can
     -- happen between the same update, and the logic to process speed changes
     -- is most efficiently handled in the onupdate.
+
+    local old = st.player.current_weapon_speed
+    local new = UnitAttackSpeed("player")
+    -- print('API speed says: ' .. tostring(new))
+    -- if st.player.crusader_currently_active then
+    --     -- print('old says: '..tostring(old))
+    --     -- print('new says: '..tostring(new))
+    -- end
+
+    -- Handle crusader snapshotting *before* we compare old and new speeds
+        -- apply a 1.4 speed multiplier until the next swing
+        -- but only if the speed has actually changed - if it hasn't
+        -- then the UnitAttackSpeed endpoint might be lagging, and we don't
+        -- want to double count the increase or reduction.
+
+    if new ~= old then
+        if st.player.new_crusader_midswing then
+            new = new * 1.4
+        elseif st.player.crusader_fell_off_midswing then
+            new = new / 1.4
+        end
+    end
+    -- print('API speed after correction says: ' .. tostring(new))
+
+    -- if st.crusader_lock == true then
+    --     -- print('Locking speed change because of crusader snapshot.')
+    --     st.player.speed_changed = false
+    --     return
+    -- end
+
     if not st.player.reported_speed_change then 
-        -- check the speed isn't the same, and if it is, return it
+        -- check the speed isn't the same, and if it is, return 
         -- this check picks up on multiple events between updates
         -- that can trigger attack speed changes
-        local old = st.player.current_weapon_speed
-        local new = UnitAttackSpeed("player")
         if old == new then return end
     end
-
-    -- Handle crusader snapshotting
-    if st.crusader_lock == true then
-        -- print('Locking speed change because of crusader snapshot.')
-        st.player.speed_changed = false
-        return
+    
+    -- Handle when the API sometimes returns 0, especially on first 
+    -- load of the client.
+    if new == 0 then
+        -- print('Warning! Prevented zero division error.')
+        new = 3.0
     end
 
-    st.player.prev_weapon_speed = st.player.current_weapon_speed
-    -- Poll the API for the attack speed
-    st.player.current_weapon_speed = UnitAttackSpeed("player")
-    -- print('API speed says: ' .. tostring(st.player.current_weapon_speed))
-
-
+    st.player.prev_weapon_speed = old
+    st.player.current_weapon_speed = new   
 
     -- Update the attack speed and mark if it has changed.
     if st.player.current_weapon_speed ~= st.player.prev_weapon_speed then
@@ -279,14 +312,22 @@ st.player.OnCombatLogUnfiltered = function(combat_info)
     -- st.player.update_weapon_speed()
 end
 
+-- Function to calculate the player's GCD duration of a standard spell
+-- takes into account spell haste, and multiplicative buffs like
+-- bloodlust and breath buff
 st.player.calculate_spell_GCD_duration = function()
     local rating_percent_reduction = GetCombatRatingBonus(20)
     local base = st.player.base_gcd_duration
     local current = base * (100 / (100+rating_percent_reduction))
+    
+    -- Check for multiplicative buffs
     if st.player.has_bloodlust then
-        
         current = current * (1/1.3)
     end
+    if st.player.has_breath_haste then
+        current = current * (1/1.25)
+    end
+
     -- minimum GCD for paladins in 1s
     if current < 1 then
         current = 1.0
@@ -309,28 +350,26 @@ end
 
 -- Function to iterate over the player's auras and record any active Seals.
 st.player.parse_auras = function()
-    local end_iter = false
-    local counter = 1
-    st.player.n_active_seals = 0
-    -- print('Processing auras on change...')
-
+    
     -- copy the previous seals
     st.player.previous_active_seals = st.player.active_seals
-    local has_bloodlust = false
-    -- iterate over the current player auras and process seals
+
+    -- reset the player's state
+    st.player.n_active_seals = 0
+    st.player.has_bloodlust = false
+    st.player.has_breath_haste = false
     st.player.active_seals = {}
-    while not end_iter do
+
+    -- iterate over the current player auras and process seals
+    -- and other buffs of interest
+    local counter = 1
+    while true do
         local name, _, _, _, _, _, _, _, _, spell_id = UnitAura("player", counter)
-        -- print(spell_id)
-        -- print(st.soc_lookup[spell_id])
         if name == nil then
-            end_iter = true
             break
         end
 
-        -- process each spell id
-        -- local end_seal_iter = false
-        -- while not end_seal_iter do
+        -- First cross check seals
         if st.data.sob_ids[spell_id] ~= nil then
             st.player.active_seals['blood'] = true
             st.player.n_active_seals = st.player.n_active_seals + 1
@@ -366,12 +405,14 @@ st.player.parse_auras = function()
 
         -- Catch bloodlust or heroism
         elseif spell_id == 2825 or spell_id == 32182 then
-            -- print('player has lust!')
-            has_bloodlust = true
+            st.player.has_bloodlust = true       
+
+        -- Catch KJ breath buff
+        elseif spell_id == 45856 then
+            st.player.has_breath_haste = true           
         end
         counter = counter + 1
     end
-    st.player.has_bloodlust = has_bloodlust
 end
 
 -- Function to parse the list of Seals and set flags etc.
@@ -387,14 +428,16 @@ st.player.process_auras = function()
             -- to handle the haste snapshotting
             if st.player.swing_timer > 0 then
                 -- print('enabling crusader lock, new SotC cast midswing')
-                st.crusader_lock = true
+                st.player.new_crusader_midswing = true
+                -- st.crusader_lock = true
             end
         end
     -- check for any crusader that's fallen off midswing
     elseif st.player.previous_active_seals["crusader"] then
         if st.player.swing_timer > 0 then
             -- print('enabling crusader lock, old SotC fell off midswing')
-            st.crusader_lock = true
+            st.player.crusader_fell_off_midswing = true
+            -- st.crusader_lock = true
         end
     end
 end

@@ -30,7 +30,6 @@ local function init_addon(self)
 
     -- Load visuals
     if st.debug then print('Initialising visuals...') end
-    st.bar.recalculate_ticks = true -- force initial draw
     st.bar.init_bar_visuals()
 
     if st.debug then print('Registering events and widget handlers...') end
@@ -78,8 +77,8 @@ local function init_frame_event_handler(self, event, ...)
     if event == "ADDON_LOADED" then
         if args[1] == "SwedgeTimer" then
 
-            local english_class = select(2, UnitClass("player"))
             -- Only load the addon if the player is a paladin
+            local english_class = select(2, UnitClass("player")) -- same in all locales
             if english_class ~= "PALADIN" then
                 st.core.init_frame:SetScript("OnEvent", nil)
                 return
