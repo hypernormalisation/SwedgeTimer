@@ -8,9 +8,9 @@ A Retribution Paladin seal twisting swing timer for WoW Classic TBC.
 SwedgeTimer is a standalone swing timer bar to help Retribution Paladins seal twist more effectively.
 It is not a WeakAura, it is built from the ground up in lua, and does not use the WeakAura API in any way.
 
-SwedgeTimer replicates all the standard features of the current WeakAura state-of-the-art, including the GCD overlay, timing markers, and colour coding based on active seals, while adding new features like dynamic GCD marker positioning and a late-twist detection system.
-It is extensively configurable in both appearance and functionality.
+SwedgeTimer replicates all the standard features of the current WeakAura state-of-the-art, including the GCD underlay, timing markers, and colour coding based on active seals, while adding new features like dynamic GCD marker positioning and a late-twist detection system.
 
+It is extensively configurable in both appearance and functionality.
 ![image](https://user-images.githubusercontent.com/52763122/169720281-d694beda-bf6c-48bb-8816-0f05b18adf6f.png)
 
 The addon does not aim to replace any of the other components of a typical Ret UI or heads-up-display.
