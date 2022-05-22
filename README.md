@@ -37,4 +37,5 @@ If you want to install the addon manually, simply download the `SwedgeTimer.zip`
 SwedgeTimer's config can be opened with the slashcommand `\st` in the chat box.
 The bar itself can be clicked and dragged, and then locked inplace when the player is happy with the positioning via. the config menu.
 
-For a full description of what each setting does, see [the relevant wiki page](https://github.com/hypernormalisation/SwedgeTimer/wiki/Settings-Explained)
+For a full description of what each setting does, see [the relevant wiki page](https://github.com/hypernormalisation/SwedgeTimer/wiki/Settings-Explained).
+
