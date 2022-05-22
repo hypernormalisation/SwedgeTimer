@@ -1,7 +1,7 @@
 -- main.lua ============================================================================
 local addon_name, st = ...
 -- local L = st.localization_table
-local version = "1.0.0"
+local version = "@project-version@"
 local load_message = "version " .. version .. " loaded!"
 local ST = LibStub("AceAddon-3.0"):GetAddon("SwedgeTimer")
 local print = st.utils.print_msg

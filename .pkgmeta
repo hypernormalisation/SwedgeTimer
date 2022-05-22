@@ -1,5 +1,3 @@
-package-as: SwedgeTimer
-
 externals:
   Libs/LibStub: https://repos.curseforge.com/wow/libstub/trunk
   Libs/CallbackHandler-1.0: https://repos.curseforge.com/wow/callbackhandler/trunk/CallbackHandler-1.0
@@ -15,3 +13,7 @@ ignore:
   - README.md
   - FUNDING.yml
   - Libs
+
+manual-changelog:
+  filename: manual_changelog.md
+  markup-type: markdown

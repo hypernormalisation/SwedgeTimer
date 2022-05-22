@@ -214,7 +214,8 @@ st.player.update_weapon_speed = function()
             end
         -- if they are substantially different, this is very likely due to the game
         -- registering the attack speed change from crusader falling off. So enable
-        -- a flag that now prevents the correction from being re-applied.
+        -- a flag that now prevents the correction from being re-applied if another
+        -- genuine haste effect changes state, like a dst proc.
         else
             st.dealt_with_stupid_edgecase = true
         end
@@ -437,7 +438,6 @@ st.player.process_auras = function()
             if st.player.swing_timer > 0 then
                 -- print('enabling crusader lock, new SotC cast midswing')
                 st.player.new_crusader_midswing = true
-                -- st.crusader_lock = true
             end
         end
     -- check for any crusader that's fallen off midswing
@@ -445,7 +445,6 @@ st.player.process_auras = function()
         if st.player.swing_timer > 0 then
             -- print('enabling crusader lock, old SotC fell off midswing')
             st.player.crusader_fell_off_midswing = true
-            -- st.crusader_lock = true
         end
     end
 end
@@ -535,7 +534,7 @@ st.player.check_impossible_twists = function()
     -- local gcd_ends_relative_to_swing = time_since_previous_swing + gcd_with_lag
     -- print('GCD + lag ends relative to swing: ' .. tostring(gcd_ends_relative_to_swing))
     -- print('Current attack speed: ' .. tostring(st.player.current_weapon_speed))
-    -- print('Lag after calibration: ' .. tostring(st.player.lag_world))
+    -- print('Lag after calibration: ' .. tostring(st.player.lag_calibrated_ms))
     
     if gcd_ends_relative_to_swing > st.player.current_weapon_speed then
         if st.player.swing_timer > st.bar.get_twist_window_time_before_swing() then
@@ -649,6 +648,7 @@ st.player.frame_on_update = function(self, elapsed)
     -- If the weapon speed changed due to buffs/debuffs, we need to modify the swing timer
     -- and inform all the UI elements that need things altered or recalculated.   
     if st.player.speed_changed and not st.player.reported_speed_change then
+        -- st.player.check_impossible_twists()
         -- print('swing speed changed, timer updating')
         -- print(tostring(st.player.prev_weapon_speed) .. " > " .. tostring(st.player.current_weapon_speed))        
 
@@ -692,6 +692,11 @@ st.player.frame_on_update = function(self, elapsed)
 
     -- Always update the swing timer with how much time has elapsed
     st.player.update_swing_timer(elapsed)
+
+    if st.player.speed_changed then
+        st.player.check_impossible_twists()
+    end
+
 
     -- Always update the bar visuals
     st.bar.update_visuals_on_update()
