@@ -25,6 +25,7 @@ See the wiki for more information: [Why use SwedgeTimer](https://github.com/hype
 ## Install Instructions
 
 It is recommended to install the addon from either Curseforge via the Curse Client, or from the Wago.io provider on the WoWUp Client:
+
 - https://www.curseforge.com/wow/addons/swedgetimer
 - https://addons.wago.io/addons/swedgetimer
 
