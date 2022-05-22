@@ -7,3 +7,4 @@
 - Seal of the Crusader snapshotting has been redone, such that haste changes can now also be processed while the snapshotting is in effect.
 - the lag compensation system now recalculates impossible twists when haste effects change midswing.
 - the swing timer bar is now able to be clicked through to UI elements underneath when the bar is locked in place.
+- the swing timer now resets properly under a very fringe case where the user is in the attacking state and casting a spell when their swing timer reaches zero. This triggers an almost "phantom hit" in the game engine, setting your melee attack on cooldowin. It can be circumvented by using `/stopattack` in macros when casting to ensure no swings are lost.
