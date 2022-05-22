@@ -42,4 +42,5 @@ luac.out
 # External Libraries
 /Libs/**
 
+# Bigwigs Packaging
 .release/**

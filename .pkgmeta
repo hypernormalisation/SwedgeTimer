@@ -15,5 +15,5 @@ ignore:
   - Libs
 
 manual-changelog:
-  filename: manual_changelog.md
+  filename: CHANGELOG.md
   markup-type: markdown
