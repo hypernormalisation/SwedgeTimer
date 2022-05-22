@@ -45,6 +45,11 @@ local function init_addon(self)
     st.player_frame:RegisterEvent("UNIT_INVENTORY_CHANGED")
     st.player_frame:RegisterUnitEvent("UNIT_AURA", "player")
     st.player_frame:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTED", "player")
+    st.player_frame:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
+    
+    st.player_frame:RegisterEvent("EXECUTE_CHAT_LINE")
+    st.player_frame:RegisterEvent("PLAYER_TARGET_SET_ATTACKING")
+
     st.player_frame:RegisterEvent("CHARACTER_POINTS_CHANGED")
     st.player_frame:RegisterEvent("UNIT_SPELLCAST_SENT")
     st.player_frame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")

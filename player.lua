@@ -86,6 +86,16 @@ st.player.twohand_spec_points = 0
 st.player.lag_world_ms = 0.0
 st.player.lag_calibrated_ms = 0.0
 
+-- Some timestamp containers used to determine when cast times get interrupted
+st.player.last_spell_update_timestamp = nil
+st.player.tracked_spell_cast_start_timestamp = nil
+st.player.swing_complete_timestamp = nil
+
+-- a flag to indicate if the player is currently in the "attacking" state
+-- from either using the manual "attack" spell 6603 or from executing 
+-- startattack/stopattack.
+st.player.is_attacking = false
+
 -- Updates the player's lag according to the specified calibration.
 st.player.update_lag = function()
     local db = ST.db.profile
@@ -506,10 +516,17 @@ st.player.OnPlayerSpellCompletion = function(args)
     if args[2] == st.player.currently_casting_spell_guid then
         -- print('detected a finished cast that resets the timer')
         st.player.reset_swing_timer()
-    elseif args[2] == st.player.holy_wrath_cast_guid then
-        -- print('player successfully cast Holy Wrath, resetting swing timer...')
-        st.player.reset_swing_timer()
     end
+
+    local spell_id = args[3]
+    -- if this is the "attack" spell id 6603, switch the attack state
+    if spell_id == 6603 then
+        st.player.is_attacking = not st.player.is_attacking
+        -- print('player is attacking = '..tostring(st.player.is_attacking))
+    end
+    -- also clear the last spell cast timestamp
+    st.player.tracked_spell_cast_start_timestamp = nil
+
 end
 
 -- Called when the player's spellcast is interrupt to reset the gcd.
@@ -517,6 +534,22 @@ st.player.on_spell_interrupt = function()
     st.player.active_gcd_remaining = 0
     st.player.gcd_lockout = false
     st.bar.hide_gcd_bar()
+
+    -- also check if we need to add time to the swing timer under
+    -- certain circumstances
+    if st.player.swing_timer == 0 and st.player.is_attacking then
+        if st.player.tracked_spell_cast_start_timestamp ~= nil then
+            local time_now = GetTime()
+            local deduction = time_now - st.player.swing_complete_timestamp
+            local new_swing_timer = st.player.current_weapon_speed - deduction
+            -- print('new swing timer says '..tostring(new_swing_timer))
+            st.player.reset_swing_timer()
+            st.player.swing_timer = new_swing_timer
+        end
+    end
+
+    st.player.tracked_spell_cast_start_timestamp = nil
+
 end
 
 -- Function to check for impossible twists and set the according flag
@@ -589,6 +622,20 @@ st.player.process_gcd_end = function()
 end
 
 
+-- Called on spell update cooldown 
+st.player.on_spell_update_cooldown = function()
+    st.player.last_spell_update_timestamp = GetTime()
+end
+
+-- If the swing timer is not zero, we need to track the timestamp of the last
+-- SPELL_UPDATE_COOLDOWN event, which might need to be used in setting the swing timer
+st.player.on_spell_cast_start = function()
+    if st.player.swing_timer > 0 then
+        st.player.tracked_spell_cast_start_timestamp = st.player.last_spell_update_timestamp
+        -- print(st.player.tracked_spell_cast_start_timestamp)
+    end
+end
+
 st.player.process_new_judgment_cd = function()
     -- called each frame after judgement is registered until the API
     -- updates with the proper cooldown information
@@ -621,6 +668,7 @@ st.player.frame_on_update = function(self, elapsed)
 
     -- Logic for when the swing timer is complete.
     if st.player.swing_timer == 0 and not st.player.reported_swing_timer_complete then
+        st.player.swing_complete_timestamp = GetTime()
         st.player.swing_timer_complete()
         st.bar.update_bar_on_timer_full()
         st.player.reported_swing_timer_complete = true
@@ -739,11 +787,29 @@ st.player.frame_on_event = function(self, event, ...)
 
     elseif event == "UNIT_SPELLCAST_INTERRUPTED" then
         -- print('found an interruption')
+        st.player.on_spell_interrupt()
         st.player.process_gcd_end()
+
+    elseif event == "UNIT_SPELLCAST_START" then
+        st.player.on_spell_cast_start()
 
     elseif event == "SPELL_UPDATE_COOLDOWN" then
         -- print('spell update cd triggering a GCD')
+        st.player.on_spell_update_cooldown()
         st.player.process_possible_spell_cooldown(false)
+    
+    elseif event == "EXECUTE_CHAT_LINE" then
+        -- If the command is stopattack or startattack, change attacking state
+        if args[1] == "/stopattack" then
+            st.player.is_attacking = false
+            -- print('player is attacking = '..tostring(st.player.is_attacking))
+        elseif args[1] == "/startattack" then
+            st.player.is_attacking = true  
+            -- print('player is attacking = '..tostring(st.player.is_attacking))
+        end        
+    
+    elseif event == "PLAYER_TARGET_SET_ATTACKING" then
+        st.player.is_attacking = true
     end
 
 end
