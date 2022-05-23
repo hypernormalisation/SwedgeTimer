@@ -1,5 +1,5 @@
 # swedgetimer
-A Retribution Paladin seal twisting swing timer for WoW Classic TBC.
+A seal twisting swing timer addon for Retribution Paladins in WoW Classic TBC.
 
 ![image](https://user-images.githubusercontent.com/52763122/169720056-0098d0d7-e283-40e1-bbb2-d96c7990bb3d.png)
 
@@ -35,7 +35,7 @@ If you want to install the addon manually, simply download the `SwedgeTimer.zip`
 
 ## Usage Instructions
 
-SwedgeTimer's config can be opened with the slashcommand `\st` in the chat box.
+SwedgeTimer's config can be opened with the slashcommand `\st` in the chat box, or via the addon interface options in the WoW menu.
 The bar itself can be clicked and dragged, and then locked inplace when the player is happy with the positioning via. the config menu.
 
 For a full description of what each setting does, see [the relevant wiki page](https://github.com/hypernormalisation/SwedgeTimer/wiki/Settings-Explained).
