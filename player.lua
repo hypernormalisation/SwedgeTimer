@@ -346,11 +346,21 @@ st.player.calculate_spell_GCD_duration = function()
     if st.player.has_breath_haste then
         current = current * (1/1.25)
     end
+	
+	-- get FoL speed, should normally equivalent to GCD unless some debuff
+	local spellFoL, timeFoL = 19750
+	local _, _, _, timeFoL, _,  _, _ = GetSpellInfo(spellFoL)
+	timeFoL = timeFoL or 1500
+	timeFoL = timeFoL / 1000
+	
+	-- get the minimum of 2 logics
+	current = math.min(current, timeFoL)
 
     -- minimum GCD for paladins in 1s
     if current < 1 then
         current = 1.0
     end
+	
     -- round to 3 decimal places
     current = floor(current, 0.001)
     st.player.spell_gcd_duration = current
