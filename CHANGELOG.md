@@ -1,3 +1,16 @@
+# 1.2.0
+
+## Features
+
+- GCD underlay color settings include alpha
+- option to change borders
+- text on the left and right can be swapped (doesn't imports old setting)
+- texture on bar have a fixed scale by default and is not rescaled to the current progress, can be changed to old look
+
+## Fixes
+
+- extra logic for more haste detection for GCD with Flash of Light
+
 # 1.1.0
 
 ## Fixes
