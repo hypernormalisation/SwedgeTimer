@@ -105,19 +105,14 @@ st.bar.init_bar_visuals = function()
     frame.left_text:SetShadowOffset(1,-1)
     frame.left_text:SetJustifyV("CENTER")
     frame.left_text:SetJustifyH("LEFT")
-    if not db.show_attack_speed_text then
-        frame.left_text:Hide()
-    end
 
     frame.right_text = frame:CreateFontString(nil, "OVERLAY")
     frame.right_text:SetShadowColor(0.0,0.0,0.0,1.0)
     frame.right_text:SetShadowOffset(1,-1)
     frame.right_text:SetJustifyV("CENTER")
     frame.right_text:SetJustifyH("RIGHT")
-    if not db.show_swing_timer_text then
-        frame.right_text:Hide()
-    end
     st.set_fonts()
+    st.set_texts()
 
     -- Create the line markers
     frame.twist_line = frame:CreateLine() -- the twist window marker
@@ -176,15 +171,18 @@ st.bar.update_visuals_on_update = function()
     -- Update the main bar's width
     local timer_width = math.min(db.bar_width - (db.bar_width * (timer / speed)), db.bar_width)
     frame.bar:SetWidth(timer_width)
-
+	
+	-- Set texts
+	local lookup = {
+		attack_speed=tostring(st.utils.simple_round(speed, 0.1)),
+		swing_timer=tostring(st.utils.simple_round(timer, 0.1)),
+	}
+	local left = lookup[db.left_text]
+	local right = lookup[db.right_text]
+	
     -- Update the main bars text, hide right text if bar full
-    frame.left_text:SetText(tostring(st.utils.simple_round(speed, 0.1)))
-    frame.right_text:SetText(tostring(st.utils.simple_round(timer, 0.1)))
-    if st.bar.draw_right_text() then
-        frame.right_text:Show()
-    else
-        frame.right_text:Hide()
-    end
+    frame.left_text:SetText(left)
+    frame.right_text:SetText(right)
 
     -- If SoC/SoR, bar colour is time/context sensitive. Deal with that here.
     if st.player.is_twist_seal_active() then
@@ -581,13 +579,6 @@ end
 
 -- draw the right text or not
 st.bar.draw_right_text = function()
-    local db = ST.db.profile
-    if not db.show_swing_timer_text then
-        return false
-    end
-    if st.player.swing_timer == 0 then
-        return false
-    end
     return true
 end
 

@@ -101,6 +101,8 @@ SwedgeTimer.defaults = {
 		font_color = {1.0, 1.0, 1.0, 1.0},
 		text_font = SML.DefaultMedia.font,
 		font_outline_key = "outline",
+        left_text = "attack_speed",
+        right_text = "swing_timer",
         show_attack_speed_text = true,
         show_swing_timer_text = true,
 
@@ -143,8 +145,14 @@ local outline_map = {
 
 local outlines = {
 	none="None",
-	outline="Outline",
+	attacs="Attach",
 	thick_outline="Thick Outline",
+}
+
+local texts = {
+	_none="Not shown",
+	attack_speed="Attack speed",
+	swing_timer="Swing Timer",
 }
 
 local gcd_padding_modes = {
@@ -232,6 +240,10 @@ local set_fonts = function()
 end
 st.set_fonts = set_fonts
 
+local set_texts = function()
+end
+st.set_texts = set_texts
+
 local set_bar_size = function()
 	local db = SwedgeTimer.db.profile
 	local frame = st.bar.frame
@@ -242,6 +254,7 @@ local set_bar_size = function()
 	-- frame.gcd_bar:SetWidth(db.bar_width)
 	frame.gcd_bar:SetHeight(db.bar_height)
 	set_fonts()
+	set_texts()
 	st.set_markers()
 end
 
@@ -902,34 +915,30 @@ SwedgeTimer.options = {
 						set_fonts()
 					end,
 				},
-				show_attack_speed_text = {
-					type="toggle",
+				left_text = {
+					type="select",
 					order = 9.1,
-					name = "Attack speed text",
-					desc = "Shows the player's current attack speed at the left of the swing timer bar.",
+					values=texts,
+					style="dropdown",
+					name = "Left text",
+					desc = "What to shows on the left of the swing timer bar.",
 					get = "GetValue",
 					set = function(self, key)
-						SwedgeTimer.db.profile.show_attack_speed_text = key
-						if key then
-							st.bar.frame.left_text:Show()
-						else
-							st.bar.frame.left_text:Hide()
-						end
-					end,
+						SwedgeTimer.db.profile.left_text = key
+						set_texts()
+					end
 				},
-				show_swing_timer_text = {
-					type="toggle",
-					order = 9.12,
-					name = "Swing timer text",
-					desc = "Shows the remaining time on the player's swing on the right of the swing bar.",
+				right_text = {
+					type="select",
+					order = 9.1,
+					values=texts,
+					style="dropdown",
+					name = "Right text",
+					desc = "What to shows on the right of the swing timer bar.",
 					get = "GetValue",
 					set = function(self, key)
-						SwedgeTimer.db.profile.show_swing_timer_text = key
-						if key then
-							st.bar.frame.right_text:Show()
-						else
-							st.bar.frame.right_text:Hide()
-						end
+						SwedgeTimer.db.profile.right_text = key
+						set_texts()
 					end,
 				},
 				
