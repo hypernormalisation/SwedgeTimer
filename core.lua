@@ -89,6 +89,7 @@ SwedgeTimer.defaults = {
 		bar_texture_key = "Solid",
         gcd_texture_key = "Solid",
         backplane_texture_key = "Solid",
+        border_texture_key = "None",
 
 		backplane_alpha = 0.85,
         
@@ -819,8 +820,24 @@ SwedgeTimer.options = {
 						local val = st.bar_outline_thicknesses[key]
 						SwedgeTimer.db.profile.backplane_outline_offset = val
 						-- print(val)
+						val = val - 2
 						st.bar.frame.backplane:SetPoint('TOPLEFT', -1*val, val)
 						st.bar.frame.backplane:SetPoint('BOTTOMRIGHT', val, -1*val)
+					end
+				},
+				border_texture_key = {
+					order = 5.2,
+					type = "select",
+					name = "Border",
+					desc = "The border texture of the swing bar.",
+					dialogControl = "LSM30_Border",
+					values = SML:HashTable("border"),
+					get = function(info) return SwedgeTimer.db.profile.border_texture_key or SML.DefaultMedia.border end,
+					set = function(self, key)
+						SwedgeTimer.db.profile.border_texture_key = key
+						st.bar.frame.backplane.backdropInfo.edgeFile = SML:Fetch('border', key)
+						st.bar.frame.backplane:ApplyBackdrop()
+						st.bar.frame.backplane:SetBackdropColor(0,0,0, SwedgeTimer.db.profile.backplane_alpha)
 					end
 				},
 

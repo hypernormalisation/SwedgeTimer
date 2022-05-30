@@ -68,6 +68,7 @@ st.bar.init_bar_visuals = function()
 
     -- These lines function as the 
     local tv = st.get_thickness_value()
+	tv = tv - 2
     frame.backplane:SetPoint('TOPLEFT', -1*tv, tv)
     frame.backplane:SetPoint('BOTTOMRIGHT', tv, -1*tv)
     
@@ -75,9 +76,9 @@ st.bar.init_bar_visuals = function()
     -- print(SML:Fetch('statusbar', db.backplane_texture_key))
     frame.backplane.backdropInfo = {
         bgFile = SML:Fetch('statusbar', db.backplane_texture_key),
-        edgeFile = nil,
+		edgeFile = SML:Fetch('border', db.border_texture_key),
         tile = true, tileSize = 16, edgeSize = 16, 
-        insets = { left = 8, right = 8, top = 8, bottom = 8}
+        insets = { left = 6, right = 6, top = 6, bottom = 6}
     }
     frame.backplane:ApplyBackdrop()
     frame.backplane:SetBackdropColor(0, 0, 0, db.backplane_alpha)
