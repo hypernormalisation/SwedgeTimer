@@ -166,11 +166,15 @@ st.bar.update_visuals_on_update = function()
     local frame = st.bar.frame
     local speed = st.player.current_weapon_speed
     local timer = st.player.swing_timer
+	local progress = 1 - math.max(0, math.min(1, timer / speed))
     local db = ST.db.profile
 
     -- Update the main bar's width
-    local timer_width = math.min(db.bar_width - (db.bar_width * (timer / speed)), db.bar_width)
+    local timer_width = db.bar_width * progress
     frame.bar:SetWidth(timer_width)
+	if not db.bar_texture_scale then
+		frame.bar:SetTexCoord(0, progress, 0, 1)
+	end
 	
 	-- Set texts
 	local lookup = {

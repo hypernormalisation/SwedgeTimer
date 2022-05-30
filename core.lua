@@ -87,6 +87,7 @@ SwedgeTimer.defaults = {
         -- gcd_texture_key = SML.DefaultMedia.statusbar,
         -- backplane_texture_key = SML.DefaultMedia.statusbar,
 		bar_texture_key = "Solid",
+		bar_texture_scale = false,
         gcd_texture_key = "Solid",
         backplane_texture_key = "Solid",
         border_texture_key = "None",
@@ -103,8 +104,6 @@ SwedgeTimer.defaults = {
 		font_outline_key = "outline",
         left_text = "attack_speed",
         right_text = "swing_timer",
-        show_attack_speed_text = true,
-        show_swing_timer_text = true,
 
 		-- Marker settings
 		marker_width = 3,
@@ -775,6 +774,15 @@ SwedgeTimer.options = {
 						st.bar.frame.bar:SetTexture(SML:Fetch('statusbar', key))
 					end
 				},
+
+				bar_texture_scale = {
+					type="toggle",
+					order = 2.1,
+					name = "Bar texture scale",
+					desc = "Enables the texture of the swing bar to be scaled to the current progress. Othewise it stays constant to the full width.",
+					get = "GetValue",
+					set = "SetValue",
+				},
 				
 				gcd_texture_key = {
 					order = 3,
@@ -789,6 +797,12 @@ SwedgeTimer.options = {
 						st.bar.frame.gcd_bar:SetTexture(SML:Fetch('statusbar', key))
 						st.bar.set_gcd_bar_width()
 					end
+				},
+
+				placeholder_1 = {
+					type="description",
+					order = 3.1,
+					name = "",
 				},
 		
 				backplane_texture_key = {
@@ -838,8 +852,15 @@ SwedgeTimer.options = {
 						st.bar.frame.backplane:SetPoint('BOTTOMRIGHT', val, -1*val)
 					end
 				},
-				border_texture_key = {
+
+				placeholder_2 = {
+					type="description",
 					order = 5.2,
+					name = "",
+				},
+				
+				border_texture_key = {
+					order = 6,
 					type = "select",
 					name = "Border",
 					desc = "The border texture of the swing bar.",
