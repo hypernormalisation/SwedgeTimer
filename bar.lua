@@ -178,8 +178,8 @@ st.bar.update_visuals_on_update = function()
 	
 	-- Set texts
 	local lookup = {
-		attack_speed=tostring(st.utils.simple_round(speed, 0.1)),
-		swing_timer=tostring(st.utils.simple_round(timer, 0.1)),
+		attack_speed=format("%.1f", st.utils.simple_round(speed, 0.1)),
+		swing_timer=format("%.1f", st.utils.simple_round(timer, 0.1)),
 	}
 	local left = lookup[db.left_text]
 	local right = lookup[db.right_text]

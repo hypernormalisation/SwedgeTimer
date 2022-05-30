@@ -9,6 +9,7 @@
 
 ## Fixes
 
+- text on the left and right now always includes one digit after dot
 - extra logic for more haste detection for GCD with Flash of Light
 
 # 1.1.0
