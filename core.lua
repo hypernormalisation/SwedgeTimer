@@ -1114,7 +1114,7 @@ SwedgeTimer.options = {
 					type="color",
 					name="Underlay color",
 					desc="The color of the GCD underlay.",
-					hasAlpha=false,
+					hasAlpha=true,
 					get = function()
 						local tab = SwedgeTimer.db.profile.bar_color_gcd
 						return tab[1], tab[2], tab[3], tab[4]
