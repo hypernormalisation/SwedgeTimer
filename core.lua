@@ -137,14 +137,14 @@ SwedgeTimer.defaults = {
 }
 
 local outline_map = {
-	none="",
+	_none="",
 	outline="OUTLINE",
 	thick_outline="THICKOUTLINE",
 }
 
 local outlines = {
-	none="None",
-	attacs="Attach",
+	_none="None",
+	outline="Outline",
 	thick_outline="Thick Outline",
 }
 
