@@ -87,7 +87,6 @@ SwedgeTimer.defaults = {
         -- gcd_texture_key = SML.DefaultMedia.statusbar,
         -- backplane_texture_key = SML.DefaultMedia.statusbar,
 		bar_texture_key = "Solid",
-		bar_texture_scale = false,
         gcd_texture_key = "Solid",
         backplane_texture_key = "Solid",
         border_texture_key = "None",
@@ -773,15 +772,6 @@ SwedgeTimer.options = {
 						SwedgeTimer.db.profile.bar_texture_key = key
 						st.bar.frame.bar:SetTexture(SML:Fetch('statusbar', key))
 					end
-				},
-
-				bar_texture_scale = {
-					type="toggle",
-					order = 2.1,
-					name = "Bar texture scale",
-					desc = "Enables the texture of the swing bar to be scaled to the current progress. Othewise it stays constant to the full width.",
-					get = "GetValue",
-					set = "SetValue",
 				},
 				
 				gcd_texture_key = {
