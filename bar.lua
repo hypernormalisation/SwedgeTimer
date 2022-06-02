@@ -64,24 +64,9 @@ st.bar.init_bar_visuals = function()
 
     -- Create the backplane and border
     frame.backplane = CreateFrame("Frame", addon_name .. "BarBackdropFrame", frame, "BackdropTemplate")
+    st.configure_bar_outline()
     frame.backplane:SetFrameStrata('LOW')
-
-    -- These lines function as the 
-    local tv = st.get_thickness_value()
-    frame.backplane:SetPoint('TOPLEFT', -1*tv, tv)
-    frame.backplane:SetPoint('BOTTOMRIGHT', tv, -1*tv)
-    
-
-    -- print(SML:Fetch('statusbar', db.backplane_texture_key))
-    frame.backplane.backdropInfo = {
-        bgFile = SML:Fetch('statusbar', db.backplane_texture_key),
-        edgeFile = nil,
-        tile = true, tileSize = 16, edgeSize = 16, 
-        insets = { left = 8, right = 8, top = 8, bottom = 8}
-    }
-    frame.backplane:ApplyBackdrop()
     frame.backplane:SetBackdropColor(0, 0, 0, db.backplane_alpha)
-
 
     -- Create the swing timer bar
     frame.bar = frame:CreateTexture(nil,"ARTWORK")
@@ -104,19 +89,14 @@ st.bar.init_bar_visuals = function()
     frame.left_text:SetShadowOffset(1,-1)
     frame.left_text:SetJustifyV("CENTER")
     frame.left_text:SetJustifyH("LEFT")
-    if not db.show_attack_speed_text then
-        frame.left_text:Hide()
-    end
 
     frame.right_text = frame:CreateFontString(nil, "OVERLAY")
     frame.right_text:SetShadowColor(0.0,0.0,0.0,1.0)
     frame.right_text:SetShadowOffset(1,-1)
     frame.right_text:SetJustifyV("CENTER")
     frame.right_text:SetJustifyH("RIGHT")
-    if not db.show_swing_timer_text then
-        frame.right_text:Hide()
-    end
     st.set_fonts()
+    st.set_texts()
 
     -- Create the line markers
     frame.twist_line = frame:CreateLine() -- the twist window marker
@@ -131,23 +111,6 @@ st.bar.init_bar_visuals = function()
     frame.judgement_line:SetDrawLayer("OVERLAY", -1)
     st.set_markers()
 
-
-    -- -- Create the seal cooldown frame.
-    -- local myFrame = CreateFrame("Frame", nil, UIParent)
-    -- myFrame:SetSize(80, 80)
-    -- myFrame:SetPoint("CENTER")
-    -- local myTexture = myFrame:CreateTexture()
-    -- myTexture:SetAllPoints()
-    -- myTexture:SetTexture(132347)
-    -- myTexture:SetTexCoord(0.1, 0.9, 0.1, 0.9);
-    -- local myCooldown = CreateFrame("Cooldown", "myCooldown", myFrame, "CooldownFrameTemplate")
-    -- myCooldown:SetAllPoints()
-
-    -- frame.seal_frame = CreateFrame("Frame", addon_name .. "SealFrame", frame, "CooldownFrameTemplate")
-    -- frame.seal_frame:SetSize(30, 30)
-    -- frame.seal_frame:SetPoint("RIGHT", 100, 0)
-    -- frame.seal_frame.texture = seal_frame.CreateTexture()
-    -- frame.seal_frame.texture:
 	frame:Show()
     if st.debug then print('Successfully initialised all bar visuals.') end
 end
@@ -170,20 +133,25 @@ st.bar.update_visuals_on_update = function()
     local frame = st.bar.frame
     local speed = st.player.current_weapon_speed
     local timer = st.player.swing_timer
+	local progress = 1 - math.max(0, math.min(1, timer / speed))
     local db = ST.db.profile
 
     -- Update the main bar's width
-    local timer_width = math.min(db.bar_width - (db.bar_width * (timer / speed)), db.bar_width)
+    local timer_width = db.bar_width * progress
     frame.bar:SetWidth(timer_width)
-
+	frame.bar:SetTexCoord(0, progress, 0, 1)
+	
+	-- Set texts
+	local lookup = {
+		attack_speed=format("%.1f", st.utils.simple_round(speed, 0.1)),
+		swing_timer=format("%.1f", st.utils.simple_round(timer, 0.1)),
+	}
+	local left = lookup[db.left_text]
+	local right = lookup[db.right_text]
+	
     -- Update the main bars text, hide right text if bar full
-    frame.left_text:SetText(tostring(st.utils.simple_round(speed, 0.1)))
-    frame.right_text:SetText(tostring(st.utils.simple_round(timer, 0.1)))
-    if st.bar.draw_right_text() then
-        frame.right_text:Show()
-    else
-        frame.right_text:Hide()
-    end
+    frame.left_text:SetText(left)
+    frame.right_text:SetText(right)
 
     -- If SoC/SoR, bar colour is time/context sensitive. Deal with that here.
     if st.player.is_twist_seal_active() then
@@ -580,13 +548,6 @@ end
 
 -- draw the right text or not
 st.bar.draw_right_text = function()
-    local db = ST.db.profile
-    if not db.show_swing_timer_text then
-        return false
-    end
-    if st.player.swing_timer == 0 then
-        return false
-    end
     return true
 end
 
