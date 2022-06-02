@@ -550,11 +550,6 @@ st.bar.set_bar_color = function()
     end
 end
 
--- draw the right text or not
-st.bar.draw_right_text = function()
-    return true
-end
-
 --=========================================================================================
 -- End, if debug verify module was read.
 --=========================================================================================
