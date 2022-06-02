@@ -1,5 +1,3 @@
-# 1.2.0
-
 ## Features
 
 - borders can now be drawn both as textures or as a solid color
