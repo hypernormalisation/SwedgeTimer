@@ -420,7 +420,9 @@ end
 -- determine wether or not to draw the gcd1 line
 st.bar.should_draw_gcd1_window = function()
     local db = ST.db.profile
-    if math.abs(st.bar.gcd1_tick_offset) > db.bar_width then
+    if not db.gcd1_enabled then
+        return false
+    elseif math.abs(st.bar.gcd1_tick_offset) > db.bar_width then
         return false
     end
     return true
@@ -429,7 +431,9 @@ end
 -- determine wether or not to draw the gcd2 line
 st.bar.should_draw_gcd2_window = function()
     local db = ST.db.profile
-    if math.abs(st.bar.gcd2_tick_offset) > db.bar_width then
+    if not db.gcd2_enabled then
+        return false
+    elseif math.abs(st.bar.gcd2_tick_offset) > db.bar_width then
         return false
     end
     return true

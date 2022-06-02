@@ -348,7 +348,7 @@ st.player.calculate_spell_GCD_duration = function()
     end
 	
 	-- get FoL speed, should normally equivalent to GCD unless some debuff
-	local spellFoL, timeFoL = 19750
+	local spellFoL = 19750
 	local _, _, _, timeFoL, _,  _, _ = GetSpellInfo(spellFoL)
 	timeFoL = timeFoL or 1500
 	timeFoL = timeFoL / 1000

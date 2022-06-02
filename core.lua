@@ -103,6 +103,8 @@ SwedgeTimer.defaults = {
 
 		-- Marker settings
 		marker_width = 3,
+		gcd1_enabled = true,
+		gcd2_enabled = true,
 		gcd_marker_color = {0.9, 0.9, 0.9, 1.0},
 		twist_marker_color = {0.9,0.9,0.9,1.0},
 		judgement_marker_color = {0.9,0.9,0.01,1.0},
@@ -1185,6 +1187,33 @@ SwedgeTimer.options = {
 					type="header",
 					name="Markers",
 				},
+				gcd1_enabled = {
+					type = "toggle",
+					order = 50.1,
+					name = "Enable GCD marker 1",
+					desc = "Toggles drawing the first GCD marker on the bar.",
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.gcd1_enabled = key
+						st.bar.show_or_hide_ticks()
+					end,
+				},
+				gcd2_enabled = {
+					type = "toggle",
+					order = 50.2,
+					name = "Enable GCD marker 2",
+					desc = "Toggles drawing the second GCD marker on the bar.",
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.gcd2_enabled = key
+						st.bar.show_or_hide_ticks()
+					end,
+				},
+				-- marker_colors_header = {
+				-- 	order=50.5,
+				-- 	type="description",
+				-- 	name="The GCD and twist window colors can be changed below.",
+				-- },
 				marker_width = {
 					type = "range",
 					order = 55,
@@ -1201,7 +1230,7 @@ SwedgeTimer.options = {
 				gcd_marker_color = {
 					order=53,
 					type="color",
-					name="GCD",
+					name="GCD color",
 					desc="The color of the GCD markers.",
 					hasAlpha=false,
 					get = function()
@@ -1215,7 +1244,7 @@ SwedgeTimer.options = {
 				twist_marker_color = {
 					order=52,
 					type="color",
-					name="Twist window",
+					name="Twist window color",
 					desc="The color of the twist window marker.",
 					hasAlpha=false,
 					get = function()
