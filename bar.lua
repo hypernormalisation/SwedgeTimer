@@ -64,25 +64,9 @@ st.bar.init_bar_visuals = function()
 
     -- Create the backplane and border
     frame.backplane = CreateFrame("Frame", addon_name .. "BarBackdropFrame", frame, "BackdropTemplate")
+    st.configure_bar_outline()
     frame.backplane:SetFrameStrata('LOW')
-
-    -- These lines function as the 
-    local tv = st.get_thickness_value()
-	tv = tv - 2
-    frame.backplane:SetPoint('TOPLEFT', -1*tv, tv)
-    frame.backplane:SetPoint('BOTTOMRIGHT', tv, -1*tv)
-    
-
-    -- print(SML:Fetch('statusbar', db.backplane_texture_key))
-    frame.backplane.backdropInfo = {
-        bgFile = SML:Fetch('statusbar', db.backplane_texture_key),
-		edgeFile = SML:Fetch('border', db.border_texture_key),
-        tile = true, tileSize = 16, edgeSize = 16, 
-        insets = { left = 6, right = 6, top = 6, bottom = 6}
-    }
-    frame.backplane:ApplyBackdrop()
     frame.backplane:SetBackdropColor(0, 0, 0, db.backplane_alpha)
-
 
     -- Create the swing timer bar
     frame.bar = frame:CreateTexture(nil,"ARTWORK")
@@ -127,23 +111,6 @@ st.bar.init_bar_visuals = function()
     frame.judgement_line:SetDrawLayer("OVERLAY", -1)
     st.set_markers()
 
-
-    -- -- Create the seal cooldown frame.
-    -- local myFrame = CreateFrame("Frame", nil, UIParent)
-    -- myFrame:SetSize(80, 80)
-    -- myFrame:SetPoint("CENTER")
-    -- local myTexture = myFrame:CreateTexture()
-    -- myTexture:SetAllPoints()
-    -- myTexture:SetTexture(132347)
-    -- myTexture:SetTexCoord(0.1, 0.9, 0.1, 0.9);
-    -- local myCooldown = CreateFrame("Cooldown", "myCooldown", myFrame, "CooldownFrameTemplate")
-    -- myCooldown:SetAllPoints()
-
-    -- frame.seal_frame = CreateFrame("Frame", addon_name .. "SealFrame", frame, "CooldownFrameTemplate")
-    -- frame.seal_frame:SetSize(30, 30)
-    -- frame.seal_frame:SetPoint("RIGHT", 100, 0)
-    -- frame.seal_frame.texture = seal_frame.CreateTexture()
-    -- frame.seal_frame.texture:
 	frame:Show()
     if st.debug then print('Successfully initialised all bar visuals.') end
 end
@@ -172,9 +139,7 @@ st.bar.update_visuals_on_update = function()
     -- Update the main bar's width
     local timer_width = db.bar_width * progress
     frame.bar:SetWidth(timer_width)
-	if not db.bar_texture_scale then
-		frame.bar:SetTexCoord(0, progress, 0, 1)
-	end
+	frame.bar:SetTexCoord(0, progress, 0, 1)
 	
 	-- Set texts
 	local lookup = {

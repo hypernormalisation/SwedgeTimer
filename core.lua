@@ -83,18 +83,15 @@ SwedgeTimer.defaults = {
 		bar_rel_point = "CENTER",
 
 		-- Bar textures
-		-- bar_texture_key = SML.DefaultMedia.statusbar,
-        -- gcd_texture_key = SML.DefaultMedia.statusbar,
-        -- backplane_texture_key = SML.DefaultMedia.statusbar,
 		bar_texture_key = "Solid",
         gcd_texture_key = "Solid",
         backplane_texture_key = "Solid",
         border_texture_key = "None",
-
 		backplane_alpha = 0.85,
-        
-		backplane_outline_offset = 10,
-		backplane_outline_name = "Medium",
+
+		-- Border settings
+		border_mode_key = "Solid",
+		backplane_outline_width = 2,
 
 		-- Font settings
 		font_size = 16,
@@ -141,6 +138,12 @@ local outline_map = {
 	thick_outline="THICKOUTLINE",
 }
 
+local bar_border_modes = {
+	Solid="Solid",
+	Texture="Texture",
+	None="None",
+}
+
 local outlines = {
 	_none="None",
 	outline="Outline",
@@ -150,7 +153,7 @@ local outlines = {
 local texts = {
 	_none="Not shown",
 	attack_speed="Attack speed",
-	swing_timer="Swing Timer",
+	swing_timer="Swing timer",
 }
 
 local gcd_padding_modes = {
@@ -171,42 +174,6 @@ local valid_anchor_points = {
     CENTER="CENTER",
 }
 
-st.bar_outline_names = {
-	None="None",
-	Thin="Thin",
-	Medium="Medium",
-	Thick="Thick",
-	Thicc="Thicc",
-}
-
-st.bar_outline_thicknesses = {
-	None=8,
-	Thin=9.0,
-	Medium=10.0,
-	Thick=10.5,
-	Thicc=11.0,
-}
-
-st.get_thickness_value = function()
-	local db = SwedgeTimer.db.profile
-	return db.backplane_outline_offset
-end
-
-local MediaList = {}
-local function getMediaData(info)
-    local mediaType = info[#(info)]
-
-    MediaList[mediaType] = MediaList[mediaType] or {}
-
-    for k in pairs(MediaList[mediaType]) do MediaList[mediaType][k] = nil end
-    for _, name in pairs(SML:List(mediaType)) do
-        MediaList[mediaType][name] = name
-    end
-
-    return MediaList[mediaType]
-end
-
-
 ------------------------------------------------------------------------------------
 -- Functions to apply settings to the UI elements.
 local set_bar_position = function()
@@ -219,7 +186,7 @@ local set_bar_position = function()
 	frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
 	frame.left_text:SetPoint("TOPLEFT", 2, -(db.bar_height / 2) + (db.font_size / 2))
 	frame.right_text:SetPoint("TOPRIGHT", 2, -(db.bar_height / 2) + (db.font_size / 2))
-	st.set_outline_thickness()
+	st.configure_bar_outline()
 end
 st.set_bar_position = set_bar_position
 
@@ -282,12 +249,40 @@ st.set_markers = function()
 	st.bar.set_marker_offsets()
 end
 
-st.set_outline_thickness = function()
+-- Function to be called whenever the state of the backdrop or texture
+-- outline are changed.
+st.configure_bar_outline = function()
 	local db = SwedgeTimer.db.profile
-	local val = SwedgeTimer.db.profile.backplane_outline_offset
-	-- print(val)
-	st.bar.frame.backplane:SetPoint('TOPLEFT', -1*val, val)
-	st.bar.frame.backplane:SetPoint('BOTTOMRIGHT', val, -1*val)
+	local mode = db.border_mode_key
+	local frame = st.bar.frame
+	local texture_key = db.border_texture_key
+    local tv = db.backplane_outline_width
+	-- 8 corresponds to no border
+	tv = tv + 8
+
+	-- Switch settings based on mode
+	if mode == "None" then
+		texture_key = "None"
+		tv = 8
+	elseif mode == "Texture" then
+		tv = 8
+	elseif mode == "Solid" then
+		texture_key = "None"
+	end
+
+    frame.backplane.backdropInfo = {
+        bgFile = SML:Fetch('statusbar', db.backplane_texture_key),
+		edgeFile = SML:Fetch('border', texture_key),
+        tile = true, tileSize = 16, edgeSize = 16, 
+        insets = { left = 6, right = 6, top = 6, bottom = 6}
+    }
+    frame.backplane:ApplyBackdrop()
+
+	tv = tv - 2
+    frame.backplane:SetPoint('TOPLEFT', -1*tv, tv)
+    frame.backplane:SetPoint('BOTTOMRIGHT', tv, -1*tv)
+	frame.backplane:SetBackdropColor(0,0,0, db.backplane_alpha)
+
 end
 
 ------------------------------------------------------------------------------------
@@ -496,7 +491,6 @@ SwedgeTimer.options = {
 					imageWidth=350,
 					imageHeight=350*0.2,
 					imageCoords={0.00,1.0,0.4,0.6},
-					name="",
 				},
 				lag_descriptions104 = {
 					order=5.06,
@@ -741,7 +735,7 @@ SwedgeTimer.options = {
 						st.bar.frame:EnableMouse(not input)
 					end,
 				},
-			}
+			},
 		},
 
 		------------------------------------------------------------------------------------
@@ -775,7 +769,7 @@ SwedgeTimer.options = {
 				},
 				
 				gcd_texture_key = {
-					order = 3,
+					order = 2.1,
 					type = "select",
 					name = "GCD underlay",
 					desc = "The texture of the GCD underlay bar.",
@@ -789,19 +783,12 @@ SwedgeTimer.options = {
 					end
 				},
 
-				placeholder_1 = {
-					type="description",
-					order = 3.1,
-					name = "",
-				},
-		
 				backplane_texture_key = {
-					order = 4,
+					order = 2.2,
 					type = "select",
 					name = "Backplane",
 					desc = "The texture of the bar's backplane.",
 					dialogControl = "LSM30_Statusbar",
-					-- values = getMediaData,
 					values = SML:HashTable("statusbar"),
 					get = function(info) return SwedgeTimer.db.profile.backplane_texture_key or SML.DefaultMedia.statusbar end,
 					set = function(self, key)
@@ -811,9 +798,10 @@ SwedgeTimer.options = {
 						st.bar.frame.backplane:SetBackdropColor(0,0,0, SwedgeTimer.db.profile.backplane_alpha)
 					end
 				},
+
 				backplane_alpha = {
 					type = "range",
-					order = 5,
+					order = 2.3,
 					name = "Backplane alpha",
 					desc = "The opacity of the swing bar's backplane.",
 					min = 0.0, max = 1.0,
@@ -824,31 +812,59 @@ SwedgeTimer.options = {
 						st.bar.frame.backplane:SetBackdropColor(0, 0, 0, key)
 					end,
 				},
-				backplane_outline_offset = {
-					type = "select",
-					order = 5.1,
-					name = "Outline",
-					desc = "The thickness of the outline around the swing timer bar.",
-					values=st.bar_outline_names,
-					sorting={"None", "Thin", "Medium", "Thick", "Thicc"},
-					get = function() return tostring(SwedgeTimer.db.profile.backplane_outline_name) end,
-					set = function(self, key)
-						SwedgeTimer.db.profile.backplane_outline_name = key
-						local val = st.bar_outline_thicknesses[key]
-						SwedgeTimer.db.profile.backplane_outline_offset = val
-						-- print(val)
-						val = val - 2
-						st.bar.frame.backplane:SetPoint('TOPLEFT', -1*val, val)
-						st.bar.frame.backplane:SetPoint('BOTTOMRIGHT', val, -1*val)
-					end
+
+
+				------------------------------------------------------------------------------------
+				-- Border options
+				bar_border_header = {
+					order=3.5,
+					type="header",
+					name="Bar border",
+				},
+				bar_border_description = {
+					order=3.51,
+					type="description",
+					name="The bar border can either be set to a solid color, a texture, or disabled.",
 				},
 
-				placeholder_2 = {
+				border_mode_key = {
+					order=3.6,
+					type="select",
+					values=bar_border_modes,
+					style="dropdown",
+					desc="The outline mode to use for the bar border, if any.",
+					name="Border mode",
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.border_mode_key = key
+						st.configure_bar_outline()
+				
+					end,
+				},
+
+				placeholder_1 = {
 					type="description",
-					order = 5.2,
+					order = 3.8,
 					name = "",
 				},
-				
+
+				backplane_outline_width = {
+					type = "range",
+					order = 5.1,
+					name = "Solid outline thickness",
+					desc = "The thickness of the outline around the swing timer bar, if in Solid border mode.",
+					min = 0, max = 5,
+					step = 0.2,
+					get = "GetValue",
+					set = function(self, key)
+						SwedgeTimer.db.profile.backplane_outline_width = key
+						st.configure_bar_outline()
+					end,
+					disabled = function()
+						return SwedgeTimer.db.profile.border_mode_key ~= "Solid"
+					end,
+				},
+
 				border_texture_key = {
 					order = 6,
 					type = "select",
@@ -859,10 +875,11 @@ SwedgeTimer.options = {
 					get = function(info) return SwedgeTimer.db.profile.border_texture_key or SML.DefaultMedia.border end,
 					set = function(self, key)
 						SwedgeTimer.db.profile.border_texture_key = key
-						st.bar.frame.backplane.backdropInfo.edgeFile = SML:Fetch('border', key)
-						st.bar.frame.backplane:ApplyBackdrop()
-						st.bar.frame.backplane:SetBackdropColor(0,0,0, SwedgeTimer.db.profile.backplane_alpha)
-					end
+						st.configure_bar_outline()
+					end,
+					disabled = function()
+						return SwedgeTimer.db.profile.border_mode_key ~= "Texture"
+					end,
 				},
 
 				------------------------------------------------------------------------------------
@@ -905,7 +922,6 @@ SwedgeTimer.options = {
 					name = "Font",
 					desc = "The font to use in the swing timer and attack speed text.",
 					dialogControl = "LSM30_Font",
-					-- values = getMediaData,
 					values = SML:HashTable("font"),
 					get = function(info) return SwedgeTimer.db.profile.text_font or SML.DefaultMedia.font end,
 					set = function(self, key)
@@ -1240,3 +1256,8 @@ end
 function SwedgeTimer:SetValue(info, value)
 	self.db.profile[info[#info]] = value
 end
+
+--=========================================================================================
+-- End, if debug verify module was read.
+--=========================================================================================
+if st.debug then print('-- Parsed core.lua module correctly') end
