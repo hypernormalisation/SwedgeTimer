@@ -65,11 +65,10 @@ st.bar.init_bar_visuals = function()
     -- Create the backplane and border
     frame.backplane = CreateFrame("Frame", addon_name .. "BarBackdropFrame", frame, "BackdropTemplate")
 
-
     -- Adjust the frame draw levels so the backplane is below the frame
     frame:SetFrameLevel(db.draw_level+1)
     frame.backplane:SetFrameLevel(db.draw_level)
-
+    -- Set to the requested frame strata
     frame:SetFrameStrata(db.frame_strata)
     frame.backplane:SetFrameStrata(db.frame_strata)
 
@@ -318,18 +317,29 @@ end
 st.bar.should_show_bar = function()
     -- Logic for if the bar should be visible
     local db = ST.db.profile
-    if db.bar_enabled then
-        if db.hide_bar_when_inactive then
-            if st.player.n_active_seals == 0 and not st.core.in_combat then
-                return false
-            end
-        end
-        if not st.player.is_player_ret() and db.hide_when_not_ret then
-            return false
-        end
+
+    -- if bar disabled, always return false
+    if not db.bar_enabled then return false end
+    
+    -- else use the bar visibility key to check if we should show
+    if db.visibility_key == "always" then 
         return true
+    elseif db.visibility_key == "in_combat" then
+        if st.core.in_combat then 
+            return true
+        end
+    elseif db.visibility_key == "active_seal" then
+        if st.player.n_active_seals > 0 then
+            return true
+        end
+    elseif db.visibility_key == "in_combat_or_active_seal" then
+        if st.core.in_combat or st.player.n_active_seals > 0 then
+            return true
+        end
     end
+    
     return false
+
 end
 
 st.bar.hide_gcd_bar = function()

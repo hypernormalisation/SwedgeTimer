@@ -59,6 +59,17 @@ function SwedgeTimer:SlashCommand(input, editbox)
 	ACD:Open("SwedgeTimer_Options")
 end
 
+local bar_visibility_values = {
+	always = "Always show",
+	in_combat = "In combat",
+	active_seal = "Seal active",
+	in_combat_or_active_seal = "In combat or seal active",
+}
+
+local bar_vis_ordering = {
+	"always", "in_combat", "active_seal", "in_combat_or_active_seal",
+}
+
 ------------------------------------------------------------------------------------
 -- Default settings for the addon.
 SwedgeTimer.defaults = {
@@ -74,6 +85,9 @@ SwedgeTimer.defaults = {
 		judgement_marker_enabled = true,
         bar_twist_color_enabled = false,
 		hide_when_not_ret = true,
+
+		-- Auto-hide setting
+		visibility_key = "always",
 
 		-- Lag calibration
 		lag_multiplier = 1.4,
@@ -340,14 +354,19 @@ SwedgeTimer.options = {
 			handler = SwedgeTimer,
 			order = 1,
 			args = {
-				hide_bar_when_inactive = {
-					type = "toggle",
-					order = 1,
-					name = "Auto-hide bar",
-					desc = "When enabled, hides the bar when there is no active seal or the player is out of combat.",
-					get = "GetValue",
-					set = "SetValue",
+				features_header = {
+					type = "header",
+					name = "Features",
+					order = 0.1,
 				},
+				-- hide_bar_when_inactive = {
+				-- 	type = "toggle",
+				-- 	order = 1,
+				-- 	name = "Auto-hide bar",
+				-- 	desc = "When enabled, hides the bar when there is no active seal or the player is out of combat.",
+				-- 	get = "GetValue",
+				-- 	set = "SetValue",
+				-- },
 				hide_when_not_ret = {
 					type = "toggle",
 					order = 1,
@@ -376,6 +395,28 @@ SwedgeTimer.options = {
 					set = "SetValue",
 				},
 				
+				------------------------------------------------------------------------------------
+				-- Visibility options, when to show the bar.
+				autohide_header = {
+					type="header",
+					order=5.0,
+					name="Bar visibility",
+				},
+				autohide_desc = {
+					type="description",
+					order=5.01,
+					name="Determines under what conditions the bar should be shown.",
+				},
+				visibility_key = {
+					type="select",
+					order=5.1,
+					name="Visibility",
+					desc="The visibility setting to use.",
+					values=bar_visibility_values,
+					sorting=bar_vis_ordering,
+					get = "GetValue",
+					set = "SetValue",
+				},
 
 				------------------------------------------------------------------------------------
 				-- marker options
