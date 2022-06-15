@@ -81,10 +81,10 @@ SwedgeTimer.defaults = {
 
 		-- Behaviour toggles
 		lag_detection_enabled = true,
-        hide_bar_when_inactive = false,
 		judgement_marker_enabled = true,
         bar_twist_color_enabled = false,
 		hide_when_not_ret = true,
+		enable_deadzone = true,
 
 		-- Auto-hide setting
 		visibility_key = "always",
@@ -119,7 +119,9 @@ SwedgeTimer.defaults = {
         gcd_texture_key = "Solid",
         backplane_texture_key = "Solid",
         border_texture_key = "None",
+		deadzone_texture_key = "Solid",
 		backplane_alpha = 0.85,
+
 
 		-- Border settings
 		border_mode_key = "Solid",
@@ -161,6 +163,9 @@ SwedgeTimer.defaults = {
 
 		-- GCD underlay bar colors
 		bar_color_gcd = {0.48, 0.48, 0.48, 1.0},
+
+		-- Deadzone bar colors
+		bar_color_deadzone = {0.72, 0.05, 0.05, 0.72},
 
     },
 
@@ -218,8 +223,9 @@ local set_bar_position = function()
 	frame.bar:SetPoint("TOPLEFT", 0, 0)
 	frame.bar:SetPoint("TOPLEFT", 0, 0)
 	frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
-	frame.left_text:SetPoint("TOPLEFT", 2, -(db.bar_height / 2) + (db.font_size / 2))
-	frame.right_text:SetPoint("TOPRIGHT", 2, -(db.bar_height / 2) + (db.font_size / 2))
+	frame.deadzone:SetPoint("TOPRIGHT", 0, 0)
+	frame.left_text:SetPoint("TOPLEFT", 3, -(db.bar_height / 2) + (db.font_size / 2))
+	frame.right_text:SetPoint("TOPRIGHT", -3, -(db.bar_height / 2) + (db.font_size / 2))
 	st.configure_bar_outline()
 end
 st.set_bar_position = set_bar_position
@@ -239,10 +245,6 @@ local set_fonts = function()
 end
 st.set_fonts = set_fonts
 
-local set_texts = function()
-end
-st.set_texts = set_texts
-
 local set_bar_size = function()
 	local db = SwedgeTimer.db.profile
 	local frame = st.bar.frame
@@ -253,7 +255,6 @@ local set_bar_size = function()
 	-- frame.gcd_bar:SetWidth(db.bar_width)
 	frame.gcd_bar:SetHeight(db.bar_height)
 	set_fonts()
-	set_texts()
 	st.set_markers()
 end
 
@@ -319,6 +320,13 @@ st.configure_bar_outline = function()
 
 end
 
+st.set_deadzone = function()
+	local db = SwedgeTimer.db.profile
+	local f = st.bar.frame.deadzone
+    f:SetTexture(SML:Fetch('statusbar', db.deadzone_texture_key))
+	f:SetVertexColor(unpack(db.bar_color_deadzone))
+end
+
 ------------------------------------------------------------------------------------
 -- Now configure the option table for our settings interface.
 SwedgeTimer.options = {
@@ -379,7 +387,7 @@ SwedgeTimer.options = {
 				judgement_marker_enabled = {
 					type = "toggle",
 					order = 2,
-					name = "Judgement Marker",
+					name = "Judgement marker",
 					desc = "When enabled, indicates where on the swing timer judgement will come off cooldown (if in "..
 					"a high value spell to judge like Seal of Blood).",
 					get = "GetValue",
@@ -393,6 +401,22 @@ SwedgeTimer.options = {
 					"dictated in the Appearance settings.",
 					get = "GetValue",
 					set = "SetValue",
+				},
+				enable_deadzone = {
+					type = "toggle",
+					order = 3,
+					name = "Enable deadzone",
+					desc = "When enabled, will display a shaded region at the end of the bar corresponding to the \"Deadzone\", where "..
+					"the player is locked into their current seal for this swing due to latency.",
+					get = "GetValue",
+					set = function(self, value)
+						SwedgeTimer.db.profile.enable_deadzone = value
+						if value then
+							st.bar.frame.deadzone:Show()
+						else
+							st.bar.frame.deadzone:Hide()
+						end
+					end,
 				},
 				
 				------------------------------------------------------------------------------------
@@ -542,7 +566,7 @@ SwedgeTimer.options = {
 					order=5.04,
 					type="description",
 					name="SwedgeTimer includes a lag compensation suite, that detects instances where the player will not be "..
-					"able to twist before their swing goes off due to lag.",
+					"able to twist before their swing goes off due to latency.",
 				},
 				lag_descriptions103 = {
 					order=5.05,
@@ -985,6 +1009,56 @@ SwedgeTimer.options = {
 					end,
 					disabled = function()
 						return SwedgeTimer.db.profile.border_mode_key ~= "Texture"
+					end,
+				},
+
+				------------------------------------------------------------------------------------
+				-- deadzone settings
+				deadzone_header = {
+					order = 7.0,
+					type = "header",
+					name = "Deadzone",
+				},
+				deadzone_desc = {
+					order = 7.01,
+					type = "description",
+					name = "The deadzone is the shaded region at the end of the bar indicating where the player cannot "..
+					"change seals before their swing due to latency. "..
+					"The deadzone must be enabled to be adjusted."
+				},
+				deadzone_texture_key = {
+					order = 7.1,
+					type = "select",
+					name = "Deadzone texture",
+					desc = "The texture of the deadzone bar.",
+					dialogControl = "LSM30_Statusbar",
+					values = SML:HashTable("statusbar"),
+					get = function(info) return SwedgeTimer.db.profile.deadzone_texture_key or SML.DefaultMedia.statusbar end,
+					set = function(self, key)
+						SwedgeTimer.db.profile.deadzone_texture_key = key
+						st.set_deadzone()
+					end,
+					disabled = function()
+						return SwedgeTimer.db.profile.enable_deadzone ~= true
+					end,
+				},
+
+				bar_color_deadzone = {
+					order=7.2,
+					type="color",
+					name="Bar color",
+					desc="The color of the deadzone bar",
+					hasAlpha=true,
+					get = function()
+						local tab = SwedgeTimer.db.profile.bar_color_deadzone
+						return tab[1], tab[2], tab[3], tab[4]
+					end,
+					set = function(self,r,g,b,a)
+						SwedgeTimer.db.profile.bar_color_deadzone = {r,g,b,a}
+						st.set_deadzone()
+					end,
+					disabled = function()
+						return SwedgeTimer.db.profile.enable_deadzone ~= true
 					end,
 				},
 

@@ -88,7 +88,20 @@ st.bar.init_bar_visuals = function()
     frame.gcd_bar:SetHeight(db.bar_height)
     frame.gcd_bar:SetTexture(SML:Fetch('statusbar', db.gcd_texture_key))
     frame.gcd_bar:SetVertexColor(unpack(db.bar_color_gcd))
-    frame.gcd_bar:SetDrawLayer("ARTWORK", -1)
+    frame.gcd_bar:SetDrawLayer("ARTWORK", -2)
+
+    -- Create the deadzone bar
+    frame.deadzone = frame:CreateTexture(nil, "ARTWORK")
+    frame.deadzone:SetPoint("TOPRIGHT", 0, 0)
+    st.set_deadzone()
+    -- frame.deadzone:SetTexture(SML:Fetch('statusbar', db.deadzone_texture_key))
+    -- -- frame.gcd_bar:SetVertexColor(unpack(db.bar_color_gcd))
+    -- frame.deadzone:SetVertexColor(0.72, 0.1, 0.1, 0.4)
+    frame.deadzone:SetHeight(db.bar_height)
+    frame.deadzone:SetDrawLayer("ARTWORK", -1)
+    if not db.enable_deadzone then
+        frame.deadzone:Hide()
+    end
 
     -- Create the attack speed/swing timer texts and init them
     frame.left_text = frame:CreateFontString(nil, "OVERLAY")
@@ -103,7 +116,6 @@ st.bar.init_bar_visuals = function()
     frame.right_text:SetJustifyV("CENTER")
     frame.right_text:SetJustifyH("RIGHT")
     st.set_fonts()
-    st.set_texts()
 
     -- Create the line markers
     frame.twist_line = frame:CreateLine() -- the twist window marker
@@ -148,6 +160,9 @@ st.bar.update_visuals_on_update = function()
     frame.bar:SetWidth(timer_width)
 	frame.bar:SetTexCoord(0, progress, 0, 1)
 	
+    -- Update the deadzone's width
+    frame.deadzone:SetWidth(st.bar.get_deadzone_width())
+
 	-- Set texts
 	local lookup = {
 		attack_speed=format("%.1f", st.utils.simple_round(speed, 0.1)),
@@ -253,6 +268,12 @@ end
 --=========================================================================================
 -- Funcs to recalculate/show/hide etc bar elements
 --=========================================================================================
+st.bar.get_deadzone_width = function()
+    local db = ST.db.profile
+    local frac = (st.player.lag_calibrated_ms / 1000) / st.player.current_weapon_speed
+    return frac * db.bar_width
+end
+
 st.bar.has_judgement_seal = function()
     -- returns true if the player has a seal they typically want to judge
     if st.player.match_seal('blood') then
@@ -321,6 +342,13 @@ st.bar.should_show_bar = function()
     -- if bar disabled, always return false
     if not db.bar_enabled then return false end
     
+    -- if enabled but Hide when not Ret, check that
+    if db.hide_when_not_ret then
+        if st.player.twohand_spec_points == 0 then
+            return false
+        end
+    end
+
     -- else use the bar visibility key to check if we should show
     if db.visibility_key == "always" then 
         return true

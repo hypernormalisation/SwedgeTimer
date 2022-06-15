@@ -116,7 +116,7 @@ end
 
 st.player.get_twohand_spec_points = function()
     st.player.twohand_spec_points = select(5,GetTalentInfo(3, 13))
-    -- print(st.player.twohand_spec_points)
+    -- print("points in 2h spec = "..tostring(st.player.twohand_spec_points))
 end
 
 -- Returns true if any points in 2h weapon spec
