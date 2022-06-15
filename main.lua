@@ -83,8 +83,7 @@ local function init_frame_event_handler(self, event, ...)
         if args[1] == "SwedgeTimer" then
 
             -- Only load the addon if the player is a paladin
-            local english_class = select(2, UnitClass("player")) -- same in all locales
-            if english_class ~= "PALADIN" then
+            if not st.utils.player_is_paladin() then
                 st.core.init_frame:SetScript("OnEvent", nil)
                 return
             end

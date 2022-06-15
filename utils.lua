@@ -48,6 +48,16 @@ st.utils.test_tolerance = function(n1, n2, tolerance)
 	end
 end
 
+-- Detect if the player is a paladin
+st.utils.player_is_paladin = function()
+	local english_class = select(2, UnitClass("player")) -- same in all locales
+	if english_class == "PALADIN" then
+		 return true
+	end
+	return false
+end
+
+
 --=======================================================================================
 -- a switch to control debug statements in module parsing
 -- NOTE: this does not incur any additional CPU usage in the addon's

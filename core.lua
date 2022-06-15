@@ -9,6 +9,8 @@ function SwedgeTimer:OnInitialize()
 	-- uses the "Default" profile instead of character-specific profiles
 	-- https://www.wowace.com/projects/ace3/pages/api/ace-db-3-0
 
+
+
 	local AC = LibStub("AceConfig-3.0")
 	local ACD = LibStub("AceConfigDialog-3.0")
 
@@ -25,19 +27,31 @@ function SwedgeTimer:OnInitialize()
 	AC:RegisterOptionsTable("SwedgeTimer_Profiles", profiles)
 	ACD:AddToBlizOptions("SwedgeTimer_Profiles", "Profiles", "SwedgeTimer")
 
-	-- https://www.wowace.com/projects/ace3/pages/api/ace-console-3-0
-	self:RegisterChatCommand("st", "SlashCommand")
-	self:RegisterChatCommand("swedgetimer", "SlashCommand")
+	
+	-- if the player is not a paladin, replace the command to open the menu with a dummy printout
+	local register_func_string = "SlashCommand"
+	if not st.utils.player_is_paladin() then
+		register_func_string = "NotPaladinSlashCommand"
+	end
+	self:RegisterChatCommand("st", register_func_string)
+	self:RegisterChatCommand("swedgetimer", register_func_string)
 
 end
 
 function SwedgeTimer:OnEnable()
+
+	-- only load if player is a paladin
+	if not st.utils.player_is_paladin() then return end
+
 	-- Sort out character information
 	st.player.get_twohand_spec_points()
 	st.player.guid = UnitGUID("player")
 	st.player.weapon_id = GetInventoryItemID("player", 16)
 	st.player.reset_swing_timer()
-	-- print("Talent points on load says: "..tostring(select(5,GetTalentInfo(3, 13))))
+end
+
+function SwedgeTimer:NotPaladinSlashCommand(input, editbox)
+	print('SwedgeTimer is disabled when the player character is not a Paladin.')
 end
 
 function SwedgeTimer:SlashCommand(input, editbox)
@@ -81,6 +95,10 @@ SwedgeTimer.defaults = {
 		bar_y_offset = -180,
 		bar_point = "CENTER",
 		bar_rel_point = "CENTER",
+
+		-- Frame strata/draw level
+		frame_strata = "MEDIUM",
+		draw_level = 10,
 
 		-- Bar textures
 		bar_texture_key = "Solid",
@@ -672,7 +690,7 @@ SwedgeTimer.options = {
 					order=4.2,
 					type="description",
 					name="If you don't understand how UI frames anchor, then either keep both anchors on "..
-					"CENTRE and enter offsets manually, or position the bar with the mouse.",
+					"CENTER and enter offsets manually, or position the bar with the mouse.",
 				},
 				bar_x_offset = {
 					type = "input",
@@ -737,6 +755,51 @@ SwedgeTimer.options = {
 						st.bar.frame:EnableMouse(not input)
 					end,
 				},
+
+				------------------------------------------------------------------------------------
+				-- strata/draw level options
+				strata_header = {
+					type = 'header',
+					name = 'Frame Strata',
+					order = 7.0,
+				},
+				strata_description = {
+					type = 'description',
+					name = 'The frame strata the addon should be drawn at. Anything higher than MEDIUM will be drawn over some in-game menus, so this is the highest strata allowed.',
+					order = 7.1,
+				},
+				frame_strata = {
+					order = 7.2,
+					type="select",
+					name = "Frame strata",
+					desc = "The frame strata the addon should be drawn at.",
+					values = {
+						BACKGROUND = "BACKGROUND",
+						LOW = "LOW",
+						MEDIUM = "MEDIUM",
+					},
+					get = "GetValue",
+					set = function(self, input)
+						SwedgeTimer.db.profile.frame_strata = input
+						st.bar.frame:SetFrameStrata(input)
+						st.bar.frame.backplane:SetFrameStrata(input)
+					end,
+				},
+				draw_level = {
+					type = "range",
+					order = 7.3,
+					name = "Draw level",
+					desc = "The bar's draw level within the frame strata.",
+					min = 1, max=100,
+					step=1,
+					get = "GetValue",
+					set = function(self, input)
+						SwedgeTimer.db.profile.draw_level = input
+						st.bar.frame:SetFrameLevel(input+1)
+						st.bar.frame.backplane:SetFrameLevel(input)
+					end
+				},
+
 			},
 		},
 

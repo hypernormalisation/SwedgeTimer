@@ -64,9 +64,17 @@ st.bar.init_bar_visuals = function()
 
     -- Create the backplane and border
     frame.backplane = CreateFrame("Frame", addon_name .. "BarBackdropFrame", frame, "BackdropTemplate")
+
+
+    -- Adjust the frame draw levels so the backplane is below the frame
+    frame:SetFrameLevel(db.draw_level+1)
+    frame.backplane:SetFrameLevel(db.draw_level)
+
+    frame:SetFrameStrata(db.frame_strata)
+    frame.backplane:SetFrameStrata(db.frame_strata)
+
+    -- Configure the backplane/outline
     st.configure_bar_outline()
-    frame.backplane:SetFrameStrata('LOW')
-    frame.backplane:SetBackdropColor(0, 0, 0, db.backplane_alpha)
 
     -- Create the swing timer bar
     frame.bar = frame:CreateTexture(nil,"ARTWORK")
@@ -216,8 +224,6 @@ end
 st.bar.set_marker_offsets = function()
     st.bar.set_twist_tick_offset()
     st.bar.set_gcd_marker_offsets()
-    -- st.bar.set_gcd1_tick_offset()
-    -- st.bar.set_gcd2_tick_offset()   
 end
 
 st.bar.update_bar_on_aura_change = function()
@@ -327,9 +333,6 @@ st.bar.should_show_bar = function()
 end
 
 st.bar.hide_gcd_bar = function()
-    -- function to "hide" the gcd bar by reducing the width to zero
-    -- instead of using the dedicated Hide method
-    -- print('Hiding GCD bar')
     st.bar.gcd_bar_width = 0
     st.bar.frame.gcd_bar:SetWidth(0)
     st.bar.frame.gcd_bar:Hide()
