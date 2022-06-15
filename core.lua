@@ -232,8 +232,8 @@ local set_fonts = function()
 	local opt_string = outline_map[db.font_outline_key]
 	frame.left_text:SetFont(font_path, db.font_size, opt_string)
 	frame.right_text:SetFont(font_path, db.font_size, opt_string)
-	frame.left_text:SetPoint("TOPLEFT", 2, -(db.bar_height / 2) + (db.font_size / 2))
-	frame.right_text:SetPoint("TOPRIGHT", -2, -(db.bar_height / 2) + (db.font_size / 2))
+	frame.left_text:SetPoint("TOPLEFT", 3, -(db.bar_height / 2) + (db.font_size / 2))
+	frame.right_text:SetPoint("TOPRIGHT", -3, -(db.bar_height / 2) + (db.font_size / 2))
 	frame.left_text:SetTextColor(unpack(db.font_color))
 	frame.right_text:SetTextColor(unpack(db.font_color))
 end
