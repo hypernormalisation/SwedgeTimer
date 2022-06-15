@@ -367,14 +367,6 @@ SwedgeTimer.options = {
 					name = "Features",
 					order = 0.1,
 				},
-				-- hide_bar_when_inactive = {
-				-- 	type = "toggle",
-				-- 	order = 1,
-				-- 	name = "Auto-hide bar",
-				-- 	desc = "When enabled, hides the bar when there is no active seal or the player is out of combat.",
-				-- 	get = "GetValue",
-				-- 	set = "SetValue",
-				-- },
 				hide_when_not_ret = {
 					type = "toggle",
 					order = 1,

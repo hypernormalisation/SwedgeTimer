@@ -94,9 +94,6 @@ st.bar.init_bar_visuals = function()
     frame.deadzone = frame:CreateTexture(nil, "ARTWORK")
     frame.deadzone:SetPoint("TOPRIGHT", 0, 0)
     st.set_deadzone()
-    -- frame.deadzone:SetTexture(SML:Fetch('statusbar', db.deadzone_texture_key))
-    -- -- frame.gcd_bar:SetVertexColor(unpack(db.bar_color_gcd))
-    -- frame.deadzone:SetVertexColor(0.72, 0.1, 0.1, 0.4)
     frame.deadzone:SetHeight(db.bar_height)
     frame.deadzone:SetDrawLayer("ARTWORK", -1)
     if not db.enable_deadzone then
@@ -132,10 +129,6 @@ st.bar.init_bar_visuals = function()
 
 	frame:Show()
     if st.debug then print('Successfully initialised all bar visuals.') end
-end
-
--- this function is called when a setting related to bar visuals is changed
-st.bar.UpdateVisualsOnSettingsChange = function()
 end
 
 --=========================================================================================
