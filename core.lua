@@ -455,7 +455,7 @@ SwedgeTimer.options = {
 					type = "range",
 					order = 5.52,
 					name="Deadzone scale factor",
-					desc="This multiplier will be applied to the player's world latency to the game world"..
+					desc="This multiplier will be applied to the player's latency to the game world"..
 					" to determine the size of the deadzone.",
 					min=0.1, max=2.0,
 					step=0.05,
