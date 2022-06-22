@@ -263,8 +263,8 @@ end
 --=========================================================================================
 st.bar.get_deadzone_width = function()
     local db = ST.db.profile
-    local frac = (st.player.lag_calibrated_ms / 1000) / st.player.current_weapon_speed
-    return frac * db.bar_width
+    local frac = (st.player.lag_world_ms / 1000) / st.player.current_weapon_speed
+    return frac * db.bar_width * db.deadzone_scale_factor
 end
 
 st.bar.has_judgement_seal = function()

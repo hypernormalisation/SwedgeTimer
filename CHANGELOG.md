@@ -1,3 +1,10 @@
+# 1.3.1
+
+## Features
+
+- The deadzone has been adjusted to use a more accurate representation of the input lag.
+- The deadzone may now be calibrated by the user in the settings menu through use of a scale factor; if the player is unable to twist just outside the deadzone, the scale factor should be increased; if the player is able to twist inside the deadzone, the scale factor should be decreased.
+
 # 1.3.0
 
 ## Features

@@ -122,6 +122,8 @@ SwedgeTimer.defaults = {
 		deadzone_texture_key = "Solid",
 		backplane_alpha = 0.85,
 
+		-- Deadzone scaling
+		deadzone_scale_factor = 1.0,
 
 		-- Border settings
 		border_mode_key = "Solid",
@@ -432,6 +434,36 @@ SwedgeTimer.options = {
 					sorting=bar_vis_ordering,
 					get = "GetValue",
 					set = "SetValue",
+				},
+
+				------------------------------------------------------------------------------------
+				-- Deadzone scaling.
+				deadzone_header = {
+					type="header",
+					order = 5.5,
+					name = "Deadzone scaling"					,
+				},
+				deadzone_desc = {
+					type="description",
+					order = 5.51,
+					name="The deadzone can be adjusted by a scale factor to better suit the unique"..
+					" properties of a player's connection to the game world. Decrease this value if you are able "..
+					"to twist inside your deadzone, or increase this value if you cannot twist when just "..
+					"outside the deadzone.",
+				},
+				deadzone_scale_factor = {
+					type = "range",
+					order = 5.52,
+					name="Deadzone scale factor",
+					desc="This multiplier will be applied to the player's world latency to the game world"..
+					" to determine the size of the deadzone.",
+					min=0.1, max=2.0,
+					step=0.05,
+					get="GetValue",
+					set="SetValue",
+					disabled = function()
+						return SwedgeTimer.db.profile.enable_deadzone == false
+					end,
 				},
 
 				------------------------------------------------------------------------------------
