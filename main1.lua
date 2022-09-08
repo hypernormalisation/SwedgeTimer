@@ -2,7 +2,7 @@
 -- Main module for creating the addon with AceAddon
 ------------------------------------------------------------------------------------
 local addon_name, st = ...
-local ST = LibStub("AceAddon-3.0"):NewAddon(addon_name, "AceConsole-3.0")
+local ST = LibStub("AceAddon-3.0"):NewAddon(addon_name, "AceConsole-3.0", "AceEvent-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local STL = LibStub("LibClassicSwingTimerAPI", true)
 -- local print = st.utils.print_msg
@@ -26,9 +26,7 @@ function ST:OnInitialize()
 	ACD:AddToBlizOptions(addon_name.."_Profiles", "Profiles", addon_name)
 
 	-- Slashcommands
-	local register_func_string = "SlashCommand"
-	self:RegisterChatCommand("st", register_func_string)
-	self:RegisterChatCommand("swedgetimer", register_func_string)
+	self:register_slashcommands()
 
 	-- Make the frame for the STL to push events to.
 	self:register_timer_callbacks()
@@ -38,6 +36,12 @@ end
 function ST:OnEnable()
 	-- Sort out character information
 	self.player_guid = UnitGUID("player")
+end
+
+------------------------------------------------------------------------------------
+-- The Internal timers
+------------------------------------------------------------------------------------
+function ST:set_timers()
 end
 
 ------------------------------------------------------------------------------------
@@ -84,6 +88,18 @@ end
 ------------------------------------------------------------------------------------
 -- Slashcommands
 ------------------------------------------------------------------------------------
+function ST:register_slashcommands()
+	local register_func_string = "SlashCommand"
+	self:RegisterChatCommand("st", register_func_string)
+	self:RegisterChatCommand("swedgetimer", register_func_string)
+	self:RegisterChatCommand("test1", "test1")
+end
+
+function ST:test1()
+	-- local b = OffhandHasWeapon()
+	-- print(b)
+end
+
 function ST:SlashCommand(input, editbox)
 	local ACD = LibStub("AceConfigDialog-3.0")
 	ACD:Open(addon_name.."_Options")
