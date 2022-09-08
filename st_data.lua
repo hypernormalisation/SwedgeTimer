@@ -58,22 +58,25 @@ st.data.sov_ids = get_tab(sov_ids)
 -- Finite cast time spell IDs that reset the swing timer.
 --=========================================================================================
 local cast_time_spells = {
-    -- Flash of Light
-    19750, 19939, 19940, 19941, 19942, 19943, 27137,
+
     -- Holy Light
-    635, 639, 647, 1026, 1042, 3472, 10328, 10329, 25292, 27135, 27136,
-    -- Avenger's Shield
-    31935, 32699, 32700,
-    -- Holy Wrath
-    2812, 10318, 27139,
-    -- Hammer of Wrath
-    24275, 24274, 24239, 27180,
+    635, 639, 647, 1026, 1042, 3472, 10328, 10329, 25292, 27135, 27136, 48781,
+    -- -- Avenger's Shield
+    -- 31935, 32699, 32700,
+    -- -- Holy Wrath
+    -- 2812, 10318, 27139,
+    -- -- Hammer of Wrath
+    -- 24275, 24274, 24239, 27180,
     -- Turn Evil
-    10326,
-    -- Turn Undead
-    2878, 5627,
+    -- 10326,
+    -- -- Turn Undead
+    -- 2878, 5627,
     -- Redemption
-    7328, 10322, 10324, 20772, 20773
+    7328, 10322, 10324, 20772, 20773,
+    -- -- Exorcism
+    -- 879, 5614, 5615, 10312, 10313, 10314, 27138, 48800, 
+    -- -- Flash of Light
+    -- 19750, 19939, 19940, 19941, 19942, 19943, 27137, 48784, 48785
 }
 st.data.reset_on_completion_spell_ids = get_tab(cast_time_spells)
 
@@ -85,6 +88,17 @@ local instant_cast_spells = {
     20066,
 }
 st.data.reset_on_cast_spell_ids = get_tab(instant_cast_spells)
+
+--=========================================================================================
+-- Spells that don't reset swing timer with Art of War proc, but otherwise do.
+--=========================================================================================
+local aow_exempt_spells = {
+    -- Exorcism
+    879, 5614, 5615, 10312, 10313, 10314, 27138, 48800,
+    -- Flash of Light
+    19750, 19939, 19940, 19941, 19942, 19943, 27137, 48784, 48785
+}
+st.data.aow_exempt_spell_ids = get_tab(aow_exempt_spells)
 
 --=========================================================================================
 -- End, if debug verify module was read.

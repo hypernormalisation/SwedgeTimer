@@ -2,7 +2,7 @@
 local addon_name, st = ...
 local print = st.utils.print_msg
 local SML = LibStub("LibSharedMedia-3.0")
-local ST = LibStub("AceAddon-3.0"):GetAddon("SwedgeTimer")
+local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
 
 --=========================================================================================
 -- BAR SETTINGS 
@@ -91,14 +91,14 @@ st.bar.init_bar_visuals = function()
     frame.gcd_bar:SetDrawLayer("ARTWORK", -2)
 
     -- Create the deadzone bar
-    frame.deadzone = frame:CreateTexture(nil, "ARTWORK")
-    frame.deadzone:SetPoint("TOPRIGHT", 0, 0)
-    st.set_deadzone()
-    frame.deadzone:SetHeight(db.bar_height)
-    frame.deadzone:SetDrawLayer("ARTWORK", -1)
-    if not db.enable_deadzone then
-        frame.deadzone:Hide()
-    end
+    -- frame.deadzone = frame:CreateTexture(nil, "ARTWORK")
+    -- frame.deadzone:SetPoint("TOPRIGHT", 0, 0)
+    -- st.set_deadzone()
+    -- frame.deadzone:SetHeight(db.bar_height)
+    -- frame.deadzone:SetDrawLayer("ARTWORK", -1)
+    -- if not db.enable_deadzone then
+    --     frame.deadzone:Hide()
+    -- end
 
     -- Create the attack speed/swing timer texts and init them
     frame.left_text = frame:CreateFontString(nil, "OVERLAY")
@@ -115,8 +115,8 @@ st.bar.init_bar_visuals = function()
     st.set_fonts()
 
     -- Create the line markers
-    frame.twist_line = frame:CreateLine() -- the twist window marker
-    frame.twist_line:SetDrawLayer("OVERLAY", -1)
+    -- frame.twist_line = frame:CreateLine() -- the twist window marker
+    -- frame.twist_line:SetDrawLayer("OVERLAY", -1)
     frame.gcd1_line = frame:CreateLine() -- the first gcd possible before a twist
     frame.gcd1_line:SetDrawLayer("OVERLAY", -1)
     frame.gcd2_line = frame:CreateLine()
@@ -154,7 +154,7 @@ st.bar.update_visuals_on_update = function()
 	frame.bar:SetTexCoord(0, progress, 0, 1)
 	
     -- Update the deadzone's width
-    frame.deadzone:SetWidth(st.bar.get_deadzone_width())
+    -- frame.deadzone:SetWidth(st.bar.get_deadzone_width())
 
 	-- Set texts
 	local lookup = {
@@ -168,24 +168,24 @@ st.bar.update_visuals_on_update = function()
     frame.left_text:SetText(left)
     frame.right_text:SetText(right)
 
-    -- If SoC/SoR, bar colour is time/context sensitive. Deal with that here.
-    if st.player.is_twist_seal_active() then
-        if st.player.n_active_seals == 1 then
-            local twist_window_time = st.bar.get_twist_window_time_before_swing()
-            local gcd1_time = select(1, st.bar.get_gcd_times_before_swing())
-            if st.player.twist_impossible then
-                st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_cant_twist))
-            elseif st.player.swing_timer < twist_window_time then 
-                st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_command))
-            else
-                if st.player.swing_timer > gcd1_time then            
-                    st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_command))
-                else
-                    st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_warning))
-                end
-            end        
-        end
-    end
+    -- -- If SoC/SoR, bar colour is time/context sensitive. Deal with that here.
+    -- if st.player.is_twist_seal_active() then
+    --     if st.player.n_active_seals == 1 then
+    --         local twist_window_time = st.bar.get_twist_window_time_before_swing()
+    --         local gcd1_time = select(1, st.bar.get_gcd_times_before_swing())
+    --         if st.player.twist_impossible then
+    --             st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_cant_twist))
+    --         elseif st.player.swing_timer < twist_window_time then 
+    --             st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_command))
+    --         else
+    --             if st.player.swing_timer > gcd1_time then            
+    --                 st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_command))
+    --             else
+    --                 st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_warning))
+    --             end
+    --         end        
+    --     end
+    -- end
 end
 
 --=========================================================================================
@@ -199,11 +199,10 @@ end
 st.bar.update_bar_on_timer_full = function()
     -- Function called when the bar fills up to change any bar visuals
     st.bar.set_gcd_bar_width()
-    st.bar.frame.twist_line:Hide()
+    -- st.bar.frame.twist_line:Hide()
     st.bar.frame.gcd1_line:Hide()
     st.bar.frame.gcd2_line:Hide()
 end
-
 
 st.bar.update_bar_on_swing_reset = function()
     -- Function called when the swing timer resets to change any bar visuals
@@ -261,23 +260,23 @@ end
 --=========================================================================================
 -- Funcs to recalculate/show/hide etc bar elements
 --=========================================================================================
-st.bar.get_deadzone_width = function()
-    local db = ST.db.profile
-    local frac = (st.player.lag_world_ms / 1000) / st.player.current_weapon_speed
-    return frac * db.bar_width * db.deadzone_scale_factor
-end
+-- st.bar.get_deadzone_width = function()
+--     local db = ST.db.profile
+--     local frac = (st.player.lag_world_ms / 1000) / st.player.current_weapon_speed
+--     return frac * db.bar_width * db.deadzone_scale_factor
+-- end
 
 st.bar.has_judgement_seal = function()
     -- returns true if the player has a seal they typically want to judge
-    if st.player.match_seal('blood') then
-        return true
-    elseif st.player.match_seal('righteousness') then
-        return true
-    elseif st.player.match_seal('vengeance') then
-        return true
-    elseif st.player.match_seal('justice') then
-        return true
-    end
+    -- if st.player.match_seal('blood') then
+    --     return true
+    -- elseif st.player.match_seal('righteousness') then
+    --     return true
+    -- elseif st.player.match_seal('vengeance') then
+    --     return true
+    -- elseif st.player.match_seal('justice') then
+    --     return true
+    -- end
     return false
 end
 
@@ -335,12 +334,12 @@ st.bar.should_show_bar = function()
     -- if bar disabled, always return false
     if not db.bar_enabled then return false end
     
-    -- if enabled but Hide when not Ret, check that
-    if db.hide_when_not_ret then
-        if st.player.twohand_spec_points == 0 then
-            return false
-        end
-    end
+    -- -- if enabled but Hide when not Ret, check that
+    -- if db.hide_when_not_ret then
+    --     if st.player.twohand_spec_points == 0 then
+    --         return false
+    --     end
+    -- end
 
     -- else use the bar visibility key to check if we should show
     if db.visibility_key == "always" then 
@@ -349,16 +348,18 @@ st.bar.should_show_bar = function()
         if st.core.in_combat then 
             return true
         end
-    elseif db.visibility_key == "active_seal" then
-        if st.player.n_active_seals > 0 then
-            return true
-        end
-    elseif db.visibility_key == "in_combat_or_active_seal" then
-        if st.core.in_combat or st.player.n_active_seals > 0 then
-            return true
-        end
+    -- elseif db.visibility_key == "hidden" then
+    --     return false
+    -- end
+    -- elseif db.visibility_key == "active_seal" then
+    --     if st.player.n_active_seals > 0 then
+    --         return true
+    --     end
+    -- elseif db.visibility_key == "in_combat_or_active_seal" then
+    --     if st.core.in_combat or st.player.n_active_seals > 0 then
+    --         return true
+    --     end
     end
-    
     return false
 
 end
@@ -416,18 +417,18 @@ st.bar.show_or_hide_ticks = function()
 
     -- always hide ticks at full swing timer
     if st.player.swing_timer == 0 then
-        st.bar.frame.twist_line:Hide()
+        -- st.bar.frame.twist_line:Hide()
         st.bar.frame.gcd1_line:Hide()
         st.bar.frame.gcd2_line:Hide()
         return
     end
 
-    -- Twist line
-    if st.bar.should_draw_twist_window() then
-        frame.twist_line:Show()
-    else
-        frame.twist_line:Hide()
-    end
+    -- -- Twist line
+    -- if false then --st.bar.should_draw_twist_window() then
+    --     -- frame.twist_line:Show()
+    -- else
+    --     frame.twist_line:Hide()
+    -- end
     -- First GCD line
     if st.bar.should_draw_gcd1_window() then
         frame.gcd1_line:Show()
@@ -445,9 +446,9 @@ end
 -- Determine wether or not to draw the twist line
 -- Hide if we are not in SoC or the swing bar is full
 st.bar.should_draw_twist_window = function()
-    if st.player.is_twist_seal_active() then
-        return true
-    end
+    -- if st.player.is_twist_seal_active() then
+    --     return true
+    -- end
     return false
 end
 
@@ -494,8 +495,8 @@ st.bar.set_twist_tick_offset = function()
     local offset = bar_fraction * db.bar_width * -1
     -- print('twist tick time = ' .. time_value)
     st.bar.twist_tick_offset = offset
-    st.bar.frame.twist_line:SetStartPoint("TOPRIGHT", offset, 0)
-    st.bar.frame.twist_line:SetEndPoint("BOTTOMRIGHT", offset, 0)
+    -- st.bar.frame.twist_line:SetStartPoint("TOPRIGHT", offset, 0)
+    -- st.bar.frame.twist_line:SetEndPoint("BOTTOMRIGHT", offset, 0)
 end
 
 st.bar.get_gcd_times_before_swing = function()
@@ -538,13 +539,13 @@ end
 -- function to determine if any seal we are happy to run with is up
 -- i.e blood justice or vengeance
 st.bar.is_running_seal_active = function()
-    if st.player.active_seals["blood"] ~= nil then
-        return true
-    elseif st.player.active_seals["justice"] ~= nil then
-        return true
-    elseif st.player.active_seals["vengeance"] ~= nil then
-        return true
-    end
+    -- if st.player.active_seals["blood"] ~= nil then
+    --     return true
+    -- elseif st.player.active_seals["justice"] ~= nil then
+    --     return true
+    -- elseif st.player.active_seals["vengeance"] ~= nil then
+    --     return true
+    -- end
     return false
 end
 
@@ -554,34 +555,34 @@ st.bar.set_bar_color = function()
 
     local db = ST.db.profile
     
-    -- if no seal return default color
-    if st.player.n_active_seals == 0 then
-        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_default))
-    -- if we're currently twisting return twist color
-    elseif st.player.n_active_seals == 2 and db.bar_twist_color_enabled then
-        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_twisting))
+    -- -- if no seal return default color
+    -- if st.player.n_active_seals == 0 then
+    --     st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_default))
+    -- -- if we're currently twisting return twist color
+    -- elseif st.player.n_active_seals == 2 and db.bar_twist_color_enabled then
+    --     st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_twisting))
 
-    -- if no special condition, match a seal color.
-    elseif st.player.match_seal('command') then
-        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_command))
-    elseif st.player.match_seal('righteousness') then
-        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_righteousness))
-    elseif st.player.match_seal('blood') then
-        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_blood))
-    elseif st.player.match_seal('vengeance') then
-        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_vengeance))
-    elseif st.player.match_seal('wisdom') then
-        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_wisdom))
-    elseif st.player.match_seal('light') then
-        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_light))        
-    elseif st.player.match_seal('justice') then
-        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_justice))
-    elseif st.player.match_seal('crusader') then
-        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_crusader))
-    else
+    -- -- if no special condition, match a seal color.
+    -- elseif st.player.match_seal('command') then
+    --     st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_command))
+    -- elseif st.player.match_seal('righteousness') then
+    --     st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_righteousness))
+    -- elseif st.player.match_seal('blood') then
+    --     st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_blood))
+    -- elseif st.player.match_seal('vengeance') then
+    --     st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_vengeance))
+    -- elseif st.player.match_seal('wisdom') then
+    --     st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_wisdom))
+    -- elseif st.player.match_seal('light') then
+    --     st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_light))        
+    -- elseif st.player.match_seal('justice') then
+    --     st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_justice))
+    -- elseif st.player.match_seal('crusader') then
+    --     st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_crusader))
+    -- else
         -- if we get to the end return the default color
-        st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_default))
-    end
+    st.bar.frame.bar:SetVertexColor(unpack(db.bar_color_default))
+    -- end
 end
 
 --=========================================================================================

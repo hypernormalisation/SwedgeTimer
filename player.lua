@@ -2,7 +2,7 @@ local addon_name, st = ...
 local print = st.utils.print_msg
 local tolerance = st.utils.test_tolerance
 local floor = st.utils.simple_round
-local ST = LibStub("AceAddon-3.0"):GetAddon("SwedgeTimer")
+local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
 
 --=========================================================================================
 -- PLAYER SETTINGS 
@@ -21,6 +21,9 @@ st.player.equipment_update_flag = false
 
 -- Flag to detect when to reset the timer from the player mounting up.
 st.player.is_mounted = false
+
+-- Flag for when the player has an Art of War proc.
+st.player.has_aow = false
 
 -- containers for seal information
 st.player.n_active_seals = 0
@@ -388,6 +391,7 @@ st.player.parse_auras = function()
     st.player.has_bloodlust = false
     st.player.has_breath_haste = false
     st.player.active_seals = {}
+    st.player.has_aow = false
 
     -- iterate over the current player auras and process seals
     -- and other buffs of interest
@@ -439,7 +443,13 @@ st.player.parse_auras = function()
         -- Catch KJ breath buff
         elseif spell_id == 45856 then
             st.player.has_breath_haste = true           
+        
+
+        -- Art of War
+        elseif spell_id == 59578 then
+            st.player.has_aow = true
         end
+
         counter = counter + 1
     end
 end
@@ -508,14 +518,27 @@ st.player.OnPlayerSpellCast = function(args)
     end
 
     -- Detect casts that reset the timer on cast
-    if st.data.reset_on_cast_spell_ids[spell_id] ~= nil then
-        st.player.reset_swing_timer()
-
-    -- Detect casts that reset the timer on completion and log
-    -- the spell guid to check it against any completing spells.
+    if st.data.aow_exempt_spell_ids[spell_id] ~= nil then
+        if not st.player.has_aow then
+            st.player.reset_swing_timer()
+        else
+            print('doing a reset watch')
+            st.player.currently_casting_spell_guid = spell_guid
+        end
     elseif st.data.reset_on_completion_spell_ids[spell_id] ~= nil then
+        print('doing a reset')
         st.player.currently_casting_spell_guid = spell_guid
     end
+
+
+    if st.data.reset_on_cast_spell_ids[spell_id] ~= nil then
+        st.player.reset_swing_timer()
+    end
+    -- Detect casts that reset the timer on completion and log
+    -- the spell guid to check it against any completing spells.
+    
+    -- Spells that don't reset swing timer when AoW is procced
+
 
 end
 
@@ -530,10 +553,10 @@ st.player.OnPlayerSpellCompletion = function(args)
 
     local spell_id = args[3]
     -- if this is the "attack" spell id 6603, switch the attack state
-    if spell_id == 6603 then
-        st.player.is_attacking = not st.player.is_attacking
-        -- print('player is attacking = '..tostring(st.player.is_attacking))
-    end
+    -- if spell_id == 6603 then
+    --     st.player.is_attacking = not st.player.is_attacking
+    --     print('player is attacking = '..tostring(st.player.is_attacking))
+    -- end
     -- also clear the last spell cast timestamp
     st.player.tracked_spell_cast_start_timestamp = nil
 
@@ -547,7 +570,7 @@ st.player.on_spell_interrupt = function()
 
     -- also check if we need to add time to the swing timer under
     -- certain circumstances
-    if st.player.swing_timer == 0 and st.player.is_attacking then
+    if st.player.swing_timer == 0 and IsPlayerAttacking("target") then
         if st.player.tracked_spell_cast_start_timestamp ~= nil then
             local time_now = GetTime()
             local deduction = time_now - st.player.swing_complete_timestamp
@@ -807,20 +830,20 @@ st.player.frame_on_event = function(self, event, ...)
         -- print('spell update cd triggering a GCD')
         st.player.on_spell_update_cooldown()
         st.player.process_possible_spell_cooldown(false)
-    
-    elseif event == "EXECUTE_CHAT_LINE" then
-        -- If the command is stopattack or startattack, change attacking state
-        if args[1] == "/stopattack" then
-            st.player.is_attacking = false
-            -- print('player is attacking = '..tostring(st.player.is_attacking))
-        elseif args[1] == "/startattack" then
-            st.player.is_attacking = true  
-            -- print('player is attacking = '..tostring(st.player.is_attacking))
-        end        
-    
-    elseif event == "PLAYER_TARGET_SET_ATTACKING" then
-        st.player.is_attacking = true
     end
+    -- elseif event == "EXECUTE_CHAT_LINE" then
+    --     -- If the command is stopattack or startattack, change attacking state
+    --     if args[1] == "/stopattack" then
+    --         st.player.is_attacking = false
+    --         -- print('player is attacking = '..tostring(st.player.is_attacking))
+    --     elseif args[1] == "/startattack" then
+    --         st.player.is_attacking = true  
+    --         -- print('player is attacking = '..tostring(st.player.is_attacking))
+    --     end        
+    
+    -- elseif event == "PLAYER_TARGET_SET_ATTACKING" then
+    --     st.player.is_attacking = true
+    -- end
 
 end
 

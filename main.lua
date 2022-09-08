@@ -3,7 +3,7 @@ local addon_name, st = ...
 -- local L = st.localization_table
 local version = "@project-version@"
 local load_message = "version " .. version .. " loaded!"
-local ST = LibStub("AceAddon-3.0"):GetAddon("SwedgeTimer")
+local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
 local print = st.utils.print_msg
 
 st.core = {}
@@ -80,13 +80,13 @@ st.core.init_frame = CreateFrame("Frame", addon_name .. "InitFrame", UIParent)
 local function init_frame_event_handler(self, event, ...)
     local args = {...}
     if event == "ADDON_LOADED" then
-        if args[1] == "SwedgeTimer" then
+        if args[1] == "SwedgeTimerWotLK" then
 
-            -- Only load the addon if the player is a paladin
-            if not st.utils.player_is_paladin() then
-                st.core.init_frame:SetScript("OnEvent", nil)
-                return
-            end
+            -- -- Only load the addon if the player is a paladin
+            -- if not st.utils.player_is_paladin() then
+            --     st.core.init_frame:SetScript("OnEvent", nil)
+            --     return
+            -- end
         
             -- else, load it
             init_addon()

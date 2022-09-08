@@ -1,14 +1,11 @@
-## Interface: 20504
+## Interface: 30400
 ## Title: SwedgeTimer
-## Notes: Seal twisting timer bar for BCC Ret Paladins.
+## Notes: General purpose swing timer addon for WotLK Classic.
 ## Author: Swedge
 ## Version: "@project-version@"
 ## DefaultState: enabled
 ## OptDeps: Ace3, LibSharedMedia-3.0, LibStub
 ## SavedVariables: SwedgeTimerDB
-## X-Wago-ID: 9rN4dMND
-## X-WoWI-ID: 26295
-## X-Curse-Project-ID: 621214
 
 Libs\LibStub\LibStub.lua
 Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
