@@ -5,7 +5,7 @@ local addon_name, st = ...
 local ST = LibStub("AceAddon-3.0"):NewAddon(addon_name, "AceConsole-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local STL = LibStub("LibClassicSwingTimerAPI", true)
-local print = st.utils.print_msg
+-- local print = st.utils.print_msg
 
 ------------------------------------------------------------------------------------
 -- The init/enable/disable
@@ -36,40 +36,55 @@ function ST:OnInitialize()
 end
 
 function ST:OnEnable()
-	-- only load if player is a paladin
-	-- if not st.utils.player_is_paladin() then return end
-
 	-- Sort out character information
-	-- st.player.get_twohand_spec_points()
-	st.player.guid = UnitGUID("player")
-	st.player.weapon_id = GetInventoryItemID("player", 16)
-	st.player.reset_swing_timer()
+	self.player_guid = UnitGUID("player")
 end
 
 ------------------------------------------------------------------------------------
 -- The Event handlers for the STL
 ------------------------------------------------------------------------------------
 function ST:register_timer_callbacks()
-	self.tf = CreateFrame(addon_name.."TimerFrame", nil)
-	STL.RegisterCallback(self.tf, "SWING_TIMER_START", self.timer_event_handler)
-	-- STL.RegisterCallback(self.tf, "SWING_TIMER_UPDATE", self.timer_event_handler)
-	-- STL.RegisterCallback(self.tf, "SWING_TIMER_CLIPPED", self.timer_event_handler)
-	-- STL.RegisterCallback(self.tf, "SWING_TIMER_PAUSED", self.timer_event_handler)
-	-- STL.RegisterCallback(self.tf, "SWING_TIMER_STOP", self.timer_event_handler)
-	-- STL.RegisterCallback(self.tf, "SWING_TIMER_DELTA", self.timer_event_handler)
+	STL.RegisterCallback(self, "SWING_TIMER_START", self.timer_event_handler)
+	STL.RegisterCallback(self, "SWING_TIMER_UPDATE", self.timer_event_handler)
+	STL.RegisterCallback(self, "SWING_TIMER_CLIPPED", self.timer_event_handler)
+	STL.RegisterCallback(self, "SWING_TIMER_PAUSED", self.timer_event_handler)
+	STL.RegisterCallback(self, "SWING_TIMER_STOP", self.timer_event_handler)
+	STL.RegisterCallback(self, "SWING_TIMER_DELTA", self.timer_event_handler)
 end
 
-function ST:SWING_TIMER_START(event)
-
+function ST:SWING_TIMER_START(speed, expiration_time, hand)
+	print("I got called!")
+	print(speed)
+	print(expiration_time)
+	print(hand)
 end
 
-function ST:timer_event_handler(event, ...)
-	return self[event](self.tf, event, ...)
+function ST:SWING_TIMER_UPDATE(speed, expiration_time, hand)
 end
 
+function ST:SWING_TIMER_CLIPPED(hand)
+end
 
+function ST:SWING_TIMER_PAUSED(hand)
+end
 
-function SwedgeTimer:SlashCommand(input, editbox)
+function ST:SWING_TIMER_STOP(hand)
+end
+
+function ST:SWING_TIMER_DELTA(hand)
+end
+
+-- Stub to call the appropriate handler.
+-- Doesn't play well with self syntax sugar.
+function ST.timer_event_handler(event, ...)
+	print(event)
+	ST[event](event, ...)
+end
+
+------------------------------------------------------------------------------------
+-- Slashcommands
+------------------------------------------------------------------------------------
+function ST:SlashCommand(input, editbox)
 	local ACD = LibStub("AceConfigDialog-3.0")
 	ACD:Open(addon_name.."_Options")
 end
