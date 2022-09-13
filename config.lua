@@ -20,6 +20,117 @@ ST.defaults = {
 		show_oh = true,
 		show_ranged = true,
 
+		-- GCD underlay
+		show_gcd_underlay = true,
+
+		-- Mainhand options
+		mainhand = {
+			-- behaviour
+			enabled = true,
+			-- Bar dimensions
+			bar_height = 32,
+			bar_width = 345,
+			-- Bar positioning
+			bar_locked = true,
+			bar_x_offset = 0,
+			bar_y_offset = -180,
+			bar_point = "CENTER",
+			bar_rel_point = "CENTER",
+			-- Bar textures
+			bar_texture_key = "Solid",
+        	gcd_texture_key = "Solid",
+        	backplane_texture_key = "Solid",
+        	border_texture_key = "None",
+			deadzone_texture_key = "Solid",
+			backplane_alpha = 0.85,
+			-- Colors
+			bar_color_default = {0.14, 0.66, 0.14, 1.0},
+			bar_color_gcd = {0.48, 0.48, 0.48, 1.0},
+			bar_color_deadzone = {0.72, 0.05, 0.05, 0.72},
+			-- Font settings
+			font_size = 16,
+			font_color = {1.0, 1.0, 1.0, 1.0},
+			text_font = LSM.DefaultMedia.font,
+			font_outline_key = "outline",
+        	left_text = "attack_speed",
+        	right_text = "swing_timer",
+			-- Border settings
+			border_mode_key = "Solid",
+			backplane_outline_width = 2,
+		},
+
+		-- Offhand options
+		offhand = {
+			-- behaviour
+			enabled = true,
+			-- Bar dimensions
+			bar_height = 32,
+			bar_width = 345,
+			-- Bar positioning
+			bar_locked = true,
+			bar_x_offset = 0,
+			bar_y_offset = -80,
+			bar_point = "CENTER",
+			bar_rel_point = "CENTER",
+			-- Bar textures
+			bar_texture_key = "Solid",
+        	gcd_texture_key = "Solid",
+        	backplane_texture_key = "Solid",
+        	border_texture_key = "None",
+			deadzone_texture_key = "Solid",
+			backplane_alpha = 0.85,
+			-- Colors
+			bar_color_default = {0.14, 0.66, 0.14, 1.0},
+			bar_color_gcd = {0.48, 0.48, 0.48, 1.0},
+			bar_color_deadzone = {0.72, 0.05, 0.05, 0.72},
+			-- Font settings
+			font_size = 16,
+			font_color = {1.0, 1.0, 1.0, 1.0},
+			text_font = LSM.DefaultMedia.font,
+			font_outline_key = "outline",
+        	left_text = "attack_speed",
+        	right_text = "swing_timer",
+			-- Border settings
+			border_mode_key = "Solid",
+			backplane_outline_width = 2,
+		},
+
+		-- Ranged options
+		ranged = {
+			-- behaviour
+			enabled = true,
+			-- Bar dimensions
+			bar_height = 32,
+			bar_width = 345,
+			-- Bar positioning
+			bar_locked = true,
+			bar_x_offset = 0,
+			bar_y_offset = 20,
+			bar_point = "CENTER",
+			bar_rel_point = "CENTER",
+			-- Bar textures
+			bar_texture_key = "Solid",
+			gcd_texture_key = "Solid",
+			backplane_texture_key = "Solid",
+			border_texture_key = "None",
+			deadzone_texture_key = "Solid",
+			backplane_alpha = 0.85,
+			-- Colors
+			bar_color_default = {0.14, 0.66, 0.14, 1.0},
+			bar_color_gcd = {0.48, 0.48, 0.48, 1.0},
+			bar_color_deadzone = {0.72, 0.05, 0.05, 0.72},
+			-- Font settings
+			font_size = 16,
+			font_color = {1.0, 1.0, 1.0, 1.0},
+			text_font = LSM.DefaultMedia.font,
+			font_outline_key = "outline",
+			left_text = "attack_speed",
+			right_text = "swing_timer",
+			-- Border settings
+			border_mode_key = "Solid",
+			backplane_outline_width = 2,
+		},
+		
 		-- Behaviour toggles
 		lag_detection_enabled = true,
 		judgement_marker_enabled = true,
@@ -104,6 +215,7 @@ local outline_map = {
 	outline="OUTLINE",
 	thick_outline="THICKOUTLINE",
 }
+ST.outline_map = outline_map
 
 local bar_border_modes = {
 	Solid="Solid",
@@ -143,48 +255,48 @@ local valid_anchor_points = {
 
 ------------------------------------------------------------------------------------
 -- Functions to apply settings to the UI elements.
-local set_bar_position = function()
-	local db = ST.db.profile
-	local frame = st.bar.frame
-	frame:ClearAllPoints()
-	frame:SetPoint(db.bar_point, UIParent, db.bar_rel_point, db.bar_x_offset, db.bar_y_offset)
-	frame.bar:SetPoint("TOPLEFT", 0, 0)
-	frame.bar:SetPoint("TOPLEFT", 0, 0)
-	frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
-	frame.deadzone:SetPoint("TOPRIGHT", 0, 0)
-	frame.left_text:SetPoint("TOPLEFT", 3, -(db.bar_height / 2) + (db.font_size / 2))
-	frame.right_text:SetPoint("TOPRIGHT", -3, -(db.bar_height / 2) + (db.font_size / 2))
-	st.configure_bar_outline()
-end
-st.set_bar_position = set_bar_position
+-- local set_bar_position = function()
+-- 	local db = ST.db.profile
+-- 	local frame = st.bar.frame
+-- 	frame:ClearAllPoints()
+-- 	frame:SetPoint(db.bar_point, UIParent, db.bar_rel_point, db.bar_x_offset, db.bar_y_offset)
+-- 	frame.bar:SetPoint("TOPLEFT", 0, 0)
+-- 	frame.bar:SetPoint("TOPLEFT", 0, 0)
+-- 	frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
+-- 	frame.deadzone:SetPoint("TOPRIGHT", 0, 0)
+-- 	frame.left_text:SetPoint("TOPLEFT", 3, -(db.bar_height / 2) + (db.font_size / 2))
+-- 	frame.right_text:SetPoint("TOPRIGHT", -3, -(db.bar_height / 2) + (db.font_size / 2))
+-- 	st.configure_bar_outline()
+-- end
+-- st.set_bar_position = set_bar_position
 
-local set_fonts = function()
-	local db = ST.db.profile
-	local frame = st.bar.frame
-	local font_path = LSM:Fetch('font', db.text_font)
+-- local set_fonts = function()
+-- 	local db = ST.db.profile
+-- 	local frame = ST.mainhand.frame
+-- 	local font_path = LSM:Fetch('font', db.text_font)
 
-	local opt_string = outline_map[db.font_outline_key]
-	frame.left_text:SetFont(font_path, db.font_size, opt_string)
-	frame.right_text:SetFont(font_path, db.font_size, opt_string)
-	frame.left_text:SetPoint("TOPLEFT", 3, -(db.bar_height / 2) + (db.font_size / 2))
-	frame.right_text:SetPoint("TOPRIGHT", -3, -(db.bar_height / 2) + (db.font_size / 2))
-	frame.left_text:SetTextColor(unpack(db.font_color))
-	frame.right_text:SetTextColor(unpack(db.font_color))
-end
-st.set_fonts = set_fonts
+-- 	local opt_string = outline_map[db.font_outline_key]
+-- 	frame.left_text:SetFont(font_path, db.font_size, opt_string)
+-- 	frame.right_text:SetFont(font_path, db.font_size, opt_string)
+-- 	frame.left_text:SetPoint("TOPLEFT", 3, -(db.bar_height / 2) + (db.font_size / 2))
+-- 	frame.right_text:SetPoint("TOPRIGHT", -3, -(db.bar_height / 2) + (db.font_size / 2))
+-- 	frame.left_text:SetTextColor(unpack(db.font_color))
+-- 	frame.right_text:SetTextColor(unpack(db.font_color))
+-- end
+-- st.set_fonts = set_fonts
 
-local set_bar_size = function()
-	local db = ST.db.profile
-	local frame = st.bar.frame
-	frame:SetWidth(db.bar_width)
-	frame:SetHeight(db.bar_height)
-	frame.bar:SetWidth(db.bar_width)
-	frame.bar:SetHeight(db.bar_height)
-	-- frame.gcd_bar:SetWidth(db.bar_width)
-	frame.gcd_bar:SetHeight(db.bar_height)
-	set_fonts()
-	st.set_markers()
-end
+-- local set_bar_size = function()
+-- 	local db = ST.db.profile
+-- 	local frame = st.bar.frame
+-- 	frame:SetWidth(db.bar_width)
+-- 	frame:SetHeight(db.bar_height)
+-- 	frame.bar:SetWidth(db.bar_width)
+-- 	frame.bar:SetHeight(db.bar_height)
+-- 	-- frame.gcd_bar:SetWidth(db.bar_width)
+-- 	frame.gcd_bar:SetHeight(db.bar_height)
+-- 	set_fonts()
+-- 	st.set_markers()
+-- end
 
 -- local set_marker_widths = function()
 -- 	local frame = st.bar.frame
@@ -214,47 +326,47 @@ end
 
 -- Function to be called whenever the state of the backdrop or texture
 -- outline are changed.
-function ST:configure_bar_outline()
-	local frame = self.mainhand.frame
-	local db = self.db.profile
-	local mode = db.border_mode_key
+-- function ST:configure_bar_outline()
+-- 	local frame = self.mainhand.frame
+-- 	local db = self.db.profile
+-- 	local mode = db.border_mode_key
 	
-	local texture_key = db.border_texture_key
-    local tv = db.backplane_outline_width
-	-- 8 corresponds to no border
-	tv = tv + 8
+-- 	local texture_key = db.border_texture_key
+--     local tv = db.backplane_outline_width
+-- 	-- 8 corresponds to no border
+-- 	tv = tv + 8
 
-	-- Switch settings based on mode
-	if mode == "None" then
-		texture_key = "None"
-		tv = 8
-	elseif mode == "Texture" then
-		tv = 8
-	elseif mode == "Solid" then
-		texture_key = "None"
-	end
+-- 	-- Switch settings based on mode
+-- 	if mode == "None" then
+-- 		texture_key = "None"
+-- 		tv = 8
+-- 	elseif mode == "Texture" then
+-- 		tv = 8
+-- 	elseif mode == "Solid" then
+-- 		texture_key = "None"
+-- 	end
 
-    frame.backplane.backdropInfo = {
-        bgFile = LSM:Fetch('statusbar', db.backplane_texture_key),
-		edgeFile = LSM:Fetch('border', texture_key),
-        tile = true, tileSize = 16, edgeSize = 16, 
-        insets = { left = 6, right = 6, top = 6, bottom = 6}
-    }
-    frame.backplane:ApplyBackdrop()
+--     frame.backplane.backdropInfo = {
+--         bgFile = LSM:Fetch('statusbar', db.backplane_texture_key),
+-- 		edgeFile = LSM:Fetch('border', texture_key),
+--         tile = true, tileSize = 16, edgeSize = 16, 
+--         insets = { left = 6, right = 6, top = 6, bottom = 6}
+--     }
+--     frame.backplane:ApplyBackdrop()
 
-	tv = tv - 2
-    frame.backplane:SetPoint('TOPLEFT', -1*tv, tv)
-    frame.backplane:SetPoint('BOTTOMRIGHT', tv, -1*tv)
-	frame.backplane:SetBackdropColor(0,0,0, db.backplane_alpha)
+-- 	tv = tv - 2
+--     frame.backplane:SetPoint('TOPLEFT', -1*tv, tv)
+--     frame.backplane:SetPoint('BOTTOMRIGHT', tv, -1*tv)
+-- 	frame.backplane:SetBackdropColor(0,0,0, db.backplane_alpha)
 
-end
+-- end
 
-st.set_deadzone = function()
-	local db = ST.db.profile
-	local f = st.bar.frame.deadzone
-    f:SetTexture(LSM:Fetch('statusbar', db.deadzone_texture_key))
-	f:SetVertexColor(unpack(db.bar_color_deadzone))
-end
+-- st.set_deadzone = function()
+-- 	local db = ST.db.profile
+-- 	local f = st.bar.frame.deadzone
+--     f:SetTexture(LSM:Fetch('statusbar', db.deadzone_texture_key))
+-- 	f:SetVertexColor(unpack(db.bar_color_deadzone))
+-- end
 
 
 ------------------------------------------------------------------------------------

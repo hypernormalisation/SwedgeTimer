@@ -11,9 +11,15 @@ local SwingTimerInfo = function(hand)
     return STL:SwingTimerInfo(hand)
 end
 
+-- keyword-accessible tables
 ST.mainhand = {}
 ST.offhand = {}
 ST.ranged = {}
+ST.hands = {
+	mainhand = true,
+	offhand = true,
+	ranged = true
+}
 
 ------------------------------------------------------------------------------------
 -- The init/enable/disable
@@ -35,8 +41,6 @@ function ST:OnInitialize()
 
 	-- Slashcommands
 	self:register_slashcommands()
-
-
 
 end
 
@@ -106,8 +110,6 @@ function ST:check_weapons()
 	end
 end
 
-
-
 ------------------------------------------------------------------------------------
 -- The Event handlers for the STL
 ------------------------------------------------------------------------------------
@@ -127,16 +129,10 @@ function ST:SWING_TIMER_START(speed, expiration_time, hand)
 	self[hand].ends_at = expiration_time
 	-- hook the onupdate
 	self[hand].frame:SetScript("OnUpdate", self[hand].onupdate)
-	
 	-- handle gcd if necessary
 	if self.gcd.lock then
 		self:set_gcd_width()
 	end
-	-- end
-	-- print("I got called!")
-	-- print(speed)
-	-- print(expiration_time)
-	-- print(hand)
 end
 
 function ST:SWING_TIMER_UPDATE(speed, expiration_time, hand)
@@ -181,7 +177,10 @@ function ST:PLAYER_ENTERING_WORLD(event, is_initial_login, is_reloading_ui)
 	-- Timer information should be first accessed here.
 	print('player entering world')
 	self:register_timer_callbacks()
-	self:init_mh_bar_visuals()
+	-- self:init_mh_bar_visuals()
+	for hand, _ in pairs(ST.hands) do
+		ST:init_visuals_template(hand)
+	end
 
 end
 
