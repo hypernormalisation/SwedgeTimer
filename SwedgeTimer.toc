@@ -23,4 +23,5 @@ Libs\AceConfig-3.0\AceConfig-3.0.xml
 utils.lua
 st_data.lua
 main1.lua
+bar1.lua
 config.lua

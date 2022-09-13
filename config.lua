@@ -15,6 +15,11 @@ ST.defaults = {
 		welcome_message = true,
 		bar_enabled = true,
 
+		-- Show individual timers
+		show_mh = true,
+		show_oh = true,
+		show_ranged = true,
+
 		-- Behaviour toggles
 		lag_detection_enabled = true,
 		judgement_marker_enabled = true,
@@ -181,38 +186,39 @@ local set_bar_size = function()
 	st.set_markers()
 end
 
-local set_marker_widths = function()
-	local frame = st.bar.frame
-	local db = ST.db.profile
-	-- frame.twist_line:SetThickness(db.marker_width)
-	frame.gcd1_line:SetThickness(db.marker_width)
-	frame.gcd2_line:SetThickness(db.marker_width)
-	frame.judgement_line:SetThickness(db.marker_width)
-end
-st.set_marker_widths = set_marker_widths
+-- local set_marker_widths = function()
+-- 	local frame = st.bar.frame
+-- 	local db = ST.db.profile
+-- 	-- frame.twist_line:SetThickness(db.marker_width)
+-- 	frame.gcd1_line:SetThickness(db.marker_width)
+-- 	frame.gcd2_line:SetThickness(db.marker_width)
+-- 	frame.judgement_line:SetThickness(db.marker_width)
+-- end
+-- st.set_marker_widths = set_marker_widths
 
-local set_marker_colors = function()
-	local frame = st.bar.frame
-	local db = ST.db.profile
-	-- frame.twist_line:SetColorTexture(unpack(ST.db.profile.twist_marker_color))
-	frame.gcd1_line:SetColorTexture(unpack(ST.db.profile.gcd_marker_color))
-	frame.gcd2_line:SetColorTexture(unpack(ST.db.profile.gcd_marker_color))
-	frame.judgement_line:SetColorTexture(unpack(ST.db.profile.judgement_marker_color))
-end
-st.set_marker_colors = set_marker_colors
+-- local set_marker_colors = function()
+-- 	local frame = st.bar.frame
+-- 	local db = ST.db.profile
+-- 	-- frame.twist_line:SetColorTexture(unpack(ST.db.profile.twist_marker_color))
+-- 	frame.gcd1_line:SetColorTexture(unpack(ST.db.profile.gcd_marker_color))
+-- 	frame.gcd2_line:SetColorTexture(unpack(ST.db.profile.gcd_marker_color))
+-- 	frame.judgement_line:SetColorTexture(unpack(ST.db.profile.judgement_marker_color))
+-- end
+-- st.set_marker_colors = set_marker_colors
 
-st.set_markers = function()
-	st.set_marker_colors()
-	st.set_marker_widths()
-	st.bar.set_marker_offsets()
-end
+-- st.set_markers = function()
+-- 	st.set_marker_colors()
+-- 	st.set_marker_widths()
+-- 	st.bar.set_marker_offsets()
+-- end
 
 -- Function to be called whenever the state of the backdrop or texture
 -- outline are changed.
-st.configure_bar_outline = function()
-	local db = ST.db.profile
+function ST:configure_bar_outline()
+	local frame = self.mainhand.frame
+	local db = self.db.profile
 	local mode = db.border_mode_key
-	local frame = st.bar.frame
+	
 	local texture_key = db.border_texture_key
     local tv = db.backplane_outline_width
 	-- 8 corresponds to no border
