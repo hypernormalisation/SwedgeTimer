@@ -184,6 +184,10 @@ function ST:SWING_TIMER_UPDATE(speed, expiration_time, hand)
 	self[hand].speed = speed
 	self[hand].ends_at = expiration_time
 	self:set_bar_texts(hand)
+	-- handle gcd if necessary
+	if self.gcd.lock then
+		self:set_gcd_width()
+	end
 end
 
 function ST:SWING_TIMER_CLIPPED(hand)
@@ -294,7 +298,11 @@ end
 
 function ST:PLAYER_TARGET_SET_ATTACKING()
 	print('offsetting offhand')
-	self.offhand.start = GetTime() - self.offhand.speed
+	local t = GetTime()
+	local old_start = self.offhand.start
+	if old_start + self.offhand.speed < t then
+		self.offhand.start = GetTime() - self.offhand.speed
+	end
 end
 
 ------------------------------------------------------------------------------------
