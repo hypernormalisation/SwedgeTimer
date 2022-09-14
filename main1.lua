@@ -48,6 +48,7 @@ function ST:OnInitialize()
 	print(safeDistanceChecker == nil)
 
 	LRC:RegisterCallback(LRC.CHECKERS_CHANGED, function() self:init_range_finders() end)
+	STL:RegisterCallback(STL.SWING_TIMER_READY, function() self:init_timers() end)
 
 	-- Slashcommands
 	self:register_slashcommands()
@@ -58,7 +59,6 @@ function ST:OnEnable()
 	-- Sort out character information
 	self.player_guid = UnitGUID("player")
 	self.player_class = select(2, UnitClass("player"))
-	print(self.player_class)
 	self.has_oh = false
 	self.has_ranged = false
 	self.mh_timer = 0
@@ -167,8 +167,7 @@ function ST:SWING_TIMER_START(speed, expiration_time, hand)
 	self[hand].start = GetTime()
 	self[hand].speed = speed
 	self[hand].ends_at = expiration_time
-	-- hook the onupdate
-	self[hand].frame:SetScript("OnUpdate", self[hand].onupdate)
+
 	-- handle gcd if necessary
 	if self.gcd.lock then
 		self:set_gcd_width()
@@ -176,6 +175,24 @@ function ST:SWING_TIMER_START(speed, expiration_time, hand)
 end
 
 function ST:SWING_TIMER_UPDATE(speed, expiration_time, hand)
+	self = ST
+	-- print(speed)
+	-- print(expiration_time)
+	-- print(hand)
+	local t = GetTime()
+	-- print('old says:')
+	-- print(self[hand].speed)
+	-- print(self[hand].ends_at)
+	-- print('new says:')
+	-- print(speed)
+	-- print(expiration_time)
+	if expiration_time < t then
+		expiration_time = t
+	end
+	-- print(string.format('updating %s speed', hand))
+	self[hand].speed = speed
+	self[hand].ends_at = expiration_time
+	self:set_bar_texts(hand)
 end
 
 function ST:SWING_TIMER_CLIPPED(hand)
@@ -186,10 +203,11 @@ end
 
 function ST:SWING_TIMER_STOP(hand)
 	-- unhooks update funcs
-	ST[hand].frame:SetScript("OnUpdate", nil)
+	-- ST[hand].frame:SetScript("OnUpdate", nil)
 end
 
-function ST:SWING_TIMER_DELTA(hand)
+function ST:SWING_TIMER_DELTA(delta)
+	print(string.format("DELTA = %s", delta))
 end
 
 -- Stub to call the appropriate handler.
@@ -200,27 +218,41 @@ function ST.timer_event_handler(event, ...)
 	local hand = nil
 	if event == "SWING_TIMER_START" or event == "SWING_TIMER_UPDATE" then
 		hand = args[3]
-	end
-	if event == "SWING_TIMER_STOP" then
+	else
 		hand = args[1]
 	end
-	if hand == "mainhand" then
-		print(event)
-	end
+	-- print('event says: '..tostring(event))
+	-- print(string.format("%s: %s", hand, event))
+	-- if hand == "mainhand" then
+	-- 	print(event)
+	-- end
 	ST[event](event, ...)
 end
 
 ------------------------------------------------------------------------------------
 -- AceEvent callbacks
 ------------------------------------------------------------------------------------
+function ST:init_timers()
+	print('RECEIVED STL CALLBACK')
+	self:register_timer_callbacks()
+
+	for hand, _ in pairs(ST.hands) do
+		local t = {SwingTimerInfo(hand)}
+		print(string.format("%s, %s, %s", tostring(t[1]),
+		tostring(t[2]), tostring(t[3])))
+		self[hand].speed = t[1]
+		self[hand].ends_at = t[2]
+		self[hand].start = t[3]
+		ST:init_visuals_template(hand)
+		ST:set_bar_texts(hand)
+		-- hook the onupdate
+		self[hand].frame:SetScript("OnUpdate", self[hand].onupdate)
+	end
+end
+
 function ST:PLAYER_ENTERING_WORLD(event, is_initial_login, is_reloading_ui)
 	-- Timer information should be first accessed here.
-	print('player entering world')
-	self:register_timer_callbacks()
-	-- self:init_mh_bar_visuals()
-	for hand, _ in pairs(ST.hands) do
-		ST:init_visuals_template(hand)
-	end
+
 end
 
 function ST:PLAYER_EQUIPMENT_CHANGED(event, slot, has_current)
@@ -263,9 +295,9 @@ end
 
 function ST:PLAYER_REGEN_ENABLED()
 	-- unhook all onupdates when out of combat
-	for _, h in ipairs({"mainhand", "offhand", "ranged"}) do
-		self[h].frame:SetScript("OnUpdate", nil)
-	end
+	-- for _, h in ipairs({"mainhand", "offhand", "ranged"}) do
+	-- 	self[h].frame:SetScript("OnUpdate", nil)
+	-- end
 end
 
 ------------------------------------------------------------------------------------
@@ -284,15 +316,23 @@ function ST:test1()
 	-- self:check_weapons()
 	-- local a, b, c = SwingTimerInfo("ranged")
 	-- print(a,b,c)
-	if self.melee_checker == nil then
-		self.melee_checker = LRC:GetHarmMaxChecker(LRC.MeleeRange)
+	-- if self.melee_checker == nil then
+	-- 	self.melee_checker = LRC:GetHarmMaxChecker(LRC.MeleeRange)
+	-- end
+	-- print(self.melee_checker)
+	-- print(self.melee_checker("target"))
+	-- -- print(RC:GetHarmCheckers())
+	-- local minRange, maxRange = LRC:GetRange('target')
+	-- print(minRange, maxRange)
+	for hand, _ in pairs(self.hands) do
+		print(hand)
+		local t = {SwingTimerInfo(hand)}
+		print(string.format("%s, %s, %s", tostring(t[1]),
+		tostring(t[2]), tostring(t[3])))
+		self[hand].speed = t[1]
+		self[hand].ends_at = t[2]
+		self[hand].start = t[3]
 	end
-	print(self.melee_checker)
-	print(self.melee_checker("target"))
-	-- print(RC:GetHarmCheckers())
-	local minRange, maxRange = LRC:GetRange('target')
-	print(minRange, maxRange)
-
 end
 
 function ST:SlashCommand(input, editbox)

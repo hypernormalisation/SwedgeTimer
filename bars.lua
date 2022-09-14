@@ -165,7 +165,7 @@ local drag_stop_handler_dict = {
 -- Intialisation func
 --=========================================================================================
 function ST:init_visuals_template(hand)
-    print(hand)
+    -- print(hand)
     local frame = self[hand].frame
     local db_shared = self.db.profile
     local db = self.db.profile[hand]
