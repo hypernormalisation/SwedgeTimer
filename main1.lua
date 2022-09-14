@@ -100,6 +100,7 @@ function ST:OnEnable()
 	self:RegisterEvent("SPELL_UPDATE_COOLDOWN")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
+	self:RegisterEvent("PLAYER_TARGET_SET_ATTACKING")
 
 end
 
@@ -176,20 +177,10 @@ end
 
 function ST:SWING_TIMER_UPDATE(speed, expiration_time, hand)
 	self = ST
-	-- print(speed)
-	-- print(expiration_time)
-	-- print(hand)
 	local t = GetTime()
-	-- print('old says:')
-	-- print(self[hand].speed)
-	-- print(self[hand].ends_at)
-	-- print('new says:')
-	-- print(speed)
-	-- print(expiration_time)
 	if expiration_time < t then
 		expiration_time = t
 	end
-	-- print(string.format('updating %s speed', hand))
 	self[hand].speed = speed
 	self[hand].ends_at = expiration_time
 	self:set_bar_texts(hand)
@@ -221,11 +212,11 @@ function ST.timer_event_handler(event, ...)
 	else
 		hand = args[1]
 	end
-	-- print('event says: '..tostring(event))
-	-- print(string.format("%s: %s", hand, event))
-	-- if hand == "mainhand" then
-	-- 	print(event)
-	-- end
+	print('event says: '..tostring(event))
+	print(string.format("%s: %s", hand, event))
+	if hand == "offhand" then
+		print(event)
+	end
 	ST[event](event, ...)
 end
 
@@ -248,6 +239,7 @@ function ST:init_timers()
 		-- hook the onupdate
 		self[hand].frame:SetScript("OnUpdate", self[hand].onupdate)
 	end
+	self.ranged.frame:Hide()
 end
 
 function ST:PLAYER_ENTERING_WORLD(event, is_initial_login, is_reloading_ui)
@@ -298,6 +290,11 @@ function ST:PLAYER_REGEN_ENABLED()
 	-- for _, h in ipairs({"mainhand", "offhand", "ranged"}) do
 	-- 	self[h].frame:SetScript("OnUpdate", nil)
 	-- end
+end
+
+function ST:PLAYER_TARGET_SET_ATTACKING()
+	print('offsetting offhand')
+	self.offhand.start = GetTime() - self.offhand.speed
 end
 
 ------------------------------------------------------------------------------------
