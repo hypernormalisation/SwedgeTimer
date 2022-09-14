@@ -41,15 +41,6 @@ end
 
 st.bar = {}
 
--- the following should be flagged when the swing speed changes to
--- evaluate the new offsets for ticks
--- st.bar.recalculate_ticks = true
--- st.bar.twist_tick_offset = 0.1
--- st.bar.gcd1_tick_offset = 0.1
--- st.bar.gcd2_tick_offset = 0.1
--- st.bar.gcd_bar_width = 0.0
-
-
 function ST:set_fonts(hand)
 	local db = self.db.profile[hand]
 	local frame = self[hand].frame
@@ -260,164 +251,10 @@ function ST:init_visuals_template(hand)
 	frame:Show()
 end
 
--- -- this function is called once to initialise all the graphics of the bar
--- function ST:init_mh_bar_visuals()
---     -- self.mh.frame = CreateFrame("Frame", addon_name .. "MHBarFrame", UIParent)
-
---     local frame = self.mainhand.frame
---     local db_shared = self.db.profile
---     local db = self.db.profile.mainhand
-
---     -- Set initial frame properties
---     frame:SetPoint("CENTER")
---     frame:SetMovable(not db.bar_locked)
---     frame:EnableMouse(not db.bar_locked)
---     frame:RegisterForDrag("LeftButton")
---     frame:SetScript("OnDragStart", mh_on_drag_start)
---     frame:SetScript("OnDragStop", mh_on_drag_stop)
---     frame:SetHeight(db.bar_height)
---     frame:SetWidth(db.bar_width)
---     frame:ClearAllPoints()
---     frame:SetPoint(db.bar_point, UIParent, db.bar_rel_point, db.bar_x_offset, db.bar_y_offset)
-
---     -- Create the backplane and border
---     frame.backplane = CreateFrame("Frame", addon_name .. "MHBarBackdropFrame", frame, "BackdropTemplate")
-
---     -- Adjust the frame draw levels so the backplane is below the frame
---     frame:SetFrameLevel(db_shared.draw_level+1)
---     frame.backplane:SetFrameLevel(db_shared.draw_level)
---     -- Set to the requested frame strata
---     frame:SetFrameStrata(db_shared.frame_strata)
---     frame.backplane:SetFrameStrata(db_shared.frame_strata)
-
---     -- Configure the backplane/outline
---     self:configure_bar_outline()
-
---     -- Create the swing timer bar
---     frame.bar = frame:CreateTexture(nil,"ARTWORK")
---     frame.bar:SetPoint("TOPLEFT", 0, 0)
---     frame.bar:SetHeight(db.bar_height)
---     frame.bar:SetTexture(LSM:Fetch('statusbar', db.bar_texture_key))
---     frame.bar:SetVertexColor(unpack(db.bar_color_default))
---     frame.bar:SetWidth(db.bar_width)
-
---     -- Create the GCD timer bar
---     frame.gcd_bar = frame:CreateTexture(nil, "ARTWORK")
---     frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
---     frame.gcd_bar:SetHeight(db.bar_height)
---     frame.gcd_bar:SetTexture(LSM:Fetch('statusbar', db.gcd_texture_key))
---     frame.gcd_bar:SetVertexColor(unpack(db.bar_color_gcd))
---     frame.gcd_bar:SetDrawLayer("ARTWORK", -2)
-
---     -- Create the deadzone bar
---     -- frame.deadzone = frame:CreateTexture(nil, "ARTWORK")
---     -- frame.deadzone:SetPoint("TOPRIGHT", 0, 0)
---     -- st.set_deadzone()
---     -- frame.deadzone:SetHeight(db.bar_height)
---     -- frame.deadzone:SetDrawLayer("ARTWORK", -1)
---     -- if not db.enable_deadzone then
---     --     frame.deadzone:Hide()
---     -- end
-
---     -- Create the attack speed/swing timer texts and init them
---     frame.left_text = frame:CreateFontString(nil, "OVERLAY")
---     frame.left_text:SetShadowColor(0.0,0.0,0.0,1.0)
---     frame.left_text:SetShadowOffset(1,-1)
---     frame.left_text:SetJustifyV("CENTER")
---     frame.left_text:SetJustifyH("LEFT")
-
---     frame.right_text = frame:CreateFontString(nil, "OVERLAY")
---     frame.right_text:SetShadowColor(0.0,0.0,0.0,1.0)
---     frame.right_text:SetShadowOffset(1,-1)
---     frame.right_text:SetJustifyV("CENTER")
---     frame.right_text:SetJustifyH("RIGHT")
---     st.set_fonts()
-
---     -- Create the line markers
---     -- frame.twist_line = frame:CreateLine() -- the twist window marker
---     -- frame.twist_line:SetDrawLayer("OVERLAY", -1)
---     -- frame.gcd1_line = frame:CreateLine() -- the first gcd possible before a twist
---     -- frame.gcd1_line:SetDrawLayer("OVERLAY", -1)
---     -- frame.gcd2_line = frame:CreateLine()
---     -- frame.gcd2_line:SetDrawLayer("OVERLAY", -1)
---     -- frame.gcd2_line:SetColorTexture(0.4,0.4,1,1)
---     -- frame.gcd2_line:SetThickness(db.marker_width)
---     -- frame.judgement_line = frame:CreateLine()
---     -- frame.judgement_line:SetDrawLayer("OVERLAY", -1)
---     -- st.set_markers()
-
--- 	frame:Show()
---     -- if st.debug then print('Successfully initialised all bar visuals.') end
--- end
-
-
--- function ST:init_oh_bar_visuals()
---     local frame = self.offhand.frame
---     local db = self.db.profile.offhand
---     local db_shared = self.db.profile
-
---     -- Set initial frame properties
---     frame:SetPoint("CENTER")
---     frame:SetMovable(not db.bar_locked)
---     frame:EnableMouse(not db.bar_locked)
---     frame:RegisterForDrag("LeftButton")
---     frame:SetScript("OnDragStart", oh_on_drag_start)
---     frame:SetScript("OnDragStop", oh_on_drag_stop)
---     frame:SetHeight(db.bar_height)
---     frame:SetWidth(db.bar_width)
---     frame:ClearAllPoints()
---     frame:SetPoint(db.bar_point, UIParent, db.bar_rel_point, db.bar_x_offset, db.bar_y_offset)
-
---     -- Create the backplane and border
---     frame.backplane = CreateFrame("Frame", addon_name .. "MHBarBackdropFrame", frame, "BackdropTemplate")
-
---     -- Adjust the frame draw levels so the backplane is below the frame
---     frame:SetFrameLevel(db_shared.draw_level+1)
---     frame.backplane:SetFrameLevel(db_shared.draw_level)
---     -- Set to the requested frame strata
---     frame:SetFrameStrata(db_shared.frame_strata)
---     frame.backplane:SetFrameStrata(db_shared.frame_strata)
-
---     -- Configure the backplane/outline
---     self:configure_bar_outline()
-
---     -- Create the swing timer bar
---     frame.bar = frame:CreateTexture(nil,"ARTWORK")
---     frame.bar:SetPoint("TOPLEFT", 0, 0)
---     frame.bar:SetHeight(db.bar_height)
---     frame.bar:SetTexture(LSM:Fetch('statusbar', db.bar_texture_key))
---     frame.bar:SetVertexColor(unpack(db.bar_color_default))
---     frame.bar:SetWidth(db.bar_width)
-
---     -- Create the GCD timer bar
---     frame.gcd_bar = frame:CreateTexture(nil, "ARTWORK")
---     frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
---     frame.gcd_bar:SetHeight(db.bar_height)
---     frame.gcd_bar:SetTexture(LSM:Fetch('statusbar', db.gcd_texture_key))
---     frame.gcd_bar:SetVertexColor(unpack(db.bar_color_gcd))
---     frame.gcd_bar:SetDrawLayer("ARTWORK", -2)
-
---     -- Create the attack speed/swing timer texts and init them
---     frame.left_text = frame:CreateFontString(nil, "OVERLAY")
---     frame.left_text:SetShadowColor(0.0,0.0,0.0,1.0)
---     frame.left_text:SetShadowOffset(1,-1)
---     frame.left_text:SetJustifyV("CENTER")
---     frame.left_text:SetJustifyH("LEFT")
-
---     frame.right_text = frame:CreateFontString(nil, "OVERLAY")
---     frame.right_text:SetShadowColor(0.0,0.0,0.0,1.0)
---     frame.right_text:SetShadowOffset(1,-1)
---     frame.right_text:SetJustifyV("CENTER")
---     frame.right_text:SetJustifyH("RIGHT")
---     st.set_fonts()
-
--- 	frame:Show()
--- end
-
 --=========================================================================================
 -- OnUpdate widget handlers and functions
 --=========================================================================================
-function ST:onupdate_template(hand)
+function ST:onupdate_common(hand)
     local frame = self[hand].frame
     local d = self[hand]
     local t = GetTime()
@@ -436,30 +273,19 @@ function ST:onupdate_template(hand)
 
 	-- Set texts
     self:set_bar_texts(hand)
-    -- local speed = d.speed
-    -- local timer = d.ends_at - t
-	-- local lookup = {
-	-- 	attack_speed=format("%.1f", st.utils.simple_round(speed, 0.1)),
-	-- 	swing_timer=format("%.1f", st.utils.simple_round(timer, 0.1)),
-	-- }
-	-- local left = lookup[db.left_text]
-	-- local right = lookup[db.right_text]
-	
-    -- -- Update the main bars text, hide right text if bar full
-    -- frame.left_text:SetText(left)
-    -- frame.right_text:SetText(right)
+
 end
 
 ST.mainhand.onupdate = function(elapsed)
-    ST:onupdate_template("mainhand")
+    ST:onupdate_common("mainhand")
 end
 
 ST.offhand.onupdate = function(elapsed)
-    ST:onupdate_template("offhand")
+    ST:onupdate_common("offhand")
 end
 
 ST.ranged.onupdate = function(elapsed)
-    ST:onupdate_template("ranged")
+    ST:onupdate_common("ranged")
 end
 
 --=========================================================================================

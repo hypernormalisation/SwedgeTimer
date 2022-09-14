@@ -5,7 +5,12 @@ local addon_name, st = ...
 local ST = LibStub("AceAddon-3.0"):NewAddon(addon_name, "AceConsole-3.0", "AceEvent-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local STL = LibStub("LibClassicSwingTimerAPI", true)
--- local print = st.utils.print_msg
+local LRC = LibStub("LibRangeCheck-2.0")
+-- print('LRC says: '..tostring(LRC))
+-- local rcf = CreateFrame("Frame", nil)
+
+
+local print = st.utils.print_msg
 
 local SwingTimerInfo = function(hand)
     return STL:SwingTimerInfo(hand)
@@ -39,6 +44,11 @@ function ST:OnInitialize()
 	AC:RegisterOptionsTable(addon_name.."_Profiles", profiles)
 	ACD:AddToBlizOptions(addon_name.."_Profiles", "Profiles", addon_name)
 
+	local safeDistanceChecker = LRC:GetHarmMinChecker(30)
+	print(safeDistanceChecker == nil)
+
+	LRC:RegisterCallback(LRC.CHECKERS_CHANGED, function() self:init_range_finders() end)
+
 	-- Slashcommands
 	self:register_slashcommands()
 
@@ -47,6 +57,8 @@ end
 function ST:OnEnable()
 	-- Sort out character information
 	self.player_guid = UnitGUID("player")
+	self.player_class = select(2, UnitClass("player"))
+	print(self.player_class)
 	self.has_oh = false
 	self.has_ranged = false
 	self.mh_timer = 0
@@ -89,6 +101,34 @@ function ST:OnEnable()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 
+end
+
+------------------------------------------------------------------------------------
+-- Range finding
+------------------------------------------------------------------------------------
+function ST:init_range_finders()
+	self.rangefinder_interval = 0.2
+	self.melee_range_checker_func = LRC:GetHarmMaxChecker(LRC.MeleeRange)
+	local r = 30
+	if self.player_class == "HUNTER" then
+		r = 35
+	end
+	self.ranged_range_checker_func = LRC:GetHarmMaxChecker(r)
+	self.in_melee_range = nil
+	self.in_ranged_range = nil
+	self.target_min_range = nil
+	self.target_max_range = nil
+	self:rf_update()
+end
+
+function ST:rf_update()
+	self.in_melee_range = self:melee_range_checker_func("target")
+	-- print(self.melee_result)
+	self.in_ranged_range = self.ranged_range_checker_func("target")
+	self.target_min_range, self.target_max_range = LRC:GetRange("target")
+	-- print('minrange = '..tostring(self.target_min_range))
+	-- print(self.target_max_range)
+	C_Timer.After(self.rangefinder_interval, function() self:rf_update() end)
 end
 
 ------------------------------------------------------------------------------------
@@ -181,7 +221,6 @@ function ST:PLAYER_ENTERING_WORLD(event, is_initial_login, is_reloading_ui)
 	for hand, _ in pairs(ST.hands) do
 		ST:init_visuals_template(hand)
 	end
-
 end
 
 function ST:PLAYER_EQUIPMENT_CHANGED(event, slot, has_current)
@@ -243,8 +282,17 @@ function ST:test1()
 	-- local b = OffhandHasWeapon()
 	-- print(b)
 	-- self:check_weapons()
-	local a, b, c = SwingTimerInfo("ranged")
-	print(a,b,c)
+	-- local a, b, c = SwingTimerInfo("ranged")
+	-- print(a,b,c)
+	if self.melee_checker == nil then
+		self.melee_checker = LRC:GetHarmMaxChecker(LRC.MeleeRange)
+	end
+	print(self.melee_checker)
+	print(self.melee_checker("target"))
+	-- print(RC:GetHarmCheckers())
+	local minRange, maxRange = LRC:GetRange('target')
+	print(minRange, maxRange)
+
 end
 
 function ST:SlashCommand(input, editbox)
