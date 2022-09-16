@@ -40,9 +40,10 @@ function ST:OnInitialize()
 	local ACD = LibStub("AceConfigDialog-3.0")
 	AC:RegisterOptionsTable(addon_name.."_Options", self.options)
 	self.optionsFrame = ACD:AddToBlizOptions(addon_name.."_Options", addon_name)
+
 	local profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
-	AC:RegisterOptionsTable(addon_name.."_Profiles", profiles)
-	ACD:AddToBlizOptions(addon_name.."_Profiles", "Profiles", addon_name)
+	-- AC:RegisterOptionsTable(addon_name.."_Profiles", profiles)
+	-- ACD:AddToBlizOptions(addon_name.."_Profiles", "Profiles", addon_name)
 
 	local safeDistanceChecker = LRC:GetHarmMinChecker(30)
 	print(safeDistanceChecker == nil)
@@ -247,8 +248,6 @@ function ST:init_timers()
 end
 
 function ST:PLAYER_ENTERING_WORLD(event, is_initial_login, is_reloading_ui)
-	-- Timer information should be first accessed here.
-
 end
 
 function ST:PLAYER_EQUIPMENT_CHANGED(event, slot, has_current)
@@ -316,28 +315,14 @@ function ST:register_slashcommands()
 end
 
 function ST:test1()
-	-- local b = OffhandHasWeapon()
-	-- print(b)
-	-- self:check_weapons()
-	-- local a, b, c = SwingTimerInfo("ranged")
-	-- print(a,b,c)
-	-- if self.melee_checker == nil then
-	-- 	self.melee_checker = LRC:GetHarmMaxChecker(LRC.MeleeRange)
-	-- end
-	-- print(self.melee_checker)
-	-- print(self.melee_checker("target"))
-	-- -- print(RC:GetHarmCheckers())
-	-- local minRange, maxRange = LRC:GetRange('target')
-	-- print(minRange, maxRange)
-	for hand, _ in pairs(self.hands) do
-		print(hand)
-		local t = {SwingTimerInfo(hand)}
-		print(string.format("%s, %s, %s", tostring(t[1]),
-		tostring(t[2]), tostring(t[3])))
-		self[hand].speed = t[1]
-		self[hand].ends_at = t[2]
-		self[hand].start = t[3]
-	end
+    local db = self:get_hand_table("mainhand")
+	print(db.tag)
+	print(db.bar_color_default)
+	local r, g, b, a = self:convert_color(db.bar_color_default)
+	print(r)
+	print(g)
+	print(b)
+	
 end
 
 function ST:SlashCommand(input, editbox)

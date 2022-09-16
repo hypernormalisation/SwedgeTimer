@@ -10,39 +10,39 @@ local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
 -- Helper funcs
 ------------------------------------------------------------------------------------
 
-function ST:show_bar(hand)
-    local c = ST.db.profile
+-- function ST:show_bar(hand)
+--     local c = ST.db.profile
 
-end
+-- end
 
-function ST:show_mh()
-    local c = ST.db.profile
-    if c.show_mh then
-        return true
-    end
-    return false
-end
+-- function ST:show_mh()
+--     local c = ST.db.profile
+--     if c.show_mh then
+--         return true
+--     end
+--     return false
+-- end
 
-function ST:show_oh()
-    local c = ST.db.profile
-    if c.show_oh and self.has_oh then
-        return true
-    end
-    return false
-end
+-- function ST:show_oh()
+--     local c = ST.db.profile
+--     if c.show_oh and self.has_oh then
+--         return true
+--     end
+--     return false
+-- end
 
-function ST:show_ranged()
-    local c = ST.db.profile
-    if c.show_ranged and self.has_ranged then
-        return true
-    end
-    return false
-end
+-- function ST:show_ranged()
+--     local c = ST.db.profile
+--     if c.show_ranged and self.has_ranged then
+--         return true
+--     end
+--     return false
+-- end
 
 st.bar = {}
 
 function ST:set_fonts(hand)
-	local db = self.db.profile[hand]
+    local db = self:get_hand_table(hand)
 	local frame = self[hand].frame
 	local font_path = LSM:Fetch('font', db.text_font)
 	local opt_string = self.outline_map[db.font_outline_key]
@@ -55,9 +55,13 @@ function ST:set_fonts(hand)
 end
 
 function ST:set_bar_color(hand)
-    local db = self.db.profile[hand]
+    local db = self:get_hand_table(hand)
     local frame = self[hand].frame
-    frame.bar:SetVertexColor(unpack(db.bar_color_default))
+    local r, g, b, a = self:convert_color(db.bar_color_default)
+    print(r, g, b, a)
+    frame.bar:SetVertexColor(
+        self:convert_color(db.bar_color_default)
+    )
 end
 
 --=========================================================================================
@@ -65,7 +69,7 @@ end
 --=========================================================================================
 function ST:configure_bar_outline(hand)
 	local frame = self[hand].frame
-	local db = self.db.profile[hand]
+    local db = self:get_hand_table(hand)
 	local mode = db.border_mode_key
 	local texture_key = db.border_texture_key
     local tv = db.backplane_outline_width
@@ -94,7 +98,7 @@ function ST:configure_bar_outline(hand)
 end
 
 function ST:set_bar_position(hand)
-	local db = self.db.profile[hand]
+    local db = self:get_hand_table(hand)
 	local frame = self[hand].frame
 	frame:ClearAllPoints()
 	frame:SetPoint(db.bar_point, UIParent, db.bar_rel_point, db.bar_x_offset, db.bar_y_offset)
@@ -109,7 +113,7 @@ end
 
 function ST:drag_stop_template(hand)
     local frame = self[hand].frame
-    local db = ST.db.profile[hand]
+    local db = self:get_hand_table(hand)
     frame:StopMovingOrSizing()
     local point, _, rel_point, x_offset, y_offset = frame:GetPoint()
     db.bar_x_offset = st.utils.simple_round(x_offset, 0.1)
@@ -121,7 +125,8 @@ function ST:drag_stop_template(hand)
 end
 
 function ST:drag_start_template(hand)
-    if not self.db.profile[hand].bar_locked then
+    local db = self:get_hand_table(hand)
+    if not db.bar_locked then
         ST[hand].frame:StartMoving()
     end
 end
@@ -168,7 +173,10 @@ function ST:init_visuals_template(hand)
     -- print(hand)
     local frame = self[hand].frame
     local db_shared = self.db.profile
-    local db = self.db.profile[hand]
+    -- local db = self.db.profile[hand]
+    local db = self:get_hand_table(hand)
+    -- print(db)
+    print(db.bar_height)
 
     -- Set initial frame properties
     frame:SetPoint("CENTER")
@@ -200,7 +208,8 @@ function ST:init_visuals_template(hand)
     frame.bar:SetPoint("TOPLEFT", 0, 0)
     frame.bar:SetHeight(db.bar_height)
     frame.bar:SetTexture(LSM:Fetch('statusbar', db.bar_texture_key))
-    frame.bar:SetVertexColor(unpack(db.bar_color_default))
+    self:set_bar_color(hand)
+    -- frame.bar:SetVertexColor(unpack(db.bar_color_default))
     frame.bar:SetWidth(db.bar_width)
 
     -- Create the GCD timer bar
@@ -261,7 +270,7 @@ function ST:onupdate_common(hand)
     local progress = math.min(1, (t - d.start) /
         (d.ends_at - d.start)
     )
-    local db = ST.db.profile[hand]
+    local db = self:get_hand_table(hand)
 
     -- Update the main bar's width
     local timer_width = db.bar_width * progress
@@ -293,7 +302,7 @@ end
 --=========================================================================================
 function ST:set_bar_texts(hand)
     local frame = self[hand].frame
-    local db = self.db.profile
+    local db = self:get_hand_table(hand)
 
     -- Set texts
     local t = GetTime()
@@ -303,9 +312,9 @@ function ST:set_bar_texts(hand)
         attack_speed=format("%.1f", st.utils.simple_round(speed, 0.1)),
         swing_timer=format("%.1f", st.utils.simple_round(timer, 0.1)),
     }
-    local left = lookup[db[hand].left_text]
-    local right = lookup[db[hand].right_text]
-        
+    local left = lookup[db.left_text]
+    local right = lookup[db.right_text]
+
     -- Update the main bars text, hide right text if bar full
     frame.left_text:SetText(left)
     frame.right_text:SetText(right)
@@ -315,7 +324,8 @@ function ST:set_gcd_width()
     -- Called when there is an active gcd either when a new gcd is triggered
     -- or when the swing timer resets.
     local frame = self.mainhand.frame
-    local db = self.db.profile
+    local hand = "mainhand"
+    local db = self:get_hand_table(hand)
     if not db.show_gcd_underlay then
         frame.gcd_bar:SetWidth(0)
         return

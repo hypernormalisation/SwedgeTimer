@@ -5,11 +5,36 @@
 local addon_name, st = ...
 local LSM = LibStub("LibSharedMedia-3.0")
 local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
+-- local print = st.utils.print_msg
+
+--=========================================================================================
+-- Functions to handle options
+--=========================================================================================
+function ST:get_class_options_table()
+	return self.db.profile[self.player_class]
+end
+
+function ST:get_hand_table(hand)
+	return self.db.profile[self.player_class][hand]
+end
+
+function ST:convert_color(t)
+	local r,g,b,a = unpack(t)
+	r = r/255
+	g = g/255
+	b = b/255
+	return r, g, b, a
+end
 
 ------------------------------------------------------------------------------------
 -- Default settings for the addon.
+
 ST.defaults = {
-    profile = {
+
+	profile = {
+
+		-- Class-specific defaults
+		ROGUE = ST.ROGUE.defaults,
 
 		-- Top level
 		welcome_message = true,
@@ -23,113 +48,113 @@ ST.defaults = {
 		-- GCD underlay
 		show_gcd_underlay = true,
 
-		-- Mainhand options
-		mainhand = {
-			-- behaviour
-			enabled = true,
-			-- Bar dimensions
-			bar_height = 32,
-			bar_width = 345,
-			-- Bar positioning
-			bar_locked = true,
-			bar_x_offset = 0,
-			bar_y_offset = -180,
-			bar_point = "CENTER",
-			bar_rel_point = "CENTER",
-			-- Bar textures
-			bar_texture_key = "Solid",
-        	gcd_texture_key = "Solid",
-        	backplane_texture_key = "Solid",
-        	border_texture_key = "None",
-			deadzone_texture_key = "Solid",
-			backplane_alpha = 0.85,
-			-- Colors
-			bar_color_default = {0.14, 0.66, 0.14, 1.0},
-			bar_color_gcd = {0.48, 0.48, 0.48, 1.0},
-			bar_color_deadzone = {0.72, 0.05, 0.05, 0.72},
-			-- Font settings
-			font_size = 16,
-			font_color = {1.0, 1.0, 1.0, 1.0},
-			text_font = LSM.DefaultMedia.font,
-			font_outline_key = "outline",
-        	left_text = "attack_speed",
-        	right_text = "swing_timer",
-			-- Border settings
-			border_mode_key = "Solid",
-			backplane_outline_width = 2,
-		},
+		-- -- Mainhand options
+		-- mainhand = {
+		-- 	-- behaviour
+		-- 	enabled = true,
+		-- 	-- Bar dimensions
+		-- 	bar_height = 32,
+		-- 	bar_width = 345,
+		-- 	-- Bar positioning
+		-- 	bar_locked = true,
+		-- 	bar_x_offset = 0,
+		-- 	bar_y_offset = -180,
+		-- 	bar_point = "CENTER",
+		-- 	bar_rel_point = "CENTER",
+		-- 	-- Bar textures
+		-- 	bar_texture_key = "Solid",
+        -- 	gcd_texture_key = "Solid",
+        -- 	backplane_texture_key = "Solid",
+        -- 	border_texture_key = "None",
+		-- 	deadzone_texture_key = "Solid",
+		-- 	backplane_alpha = 0.85,
+		-- 	-- Colors
+		-- 	bar_color_default = {0.14, 0.66, 0.14, 1.0},
+		-- 	bar_color_gcd = {0.48, 0.48, 0.48, 1.0},
+		-- 	bar_color_deadzone = {0.72, 0.05, 0.05, 0.72},
+		-- 	-- Font settings
+		-- 	font_size = 16,
+		-- 	font_color = {1.0, 1.0, 1.0, 1.0},
+		-- 	text_font = LSM.DefaultMedia.font,
+		-- 	font_outline_key = "outline",
+        -- 	left_text = "attack_speed",
+        -- 	right_text = "swing_timer",
+		-- 	-- Border settings
+		-- 	border_mode_key = "Solid",
+		-- 	backplane_outline_width = 2,
+		-- },
 
-		-- Offhand options
-		offhand = {
-			-- behaviour
-			enabled = true,
-			-- Bar dimensions
-			bar_height = 32,
-			bar_width = 345,
-			-- Bar positioning
-			bar_locked = true,
-			bar_x_offset = 0,
-			bar_y_offset = -80,
-			bar_point = "CENTER",
-			bar_rel_point = "CENTER",
-			-- Bar textures
-			bar_texture_key = "Solid",
-        	gcd_texture_key = "Solid",
-        	backplane_texture_key = "Solid",
-        	border_texture_key = "None",
-			deadzone_texture_key = "Solid",
-			backplane_alpha = 0.85,
-			-- Colors
-			bar_color_default = {0.14, 0.66, 0.14, 1.0},
-			bar_color_gcd = {0.48, 0.48, 0.48, 1.0},
-			bar_color_deadzone = {0.72, 0.05, 0.05, 0.72},
-			-- Font settings
-			font_size = 16,
-			font_color = {1.0, 1.0, 1.0, 1.0},
-			text_font = LSM.DefaultMedia.font,
-			font_outline_key = "outline",
-        	left_text = "attack_speed",
-        	right_text = "swing_timer",
-			-- Border settings
-			border_mode_key = "Solid",
-			backplane_outline_width = 2,
-		},
+		-- -- Offhand options
+		-- offhand = {
+		-- 	-- behaviour
+		-- 	enabled = true,
+		-- 	-- Bar dimensions
+		-- 	bar_height = 32,
+		-- 	bar_width = 345,
+		-- 	-- Bar positioning
+		-- 	bar_locked = true,
+		-- 	bar_x_offset = 0,
+		-- 	bar_y_offset = -80,
+		-- 	bar_point = "CENTER",
+		-- 	bar_rel_point = "CENTER",
+		-- 	-- Bar textures
+		-- 	bar_texture_key = "Solid",
+        -- 	gcd_texture_key = "Solid",
+        -- 	backplane_texture_key = "Solid",
+        -- 	border_texture_key = "None",
+		-- 	deadzone_texture_key = "Solid",
+		-- 	backplane_alpha = 0.85,
+		-- 	-- Colors
+		-- 	bar_color_default = {0.14, 0.66, 0.14, 1.0},
+		-- 	bar_color_gcd = {0.48, 0.48, 0.48, 1.0},
+		-- 	bar_color_deadzone = {0.72, 0.05, 0.05, 0.72},
+		-- 	-- Font settings
+		-- 	font_size = 16,
+		-- 	font_color = {1.0, 1.0, 1.0, 1.0},
+		-- 	text_font = LSM.DefaultMedia.font,
+		-- 	font_outline_key = "outline",
+        -- 	left_text = "attack_speed",
+        -- 	right_text = "swing_timer",
+		-- 	-- Border settings
+		-- 	border_mode_key = "Solid",
+		-- 	backplane_outline_width = 2,
+		-- },
 
-		-- Ranged options
-		ranged = {
-			-- behaviour
-			enabled = true,
-			-- Bar dimensions
-			bar_height = 32,
-			bar_width = 345,
-			-- Bar positioning
-			bar_locked = true,
-			bar_x_offset = 0,
-			bar_y_offset = 20,
-			bar_point = "CENTER",
-			bar_rel_point = "CENTER",
-			-- Bar textures
-			bar_texture_key = "Solid",
-			gcd_texture_key = "Solid",
-			backplane_texture_key = "Solid",
-			border_texture_key = "None",
-			deadzone_texture_key = "Solid",
-			backplane_alpha = 0.85,
-			-- Colors
-			bar_color_default = {0.14, 0.66, 0.14, 1.0},
-			bar_color_gcd = {0.48, 0.48, 0.48, 1.0},
-			bar_color_deadzone = {0.72, 0.05, 0.05, 0.72},
-			-- Font settings
-			font_size = 16,
-			font_color = {1.0, 1.0, 1.0, 1.0},
-			text_font = LSM.DefaultMedia.font,
-			font_outline_key = "outline",
-			left_text = "attack_speed",
-			right_text = "swing_timer",
-			-- Border settings
-			border_mode_key = "Solid",
-			backplane_outline_width = 2,
-		},
+		-- -- Ranged options
+		-- ranged = {
+		-- 	-- behaviour
+		-- 	enabled = true,
+		-- 	-- Bar dimensions
+		-- 	bar_height = 32,
+		-- 	bar_width = 345,
+		-- 	-- Bar positioning
+		-- 	bar_locked = true,
+		-- 	bar_x_offset = 0,
+		-- 	bar_y_offset = 20,
+		-- 	bar_point = "CENTER",
+		-- 	bar_rel_point = "CENTER",
+		-- 	-- Bar textures
+		-- 	bar_texture_key = "Solid",
+		-- 	gcd_texture_key = "Solid",
+		-- 	backplane_texture_key = "Solid",
+		-- 	border_texture_key = "None",
+		-- 	deadzone_texture_key = "Solid",
+		-- 	backplane_alpha = 0.85,
+		-- 	-- Colors
+		-- 	bar_color_default = {0.14, 0.66, 0.14, 1.0},
+		-- 	bar_color_gcd = {0.48, 0.48, 0.48, 1.0},
+		-- 	bar_color_deadzone = {0.72, 0.05, 0.05, 0.72},
+		-- 	-- Font settings
+		-- 	font_size = 16,
+		-- 	font_color = {1.0, 1.0, 1.0, 1.0},
+		-- 	text_font = LSM.DefaultMedia.font,
+		-- 	font_outline_key = "outline",
+		-- 	left_text = "attack_speed",
+		-- 	right_text = "swing_timer",
+		-- 	-- Border settings
+		-- 	border_mode_key = "Solid",
+		-- 	backplane_outline_width = 2,
+		-- },
 		
 		-- Behaviour toggles
 		lag_detection_enabled = true,
@@ -1002,4 +1027,4 @@ end
 --=========================================================================================
 -- End, if debug verify module was read.
 --=========================================================================================
-if st.debug then print('-- Parsed core.lua module correctly') end
+if st.debug then print('-- Parsed config.lua module correctly') end
