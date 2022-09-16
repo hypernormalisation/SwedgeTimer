@@ -33,7 +33,7 @@ ST.ROGUE.defaults = {
 		deadzone_texture_key = "Solid",
 		backplane_alpha = 0.85,
 		-- Colors
-		bar_color_default = {255, 209, 56, 1.0},
+		bar_color_default = {235, 189, 56, 1.0},
 		bar_color_gcd = {0.48, 0.48, 0.48, 1.0},
 		bar_color_deadzone = {0.72, 0.05, 0.05, 0.72},
 		-- Font settings
@@ -48,6 +48,10 @@ ST.ROGUE.defaults = {
 		backplane_outline_width = 2,
         -- GCD underlay settings
         show_gcd_underlay = true,
+        -- Show GCD markers
+        show_gcd_markers = true,
+        -- Show range
+        show_range_finder = true,
 	},
 
 	-- Offhand options
@@ -86,6 +90,10 @@ ST.ROGUE.defaults = {
 		backplane_outline_width = 2,
         -- GCD underlay settings
         show_gcd_underlay = false,
+        -- Show GCD markers
+        show_gcd_markers = false,
+        -- Show range
+        show_range_finder = false,
 	},
 
 	-- Ranged options
@@ -124,6 +132,10 @@ ST.ROGUE.defaults = {
 		backplane_outline_width = 2,
         -- GCD underlay settings
         show_gcd_underlay = false,
+        -- Show GCD markers
+        show_gcd_markers = false,
+        -- Show range
+        show_range_finder = true,
 	},
 }
 

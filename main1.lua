@@ -9,7 +9,6 @@ local LRC = LibStub("LibRangeCheck-2.0")
 -- print('LRC says: '..tostring(LRC))
 -- local rcf = CreateFrame("Frame", nil)
 
-
 local print = st.utils.print_msg
 
 local SwingTimerInfo = function(hand)
@@ -25,6 +24,20 @@ ST.hands = {
 	offhand = true,
 	ranged = true
 }
+ST.h = {"mainhand", "offhand", "ranged"}
+
+function ST:iter_hands()
+	local i = 0
+	local hands = self.h
+	local n = #hands
+	return function ()
+		i = i + 1
+		while i <= n do
+			return hands[i]
+		end
+		return nil
+	end
+end
 
 ------------------------------------------------------------------------------------
 -- The init/enable/disable
@@ -134,7 +147,7 @@ function ST:rf_update()
 end
 
 ------------------------------------------------------------------------------------
--- The Internal timers
+-- State setting
 ------------------------------------------------------------------------------------
 function ST:check_weapons()
 	-- Detect what weapon types are equipped.
@@ -151,6 +164,23 @@ function ST:check_weapons()
 		self.has_ranged = true
 	end
 end
+
+------------------------------------------------------------------------------------
+-- GCD funcs
+------------------------------------------------------------------------------------
+function ST:needs_gcd()
+	if self:get_hand_table("mainhand")["show_gcd_underlay"] or
+		self:get_hand_table("offhand")["show_gcd_underlay"] or
+		self:get_hand_table("ranged")["show_gcd_underlay"] then
+		return true
+	end
+	return false
+end
+
+-- function ST:hands_needing_underlay()
+-- 	local hands = {}
+-- 	for 
+-- end
 
 ------------------------------------------------------------------------------------
 -- The Event handlers for the STL
@@ -232,7 +262,7 @@ function ST:init_timers()
 	print('RECEIVED STL CALLBACK')
 	self:register_timer_callbacks()
 
-	for hand, _ in pairs(ST.hands) do
+	for hand in self:iter_hands() do
 		local t = {SwingTimerInfo(hand)}
 		print(string.format("%s, %s, %s", tostring(t[1]),
 		tostring(t[2]), tostring(t[3])))
@@ -262,6 +292,9 @@ end
 
 -- GCD events
 function ST:SPELL_UPDATE_COOLDOWN()
+	if not self:needs_gcd() then
+		return
+	end
 	if self.gcd.lock then
 		return
 	end
@@ -315,14 +348,18 @@ function ST:register_slashcommands()
 end
 
 function ST:test1()
-    local db = self:get_hand_table("mainhand")
-	print(db.tag)
-	print(db.bar_color_default)
-	local r, g, b, a = self:convert_color(db.bar_color_default)
-	print(r)
-	print(g)
-	print(b)
-	
+    -- local db = self:get_hand_table("mainhand")
+	-- print(db.tag)
+	-- print(db.bar_color_default)
+	-- local r, g, b, a = self:convert_color(db.bar_color_default)
+	-- print(r)
+	-- print(g)
+	-- print(b)
+	print("iterating hands")
+	for hand in self:iter_hands() do
+		print('=')
+		print(hand)
+	end
 end
 
 function ST:SlashCommand(input, editbox)

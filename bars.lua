@@ -57,8 +57,6 @@ end
 function ST:set_bar_color(hand)
     local db = self:get_hand_table(hand)
     local frame = self[hand].frame
-    local r, g, b, a = self:convert_color(db.bar_color_default)
-    print(r, g, b, a)
     frame.bar:SetVertexColor(
         self:convert_color(db.bar_color_default)
     )
@@ -87,7 +85,7 @@ function ST:configure_bar_outline(hand)
     frame.backplane.backdropInfo = {
         bgFile = LSM:Fetch('statusbar', db.backplane_texture_key),
 		edgeFile = LSM:Fetch('border', texture_key),
-        tile = true, tileSize = 16, edgeSize = 16, 
+        tile = true, tileSize = 16, edgeSize = 16,
         insets = { left = 6, right = 6, top = 6, bottom = 6}
     }
     frame.backplane:ApplyBackdrop()
@@ -323,22 +321,28 @@ end
 function ST:set_gcd_width()
     -- Called when there is an active gcd either when a new gcd is triggered
     -- or when the swing timer resets.
-    local frame = self.mainhand.frame
-    local hand = "mainhand"
-    local db = self:get_hand_table(hand)
-    if not db.show_gcd_underlay then
-        frame.gcd_bar:SetWidth(0)
+    if not self:needs_gcd() then
         return
     end
-    if self.gcd.expires > self.mainhand.ends_at then
-        frame.gcd_bar:SetWidth(db.bar_width)
-        return
+
+    for hand in self:iter_hands() do
+
+        local frame = self[hand].frame
+        local db = self:get_hand_table(hand)
+        if not db.show_gcd_underlay then
+            frame.gcd_bar:SetWidth(0)
+            return
+        end
+        if self.gcd.expires > self[hand].ends_at then
+            frame.gcd_bar:SetWidth(db.bar_width)
+            return
+        end
+        -- Else figure out the width to set it at.
+        local t = self.gcd.expires
+        local progress = math.min(1, (t - self[hand].start) /
+            (self[hand].ends_at - self[hand].start)
+        )
+        local timer_width = db.bar_width * progress
+        frame.gcd_bar:SetWidth(timer_width)
     end
-    -- Else figure out the width to set it at.
-    local t = self.gcd.expires
-    local progress = math.min(1, (t - self.mainhand.start) /
-        (self.mainhand.ends_at - self.mainhand.start)
-    )
-    local timer_width = db.bar_width * progress
-    frame.gcd_bar:SetWidth(timer_width)
 end
