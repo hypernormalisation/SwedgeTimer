@@ -25,6 +25,7 @@ ST.hands = {
 	ranged = true
 }
 ST.h = {"mainhand", "offhand", "ranged"}
+ST.mh = {"mainhand", "offhand"}
 
 function ST:iter_hands()
 	local i = 0
@@ -37,6 +38,24 @@ function ST:iter_hands()
 		end
 		return nil
 	end
+end
+
+function ST:iter_melee_hands()
+	local i = 0
+	local hands = self.mh
+	local n = #hands
+	return function ()
+		i = i + 1
+		while i <= n do
+			return hands[i]
+		end
+		return nil
+	end
+end
+
+function ST:get_frame(hand)
+	-- print(self[hand])
+	return self[hand].frame
 end
 
 ------------------------------------------------------------------------------------
@@ -61,12 +80,32 @@ function ST:OnInitialize()
 	local safeDistanceChecker = LRC:GetHarmMinChecker(30)
 	print(safeDistanceChecker == nil)
 
-	LRC:RegisterCallback(LRC.CHECKERS_CHANGED, function() self:init_range_finders() end)
-	STL:RegisterCallback(STL.SWING_TIMER_READY, function() self:init_timers() end)
+	self.lrc_ready = false
+	self.stl_ready = false
+
+	LRC:RegisterCallback(LRC.CHECKERS_CHANGED, function()
+			self.lrc_ready = true
+			if self.stl_ready then
+				self:init_libs()
+			end
+		end
+	)
+	STL:RegisterCallback(STL.SWING_TIMER_READY, function()
+			self.stl_ready = true
+			if self.lrc_ready then
+				self:init_libs()
+			end
+		end
+	)
 
 	-- Slashcommands
 	self:register_slashcommands()
 
+end
+
+function ST:init_libs()
+	self:init_timers()
+	self:init_range_finders()
 end
 
 function ST:OnEnable()
@@ -78,14 +117,20 @@ function ST:OnEnable()
 	self.mh_timer = 0
 	self.oh_timer = 0
 	self.ranged_timer = 0
-	self:check_weapons()
+	-- self:check_weapons()
+
+	-- Character state containers
+	self.in_combat = false
+	self.is_melee_attacking = false
+	self.has_target = false
+	self.has_attackable_target = false
 
 	-- MH timer containers
-	-- self.mh.last_swing = nil
 	self.mainhand.start = nil
 	self.mainhand.speed = nil
 	self.mainhand.ends_at = nil
 	self.mainhand.inactive_timer = nil
+	self.mainhand.has_weapon = true
 	self.mainhand.frame = CreateFrame("Frame", addon_name .. "MHBarFrame", UIParent)
 
 	-- OH containers
@@ -93,6 +138,7 @@ function ST:OnEnable()
 	self.offhand.speed = nil
 	self.offhand.ends_at = nil
 	self.offhand.inactive_timer = nil
+	self.offhand.has_weapon = nil
 	self.offhand.frame = CreateFrame("Frame", addon_name .. "OHBarFrame", UIParent)
 
 	-- ranged containers
@@ -100,6 +146,7 @@ function ST:OnEnable()
 	self.ranged.speed = nil
 	self.ranged.ends_at = nil
 	self.ranged.inactive_timer = nil
+	self.ranged.has_weapon = nil
 	self.ranged.frame = CreateFrame("Frame", addon_name .. "OHBarFrame", UIParent)
 
 	-- GCD info containers
@@ -115,6 +162,11 @@ function ST:OnEnable()
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("PLAYER_TARGET_SET_ATTACKING")
+	self:RegisterEvent("PLAYER_REGEN_ENABLED")
+	self:RegisterEvent("PLAYER_REGEN_DISABLED")
+	self:RegisterEvent("PLAYER_ENTER_COMBAT")
+	self:RegisterEvent("PLAYER_LEAVE_COMBAT")
+	self:RegisterEvent("UNIT_TARGET")
 
 end
 
@@ -122,7 +174,7 @@ end
 -- Range finding
 ------------------------------------------------------------------------------------
 function ST:init_range_finders()
-	self.rangefinder_interval = 0.2
+	self.rangefinder_interval = 0.1
 	self.melee_range_checker_func = LRC:GetHarmMaxChecker(LRC.MeleeRange)
 	local r = 30
 	if self.player_class == "HUNTER" then
@@ -133,17 +185,96 @@ function ST:init_range_finders()
 	self.in_ranged_range = nil
 	self.target_min_range = nil
 	self.target_max_range = nil
+	-- C_Timer.After(1.0, function() self:rf_update() end)
+
 	self:rf_update()
 end
 
 function ST:rf_update()
 	self.in_melee_range = self:melee_range_checker_func("target")
 	-- print(self.melee_result)
-	self.in_ranged_range = self.ranged_range_checker_func("target")
+	self.in_ranged_range = self.ranged_range_checker_func("target") and not self.in_melee_range
 	self.target_min_range, self.target_max_range = LRC:GetRange("target")
 	-- print('minrange = '..tostring(self.target_min_range))
 	-- print(self.target_max_range)
+	self:set_bar_visibilities()
 	C_Timer.After(self.rangefinder_interval, function() self:rf_update() end)
+end
+
+------------------------------------------------------------------------------------
+-- Bar visibility
+------------------------------------------------------------------------------------
+function ST:hide_bar(hand)
+	self:get_frame(hand):Hide()
+end
+
+function ST:show_bar(hand)
+	self:get_frame(hand):Show()
+end
+
+function ST:bar_is_enabled(hand)
+	local db = self:get_hand_table(hand)
+	if hand == "mainhand" then -- always has weapon
+		if db.enabled then
+			return true
+		else
+			return false
+		end
+	elseif db.enabled and self[hand].has_weapon then
+		return true
+	else
+		return false
+	end
+end
+
+function ST:handle_bar_visibility(hand)
+	-- Out of combat requirement overrides all else
+	local db = self:get_hand_table(hand)
+	if db.hide_ooc then
+		if not self.in_combat then
+			self:hide_bar(hand)
+			return
+		end
+	end
+	if db.force_show_in_combat then
+		if self.in_combat then
+			self:show_bar(hand)
+			return
+		end
+	end
+	-- Then target and range checks
+	if db.require_has_valid_target then
+		if self.has_attackable_target then
+			if db.require_in_range then
+				local in_range = self.in_melee_range
+				if hand == "ranged" then in_range = self.in_ranged_range end
+				if not in_range then
+					self:hide_bar(hand)
+					return
+				end
+			end
+		else
+			self:hide_bar(hand)
+			return
+		end
+	end
+	-- If we get here, bar should be shown
+	self:show_bar(hand)
+end
+
+function ST:set_bar_visibilities()
+	-- Function hooked onto the rangefinder C_Timer to determine bar states
+	for hand in self:iter_hands() do
+		-- Get appropriate range
+		-- print(string.format("%s in range: %s", hand, tostring(in_range)))
+		if not self:bar_is_enabled(hand) then
+			self:hide_bar()
+		else
+			self:handle_bar_visibility(hand)
+			-- self:show_bar(hand)
+
+		end
+	end
 end
 
 ------------------------------------------------------------------------------------
@@ -151,17 +282,14 @@ end
 ------------------------------------------------------------------------------------
 function ST:check_weapons()
 	-- Detect what weapon types are equipped.
-	-- Called when equipment is changed.
-	local mh_info = {SwingTimerInfo('mainhand')}
-	local oh_info = {SwingTimerInfo('offhand')}
-	local ranged_info = {SwingTimerInfo('ranged')}
-	self.has_oh = false
-	self.has_ranged = false
-	if oh_info[1] ~= 0 then
-		self.has_oh = true
-	end
-	if ranged_info[1] ~= 0 then
-		self.has_ranged = true
+	for hand in self:iter_hands() do
+		local speed = SwingTimerInfo(hand)
+		-- print(speed)
+		if speed == 0 then
+			self[hand].has_weapon = false
+		else
+			self[hand].has_weapon = true
+		end
 	end
 end
 
@@ -176,11 +304,6 @@ function ST:needs_gcd()
 	end
 	return false
 end
-
--- function ST:hands_needing_underlay()
--- 	local hands = {}
--- 	for 
--- end
 
 ------------------------------------------------------------------------------------
 -- The Event handlers for the STL
@@ -233,7 +356,7 @@ function ST:SWING_TIMER_STOP(hand)
 end
 
 function ST:SWING_TIMER_DELTA(delta)
-	print(string.format("DELTA = %s", delta))
+	-- print(string.format("DELTA = %s", delta))
 end
 
 -- Stub to call the appropriate handler.
@@ -247,10 +370,10 @@ function ST.timer_event_handler(event, ...)
 	else
 		hand = args[1]
 	end
-	print('event says: '..tostring(event))
-	print(string.format("%s: %s", hand, event))
+	-- print('event says: '..tostring(event))
+	-- print(string.format("%s: %s", hand, event))
 	if hand == "offhand" then
-		print(event)
+		-- print(event)
 	end
 	ST[event](event, ...)
 end
@@ -259,13 +382,12 @@ end
 -- AceEvent callbacks
 ------------------------------------------------------------------------------------
 function ST:init_timers()
-	print('RECEIVED STL CALLBACK')
 	self:register_timer_callbacks()
-
+	self:check_weapons()
 	for hand in self:iter_hands() do
 		local t = {SwingTimerInfo(hand)}
-		print(string.format("%s, %s, %s", tostring(t[1]),
-		tostring(t[2]), tostring(t[3])))
+		-- print(string.format("%s, %s, %s", tostring(t[1]),
+		-- tostring(t[2]), tostring(t[3])))
 		self[hand].speed = t[1]
 		self[hand].ends_at = t[2]
 		self[hand].start = t[3]
@@ -274,7 +396,6 @@ function ST:init_timers()
 		-- hook the onupdate
 		self[hand].frame:SetScript("OnUpdate", self[hand].onupdate)
 	end
-	self.ranged.frame:Hide()
 end
 
 function ST:PLAYER_ENTERING_WORLD(event, is_initial_login, is_reloading_ui)
@@ -285,8 +406,8 @@ function ST:PLAYER_EQUIPMENT_CHANGED(event, slot, has_current)
 	-- print(slot)
 	if slot == 16 or slot == 17 or slot == 18 then
 		self:check_weapons()
-		print('has_oh: '.. tostring(self.has_oh))
-		print('has ranged: '..tostring(self.has_ranged))
+		print('has_oh: '.. tostring(self.offhand.has_weapon))
+		print('has ranged: '..tostring(self.ranged.has_weapon))
 	end
 end
 
@@ -307,7 +428,7 @@ function ST:SPELL_UPDATE_COOLDOWN()
     self.gcd.duration = duration - (t - time_started)
 	self.gcd.started = t
 	self.gcd.expires = t + self.gcd.duration
-	print(self.gcd.started, self.gcd.duration)
+	-- print(self.gcd.started, self.gcd.duration)
 	self:set_gcd_width()
 	-- set a timer to release the GCD lock when it expires
 	C_Timer.After(self.gcd.duration, function() self:release_gcd_lock() end)
@@ -322,18 +443,43 @@ function ST:release_gcd_lock()
 end
 
 function ST:PLAYER_REGEN_ENABLED()
+	self.in_combat = false
 	-- unhook all onupdates when out of combat
 	-- for _, h in ipairs({"mainhand", "offhand", "ranged"}) do
 	-- 	self[h].frame:SetScript("OnUpdate", nil)
 	-- end
 end
 
+function ST:PLAYER_REGEN_DISABLED()
+	self.in_combat = true
+end
+
+function ST:PLAYER_ENTER_COMBAT()
+	self.is_melee_attacking = true
+end
+
+function ST:PLAYER_LEAVE_COMBAT()
+	self.is_melee_attacking = false
+end
+
 function ST:PLAYER_TARGET_SET_ATTACKING()
-	print('offsetting offhand')
+	-- print('offsetting offhand')
 	local t = GetTime()
 	local old_start = self.offhand.start
 	if old_start + self.offhand.speed < t then
 		self.offhand.start = GetTime() - self.offhand.speed
+	end
+end
+
+function ST:UNIT_TARGET(event, unitId)
+	if unitId ~= "player" then
+		return
+	end
+	if UnitExists("target") then self.has_target = true else self.has_target = false end
+	if UnitCanAttack("player", "target") == true then
+		self.has_attackable_target = true
+	else
+		self.has_attackable_target = false
 	end
 end
 
@@ -355,11 +501,14 @@ function ST:test1()
 	-- print(r)
 	-- print(g)
 	-- print(b)
-	print("iterating hands")
-	for hand in self:iter_hands() do
-		print('=')
-		print(hand)
-	end
+	-- print("iterating hands")
+	-- for hand in self:iter_melee_hands() do
+	-- 	print('=')
+	-- 	print(hand)
+	-- end
+	print(self.has_attackable_target)
+	print(self.in_melee_range)
+
 end
 
 function ST:SlashCommand(input, editbox)

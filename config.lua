@@ -18,8 +18,9 @@ function ST:get_hand_table(hand)
 	return self.db.profile[self.player_class][hand]
 end
 
-function ST:convert_color(t)
+function ST:convert_color(t, new_alpha)
 	local r,g,b,a = unpack(t)
+	a = new_alpha or a
 	r = r/255
 	g = g/255
 	b = b/255
@@ -233,6 +234,19 @@ ST.defaults = {
 
     },
 
+}
+
+local bar_visibility_values = {
+	always = "Always show",
+	in_combat = "In Combat",
+	contextual = "Contextual",
+	hidden = "Hidden",
+}
+
+local contextual_visibility_values = {
+	in_combat = "In Combat",
+	has_attackable_target = "Has Attackable Target",
+	in_range = "In Range of Target",	
 }
 
 local outline_map = {
