@@ -58,6 +58,10 @@ function ST:get_frame(hand)
 	return self[hand].frame
 end
 
+function ST:get_in_range(hand)
+	if hand == "ranged" then return self.in_ranged_range else return self.in_melee_range end
+end
+
 ------------------------------------------------------------------------------------
 -- The init/enable/disable
 ------------------------------------------------------------------------------------
@@ -83,6 +87,8 @@ function ST:OnInitialize()
 	self.lrc_ready = false
 	self.stl_ready = false
 
+	-- init our lib interfaces only once the range and swing timer
+	-- libs are both loaded, as they are interdependent
 	LRC:RegisterCallback(LRC.CHECKERS_CHANGED, function()
 			self.lrc_ready = true
 			if self.stl_ready then
@@ -198,7 +204,32 @@ function ST:rf_update()
 	-- print('minrange = '..tostring(self.target_min_range))
 	-- print(self.target_max_range)
 	self:set_bar_visibilities()
+	self:handle_oor()
 	C_Timer.After(self.rangefinder_interval, function() self:rf_update() end)
+end
+
+------------------------------------------------------------------------------------
+-- Bar out-of-range behaviour
+------------------------------------------------------------------------------------
+function ST:handle_oor()
+	for hand in self:iter_hands() do
+		if self:bar_is_enabled(hand) then
+			self:handle_oor_hand(hand)
+		end
+	end
+end
+
+function ST:handle_oor_hand(hand)
+	local db = self:get_hand_table(hand)
+	local frame = self:get_frame(hand)
+
+	if db.oor_effect == "dim" then
+		if not self:get_in_range(hand) then
+			frame:SetAlpha(db.dim_alpha)
+		else
+			frame:SetAlpha(1.0)
+		end
+	end
 end
 
 ------------------------------------------------------------------------------------
@@ -246,9 +277,7 @@ function ST:handle_bar_visibility(hand)
 	if db.require_has_valid_target then
 		if self.has_attackable_target then
 			if db.require_in_range then
-				local in_range = self.in_melee_range
-				if hand == "ranged" then in_range = self.in_ranged_range end
-				if not in_range then
+				if not self:get_in_range(hand) then
 					self:hide_bar(hand)
 					return
 				end

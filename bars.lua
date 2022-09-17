@@ -168,7 +168,7 @@ local drag_stop_handler_dict = {
 -- Intialisation func
 --=========================================================================================
 function ST:init_visuals_template(hand)
-    -- print(hand)
+    print(hand)
     local frame = self[hand].frame
     local db_shared = self.db.profile
     -- local db = self.db.profile[hand]
@@ -189,7 +189,9 @@ function ST:init_visuals_template(hand)
     frame:SetPoint(db.bar_point, UIParent, db.bar_rel_point, db.bar_x_offset, db.bar_y_offset)
 
     -- Create the backplane and border
-    frame.backplane = CreateFrame("Frame", addon_name .. "MHBarBackdropFrame", frame, "BackdropTemplate")
+    frame.backplane = CreateFrame("Frame", addon_name .. "MHBarBackdropFrame",
+        frame, "BackdropTemplate"
+    )
 
     -- Adjust the frame draw levels so the backplane is below the frame
     frame:SetFrameLevel(db_shared.draw_level+1)

@@ -29,208 +29,20 @@ end
 
 ------------------------------------------------------------------------------------
 -- Default settings for the addon.
-
 ST.defaults = {
 
 	profile = {
 
-		-- Class-specific defaults
-		ROGUE = ST.ROGUE.defaults,
-
 		-- Top level
 		welcome_message = true,
-		bar_enabled = true,
-
-		-- Show individual timers
-		show_mh = true,
-		show_oh = true,
-		show_ranged = true,
-
-		-- GCD underlay
-		show_gcd_underlay = true,
-
-		-- -- Mainhand options
-		-- mainhand = {
-		-- 	-- behaviour
-		-- 	enabled = true,
-		-- 	-- Bar dimensions
-		-- 	bar_height = 32,
-		-- 	bar_width = 345,
-		-- 	-- Bar positioning
-		-- 	bar_locked = true,
-		-- 	bar_x_offset = 0,
-		-- 	bar_y_offset = -180,
-		-- 	bar_point = "CENTER",
-		-- 	bar_rel_point = "CENTER",
-		-- 	-- Bar textures
-		-- 	bar_texture_key = "Solid",
-        -- 	gcd_texture_key = "Solid",
-        -- 	backplane_texture_key = "Solid",
-        -- 	border_texture_key = "None",
-		-- 	deadzone_texture_key = "Solid",
-		-- 	backplane_alpha = 0.85,
-		-- 	-- Colors
-		-- 	bar_color_default = {0.14, 0.66, 0.14, 1.0},
-		-- 	bar_color_gcd = {0.48, 0.48, 0.48, 1.0},
-		-- 	bar_color_deadzone = {0.72, 0.05, 0.05, 0.72},
-		-- 	-- Font settings
-		-- 	font_size = 16,
-		-- 	font_color = {1.0, 1.0, 1.0, 1.0},
-		-- 	text_font = LSM.DefaultMedia.font,
-		-- 	font_outline_key = "outline",
-        -- 	left_text = "attack_speed",
-        -- 	right_text = "swing_timer",
-		-- 	-- Border settings
-		-- 	border_mode_key = "Solid",
-		-- 	backplane_outline_width = 2,
-		-- },
-
-		-- -- Offhand options
-		-- offhand = {
-		-- 	-- behaviour
-		-- 	enabled = true,
-		-- 	-- Bar dimensions
-		-- 	bar_height = 32,
-		-- 	bar_width = 345,
-		-- 	-- Bar positioning
-		-- 	bar_locked = true,
-		-- 	bar_x_offset = 0,
-		-- 	bar_y_offset = -80,
-		-- 	bar_point = "CENTER",
-		-- 	bar_rel_point = "CENTER",
-		-- 	-- Bar textures
-		-- 	bar_texture_key = "Solid",
-        -- 	gcd_texture_key = "Solid",
-        -- 	backplane_texture_key = "Solid",
-        -- 	border_texture_key = "None",
-		-- 	deadzone_texture_key = "Solid",
-		-- 	backplane_alpha = 0.85,
-		-- 	-- Colors
-		-- 	bar_color_default = {0.14, 0.66, 0.14, 1.0},
-		-- 	bar_color_gcd = {0.48, 0.48, 0.48, 1.0},
-		-- 	bar_color_deadzone = {0.72, 0.05, 0.05, 0.72},
-		-- 	-- Font settings
-		-- 	font_size = 16,
-		-- 	font_color = {1.0, 1.0, 1.0, 1.0},
-		-- 	text_font = LSM.DefaultMedia.font,
-		-- 	font_outline_key = "outline",
-        -- 	left_text = "attack_speed",
-        -- 	right_text = "swing_timer",
-		-- 	-- Border settings
-		-- 	border_mode_key = "Solid",
-		-- 	backplane_outline_width = 2,
-		-- },
-
-		-- -- Ranged options
-		-- ranged = {
-		-- 	-- behaviour
-		-- 	enabled = true,
-		-- 	-- Bar dimensions
-		-- 	bar_height = 32,
-		-- 	bar_width = 345,
-		-- 	-- Bar positioning
-		-- 	bar_locked = true,
-		-- 	bar_x_offset = 0,
-		-- 	bar_y_offset = 20,
-		-- 	bar_point = "CENTER",
-		-- 	bar_rel_point = "CENTER",
-		-- 	-- Bar textures
-		-- 	bar_texture_key = "Solid",
-		-- 	gcd_texture_key = "Solid",
-		-- 	backplane_texture_key = "Solid",
-		-- 	border_texture_key = "None",
-		-- 	deadzone_texture_key = "Solid",
-		-- 	backplane_alpha = 0.85,
-		-- 	-- Colors
-		-- 	bar_color_default = {0.14, 0.66, 0.14, 1.0},
-		-- 	bar_color_gcd = {0.48, 0.48, 0.48, 1.0},
-		-- 	bar_color_deadzone = {0.72, 0.05, 0.05, 0.72},
-		-- 	-- Font settings
-		-- 	font_size = 16,
-		-- 	font_color = {1.0, 1.0, 1.0, 1.0},
-		-- 	text_font = LSM.DefaultMedia.font,
-		-- 	font_outline_key = "outline",
-		-- 	left_text = "attack_speed",
-		-- 	right_text = "swing_timer",
-		-- 	-- Border settings
-		-- 	border_mode_key = "Solid",
-		-- 	backplane_outline_width = 2,
-		-- },
-		
-		-- Behaviour toggles
-		lag_detection_enabled = true,
-		judgement_marker_enabled = true,
-        bar_twist_color_enabled = false,
-		hide_when_not_ret = true,
-		enable_deadzone = true,
-
-		-- Auto-hide setting
-		visibility_key = "always",
-
-		-- Lag calibration
-		lag_multiplier = 1.4,
-		lag_offset = 15,
-
-		-- Marker position settings
-		gcd_padding_mode = "Dynamic",
-		gcd_static_padding_ms = 100,
-		twist_padding_mode = "None",
-		twist_window_padding_ms = 0,
-
-		-- Bar dimensions
-		bar_height = 32,
-		bar_width = 345,
-
-		-- Bar positioning
-		bar_locked = true,
-		bar_x_offset = 0,
-		bar_y_offset = -180,
-		bar_point = "CENTER",
-		bar_rel_point = "CENTER",
+		enabled = true, -- top level control
 
 		-- Frame strata/draw level
 		frame_strata = "MEDIUM",
 		draw_level = 10,
 
-		-- Bar textures
-		bar_texture_key = "Solid",
-        gcd_texture_key = "Solid",
-        backplane_texture_key = "Solid",
-        border_texture_key = "None",
-		deadzone_texture_key = "Solid",
-		backplane_alpha = 0.85,
-
-		-- Deadzone scaling
-		deadzone_scale_factor = 1.0,
-
-		-- Border settings
-		border_mode_key = "Solid",
-		backplane_outline_width = 2,
-
-		-- Font settings
-		font_size = 16,
-		font_color = {1.0, 1.0, 1.0, 1.0},
-		text_font = LSM.DefaultMedia.font,
-		font_outline_key = "outline",
-        left_text = "attack_speed",
-        right_text = "swing_timer",
-
-		-- Marker settings
-		marker_width = 3,
-		gcd1_enabled = false,
-		gcd2_enabled = false,
-		gcd_marker_color = {0.9, 0.9, 0.9, 1.0},
-		twist_marker_color = {0.9,0.9,0.9,1.0},
-		judgement_marker_color = {0.9,0.9,0.01,1.0},
-
-		-- Special bar colors
-		bar_color_default = {0.14, 0.66, 0.14, 1.0},
-
-		-- GCD underlay bar colors
-		bar_color_gcd = {0.48, 0.48, 0.48, 1.0},
-
-		-- Deadzone bar colors
-		bar_color_deadzone = {0.72, 0.05, 0.05, 0.72},
+		-- Class-specific defaults
+		ROGUE = ST.ROGUE.defaults,
 
     },
 
@@ -246,7 +58,7 @@ local bar_visibility_values = {
 local contextual_visibility_values = {
 	in_combat = "In Combat",
 	has_attackable_target = "Has Attackable Target",
-	in_range = "In Range of Target",	
+	in_range = "In Range of Target",
 }
 
 local outline_map = {
