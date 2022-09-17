@@ -43,6 +43,7 @@ ST.ROGUE.defaults = {
 		deadzone_texture_key = "Solid",
 		backplane_alpha = 0.6,
 		-- Colors
+		bar_color_default = {117, 26, 17, 1.0},
 		bar_color_gcd = {0.48, 0.48, 0.48, 0.8},
 		bar_color_deadzone = {0.72, 0.05, 0.05, 0.72},
 		-- Font settings
