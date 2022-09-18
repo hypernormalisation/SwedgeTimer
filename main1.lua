@@ -62,10 +62,15 @@ function ST:get_in_range(hand)
 	if hand == "ranged" then return self.in_ranged_range else return self.in_melee_range end
 end
 
+ST.interfaces_are_initialised = false
+
 ------------------------------------------------------------------------------------
 -- The init/enable/disable
 ------------------------------------------------------------------------------------
 function ST:OnInitialize()
+
+	-- ST.some_counter = ST.some_counter + 1
+	-- print(string.format("init count: %i", ST.some_counter))
 
 	-- Addon database
 	local SwedgeTimerDB = LibStub("AceDB-3.0"):New(addon_name.."DB", self.defaults, true)
@@ -81,17 +86,16 @@ function ST:OnInitialize()
 	-- AC:RegisterOptionsTable(addon_name.."_Profiles", profiles)
 	-- ACD:AddToBlizOptions(addon_name.."_Profiles", "Profiles", addon_name)
 
-	local safeDistanceChecker = LRC:GetHarmMinChecker(30)
-	print(safeDistanceChecker == nil)
-
 	self.lrc_ready = false
 	self.stl_ready = false
 
 	-- init our lib interfaces only once the range and swing timer
 	-- libs are both loaded, as they are interdependent
+	-- init_libs has a check to ensure this only happens once per reload
 	LRC:RegisterCallback(LRC.CHECKERS_CHANGED, function()
 			self.lrc_ready = true
 			if self.stl_ready then
+				print('initing interfaces on LRC')
 				self:init_libs()
 			end
 		end
@@ -99,6 +103,7 @@ function ST:OnInitialize()
 	STL:RegisterCallback(STL.SWING_TIMER_READY, function()
 			self.stl_ready = true
 			if self.lrc_ready then
+				print('initing interfaces on STL')
 				self:init_libs()
 			end
 		end
@@ -107,14 +112,6 @@ function ST:OnInitialize()
 	-- Slashcommands
 	self:register_slashcommands()
 
-end
-
-function ST:init_libs()
-	self:init_timers()
-	self:init_range_finders()
-end
-
-function ST:OnEnable()
 	-- Sort out character information
 	self.player_guid = UnitGUID("player")
 	self.player_class = select(2, UnitClass("player"))
@@ -174,6 +171,18 @@ function ST:OnEnable()
 	self:RegisterEvent("PLAYER_LEAVE_COMBAT")
 	self:RegisterEvent("UNIT_TARGET")
 
+end
+
+function ST:init_libs()
+	if self.interfaces_are_initialised then
+		return
+	end
+	self:init_timers()
+	self:init_range_finders()
+	self.interfaces_are_initialised = true
+end
+
+function ST:OnEnable()
 end
 
 ------------------------------------------------------------------------------------

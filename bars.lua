@@ -168,13 +168,13 @@ local drag_stop_handler_dict = {
 -- Intialisation func
 --=========================================================================================
 function ST:init_visuals_template(hand)
-    print(hand)
+    -- print(hand)
     local frame = self[hand].frame
     local db_shared = self.db.profile
     -- local db = self.db.profile[hand]
     local db = self:get_hand_table(hand)
     -- print(db)
-    print(db.bar_height)
+    -- print(db.bar_height)
 
     -- Set initial frame properties
     frame:SetPoint("CENTER")
@@ -219,6 +219,9 @@ function ST:init_visuals_template(hand)
     frame.gcd_bar:SetTexture(LSM:Fetch('statusbar', db.gcd_texture_key))
     frame.gcd_bar:SetVertexColor(unpack(db.bar_color_gcd))
     frame.gcd_bar:SetDrawLayer("ARTWORK", -2)
+    if not db.show_gcd_underlay then
+        frame.gcd_bar:Hide()
+    end
 
     -- Create the deadzone bar
     -- frame.deadzone = frame:CreateTexture(nil, "ARTWORK")

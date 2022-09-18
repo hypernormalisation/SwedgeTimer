@@ -19,7 +19,7 @@ ST.bar_defaults = {
 
     -- Out of range behaviour
     oor_effect = "dim",
-    dim_alpha = 0.4,
+    dim_alpha = 0.6,
 
     -- Bar dimensions/positioning
     bar_height = 16,
@@ -32,12 +32,11 @@ ST.bar_defaults = {
 
     -- Bar appearance
     bar_texture_key = "Solid",
-    gcd_texture_key = "Solid",
     border_texture_key = "None",
-    bar_color_default = {117, 26, 17, 1.0},
+    bar_color_default = {117, 26, 17, 0.4},
 
     -- Backplane and border
-    backplane_alpha = 0.6,
+    backplane_alpha = 0.75,
     backplane_texture_key = "Solid",
     border_mode_key = "Solid",
     backplane_outline_width = 1.5,
@@ -51,8 +50,14 @@ ST.bar_defaults = {
     right_text = "swing_timer",
 
     -- GCD underlay
+    gcd = {
+        test1 = 'the default',
+        test2 = 'another default',
+    },
     show_gcd_underlay = true,
     bar_color_gcd = {0.48, 0.48, 0.48, 0.8},
+    gcd_texture_key = "Solid",
+
     -- GCD markers
     show_gcd_markers = true,
     marker_width = 3,
