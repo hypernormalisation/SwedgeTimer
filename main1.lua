@@ -362,9 +362,9 @@ function ST:SWING_TIMER_START(speed, expiration_time, hand)
 	self[hand].ends_at = expiration_time
 
 	-- handle gcd if necessary
-	if self.gcd.lock then
-		self:set_gcd_width()
-	end
+	-- if self.gcd.lock then
+	-- 	self:set_gcd_width()
+	-- end
 end
 
 function ST:SWING_TIMER_UPDATE(speed, expiration_time, hand)
@@ -376,10 +376,6 @@ function ST:SWING_TIMER_UPDATE(speed, expiration_time, hand)
 	self[hand].speed = speed
 	self[hand].ends_at = expiration_time
 	self:set_bar_texts(hand)
-	-- handle gcd if necessary
-	if self.gcd.lock then
-		self:set_gcd_width()
-	end
 end
 
 function ST:SWING_TIMER_CLIPPED(hand)
@@ -466,8 +462,11 @@ function ST:SPELL_UPDATE_COOLDOWN()
     self.gcd.duration = duration - (t - time_started)
 	self.gcd.started = t
 	self.gcd.expires = t + self.gcd.duration
+	for hand in self:iter_hands() do
+		self:get_frame(hand).gcd_bar:Show()
+	end
 	-- print(self.gcd.started, self.gcd.duration)
-	self:set_gcd_width()
+	-- self:set_gcd_width()
 	-- set a timer to release the GCD lock when it expires
 	C_Timer.After(self.gcd.duration, function() self:release_gcd_lock() end)
 end
@@ -477,7 +476,12 @@ function ST:release_gcd_lock()
 	self.gcd.lock = false
     self.gcd.duration = nil
 	self.gcd.started = nil
-	self.mainhand.frame.gcd_bar:SetWidth(0)
+	self.gcd.needs_setpoint = false
+	for hand in self:iter_hands() do
+		local frame = self:get_frame(hand)
+		frame.gcd_bar:SetWidth(0)
+		frame.gcd_bar:Hide()
+	end
 end
 
 function ST:PLAYER_REGEN_ENABLED()
@@ -532,20 +536,9 @@ function ST:register_slashcommands()
 end
 
 function ST:test1()
-    -- local db = self:get_hand_table("mainhand")
-	-- print(db.tag)
-	-- print(db.bar_color_default)
-	-- local r, g, b, a = self:convert_color(db.bar_color_default)
-	-- print(r)
-	-- print(g)
-	-- print(b)
-	-- print("iterating hands")
-	-- for hand in self:iter_melee_hands() do
-	-- 	print('=')
-	-- 	print(hand)
-	-- end
-	print(self.has_attackable_target)
-	print(self.in_melee_range)
+    local db = self:get_hand_table("mainhand")
+	local f = self:get_frame("mainhand")
+	-- self.mainhand.frame.gcd_bar
 
 end
 

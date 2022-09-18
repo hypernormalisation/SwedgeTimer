@@ -214,14 +214,12 @@ function ST:init_visuals_template(hand)
 
     -- Create the GCD timer bar
     frame.gcd_bar = frame:CreateTexture(nil, "ARTWORK")
-    frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
+    -- frame.gcd_bar:SetPoint("TOPRIGHT", 0, 0)
     frame.gcd_bar:SetHeight(db.bar_height)
     frame.gcd_bar:SetTexture(LSM:Fetch('statusbar', db.gcd_texture_key))
     frame.gcd_bar:SetVertexColor(unpack(db.bar_color_gcd))
     frame.gcd_bar:SetDrawLayer("ARTWORK", -2)
-    if not db.show_gcd_underlay then
-        frame.gcd_bar:Hide()
-    end
+    frame.gcd_bar:Hide()
 
     -- Create the deadzone bar
     -- frame.deadzone = frame:CreateTexture(nil, "ARTWORK")
@@ -279,11 +277,14 @@ function ST:onupdate_common(hand)
     local timer_width = db.bar_width * progress
     frame.bar:SetWidth(timer_width)
 	frame.bar:SetTexCoord(0, progress, 0, 1)
-	
+    -- frame.gcd_bar:SetPoint("TOPRIGHT", 0, 0)
+
     -- Update the deadzone's width
     -- frame.deadzone:SetWidth(st.bar.get_deadzone_width())
-
-	-- Set texts
+    if db.show_gcd_underlay and self.gcd.lock then
+        self:set_gcd_width(hand, timer_width, progress)
+    end
+    -- Set texts
     self:set_bar_texts(hand)
 
 end
@@ -303,6 +304,27 @@ end
 --=========================================================================================
 -- Funcs to alter widgets
 --=========================================================================================
+function ST:set_gcd_width(hand, timer_width, progress)
+    local db = self:get_hand_table(hand)
+    local frame = self[hand].frame
+    local tab = self[hand]
+    local t = GetTime()
+    local gcd_progress = (self.gcd.expires - tab.start) / (tab.ends_at - tab.start)
+    -- if gcd would go over the top of the bar, instead use the swing timer
+    -- bar progress to evalute texture coords and gcd bar width
+    if gcd_progress > 1 then
+        local gcd_width = db.bar_width - timer_width
+        frame.gcd_bar:SetWidth(gcd_width)
+        frame.gcd_bar:SetTexCoord(progress, 1, 0, 1)
+    else
+        local gcd_width = (db.bar_width * gcd_progress) - timer_width
+        frame.gcd_bar:SetWidth(gcd_width)
+        frame.gcd_bar:SetTexCoord(progress, gcd_progress, 0, 1)
+    end
+    frame.gcd_bar:SetPoint("TOPLEFT", timer_width, 0)
+
+end
+
 function ST:set_bar_texts(hand)
     local frame = self[hand].frame
     local db = self:get_hand_table(hand)
@@ -323,31 +345,30 @@ function ST:set_bar_texts(hand)
     frame.right_text:SetText(right)
 end
 
-function ST:set_gcd_width()
-    -- Called when there is an active gcd either when a new gcd is triggered
-    -- or when the swing timer resets.
-    if not self:needs_gcd() then
-        return
-    end
+-- function ST:set_gcd_width()
+--     -- Called when there is an active gcd either when a new gcd is triggered
+--     -- or when the swing timer resets.
+--     if not self:needs_gcd() then
+--         return
+--     end
+--     for hand in self:iter_hands() do
+--         local frame = self[hand].frame
+--         local db = self:get_hand_table(hand)
+--         if not db.show_gcd_underlay then
+--             return
+--         end
+--         frame.gcd_bar:Show()
 
-    for hand in self:iter_hands() do
-
-        local frame = self[hand].frame
-        local db = self:get_hand_table(hand)
-        if not db.show_gcd_underlay then
-            frame.gcd_bar:SetWidth(0)
-            return
-        end
-        if self.gcd.expires > self[hand].ends_at then
-            frame.gcd_bar:SetWidth(db.bar_width)
-            return
-        end
-        -- Else figure out the width to set it at.
-        local t = self.gcd.expires
-        local progress = math.min(1, (t - self[hand].start) /
-            (self[hand].ends_at - self[hand].start)
-        )
-        local timer_width = db.bar_width * progress
-        frame.gcd_bar:SetWidth(timer_width)
-    end
-end
+--         if self.gcd.expires > self[hand].ends_at then
+--             frame.gcd_bar:SetWidth(db.bar_width)
+--             return
+--         end
+--         -- Else figure out the width to set it at.
+--         local t = self.gcd.expires
+--         local progress = math.min(1, (t - self[hand].start) /
+--             (self[hand].ends_at - self[hand].start)
+--         )
+--         local timer_width = db.bar_width * progress
+--         frame.gcd_bar:SetWidth(timer_width)
+--     end
+-- end

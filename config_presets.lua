@@ -36,7 +36,7 @@ ST.bar_defaults = {
     bar_color_default = {117, 26, 17, 0.4},
 
     -- Backplane and border
-    backplane_alpha = 0.75,
+    backplane_alpha = 0.85,
     backplane_texture_key = "Solid",
     border_mode_key = "Solid",
     backplane_outline_width = 1.5,
@@ -55,7 +55,7 @@ ST.bar_defaults = {
         test2 = 'another default',
     },
     show_gcd_underlay = true,
-    bar_color_gcd = {0.48, 0.48, 0.48, 0.8},
+    bar_color_gcd = {0.42, 0.42, 0.42, 0.8},
     gcd_texture_key = "Solid",
 
     -- GCD markers
