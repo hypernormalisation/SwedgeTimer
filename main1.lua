@@ -54,7 +54,7 @@ function ST:iter_melee_hands()
 end
 
 function ST:get_frame(hand)
-	-- print(self[hand])
+	-- print("hand says: " .. tostring(hand))
 	return self[hand].frame
 end
 
@@ -306,7 +306,7 @@ function ST:set_bar_visibilities()
 		-- Get appropriate range
 		-- print(string.format("%s in range: %s", hand, tostring(in_range)))
 		if not self:bar_is_enabled(hand) then
-			self:hide_bar()
+			self:hide_bar(hand)
 		else
 			self:handle_bar_visibility(hand)
 			-- self:show_bar(hand)

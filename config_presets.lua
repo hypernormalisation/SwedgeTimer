@@ -33,7 +33,7 @@ ST.bar_defaults = {
     -- Bar appearance
     bar_texture_key = "Solid",
     border_texture_key = "None",
-    bar_color_default = {117, 26, 17, 0.4},
+    bar_color_default = {137, 56, 27, 0.6},
 
     -- Backplane and border
     backplane_alpha = 0.85,
@@ -92,7 +92,7 @@ ST.ROGUE.defaults = {
 	offhand = {
 		bar_x_offset = 0,
 		bar_y_offset = -144,
-		bar_color_default = {1, 66, 69, 1.0},
+		bar_color_default = {1, 66, 69, 0.8},
         show_gcd_underlay = false,
 	},
 
@@ -104,8 +104,9 @@ ST.ROGUE.defaults = {
 		bar_width = 200,
 		bar_x_offset = 0,
 		bar_y_offset = -102,
-		bar_color_default = {115, 17, 42, 1.0},
+		bar_color_default = {115, 17, 42, 0.8},
 		font_size = 11,
+        show_gcd_underlay = false,
         show_gcd_markers = false,
         show_range_finder = true,
 	},

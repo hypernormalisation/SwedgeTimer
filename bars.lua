@@ -168,7 +168,7 @@ local drag_stop_handler_dict = {
 -- Intialisation func
 --=========================================================================================
 function ST:init_visuals_template(hand)
-    -- print(hand)
+    print("initing visuals for hand: "..tostring(hand))
     local frame = self[hand].frame
     local db_shared = self.db.profile
     -- local db = self.db.profile[hand]
@@ -322,7 +322,6 @@ function ST:set_gcd_width(hand, timer_width, progress)
         frame.gcd_bar:SetTexCoord(progress, gcd_progress, 0, 1)
     end
     frame.gcd_bar:SetPoint("TOPLEFT", timer_width, 0)
-
 end
 
 function ST:set_bar_texts(hand)
