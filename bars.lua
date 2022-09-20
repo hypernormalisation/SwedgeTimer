@@ -235,23 +235,12 @@ function ST:onupdate_common(hand)
     local progress = math.min(1, (t - d.start) /
         (d.ends_at - d.start)
     )
-    -- print(progress)
-    -- if progress == 1 then
-    --     self[hand].is_full = true
-    --     -- self:set_bar_color(hand, {0.5, 0.5, 0.5, 1.0})
-    -- else
-    --     self[hand].is_full = false
-    --     -- self:set_bar_color(hand)
-    -- end
     local db = self:get_hand_table(hand)
 
     -- Update the main bar's width
     local timer_width = db.bar_width * progress
     frame.bar:SetWidth(timer_width)
 	frame.bar:SetTexCoord(0, progress, 0, 1)
-
-    -- Update the deadzone's width
-    -- frame.deadzone:SetWidth(st.bar.get_deadzone_width())
 
     -- Update the GCD underlay if necessary.
     if db.show_gcd_underlay and self.gcd.lock then
