@@ -59,11 +59,10 @@ ST.bar_defaults = {
     gcd_texture_key = "Solid",
 
     -- GCD markers
-    show_gcd_markers = true,
-    marker_width = 3,
-    gcd1_enabled = true,
-    gcd2_enabled = false,
-    gcd_marker_color = {0.9, 0.9, 0.9, 1.0},
+    gcd1_marker_enabled = true,
+    gcd2_marker_enabled = false,
+    gcd_marker_width = 3,
+    gcd_marker_color = {230, 230, 230, 1.0},
 
     -- Deadzone settings
     enable_deadzone = false,

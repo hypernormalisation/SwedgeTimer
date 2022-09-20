@@ -6,6 +6,10 @@ local ST = LibStub("AceAddon-3.0"):NewAddon(addon_name, "AceConsole-3.0", "AceEv
 local LSM = LibStub("LibSharedMedia-3.0")
 local STL = LibStub("LibClassicSwingTimerAPI", true)
 local LRC = LibStub("LibRangeCheck-2.0")
+local LLM = LibStub("LibLatencyMonitor")
+-- print('LLM says')
+-- print(LLM)
+
 local print = st.utils.print_msg
 
 local SwingTimerInfo = function(hand)
@@ -59,37 +63,37 @@ function ST:OnInitialize()
 	AC:RegisterOptionsTable(addon_name.."_Options", self.options)
 	self.optionsFrame = ACD:AddToBlizOptions(addon_name.."_Options", addon_name)
 
+	-- Profile options
 	local profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
 	-- AC:RegisterOptionsTable(addon_name.."_Profiles", profiles)
 	-- ACD:AddToBlizOptions(addon_name.."_Profiles", "Profiles", addon_name)
 
-	self.lrc_ready = false
-	self.stl_ready = false
-
 	-- Init our lib interfaces only once the range and swing timer
 	-- libs are both loaded, as they are interdependent
 	-- init_libs has a check to ensure this only happens once per reload
-	LRC:RegisterCallback(LRC.CHECKERS_CHANGED, function()
+	self.lrc_ready = false
+	self.stl_ready = false
+	self.llm_ready = false
+	
+	LRC.RegisterCallback(self, LRC.CHECKERS_CHANGED, function()
 			self.lrc_ready = true
-			if self.stl_ready then
-				print('initing interfaces on LRC')
-				self:init_libs()
-			end
+			self:init_libs()
 		end
 	)
-	STL:RegisterCallback(STL.SWING_TIMER_READY, function()
+	STL.RegisterCallback(self, STL.SWING_TIMER_READY, function()
 			self.stl_ready = true
-			if self.lrc_ready then
-				print('initing interfaces on STL')
-				self:init_libs()
-			end
+			self:init_libs()
+		end
+	)
+	LLM.RegisterCallback(self, LLM.LATENCY_CHANGED, function(...)
+			ST:on_latency_update_event(...)
 		end
 	)
 
 	-- Slashcommands
 	self:register_slashcommands()
 
-	-- Sort out character information
+	-- Character info containers
 	self.player_guid = UnitGUID("player")
 	self.player_class = select(2, UnitClass("player"))
 	self.has_oh = false
@@ -97,7 +101,6 @@ function ST:OnInitialize()
 	self.mh_timer = 0
 	self.oh_timer = 0
 	self.ranged_timer = 0
-	-- self:check_weapons()
 
 	-- Character state containers
 	self.in_combat = false
@@ -162,7 +165,15 @@ function ST:OnInitialize()
 end
 
 function ST:init_libs()
+	-- This function inits our interfaces to the libraries we use
+	-- but only once those libraries are fully ready and have
+	-- all of the information necessary.
+
+	-- If already loaded, ignore subsequent events
 	if self.interfaces_are_initialised then
+		return
+	end
+	if not self.lrc_ready and self.stl_ready then
 		return
 	end
 	self:init_timers()
@@ -177,7 +188,6 @@ end
 function ST:post_init()
 	-- Takes care of any miscellaneous stuff that needs to run
 	-- once the libraries and addon are initialised.
-	self:latency_checker()
 	for hand in self:iter_hands() do
 		self:set_bar_full_state(hand)
 		self[hand].is_full = true
@@ -187,16 +197,12 @@ end
 ------------------------------------------------------------------------------------
 -- Lag checking
 ------------------------------------------------------------------------------------
-function ST:latency_checker()
-	local old_home = self.latency.home_ms
-	local old_world = self.latency.world_ms
-	self.latency.home_ms, self.latency.world_ms = select(3, GetNetStats())
-	if old_home ~= self.latency.home_ms or old_world ~= self.latency.world_ms then
-		for hand in self:iter_hands() do
-			self:set_deadzone_width(hand)
-		end
+function ST:on_latency_update_event(event, home, world)
+	self.latency.home_ms = home
+	self.latency.world_ms = world
+	if self.interfaces_are_initialised then
+		self:on_latency_update()
 	end
-	C_Timer.After(self.latency.update_interval_s, function() self:latency_checker() end)
 end
 
 ------------------------------------------------------------------------------------
@@ -362,6 +368,12 @@ function ST:needs_gcd()
 	return false
 end
 
+function ST:calculate_spell_GCD_duration()
+	-- This function calculates the expected spell GCD of a player,
+	-- accounting for buffs.
+
+end
+
 ------------------------------------------------------------------------------------
 -- The Event handlers for the STL
 ------------------------------------------------------------------------------------
@@ -376,9 +388,9 @@ end
 
 function ST:SWING_TIMER_START(speed, expiration_time, hand)
 	self = ST
-	if hand == "mainhand" then
-		print('SWING START on ' .. hand)
-	end
+	-- if hand == "mainhand" then
+	-- 	print('SWING START on ' .. hand)
+	-- end
 	if self[hand].is_full_timer then
 		self[hand].is_full_timer:Cancel()
 		self:set_filling_state(hand)
@@ -410,9 +422,9 @@ end
 
 function ST:SWING_TIMER_STOP(hand)
 	self = ST
-	if hand == "mainhand" then
-		print('SWING STOP on ' .. hand)
-	end
+	-- if hand == "mainhand" then
+	-- 	print('SWING STOP on ' .. hand)
+	-- end
 	local db_shared = self.db.profile
 	self[hand].is_full_timer = C_Timer.NewTimer(db_shared.bar_full_delay, function()
 		self:set_bar_full_state(hand)

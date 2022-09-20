@@ -73,6 +73,7 @@ function ST:init_visuals_template(hand)
     frame.deadzone:SetHeight(db.bar_height)
     frame.deadzone:SetDrawLayer("ARTWORK", -1)
     self:configure_deadzone(hand)
+    self:set_deadzone_width(hand)
     if not db.enable_deadzone then
         frame.deadzone:Hide()
     end
@@ -92,26 +93,33 @@ function ST:init_visuals_template(hand)
     self:configure_fonts(hand)
 
     -- Create the line markers
-    -- frame.twist_line = frame:CreateLine() -- the twist window marker
-    -- frame.twist_line:SetDrawLayer("OVERLAY", -1)
-    -- frame.gcd1_line = frame:CreateLine() -- the first gcd possible before a twist
-    -- frame.gcd1_line:SetDrawLayer("OVERLAY", -1)
-    -- frame.gcd2_line = frame:CreateLine()
-    -- frame.gcd2_line:SetDrawLayer("OVERLAY", -1)
-    -- frame.gcd2_line:SetColorTexture(0.4,0.4,1,1)
-    -- frame.gcd2_line:SetThickness(db.marker_width)
-    -- frame.judgement_line = frame:CreateLine()
-    -- frame.judgement_line:SetDrawLayer("OVERLAY", -1)
-    -- st.set_markers()
+    frame.gcd1_line = frame:CreateLine()
+    frame.gcd1_line:SetDrawLayer("OVERLAY", -1)
+    frame.gcd2_line = frame:CreateLine()
+    frame.gcd2_line:SetDrawLayer("OVERLAY", -1)
+    -- self:configure_gcd_markers(hand)
 
+    -- Finally show the frame
 	frame:Show()
 end
 
-
-
 ------------------------------------------------------------------------------------
 -- Configuration functions (called on frame inits and setting changes)
+-- These all operate on a given hand.
 ------------------------------------------------------------------------------------
+function ST:configure_gcd_markers(hand)
+    local db = self:get_hand_table(hand)
+    local f = self:get_frame(hand)
+    f.gcd1_line:SetColorTexture(
+        self:convert_color(db.gcd_marker_color)
+    )
+    f.gcd2_line:SetColorTexture(
+        self:convert_color(db.gcd_marker_color)
+    )
+    f.gcd1_line:SetThickness(db.gcd_marker_thick)
+    f.gcd2_line:SetThickness(db.gcd_marker_thick)
+end
+
 function ST:configure_deadzone(hand)
 	local db = self:get_hand_table(hand)
 	local f = self:get_frame(hand).deadzone
@@ -123,7 +131,7 @@ end
 
 function ST:configure_fonts(hand)
     local db = self:get_hand_table(hand)
-	local frame = self[hand].frame
+	local frame = self:get_frame(hand)
 	local font_path = LSM:Fetch('font', db.text_font)
 	local opt_string = self.outline_map[db.font_outline_key]
 	frame.left_text:SetFont(font_path, db.font_size, opt_string)
@@ -134,17 +142,13 @@ function ST:configure_fonts(hand)
 	frame.right_text:SetTextColor(unpack(db.font_color))
 end
 
---=========================================================================================
--- Drag and drop handlers
---=========================================================================================
 function ST:configure_bar_outline(hand)
 	local frame = self[hand].frame
     local db = self:get_hand_table(hand)
 	local mode = db.border_mode_key
 	local texture_key = db.border_texture_key
     local tv = db.backplane_outline_width
-	-- 8 corresponds to no border
-	tv = tv + 8
+	tv = tv + 8 -- 8 corresponds to no border
 	-- Switch settings based on mode
 	if mode == "None" then
 		texture_key = "None"
@@ -167,7 +171,7 @@ function ST:configure_bar_outline(hand)
 	frame.backplane:SetBackdropColor(0,0,0, db.backplane_alpha)
 end
 
-function ST:set_bar_position(hand)
+function ST:configure_bar_position(hand)
     local db = self:get_hand_table(hand)
 	local frame = self[hand].frame
 	frame:ClearAllPoints()
@@ -181,6 +185,9 @@ function ST:set_bar_position(hand)
 	self:configure_bar_outline(hand)
 end
 
+--=========================================================================================
+-- Drag and drop UIHANDLERs
+--=========================================================================================
 function ST:drag_stop_template(hand)
     local frame = self[hand].frame
     local db = self:get_hand_table(hand)
@@ -190,7 +197,7 @@ function ST:drag_stop_template(hand)
     db.bar_y_offset = st.utils.simple_round(y_offset, 0.1)
     db.bar_point = point
     db.bar_rel_point = rel_point
-    self:set_bar_position(hand)
+    self:configure_bar_position(hand)
     self:set_bar_color(hand)
 end
 
@@ -226,7 +233,7 @@ function ST.ranged.on_drag_stop()
 end
 
 --=========================================================================================
--- OnUpdate widget handlers and functions
+-- OnUpdate funcs
 --=========================================================================================
 function ST:onupdate_common(hand)
     local frame = self[hand].frame
@@ -239,7 +246,8 @@ function ST:onupdate_common(hand)
 
     -- Update the main bar's width
     local timer_width = db.bar_width * progress
-    frame.bar:SetWidth(timer_width)
+    frame.bar:SetWidth(max(1, timer_width))
+    -- frame.bar:SetWidth(0)
 	frame.bar:SetTexCoord(0, progress, 0, 1)
 
     -- Update the GCD underlay if necessary.
@@ -264,27 +272,36 @@ ST.ranged.onupdate = function(elapsed)
 end
 
 --=========================================================================================
--- Collections of widget altering funcs to be called on specific events
+-- Collections of widget altering funcs to be called on specific events/conditions
+-- Some operate generally, others on a given hand.
 --=========================================================================================
 function ST:on_attack_speed_change(hand)
     self:set_deadzone_width(hand)
     self:set_bar_texts(hand)
 end
 
+function ST:on_latency_update()
+    for hand in self:iter_hands() do
+        self:set_deadzone_width(hand)
+    end
+end
+
 --=========================================================================================
--- Funcs to alter widgets
+-- Funcs to alter widgets outside of configuration changes.
+-- These all operate on a given hand.
 --=========================================================================================
 function ST:set_gcd_width(hand, timer_width, progress)
     local db = self:get_hand_table(hand)
-    local frame = self[hand].frame
+    local frame = self:get_frame(hand)
     local tab = self[hand]
-    local t = GetTime()
     local gcd_progress = (self.gcd.expires - tab.start) / (tab.ends_at - tab.start)
     -- if gcd would go over the end of the bar, instead use the swing timer
     -- bar progress to evalute texture coords and gcd bar width
     if gcd_progress > 1 then
         local gcd_width = db.bar_width - timer_width
-        frame.gcd_bar:SetWidth(gcd_width)
+        frame.gcd_bar:SetWidth(max(1, gcd_width))
+        -- print(gcd_width)
+        print(string.format("%f %f", progress, gcd_width))
         frame.gcd_bar:SetTexCoord(progress, 1, 0, 1)
     else
         local gcd_width = (db.bar_width * gcd_progress) - timer_width
@@ -294,10 +311,14 @@ function ST:set_gcd_width(hand, timer_width, progress)
     frame.gcd_bar:SetPoint("TOPLEFT", timer_width, 0)
 end
 
+function ST:set_gcd_marker_width(hand)
+    local db = self:get_hand_table(hand)
+    local frame = self:get_frame(hand)
+end
+
 function ST:set_bar_texts(hand)
     local frame = self[hand].frame
     local db = self:get_hand_table(hand)
-
     -- Set texts
     local t = GetTime()
     local speed = self[hand].speed
@@ -308,12 +329,22 @@ function ST:set_bar_texts(hand)
     }
     local left = lookup[db.left_text]
     local right = lookup[db.right_text]
-
     -- Update the main bars text, hide right text if bar full
     frame.left_text:SetText(left)
     frame.right_text:SetText(right)
 end
 
+function ST:set_deadzone_width(hand)
+    -- print('call to set deadzone width for '..hand)
+    local db = self:get_hand_table(hand)
+    local frame = self:get_frame(hand).deadzone
+    if not db.enable_deadzone then
+        return
+    end
+    local frac = (self.latency.world_ms / 1000) / self[hand].speed
+    -- print(frac)
+    frame:SetWidth(frac * db.bar_width)
+end
 
 function ST:set_bar_color(hand, color_table)
     local db = self:get_hand_table(hand)
@@ -327,16 +358,4 @@ function ST:set_bar_color(hand, color_table)
             self:convert_color(db.bar_color_default)
         )
     end
-end
-
-function ST:set_deadzone_width(hand)
-    print('call to set deadzone width for '..hand)
-    local db = self:get_hand_table(hand)
-    local frame = self:get_frame(hand).deadzone
-    if not db.enable_deadzone then
-        return
-    end
-    local frac = (self.latency.world_ms / 1000) / self[hand].speed
-    print(frac)
-    frame:SetWidth(frac * db.bar_width)
 end
