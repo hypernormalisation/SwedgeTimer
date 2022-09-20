@@ -41,6 +41,9 @@ ST.defaults = {
 		frame_strata = "MEDIUM",
 		draw_level = 10,
 
+		-- Bar visual behaviour
+		bar_full_delay = 0.1,
+
 		-- Class-specific defaults
 		ROGUE = ST.ROGUE.defaults,
 

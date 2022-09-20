@@ -6,43 +6,21 @@ local ST = LibStub("AceAddon-3.0"):NewAddon(addon_name, "AceConsole-3.0", "AceEv
 local LSM = LibStub("LibSharedMedia-3.0")
 local STL = LibStub("LibClassicSwingTimerAPI", true)
 local LRC = LibStub("LibRangeCheck-2.0")
--- print('LRC says: '..tostring(LRC))
--- local rcf = CreateFrame("Frame", nil)
-
 local print = st.utils.print_msg
 
 local SwingTimerInfo = function(hand)
     return STL:SwingTimerInfo(hand)
 end
 
--- keyword-accessible tables
+-- keyword-accessible tables to handle case-switching
 ST.mainhand = {}
 ST.offhand = {}
 ST.ranged = {}
-ST.hands = {
-	mainhand = true,
-	offhand = true,
-	ranged = true
-}
-ST.h = {"mainhand", "offhand", "ranged"}
-ST.mh = {"mainhand", "offhand"}
+ST.hands = {"mainhand", "offhand", "ranged"}
 
 function ST:iter_hands()
 	local i = 0
-	local hands = self.h
-	local n = #hands
-	return function ()
-		i = i + 1
-		while i <= n do
-			return hands[i]
-		end
-		return nil
-	end
-end
-
-function ST:iter_melee_hands()
-	local i = 0
-	local hands = self.mh
+	local hands = self.hands
 	local n = #hands
 	return function ()
 		i = i + 1
@@ -134,6 +112,8 @@ function ST:OnInitialize()
 	self.mainhand.ends_at = nil
 	self.mainhand.inactive_timer = nil
 	self.mainhand.has_weapon = true
+	self.mainhand.is_full = true  -- deliberately true
+	self.mainhand.is_full_timer = nil
 	self.mainhand.frame = CreateFrame("Frame", addon_name .. "MHBarFrame", UIParent)
 
 	-- OH containers
@@ -142,6 +122,8 @@ function ST:OnInitialize()
 	self.offhand.ends_at = nil
 	self.offhand.inactive_timer = nil
 	self.offhand.has_weapon = nil
+	self.offhand.is_full = false
+	self.mainhand.is_full_timer = nil
 	self.offhand.frame = CreateFrame("Frame", addon_name .. "OHBarFrame", UIParent)
 
 	-- ranged containers
@@ -150,6 +132,7 @@ function ST:OnInitialize()
 	self.ranged.ends_at = nil
 	self.ranged.inactive_timer = nil
 	self.ranged.has_weapon = nil
+	self.ranged.is_full = false
 	self.ranged.frame = CreateFrame("Frame", addon_name .. "OHBarFrame", UIParent)
 
 	-- GCD info containers
@@ -180,9 +163,19 @@ function ST:init_libs()
 	self:init_timers()
 	self:init_range_finders()
 	self.interfaces_are_initialised = true
+	self:post_init()
 end
 
 function ST:OnEnable()
+end
+
+function ST:post_init()
+	-- Takes care of any miscellaneous stuff that needs to run
+	-- once the libraries and addon are initialised.
+	for hand in self:iter_hands() do
+		self:set_bar_full_state(hand)
+		self[hand].is_full = true
+	end
 end
 
 ------------------------------------------------------------------------------------
@@ -200,12 +193,11 @@ function ST:init_range_finders()
 	self.in_ranged_range = nil
 	self.target_min_range = nil
 	self.target_max_range = nil
-	-- C_Timer.After(1.0, function() self:rf_update() end)
-
 	self:rf_update()
 end
 
 function ST:rf_update()
+	-- print(self.mainhand.is_full)
 	self.in_melee_range = self:melee_range_checker_func("target")
 	-- print(self.melee_result)
 	self.in_ranged_range = self.ranged_range_checker_func("target") and not self.in_melee_range
@@ -309,8 +301,6 @@ function ST:set_bar_visibilities()
 			self:hide_bar(hand)
 		else
 			self:handle_bar_visibility(hand)
-			-- self:show_bar(hand)
-
 		end
 	end
 end
@@ -329,6 +319,14 @@ function ST:check_weapons()
 			self[hand].has_weapon = true
 		end
 	end
+end
+
+function ST:set_bar_full_state(hand)
+	self:set_bar_color(hand, {0.5, 0.5, 0.5, 1.0})
+end
+
+function ST:set_filling_state(hand)
+	self:set_bar_color(hand)
 end
 
 ------------------------------------------------------------------------------------
@@ -356,15 +354,20 @@ function ST:register_timer_callbacks()
 end
 
 function ST:SWING_TIMER_START(speed, expiration_time, hand)
-	local self = ST
+	self = ST
+	if hand == "mainhand" then
+		print('SWING START on ' .. hand)
+	end
+	if self[hand].is_full_timer then
+		self[hand].is_full_timer:Cancel()
+		self:set_filling_state(hand)
+	elseif self[hand].is_full then
+		self[hand].is_full = false
+		self:set_filling_state(hand)
+	end
 	self[hand].start = GetTime()
 	self[hand].speed = speed
 	self[hand].ends_at = expiration_time
-
-	-- handle gcd if necessary
-	-- if self.gcd.lock then
-	-- 	self:set_gcd_width()
-	-- end
 end
 
 function ST:SWING_TIMER_UPDATE(speed, expiration_time, hand)
@@ -385,8 +388,15 @@ function ST:SWING_TIMER_PAUSED(hand)
 end
 
 function ST:SWING_TIMER_STOP(hand)
-	-- unhooks update funcs
-	-- ST[hand].frame:SetScript("OnUpdate", nil)
+	self = ST
+	if hand == "mainhand" then
+		print('SWING STOP on ' .. hand)
+	end
+	local db_shared = self.db.profile
+	self[hand].is_full_timer = C_Timer.NewTimer(db_shared.bar_full_delay, function()
+		self:set_bar_full_state(hand)
+		self[hand].is_full = true
+	end)
 end
 
 function ST:SWING_TIMER_DELTA(delta)
@@ -509,6 +519,7 @@ function ST:PLAYER_TARGET_SET_ATTACKING()
 	local t = GetTime()
 	local old_start = self.offhand.start
 	if old_start + self.offhand.speed < t then
+		self:set_bar_color('offhand')
 		self.offhand.start = GetTime() - self.offhand.speed
 	end
 end
@@ -539,7 +550,6 @@ function ST:test1()
     local db = self:get_hand_table("mainhand")
 	local f = self:get_frame("mainhand")
 	-- self.mainhand.frame.gcd_bar
-
 end
 
 function ST:SlashCommand(input, editbox)

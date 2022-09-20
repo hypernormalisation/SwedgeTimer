@@ -66,9 +66,9 @@ ST.bar_defaults = {
     gcd_marker_color = {0.9, 0.9, 0.9, 1.0},
 
     -- Deadzone settings
-    enable_deadzone = true,
+    enable_deadzone = false,
     deadzone_texture_key = "Solid",
-    bar_color_deadzone = {0.72, 0.05, 0.05, 0.72},
+    deadzone_bar_color = {171, 9, 41, 0.82},
 
     -- Show range
     show_range_finder = false,
@@ -86,7 +86,9 @@ ST.ROGUE.defaults = {
     ['**'] = ST.bar_defaults,
 
 	-- Mainhand options
-	mainhand = {},
+	mainhand = {
+        enable_deadzone = true,
+    },
 
 	-- Offhand options
 	offhand = {
