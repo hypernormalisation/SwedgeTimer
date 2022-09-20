@@ -43,10 +43,9 @@ end
 ST.interfaces_are_initialised = false
 
 ------------------------------------------------------------------------------------
--- The init/enable/disable
+-- Funcs to initialise the addon
 ------------------------------------------------------------------------------------
 function ST:OnInitialize()
-
 	-- ST.some_counter = ST.some_counter + 1
 	-- print(string.format("init count: %i", ST.some_counter))
 
@@ -67,7 +66,7 @@ function ST:OnInitialize()
 	self.lrc_ready = false
 	self.stl_ready = false
 
-	-- init our lib interfaces only once the range and swing timer
+	-- Init our lib interfaces only once the range and swing timer
 	-- libs are both loaded, as they are interdependent
 	-- init_libs has a check to ensure this only happens once per reload
 	LRC:RegisterCallback(LRC.CHECKERS_CHANGED, function()
@@ -142,6 +141,12 @@ function ST:OnInitialize()
 	self.gcd.started = nil
 	self.gcd.expires = nil
 
+	-- Latency info containers
+	self.latency = {}
+	self.latency.update_interval_s = 1
+	self.latency.home_ms = nil
+	self.latency.world_ms = nil
+
 	-- Register events
 	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 	self:RegisterEvent("SPELL_UPDATE_COOLDOWN")
@@ -172,10 +177,26 @@ end
 function ST:post_init()
 	-- Takes care of any miscellaneous stuff that needs to run
 	-- once the libraries and addon are initialised.
+	self:latency_checker()
 	for hand in self:iter_hands() do
 		self:set_bar_full_state(hand)
 		self[hand].is_full = true
 	end
+end
+
+------------------------------------------------------------------------------------
+-- Lag checking
+------------------------------------------------------------------------------------
+function ST:latency_checker()
+	local old_home = self.latency.home_ms
+	local old_world = self.latency.world_ms
+	self.latency.home_ms, self.latency.world_ms = select(3, GetNetStats())
+	if old_home ~= self.latency.home_ms or old_world ~= self.latency.world_ms then
+		for hand in self:iter_hands() do
+			self:set_deadzone_width(hand)
+		end
+	end
+	C_Timer.After(self.latency.update_interval_s, function() self:latency_checker() end)
 end
 
 ------------------------------------------------------------------------------------
@@ -378,7 +399,7 @@ function ST:SWING_TIMER_UPDATE(speed, expiration_time, hand)
 	end
 	self[hand].speed = speed
 	self[hand].ends_at = expiration_time
-	self:set_bar_texts(hand)
+	self:on_attack_speed_change(hand)
 end
 
 function ST:SWING_TIMER_CLIPPED(hand)

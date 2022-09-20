@@ -89,7 +89,7 @@ function ST:init_visuals_template(hand)
     frame.right_text:SetShadowOffset(1,-1)
     frame.right_text:SetJustifyV("CENTER")
     frame.right_text:SetJustifyH("RIGHT")
-    self:set_fonts(hand)
+    self:configure_fonts(hand)
 
     -- Create the line markers
     -- frame.twist_line = frame:CreateLine() -- the twist window marker
@@ -114,14 +114,14 @@ end
 ------------------------------------------------------------------------------------
 function ST:configure_deadzone(hand)
 	local db = self:get_hand_table(hand)
-	local f = self:get_frame(hand)
+	local f = self:get_frame(hand).deadzone
     f:SetTexture(LSM:Fetch('statusbar', db.deadzone_texture_key))
 	f:SetVertexColor(
         self:convert_color(db.deadzone_bar_color)
     )
 end
 
-function ST:set_fonts(hand)
+function ST:configure_fonts(hand)
     local db = self:get_hand_table(hand)
 	local frame = self[hand].frame
 	local font_path = LSM:Fetch('font', db.text_font)
@@ -132,20 +132,6 @@ function ST:set_fonts(hand)
 	frame.right_text:SetPoint("TOPRIGHT", -3, -(db.bar_height / 2) + (db.font_size / 2))
 	frame.left_text:SetTextColor(unpack(db.font_color))
 	frame.right_text:SetTextColor(unpack(db.font_color))
-end
-
-function ST:set_bar_color(hand, color_table)
-    local db = self:get_hand_table(hand)
-    local frame = self[hand].frame
-    if color_table then
-        frame.bar:SetVertexColor(
-            unpack(color_table)
-        )
-    else
-        frame.bar:SetVertexColor(
-            self:convert_color(db.bar_color_default)
-        )
-    end
 end
 
 --=========================================================================================
@@ -250,13 +236,13 @@ function ST:onupdate_common(hand)
         (d.ends_at - d.start)
     )
     -- print(progress)
-    if progress == 1 then
-        self[hand].is_full = true
-        -- self:set_bar_color(hand, {0.5, 0.5, 0.5, 1.0})
-    else
-        self[hand].is_full = false
-        -- self:set_bar_color(hand)
-    end
+    -- if progress == 1 then
+    --     self[hand].is_full = true
+    --     -- self:set_bar_color(hand, {0.5, 0.5, 0.5, 1.0})
+    -- else
+    --     self[hand].is_full = false
+    --     -- self:set_bar_color(hand)
+    -- end
     local db = self:get_hand_table(hand)
 
     -- Update the main bar's width
@@ -286,6 +272,14 @@ end
 
 ST.ranged.onupdate = function(elapsed)
     ST:onupdate_common("ranged")
+end
+
+--=========================================================================================
+-- Collections of widget altering funcs to be called on specific events
+--=========================================================================================
+function ST:on_attack_speed_change(hand)
+    self:set_deadzone_width(hand)
+    self:set_bar_texts(hand)
 end
 
 --=========================================================================================
@@ -331,3 +325,29 @@ function ST:set_bar_texts(hand)
     frame.right_text:SetText(right)
 end
 
+
+function ST:set_bar_color(hand, color_table)
+    local db = self:get_hand_table(hand)
+    local frame = self[hand].frame
+    if color_table then
+        frame.bar:SetVertexColor(
+            unpack(color_table)
+        )
+    else
+        frame.bar:SetVertexColor(
+            self:convert_color(db.bar_color_default)
+        )
+    end
+end
+
+function ST:set_deadzone_width(hand)
+    print('call to set deadzone width for '..hand)
+    local db = self:get_hand_table(hand)
+    local frame = self:get_frame(hand).deadzone
+    if not db.enable_deadzone then
+        return
+    end
+    local frac = (self.latency.world_ms / 1000) / self[hand].speed
+    print(frac)
+    frame:SetWidth(frac * db.bar_width)
+end

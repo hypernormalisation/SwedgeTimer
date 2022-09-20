@@ -68,7 +68,7 @@ ST.bar_defaults = {
     -- Deadzone settings
     enable_deadzone = false,
     deadzone_texture_key = "Solid",
-    deadzone_bar_color = {171, 9, 41, 0.82},
+    deadzone_bar_color = {131, 9, 41, 0.62},
 
     -- Show range
     show_range_finder = false,
