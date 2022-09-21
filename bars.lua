@@ -300,12 +300,16 @@ function ST:set_gcd_width(hand, timer_width, progress)
     if gcd_progress > 1 then
         local gcd_width = db.bar_width - timer_width
         frame.gcd_bar:SetWidth(max(1, gcd_width))
+        if gcd_width == 0 then
+            frame.gcd_bar:Hide()
+        end
         -- print(gcd_width)
-        print(string.format("%f %f", progress, gcd_width))
+        -- print(string.format("%f %f", progress, gcd_width))
         frame.gcd_bar:SetTexCoord(progress, 1, 0, 1)
     else
         local gcd_width = (db.bar_width * gcd_progress) - timer_width
-        frame.gcd_bar:SetWidth(gcd_width)
+        frame.gcd_bar:Show()
+        frame.gcd_bar:SetWidth(max(1, gcd_width))
         frame.gcd_bar:SetTexCoord(progress, gcd_progress, 0, 1)
     end
     frame.gcd_bar:SetPoint("TOPLEFT", timer_width, 0)

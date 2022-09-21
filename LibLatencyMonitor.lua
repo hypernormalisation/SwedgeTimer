@@ -8,20 +8,36 @@ end
 
 local CreateFrame = CreateFrame
 local C_Timer = C_Timer
+local GetTime = GetTime
 local GetNetStats = GetNetStats
 local type = type
 
 lib.callbacks = lib.callbacks or LibStub("CallbackHandler-1.0"):New(lib)
 lib.LATENCY_CHANGED = "LATENCY_CHANGED"
 
-lib.bandwidth_down_KBps = 0
-lib.bandwidth_up_KBps = 0
-lib.home_latency_ms = 0
-lib.world_latency_ms = 0
-lib.update_interval_s = 5
+lib.bandwidth_down_KBps = nil
+lib.bandwidth_up_KBps = nil
+lib.home_latency_ms = nil
+lib.world_latency_ms = nil
+lib.update_interval_s = 1
+
+-- Once this is 
+lib.time_since_last_update = nil
+
+
+function lib:set_update_timestamp()
+    -- First called when we detect a valid change in latency and
+    -- know when the 30s update happens.
+    lib.time_since_last_update = GetTime()
+    -- print(lib.time_since_last_update)
+    C_Timer.After(30, function() self:set_update_timestamp() end)
+end
+
 
 function lib:latency_checker()
+    -- prevent duplicate events booking multiple C_Timers
     lib.is_registered = true
+
 	local old_home = self.home_latency_ms
 	local old_world = self.world_latency_ms
     local down, up, home, world = GetNetStats()
@@ -29,10 +45,20 @@ function lib:latency_checker()
     self.bandwidth_up_KBps = up
     self.home_latency_ms = home
     self.world_latency_ms = world
-    -- print('Latency says: ' ..tostring(self.world_latency_ms))
-	if true then --  old_home ~= self.home_latency_ms or old_world ~= self.world_latency_ms then
-        self.update_interval_s = 30 -- set this to 30 the first time we get an update
-        print('firing event')
+	
+    if old_home ~= self.home_latency_ms or old_world ~= self.world_latency_ms then
+        -- print('new latency')
+        -- print('old_home says: '..tostring(old_home))
+        -- print(old_home == nil)
+        -- print(lib.time_since_last_update == nil)
+        if lib.time_since_last_update == nil and not (old_home == nil) then
+            -- We'll poll every 1s until we detect a change, then we know subsequent
+            -- changes are on a 30s timer.
+            -- We'll also book a C_Timer to timestamp the lag updates.
+            -- print('found first indication of update time')
+            self.update_interval_s = 30
+            self:set_update_timestamp()
+        end
         self.callbacks:Fire("LATENCY_CHANGED", home, world)
 	end
 	C_Timer.After(self.update_interval_s, function() self:latency_checker() end)
@@ -42,12 +68,6 @@ function lib:set_check_interval(interval)
     if type(interval) == "number" then
         self.update_interval_s = interval
     end
-end
-
--- function:update
-
-function lib:update()
-    -- Func to force an update to the endpoints.
 end
 
 function lib:activate()
