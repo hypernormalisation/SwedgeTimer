@@ -25,7 +25,6 @@ lib.update_interval_s = 1
 -- this will be set to a timestamp, and will remain nil until then.
 lib.time_since_last_update = nil
 
-
 function lib:set_update_timestamp_ticker()
     -- First called when we detect a valid change in latency and
     -- know when the 30s update happens.
@@ -33,7 +32,6 @@ function lib:set_update_timestamp_ticker()
     -- print(lib.time_since_last_update)
     C_Timer.After(30, function() self:set_update_timestamp_ticker() end)
 end
-
 
 function lib:latency_checker()
     -- prevent duplicate events booking multiple C_Timers
@@ -55,8 +53,10 @@ function lib:latency_checker()
         if lib.time_since_last_update == nil and not (old_home == nil) then
             -- We'll poll every 1s until we detect a change, then we know subsequent
             -- changes are on a 30s timer.
-            -- We'll also book a C_Timer to timestamp the lag updates.
-            -- print('found first indication of update time')
+            -- We'll also book a C_Timer to timestamp the lag updates,
+            -- and fire an event to let addons know the lib has found the update
+            -- interval
+            self.callbacks:Fire("ACQUIRED_UPDATE_INTERVAL")
             self.update_interval_s = 30
             self:set_update_timestamp_ticker()
         end

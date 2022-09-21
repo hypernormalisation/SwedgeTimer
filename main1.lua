@@ -44,7 +44,6 @@ function ST:get_in_range(hand)
 	if hand == "ranged" then return self.in_ranged_range else return self.in_melee_range end
 end
 
-
 --=========================================================================================
 -- Funcs to initialise the addon
 --=========================================================================================
@@ -214,7 +213,6 @@ function ST:GCD_STARTED(_, duration, expires)
 	-- print(duration)
 	-- print(expires)
 	self.gcd.expires = expires
-	-- self:set_gcd_width()
 end
 
 function ST:GCD_OVER()
