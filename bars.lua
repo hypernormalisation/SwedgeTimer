@@ -247,11 +247,10 @@ function ST:onupdate_common(hand)
     -- Update the main bar's width
     local timer_width = db.bar_width * progress
     frame.bar:SetWidth(max(1, timer_width))
-    -- frame.bar:SetWidth(0)
 	frame.bar:SetTexCoord(0, progress, 0, 1)
 
     -- Update the GCD underlay if necessary.
-    if db.show_gcd_underlay and self.gcd.lock then
+    if db.show_gcd_underlay and self.gcd.expires then
         self:set_gcd_width(hand, timer_width, progress)
     end
     -- Set texts

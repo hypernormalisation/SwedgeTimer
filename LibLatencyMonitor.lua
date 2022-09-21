@@ -1,5 +1,5 @@
 local MAJOR_VERSION = "LibLatencyMonitor"
-local MINOR_VERSION = 1.0
+local MINOR_VERSION = 1
 
 local lib = LibStub:NewLibrary(MAJOR_VERSION, MINOR_VERSION)
 if not lib then
@@ -21,16 +21,17 @@ lib.home_latency_ms = nil
 lib.world_latency_ms = nil
 lib.update_interval_s = 1
 
--- Once this is 
+-- Once we have an indication of when the GetNetStats endpoint updates,
+-- this will be set to a timestamp, and will remain nil until then.
 lib.time_since_last_update = nil
 
 
-function lib:set_update_timestamp()
+function lib:set_update_timestamp_ticker()
     -- First called when we detect a valid change in latency and
     -- know when the 30s update happens.
     lib.time_since_last_update = GetTime()
     -- print(lib.time_since_last_update)
-    C_Timer.After(30, function() self:set_update_timestamp() end)
+    C_Timer.After(30, function() self:set_update_timestamp_ticker() end)
 end
 
 
@@ -57,7 +58,7 @@ function lib:latency_checker()
             -- We'll also book a C_Timer to timestamp the lag updates.
             -- print('found first indication of update time')
             self.update_interval_s = 30
-            self:set_update_timestamp()
+            self:set_update_timestamp_ticker()
         end
         self.callbacks:Fire("LATENCY_CHANGED", home, world)
 	end

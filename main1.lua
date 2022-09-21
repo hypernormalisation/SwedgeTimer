@@ -1,14 +1,13 @@
-------------------------------------------------------------------------------------
+--=========================================================================================
 -- Main module for creating the addon with AceAddon
-------------------------------------------------------------------------------------
+--=========================================================================================
 local addon_name, st = ...
 local ST = LibStub("AceAddon-3.0"):NewAddon(addon_name, "AceConsole-3.0", "AceEvent-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local STL = LibStub("LibClassicSwingTimerAPI", true)
 local LRC = LibStub("LibRangeCheck-2.0")
 local LLM = LibStub("LibLatencyMonitor")
--- print('LLM says')
--- print(LLM)
+local LGC = LibStub("LibGlobalCooldown")
 
 local print = st.utils.print_msg
 
@@ -21,6 +20,7 @@ ST.mainhand = {}
 ST.offhand = {}
 ST.ranged = {}
 ST.hands = {"mainhand", "offhand", "ranged"}
+ST.interfaces_are_initialised = false
 
 function ST:iter_hands()
 	local i = 0
@@ -44,11 +44,10 @@ function ST:get_in_range(hand)
 	if hand == "ranged" then return self.in_ranged_range else return self.in_melee_range end
 end
 
-ST.interfaces_are_initialised = false
 
-------------------------------------------------------------------------------------
+--=========================================================================================
 -- Funcs to initialise the addon
-------------------------------------------------------------------------------------
+--=========================================================================================
 function ST:OnInitialize()
 	-- ST.some_counter = ST.some_counter + 1
 	-- print(string.format("init count: %i", ST.some_counter))
@@ -74,7 +73,7 @@ function ST:OnInitialize()
 	self.lrc_ready = false
 	self.stl_ready = false
 	self.llm_ready = false
-	
+
 	LRC.RegisterCallback(self, LRC.CHECKERS_CHANGED, function()
 			self.lrc_ready = true
 			self:init_libs()
@@ -89,6 +88,8 @@ function ST:OnInitialize()
 			ST:on_latency_update_event(...)
 		end
 	)
+
+	LGC.RegisterCallback(self, LGC.GCD_STARTED, self.callback_event_handler)
 
 	-- Slashcommands
 	self:register_slashcommands()
@@ -139,7 +140,6 @@ function ST:OnInitialize()
 
 	-- GCD info containers
 	self.gcd = {}
-	self.gcd.lock = false
     self.gcd.duration = nil
 	self.gcd.started = nil
 	self.gcd.expires = nil
@@ -152,7 +152,7 @@ function ST:OnInitialize()
 
 	-- Register events
 	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
-	self:RegisterEvent("SPELL_UPDATE_COOLDOWN")
+	-- self:RegisterEvent("SPELL_UPDATE_COOLDOWN")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("PLAYER_TARGET_SET_ATTACKING")
@@ -191,6 +191,30 @@ function ST:post_init()
 	for hand in self:iter_hands() do
 		self:set_bar_full_state(hand)
 		self[hand].is_full = true
+	end
+end
+
+--=========================================================================================
+-- CallbackHandlers
+--=========================================================================================
+function ST.callback_event_handler(event, ...)
+	-- Func to pass all callbacks to their relevant handler
+	print(event)
+	ST[event](ST, event, ...)
+end
+
+-- GCD lib funcs
+function ST:GCD_STARTED(_, duration, expires)
+	-- print(duration)
+	-- print(expires)
+	self.gcd.expires = expires
+	-- self:set_gcd_width()
+end
+
+function ST:GCD_OVER()
+	self.gcd.expires = nil
+	for hand in self:iter_hands() do
+		self:get_frame(hand).gcd_bar:Hide()
 	end
 end
 
@@ -357,7 +381,7 @@ function ST:set_filling_state(hand)
 end
 
 ------------------------------------------------------------------------------------
--- GCD funcs
+-- GCD functionality
 ------------------------------------------------------------------------------------
 function ST:needs_gcd()
 	if self:get_hand_table("mainhand")["show_gcd_underlay"] or
@@ -368,11 +392,7 @@ function ST:needs_gcd()
 	return false
 end
 
-function ST:calculate_spell_GCD_duration()
-	-- This function calculates the expected spell GCD of a player,
-	-- accounting for buffs.
-
-end
+-- function ST:
 
 ------------------------------------------------------------------------------------
 -- The Event handlers for the STL
@@ -488,38 +508,11 @@ function ST:PLAYER_EQUIPMENT_CHANGED(event, slot, has_current)
 	end
 end
 
--- GCD events
-function ST:SPELL_UPDATE_COOLDOWN()
-	if not self:needs_gcd() then
-		return
-	end
-	if self.gcd.lock then
-		return
-	end
-	local time_started, duration = GetSpellCooldown(29515)
-    if duration == 0 then
-        return
-    end
-	local t = GetTime()
-	self.gcd.lock = true
-    self.gcd.duration = duration - (t - time_started)
-	self.gcd.started = t
-	self.gcd.expires = t + self.gcd.duration
-	for hand in self:iter_hands() do
-		self:get_frame(hand).gcd_bar:Show()
-	end
-	-- print(self.gcd.started, self.gcd.duration)
-	-- self:set_gcd_width()
-	-- set a timer to release the GCD lock when it expires
-	C_Timer.After(self.gcd.duration, function() self:release_gcd_lock() end)
-end
-
 function ST:release_gcd_lock()
 	-- Called when a GCD expires.
 	self.gcd.lock = false
     self.gcd.duration = nil
 	self.gcd.started = nil
-	self.gcd.needs_setpoint = false
 	for hand in self:iter_hands() do
 		local frame = self:get_frame(hand)
 		frame.gcd_bar:SetWidth(0)
@@ -529,10 +522,6 @@ end
 
 function ST:PLAYER_REGEN_ENABLED()
 	self.in_combat = false
-	-- unhook all onupdates when out of combat
-	-- for _, h in ipairs({"mainhand", "offhand", "ranged"}) do
-	-- 	self[h].frame:SetScript("OnUpdate", nil)
-	-- end
 end
 
 function ST:PLAYER_REGEN_DISABLED()

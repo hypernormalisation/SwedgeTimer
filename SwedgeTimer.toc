@@ -13,6 +13,7 @@ Libs\LibSharedMedia-3.0\lib.xml
 Libs\LibClassicSwingTimerAPI\LibClassicSwingTimerAPI.xml
 Libs\LibRangeCheck-2.0\LibRangeCheck-2.0\LibRangeCheck-2.0.lua
 LibLatencyMonitor.lua
+LibGlobalCooldown.lua
 
 Libs\AceAddon-3.0\AceAddon-3.0.xml
 Libs\AceDB-3.0\AceDB-3.0.xml
