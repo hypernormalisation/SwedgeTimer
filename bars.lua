@@ -301,6 +301,8 @@ function ST:set_gcd_width(hand, timer_width, progress)
         frame.gcd_bar:SetWidth(max(1, gcd_width))
         if gcd_width == 0 then
             frame.gcd_bar:Hide()
+        else
+            frame.gcd_bar:Show()
         end
         -- print(gcd_width)
         -- print(string.format("%f %f", progress, gcd_width))
