@@ -67,13 +67,16 @@ function ST:OnInitialize()
 	-- AC:RegisterOptionsTable(addon_name.."_Profiles", profiles)
 	-- ACD:AddToBlizOptions(addon_name.."_Profiles", "Profiles", addon_name)
 
+	-----------------------------------------------------------
+	-- Callbackhandlers for letting the addon know that dependent
+	-- libraries have their interfaces enabled.
+	-----------------------------------------------------------
 	-- Init our lib interfaces only once the range and swing timer
 	-- libs are both loaded, as they are interdependent
 	-- init_libs has a check to ensure this only happens once per reload
 	self.lrc_ready = false
 	self.stl_ready = false
 	self.llm_ready = false
-
 	LRC.RegisterCallback(self, LRC.CHECKERS_CHANGED, function()
 			self.lrc_ready = true
 			self:init_libs()
@@ -84,12 +87,15 @@ function ST:OnInitialize()
 			self:init_libs()
 		end
 	)
-	LLM.RegisterCallback(self, LLM.LATENCY_CHANGED, function(...)
-			ST:on_latency_update_event(...)
-		end
-	)
 
+	-----------------------------------------------------------
+	-- Callbackhandlers less sensitive to load orders.
+	-----------------------------------------------------------
+	-- LibLatencyMonitor
+	LLM.RegisterCallback(self, LLM.LATENCY_CHANGED, self.callback_event_handler)
+	-- LibGlobalCooldown
 	LGC.RegisterCallback(self, LGC.GCD_STARTED, self.callback_event_handler)
+	LGC.RegisterCallback(self, LGC.GCD_OVER, self.callback_event_handler)
 
 	-- Slashcommands
 	self:register_slashcommands()
@@ -218,10 +224,8 @@ function ST:GCD_OVER()
 	end
 end
 
-------------------------------------------------------------------------------------
--- Lag checking
-------------------------------------------------------------------------------------
-function ST:on_latency_update_event(event, home, world)
+-- Latency tracking
+function ST:LATENCY_CHANGED(_, home, world)
 	self.latency.home_ms = home
 	self.latency.world_ms = world
 	if self.interfaces_are_initialised then
