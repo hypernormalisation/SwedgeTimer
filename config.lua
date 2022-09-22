@@ -46,7 +46,7 @@ ST.defaults = {
 
 		-- Class-specific defaults
 		ROGUE = ST.ROGUE.defaults,
-
+		DRUID = ST.DRUID.defaults,
     },
 
 }

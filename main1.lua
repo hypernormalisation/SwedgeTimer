@@ -433,6 +433,7 @@ function ST:SWING_TIMER_UPDATE(speed, expiration_time, hand)
 	end
 	self[hand].speed = speed
 	self[hand].ends_at = expiration_time
+	print('New speed = ' .. tostring(speed))
 	self:on_attack_speed_change(hand)
 end
 

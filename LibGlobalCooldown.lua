@@ -166,7 +166,7 @@ function lib:UPDATE_SHAPESHIFT_FORM()
     if i == 3 then
         self.phys_gcd = 1.0
     else
-        self.phys_gcd = 1.0
+        self.phys_gcd = 1.5
     end
 end
 
