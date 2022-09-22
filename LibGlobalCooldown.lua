@@ -22,9 +22,12 @@ lib.callbacks = lib.callbacks or LibStub("CallbackHandler-1.0"):New(lib)
 lib.GCD_OVER = "GCD_OVER"
 lib.GCD_STARTED = "GCD_STARTED"
 lib.GCD_DURATIONS_UPDATED = "GCD_DURATIONS_UPDATED"
+lib.GCD_PHYS_UPDATED = "GCD_PHYS_UPDATED"
+lib.GCD_SPELL_UPDATED = "GCD_SPELL_UPDATED"
 
 -- Containers for state tracking
 lib.in_combat = false
+lib.current_form = nil
 
 -- Containers for active GCD info
 lib.gcd_lock = false
@@ -65,7 +68,9 @@ function lib:calculate_expected_spell_gcd()
     end
 
 	-- Flash of Light has a 1.5s cast time so can be used to check
-    -- for the spell GCD duration, in case we miss any multiplicative buffs
+    -- for the spell GCD duration, in case we miss any multiplicative buffs.
+    -- If there are any debuffs decreasing cast speed, this will be wrong,
+    -- and we'll fallback on the first principles calc.
 	local spell_id_fol = 19750
 	local cast_time_fol = select(4, GetSpellInfo(spell_id_fol))
 	cast_time_fol = cast_time_fol or 1500
@@ -84,7 +89,8 @@ function lib:calculate_expected_spell_gcd()
 
     -- If has changed, fire a SPELL_GCD_UPDATE event.
     if not current == self.current_spell_gcd then
-        self.callbacks:Fire("SPELL_GCD_UPDATE", current)
+        self:Fire(self.GCD_SPELL_UPDATED, lib.current_spell_gcd)
+        self:Fire(lib.GCD_DURATIONS_UPDATED, lib.phys_gcd, lib.current_spell_gcd)
     end
     self.current_spell_gcd = current
     print(string.format('spell GCD: %f, phys GCD: %f', current, self.phys_gcd))
@@ -125,7 +131,7 @@ end
 function lib:PLAYER_LOGIN()
     -- Populate info on class here.
     local class = select(2, UnitClass("player"))
-    print("class says: "..tostring(class))
+    -- print("class says: "..tostring(class))
     self.class = class
     lib.phys_gcd = 1.5
     lib.base_spell_gcd = 1.5
@@ -142,13 +148,13 @@ function lib:PLAYER_LOGIN()
     self:Fire("GCD_DURATIONS_UPDATED", lib.phys_gcd, lib.current_spell_gcd)
 end
 
-function lib:PLAYER_REGEN_DISABLED()
-    self.in_combat = true
-end
+-- function lib:PLAYER_REGEN_DISABLED()
+--     self.in_combat = true
+-- end
 
-function lib:PLAYER_REGEN_ENABLED()
-    self.in_combat = false
-end
+-- function lib:PLAYER_REGEN_ENABLED()
+--     self.in_combat = false
+-- end
 
 function lib:SPELL_UPDATE_COOLDOWN()
     self:poll_gcd()
@@ -159,7 +165,7 @@ function lib:UNIT_AURA()
 end
 
 function lib:UPDATE_SHAPESHIFT_FORM()
-    print('got a shapeshift event')
+    -- Only druids have their physical gcd change.
     if not self.class == "DRUID" then
         return
     end
@@ -169,6 +175,13 @@ function lib:UPDATE_SHAPESHIFT_FORM()
     else
         self.phys_gcd = 1.5
     end
+    -- If shifting to or from cat form, Fire an event.
+    if i == 3 or self.current_form == 3 then
+        if not i == self.current_form then
+            self:Fire(self.GCD_PHYS_UPDATED, lib.phys_gcd)
+            self:Fire(self.GCD_DURATIONS_UPDATED, lib.phys_gcd, lib.current_spell_gcd)
+        end
+    end
 end
 
 function lib:activate()
@@ -176,8 +189,8 @@ function lib:activate()
         local frame = CreateFrame("Frame")
         self.frame = frame
         frame:RegisterEvent("PLAYER_LOGIN")
-        frame:RegisterEvent("PLAYER_REGEN_DISABLED")
-        frame:RegisterEvent("PLAYER_REGEN_ENABLED")
+        -- frame:RegisterEvent("PLAYER_REGEN_DISABLED")
+        -- frame:RegisterEvent("PLAYER_REGEN_ENABLED")
         frame:RegisterEvent("SPELL_UPDATE_COOLDOWN")
         frame:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
         frame:RegisterUnitEvent("UNIT_AURA", "player")

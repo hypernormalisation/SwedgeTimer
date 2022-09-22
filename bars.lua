@@ -97,7 +97,7 @@ function ST:init_visuals_template(hand)
     frame.gcd1_line:SetDrawLayer("OVERLAY", -1)
     frame.gcd2_line = frame:CreateLine()
     frame.gcd2_line:SetDrawLayer("OVERLAY", -1)
-    -- self:configure_gcd_markers(hand)
+    self:configure_gcd_markers(hand)
 
     -- Finally show the frame
 	frame:Show()
@@ -283,6 +283,15 @@ function ST:on_latency_update()
     for hand in self:iter_hands() do
         self:set_deadzone_width(hand)
     end
+end
+
+function ST:on_gcd_length_change()
+    -- This function fires when the *predicted length* of a GCD
+    -- changes, and doesn't refer to any active GCD.
+    for hand in self:iter_hands() do
+
+    end
+
 end
 
 --=========================================================================================

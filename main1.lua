@@ -54,7 +54,7 @@ function ST:OnInitialize()
 	-- Addon database
 	local SwedgeTimerDB = LibStub("AceDB-3.0"):New(addon_name.."DB", self.defaults, true)
 	self.db = SwedgeTimerDB
-
+	print("unit class says: "..tostring(select(2, UnitClass("player"))))
 	-- Options table
 	local AC = LibStub("AceConfig-3.0")
 	local ACD = LibStub("AceConfigDialog-3.0")
@@ -149,6 +149,8 @@ function ST:OnInitialize()
     self.gcd.duration = nil
 	self.gcd.started = nil
 	self.gcd.expires = nil
+	self.gcd.phys_length = nil
+	self.gcd.spell_length = nil
 
 	-- Latency info containers
 	self.latency = {}
@@ -223,8 +225,10 @@ function ST:GCD_OVER()
 	end
 end
 
-function ST:GCD_DURATIONS_UPDATED()
-
+function ST:GCD_DURATIONS_UPDATED(_, phys_length, spell_length)
+	self.gcd.spell_length = spell_length
+	self.gcd.phys_length = phys_length
+	self:on_gcd_length_change()
 end
 
 -- Latency tracking
