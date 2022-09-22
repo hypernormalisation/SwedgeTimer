@@ -116,8 +116,8 @@ function ST:configure_gcd_markers(hand)
     f.gcd2_line:SetColorTexture(
         self:convert_color(db.gcd_marker_color)
     )
-    f.gcd1_line:SetThickness(db.gcd_marker_thick)
-    f.gcd2_line:SetThickness(db.gcd_marker_thick)
+    f.gcd1_line:SetThickness(db.gcd_marker_width)
+    f.gcd2_line:SetThickness(db.gcd_marker_width)
 end
 
 function ST:configure_deadzone(hand)
@@ -359,7 +359,7 @@ function ST:set_deadzone_width(hand)
     local frac = (self.latency.world_ms / 1000) / self[hand].speed
     frac = frac * db_shared.deadzone_scale_factor
     -- print(frac)
-    frame:SetWidth(frac * db.bar_width)
+    frame:SetWidth(max(1, frac * db.bar_width))
 end
 
 function ST:set_bar_color(hand, color_table)

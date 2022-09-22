@@ -93,7 +93,7 @@ function lib:calculate_expected_spell_gcd()
         self:Fire(lib.GCD_DURATIONS_UPDATED, lib.phys_gcd, lib.current_spell_gcd)
     end
     self.current_spell_gcd = current
-    print(string.format('spell GCD: %f, phys GCD: %f', current, self.phys_gcd))
+    -- print(string.format('spell GCD: %f, phys GCD: %f', current, self.phys_gcd))
 end
 
 function lib:release_gcd_lock()
@@ -120,7 +120,7 @@ function lib:poll_gcd()
     self.gcd_duration = duration_reported
 	self.gcd_started = time_started
 	self.gcd_expires = expires
-    print(duration_reported)
+    -- print(duration_reported)
     self:Fire(self.GCD_STARTED, duration_actual, expires)
 	C_Timer.After(self.gcd_duration, function() self:release_gcd_lock() end)
 end
