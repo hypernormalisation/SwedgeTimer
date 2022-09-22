@@ -15,6 +15,10 @@ local SwingTimerInfo = function(hand)
     return STL:SwingTimerInfo(hand)
 end
 
+function table.pack(...)
+	return { n = select("#", ...), ... }
+  end
+  
 
 --=========================================================================================
 -- Funcs/iterables to automate common tasks.
@@ -94,18 +98,19 @@ function ST:OnInitialize()
 	)
 
 	-----------------------------------------------------------
-	-- Callbackhandlers less sensitive to load orders.
+	-- Callbackhandlers that are less sensitive to load orders.
 	-----------------------------------------------------------
 	-- LibLatencyMonitor
 	LLM.RegisterCallback(self, LLM.LATENCY_CHANGED, self.callback_event_handler)
+
 	-- LibGlobalCooldown
 	LGC.RegisterCallback(self, LGC.GCD_STARTED, self.callback_event_handler)
 	LGC.RegisterCallback(self, LGC.GCD_OVER, self.callback_event_handler)
 	LGC.RegisterCallback(self, LGC.GCD_DURATIONS_UPDATED, self.callback_event_handler)
 
-	-- Slashcommands
-	self:register_slashcommands()
-
+	-----------------------------------------------------------
+	-- The set of containers and frames used in the addon.
+	-----------------------------------------------------------
 	-- Character info containers
 	self.player_guid = UnitGUID("player")
 	self.player_class = select(2, UnitClass("player"))
@@ -164,9 +169,10 @@ function ST:OnInitialize()
 	self.latency.home_ms = nil
 	self.latency.world_ms = nil
 
+	-----------------------------------------------------------
 	-- Register events
+	-----------------------------------------------------------
 	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
-	-- self:RegisterEvent("SPELL_UPDATE_COOLDOWN")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("PLAYER_TARGET_SET_ATTACKING")
@@ -175,6 +181,12 @@ function ST:OnInitialize()
 	self:RegisterEvent("PLAYER_ENTER_COMBAT")
 	self:RegisterEvent("PLAYER_LEAVE_COMBAT")
 	self:RegisterEvent("UNIT_TARGET")
+
+	-----------------------------------------------------------
+	-- Register Slashcommands
+	-----------------------------------------------------------
+	self:register_slashcommands()
+
 
 end
 
@@ -194,6 +206,45 @@ function ST:init_libs()
 	self:post_init()
 end
 
+function ST:init_timers()
+	self:register_timer_callbacks()
+	self:check_weapons()
+	for hand in self:iter_hands() do
+		local t = {SwingTimerInfo(hand)}
+		-- print(string.format("%s, %s, %s", tostring(t[1]),
+		-- tostring(t[2]), tostring(t[3])))
+		self[hand].speed = t[1]
+		self[hand].ends_at = t[2]
+		self[hand].start = t[3]
+		ST:init_visuals_template(hand)
+		ST:set_bar_texts(hand)
+		-- hook the onupdate
+		self[hand].frame:SetScript("OnUpdate", self[hand].onupdate)
+	end
+end
+
+function ST:register_timer_callbacks()
+	STL.RegisterCallback(self, "SWING_TIMER_CLIPPED", self.callback_event_handler)
+	STL.RegisterCallback(self, "SWING_TIMER_DELTA", self.callback_event_handler)
+	STL.RegisterCallback(self, "SWING_TIMER_PAUSED", self.callback_event_handler)
+	STL.RegisterCallback(self, "SWING_TIMER_START", self.callback_event_handler)
+	STL.RegisterCallback(self, "SWING_TIMER_STOP", self.callback_event_handler)
+	STL.RegisterCallback(self, "SWING_TIMER_UPDATE", self.callback_event_handler)
+end
+
+function ST:check_weapons()
+	-- Detect what weapon types are equipped.
+	for hand in self:iter_hands() do
+		local speed = SwingTimerInfo(hand)
+		-- print(speed)
+		if speed == 0 then
+			self[hand].has_weapon = false
+		else
+			self[hand].has_weapon = true
+		end
+	end
+end
+
 function ST:post_init()
 	-- Takes care of any miscellaneous widget/state manipulation that needs to run
 	-- once the libraries and addon are initialised.
@@ -208,11 +259,19 @@ end
 --=========================================================================================
 function ST.callback_event_handler(event, ...)
 	-- Func to pass all callbacks to their relevant handler
+	print('===============')
 	print(event)
+	local args = table.pack(...)
+	for i=1, args.n do
+		print(tostring(args[i]))
+	end
+	print('===============')
 	ST[event](ST, event, ...)
 end
 
+-----------------------------------------------------------
 -- GCD lib funcs
+-----------------------------------------------------------
 function ST:GCD_STARTED(_, duration, expires)
 	-- print(duration)
 	-- print(expires)
@@ -232,7 +291,9 @@ function ST:GCD_DURATIONS_UPDATED(_, phys_length, spell_length)
 	self:on_gcd_length_change()
 end
 
+-----------------------------------------------------------
 -- Latency tracking
+-----------------------------------------------------------
 function ST:LATENCY_CHANGED(_, home, world)
 	self.latency.home_ms = home
 	self.latency.world_ms = world
@@ -241,7 +302,115 @@ function ST:LATENCY_CHANGED(_, home, world)
 	end
 end
 
+-----------------------------------------------------------
 -- Swing Timer Lib
+-----------------------------------------------------------
+function ST:SWING_TIMER_CLIPPED(_, hand)
+end
+
+function ST:SWING_TIMER_DELTA(_, delta)
+	-- print(string.format("DELTA = %s", delta))
+end
+
+function ST:SWING_TIMER_PAUSED(_, hand)
+end
+
+function ST:SWING_TIMER_START(_, speed, expiration_time, hand)
+	if self[hand].is_full_timer then
+		self[hand].is_full_timer:Cancel()
+		self:set_filling_state(hand)
+	elseif self[hand].is_full then
+		self[hand].is_full = false
+		self:set_filling_state(hand)
+	end
+	self[hand].start = GetTime()
+	self[hand].speed = speed
+	self[hand].ends_at = expiration_time
+end
+
+function ST:SWING_TIMER_STOP(_, hand)
+	local db_shared = self.db.profile
+	self[hand].is_full_timer = C_Timer.NewTimer(db_shared.bar_full_delay, function()
+		self:set_bar_full_state(hand)
+		self[hand].is_full = true
+	end)
+end
+
+function ST:SWING_TIMER_UPDATE(_, speed, expiration_time, hand)
+	local t = GetTime()
+	if expiration_time < t then
+		expiration_time = t
+	end
+	self[hand].speed = speed
+	self[hand].ends_at = expiration_time
+	print('New speed = ' .. tostring(speed))
+	self:on_attack_speed_change(hand)
+end
+
+------------------------------------------------------------------------------------
+-- AceEvent callbacks
+------------------------------------------------------------------------------------
+function ST:PLAYER_ENTERING_WORLD(event, is_initial_login, is_reloading_ui)
+end
+
+function ST:PLAYER_EQUIPMENT_CHANGED(event, slot, has_current)
+	print('slot says: '..tostring(slot))
+	-- print(slot)
+	if slot == 16 or slot == 17 or slot == 18 then
+		self:check_weapons()
+		print('has_oh: '.. tostring(self.offhand.has_weapon))
+		print('has ranged: '..tostring(self.ranged.has_weapon))
+	end
+end
+
+-- function ST:release_gcd_lock()
+-- 	-- Called when a GCD expires.
+--     self.gcd.duration = nil
+-- 	self.gcd.started = nil
+-- 	for hand in self:iter_hands() do
+-- 		local frame = self:get_frame(hand)
+-- 		frame.gcd_bar:SetWidth(0)
+-- 		frame.gcd_bar:Hide()
+-- 	end
+-- end
+
+function ST:PLAYER_REGEN_ENABLED()
+	self.in_combat = false
+end
+
+function ST:PLAYER_REGEN_DISABLED()
+	self.in_combat = true
+end
+
+function ST:PLAYER_ENTER_COMBAT()
+	self.is_melee_attacking = true
+end
+
+function ST:PLAYER_LEAVE_COMBAT()
+	self.is_melee_attacking = false
+end
+
+function ST:PLAYER_TARGET_SET_ATTACKING()
+	-- print('offsetting offhand')
+	local t = GetTime()
+	local old_start = self.offhand.start
+	if old_start + self.offhand.speed < t then
+		self:set_bar_color('offhand')
+		self.offhand.start = GetTime() - self.offhand.speed
+	end
+end
+
+function ST:UNIT_TARGET(event, unitId)
+	if unitId ~= "player" then
+		return
+	end
+	if UnitExists("target") then self.has_target = true else self.has_target = false end
+	if UnitCanAttack("player", "target") == true then
+		self.has_attackable_target = true
+	else
+		self.has_attackable_target = false
+	end
+end
 
 ------------------------------------------------------------------------------------
 -- Range finding
@@ -373,18 +542,7 @@ end
 ------------------------------------------------------------------------------------
 -- State setting
 ------------------------------------------------------------------------------------
-function ST:check_weapons()
-	-- Detect what weapon types are equipped.
-	for hand in self:iter_hands() do
-		local speed = SwingTimerInfo(hand)
-		-- print(speed)
-		if speed == 0 then
-			self[hand].has_weapon = false
-		else
-			self[hand].has_weapon = true
-		end
-	end
-end
+
 
 function ST:set_bar_full_state(hand)
 	self:set_bar_color(hand, {0.5, 0.5, 0.5, 1.0})
@@ -406,172 +564,6 @@ function ST:needs_gcd()
 	return false
 end
 
--- function ST:
-
-------------------------------------------------------------------------------------
--- The Event handlers for the STL
-------------------------------------------------------------------------------------
-function ST:register_timer_callbacks()
-	STL.RegisterCallback(self, "SWING_TIMER_START", self.timer_event_handler)
-	STL.RegisterCallback(self, "SWING_TIMER_UPDATE", self.timer_event_handler)
-	STL.RegisterCallback(self, "SWING_TIMER_CLIPPED", self.timer_event_handler)
-	STL.RegisterCallback(self, "SWING_TIMER_PAUSED", self.timer_event_handler)
-	STL.RegisterCallback(self, "SWING_TIMER_STOP", self.timer_event_handler)
-	STL.RegisterCallback(self, "SWING_TIMER_DELTA", self.timer_event_handler)
-end
-
-function ST:SWING_TIMER_START(speed, expiration_time, hand)
-	self = ST
-	-- if hand == "mainhand" then
-	-- 	print('SWING START on ' .. hand)
-	-- end
-	if self[hand].is_full_timer then
-		self[hand].is_full_timer:Cancel()
-		self:set_filling_state(hand)
-	elseif self[hand].is_full then
-		self[hand].is_full = false
-		self:set_filling_state(hand)
-	end
-	self[hand].start = GetTime()
-	self[hand].speed = speed
-	self[hand].ends_at = expiration_time
-end
-
-function ST:SWING_TIMER_UPDATE(speed, expiration_time, hand)
-	self = ST
-	local t = GetTime()
-	if expiration_time < t then
-		expiration_time = t
-	end
-	self[hand].speed = speed
-	self[hand].ends_at = expiration_time
-	print('New speed = ' .. tostring(speed))
-	self:on_attack_speed_change(hand)
-end
-
-function ST:SWING_TIMER_CLIPPED(hand)
-end
-
-function ST:SWING_TIMER_PAUSED(hand)
-end
-
-function ST:SWING_TIMER_STOP(hand)
-	self = ST
-	-- if hand == "mainhand" then
-	-- 	print('SWING STOP on ' .. hand)
-	-- end
-	local db_shared = self.db.profile
-	self[hand].is_full_timer = C_Timer.NewTimer(db_shared.bar_full_delay, function()
-		self:set_bar_full_state(hand)
-		self[hand].is_full = true
-	end)
-end
-
-function ST:SWING_TIMER_DELTA(delta)
-	-- print(string.format("DELTA = %s", delta))
-end
-
--- Stub to call the appropriate handler.
--- Doesn't play well with self syntax sugar.
-function ST.timer_event_handler(event, ...)
-	local args = {...}
-	-- print(args)
-	local hand = nil
-	if event == "SWING_TIMER_START" or event == "SWING_TIMER_UPDATE" then
-		hand = args[3]
-	else
-		hand = args[1]
-	end
-	-- print('event says: '..tostring(event))
-	-- print(string.format("%s: %s", hand, event))
-	if hand == "offhand" then
-		-- print(event)
-	end
-	ST[event](event, ...)
-end
-
-------------------------------------------------------------------------------------
--- AceEvent callbacks
-------------------------------------------------------------------------------------
-function ST:init_timers()
-	self:register_timer_callbacks()
-	self:check_weapons()
-	for hand in self:iter_hands() do
-		local t = {SwingTimerInfo(hand)}
-		-- print(string.format("%s, %s, %s", tostring(t[1]),
-		-- tostring(t[2]), tostring(t[3])))
-		self[hand].speed = t[1]
-		self[hand].ends_at = t[2]
-		self[hand].start = t[3]
-		ST:init_visuals_template(hand)
-		ST:set_bar_texts(hand)
-		-- hook the onupdate
-		self[hand].frame:SetScript("OnUpdate", self[hand].onupdate)
-	end
-end
-
-function ST:PLAYER_ENTERING_WORLD(event, is_initial_login, is_reloading_ui)
-end
-
-function ST:PLAYER_EQUIPMENT_CHANGED(event, slot, has_current)
-	print('slot says: '..tostring(slot))
-	-- print(slot)
-	if slot == 16 or slot == 17 or slot == 18 then
-		self:check_weapons()
-		print('has_oh: '.. tostring(self.offhand.has_weapon))
-		print('has ranged: '..tostring(self.ranged.has_weapon))
-	end
-end
-
-function ST:release_gcd_lock()
-	-- Called when a GCD expires.
-	self.gcd.lock = false
-    self.gcd.duration = nil
-	self.gcd.started = nil
-	for hand in self:iter_hands() do
-		local frame = self:get_frame(hand)
-		frame.gcd_bar:SetWidth(0)
-		frame.gcd_bar:Hide()
-	end
-end
-
-function ST:PLAYER_REGEN_ENABLED()
-	self.in_combat = false
-end
-
-function ST:PLAYER_REGEN_DISABLED()
-	self.in_combat = true
-end
-
-function ST:PLAYER_ENTER_COMBAT()
-	self.is_melee_attacking = true
-end
-
-function ST:PLAYER_LEAVE_COMBAT()
-	self.is_melee_attacking = false
-end
-
-function ST:PLAYER_TARGET_SET_ATTACKING()
-	-- print('offsetting offhand')
-	local t = GetTime()
-	local old_start = self.offhand.start
-	if old_start + self.offhand.speed < t then
-		self:set_bar_color('offhand')
-		self.offhand.start = GetTime() - self.offhand.speed
-	end
-end
-
-function ST:UNIT_TARGET(event, unitId)
-	if unitId ~= "player" then
-		return
-	end
-	if UnitExists("target") then self.has_target = true else self.has_target = false end
-	if UnitCanAttack("player", "target") == true then
-		self.has_attackable_target = true
-	else
-		self.has_attackable_target = false
-	end
-end
 
 ------------------------------------------------------------------------------------
 -- Slashcommands
