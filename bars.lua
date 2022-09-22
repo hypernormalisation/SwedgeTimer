@@ -343,10 +343,12 @@ function ST:set_deadzone_width(hand)
     -- print('call to set deadzone width for '..hand)
     local db = self:get_hand_table(hand)
     local frame = self:get_frame(hand).deadzone
+    local db_shared = self.db.profile
     if not db.enable_deadzone then
         return
     end
     local frac = (self.latency.world_ms / 1000) / self[hand].speed
+    frac = frac * db_shared.deadzone_scale_factor
     -- print(frac)
     frame:SetWidth(frac * db.bar_width)
 end

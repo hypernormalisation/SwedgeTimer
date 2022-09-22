@@ -67,7 +67,7 @@ ST.bar_defaults = {
     -- Deadzone settings
     enable_deadzone = false,
     deadzone_texture_key = "Solid",
-    deadzone_bar_color = {131, 9, 41, 0.62},
+    deadzone_bar_color = {141, 59, 81, 0.82},
 
     -- Show range
     show_range_finder = false,
@@ -118,8 +118,13 @@ ST.ROGUE.defaults = {
 ------------------------------------------------------------------------------------
 ST.DRUID = {}
 ST.DRUID.defaults = {
-    tag = "ROGUE",
+    tag = "DRUID",
     ['**'] = ST.bar_defaults,
+    -- Mainhand options
+	mainhand = {
+        enable_deadzone = true,
+        bar_color_default = {247, 181, 1, 0.8},
+    },
 }
 --=========================================================================================
 -- End, if debug verify module was read.

@@ -44,6 +44,9 @@ ST.defaults = {
 		-- Bar visual behaviour
 		bar_full_delay = 0.1,
 
+		-- Deadzone
+		deadzone_scale_factor = 1.4,
+
 		-- Class-specific defaults
 		ROGUE = ST.ROGUE.defaults,
 		DRUID = ST.DRUID.defaults,

@@ -95,6 +95,7 @@ function ST:OnInitialize()
 	-- LibGlobalCooldown
 	LGC.RegisterCallback(self, LGC.GCD_STARTED, self.callback_event_handler)
 	LGC.RegisterCallback(self, LGC.GCD_OVER, self.callback_event_handler)
+	LGC.RegisterCallback(self, LGC.GCD_DURATIONS_UPDATED, self.callback_event_handler)
 
 	-- Slashcommands
 	self:register_slashcommands()
@@ -220,6 +221,10 @@ function ST:GCD_OVER()
 	for hand in self:iter_hands() do
 		self:get_frame(hand).gcd_bar:Hide()
 	end
+end
+
+function ST:GCD_DURATIONS_UPDATED()
+
 end
 
 -- Latency tracking

@@ -21,6 +21,7 @@ local UnitClass = UnitClass
 lib.callbacks = lib.callbacks or LibStub("CallbackHandler-1.0"):New(lib)
 lib.GCD_OVER = "GCD_OVER"
 lib.GCD_STARTED = "GCD_STARTED"
+lib.GCD_DURATIONS_UPDATED = "GCD_DURATIONS_UPDATED"
 
 -- Containers for state tracking
 lib.in_combat = false
