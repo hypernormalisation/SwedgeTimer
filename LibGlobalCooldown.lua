@@ -30,7 +30,6 @@ lib.in_combat = false
 lib.current_form = nil
 
 -- Containers for active GCD info
-lib.gcd_lock = false
 lib.gcd_duration = nil
 lib.gcd_started = nil
 lib.gcd_expires = nil
@@ -97,7 +96,6 @@ function lib:calculate_expected_spell_gcd()
 end
 
 function lib:release_gcd_lock()
-	self.gcd_lock = false
     self.gcd_duration = nil
 	self.gcd_started = nil
     self:Fire(self.GCD_OVER)
@@ -106,7 +104,7 @@ end
 function lib:poll_gcd()
     -- Function to be called when we have reason to believe a new GCD may 
     -- have triggered. Locks out new updates when we're on a GCD.
-    if self.gcd_lock then
+    if self.gcd_duration then
         return
     end
     local time_started, duration_reported = GetSpellCooldown(29515)
@@ -114,7 +112,6 @@ function lib:poll_gcd()
         return
     end
 	local t = GetTime()
-	self.gcd_lock = true
     local duration_actual = duration_reported - (t - time_started)
     local expires = t + duration_actual
     self.gcd_duration = duration_reported

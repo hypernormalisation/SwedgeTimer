@@ -15,6 +15,10 @@ local SwingTimerInfo = function(hand)
     return STL:SwingTimerInfo(hand)
 end
 
+
+--=========================================================================================
+-- Funcs/iterables to automate common tasks.
+--=========================================================================================
 -- keyword-accessible tables to handle case-switching
 ST.mainhand = {}
 ST.offhand = {}
@@ -23,6 +27,7 @@ ST.hands = {"mainhand", "offhand", "ranged"}
 ST.interfaces_are_initialised = false
 
 function ST:iter_hands()
+	-- Iterates over melee/ranged/offhand 
 	local i = 0
 	local hands = self.hands
 	local n = #hands
@@ -36,6 +41,7 @@ function ST:iter_hands()
 end
 
 function ST:get_frame(hand)
+	-- Gets the frame associated with that hand's bar
 	-- print("hand says: " .. tostring(hand))
 	return self[hand].frame
 end
@@ -173,11 +179,9 @@ function ST:OnInitialize()
 end
 
 function ST:init_libs()
-	-- This function inits our interfaces to the libraries we use
+	-- This function inits our interfaces to the libraries we use,
 	-- but only once those libraries are fully ready and have
 	-- all of the information necessary.
-
-	-- If already loaded, ignore subsequent events
 	if self.interfaces_are_initialised then
 		return
 	end
@@ -190,11 +194,8 @@ function ST:init_libs()
 	self:post_init()
 end
 
-function ST:OnEnable()
-end
-
 function ST:post_init()
-	-- Takes care of any miscellaneous stuff that needs to run
+	-- Takes care of any miscellaneous widget/state manipulation that needs to run
 	-- once the libraries and addon are initialised.
 	for hand in self:iter_hands() do
 		self:set_bar_full_state(hand)
@@ -239,6 +240,8 @@ function ST:LATENCY_CHANGED(_, home, world)
 		self:on_latency_update()
 	end
 end
+
+-- Swing Timer Lib
 
 ------------------------------------------------------------------------------------
 -- Range finding
