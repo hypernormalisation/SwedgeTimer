@@ -187,7 +187,6 @@ function ST:OnInitialize()
 	-----------------------------------------------------------
 	self:register_slashcommands()
 
-
 end
 
 function ST:init_libs()
@@ -259,13 +258,13 @@ end
 --=========================================================================================
 function ST.callback_event_handler(event, ...)
 	-- Func to pass all callbacks to their relevant handler
-	print('===============')
-	print(event)
-	local args = table.pack(...)
-	for i=1, args.n do
-		print(tostring(args[i]))
-	end
-	print('===============')
+	-- print('===============')
+	-- print(event)
+	-- local args = table.pack(...)
+	-- for i=1, args.n do
+	-- 	print(tostring(args[i]))
+	-- end
+	-- print('===============')
 	ST[event](ST, event, ...)
 end
 
@@ -343,7 +342,7 @@ function ST:SWING_TIMER_UPDATE(_, speed, expiration_time, hand)
 	end
 	self[hand].speed = speed
 	self[hand].ends_at = expiration_time
-	print('New speed = ' .. tostring(speed))
+	-- print('New speed = ' .. tostring(speed))
 	self:on_attack_speed_change(hand)
 end
 
@@ -362,17 +361,6 @@ function ST:PLAYER_EQUIPMENT_CHANGED(event, slot, has_current)
 		print('has ranged: '..tostring(self.ranged.has_weapon))
 	end
 end
-
--- function ST:release_gcd_lock()
--- 	-- Called when a GCD expires.
---     self.gcd.duration = nil
--- 	self.gcd.started = nil
--- 	for hand in self:iter_hands() do
--- 		local frame = self:get_frame(hand)
--- 		frame.gcd_bar:SetWidth(0)
--- 		frame.gcd_bar:Hide()
--- 	end
--- end
 
 function ST:PLAYER_REGEN_ENABLED()
 	self.in_combat = false
