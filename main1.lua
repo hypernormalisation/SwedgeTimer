@@ -21,14 +21,15 @@ function table.pack(...)
   
 
 --=========================================================================================
--- Funcs/iterables to automate common tasks.
+-- Funcs/iterables to automate common tasks and retrieve objects.
 --=========================================================================================
+ST.interfaces_are_initialised = false
+
 -- keyword-accessible tables to handle case-switching
 ST.mainhand = {}
 ST.offhand = {}
 ST.ranged = {}
 ST.hands = {"mainhand", "offhand", "ranged"}
-ST.interfaces_are_initialised = false
 
 function ST:iter_hands()
 	-- Iterates over melee/ranged/offhand 
@@ -48,6 +49,18 @@ function ST:get_frame(hand)
 	-- Gets the frame associated with that hand's bar
 	-- print("hand says: " .. tostring(hand))
 	return self[hand].frame
+end
+
+function ST:get_profile_options_table()
+	return self.db.profile
+end
+
+function ST:get_class_options_table()
+	return self.db.profile[self.player_class]
+end
+
+function ST:get_hand_table(hand)
+	return self.db.profile[self.player_class][hand]
 end
 
 function ST:get_in_range(hand)
@@ -162,6 +175,9 @@ function ST:OnInitialize()
 	self.gcd.expires = nil
 	self.gcd.phys_length = nil
 	self.gcd.spell_length = nil
+
+    self.gcd1_marker_position = nil
+	self.gcd2_marker_position = nil
 
 	-- Latency info containers
 	self.latency = {}
@@ -530,8 +546,6 @@ end
 ------------------------------------------------------------------------------------
 -- State setting
 ------------------------------------------------------------------------------------
-
-
 function ST:set_bar_full_state(hand)
 	self:set_bar_color(hand, {0.5, 0.5, 0.5, 1.0})
 end
@@ -551,7 +565,6 @@ function ST:needs_gcd()
 	end
 	return false
 end
-
 
 ------------------------------------------------------------------------------------
 -- Slashcommands

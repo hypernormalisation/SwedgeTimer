@@ -90,13 +90,19 @@ function ST:init_visuals_template(hand)
     frame.right_text:SetShadowOffset(1,-1)
     frame.right_text:SetJustifyV("CENTER")
     frame.right_text:SetJustifyH("RIGHT")
-    self:configure_fonts(hand)
+    self:configure_texts(hand)
 
     -- Create the line markers
-    frame.gcd1_line = frame:CreateLine()
-    frame.gcd1_line:SetDrawLayer("OVERLAY", -1)
-    frame.gcd2_line = frame:CreateLine()
-    frame.gcd2_line:SetDrawLayer("OVERLAY", -1)
+    frame.gcd1a_marker = frame:CreateLine()
+    frame.gcd1a_marker:SetDrawLayer("OVERLAY", -1)
+    frame.gcd1b_marker = frame:CreateLine()
+    frame.gcd1b_marker:SetDrawLayer("OVERLAY", -1)
+
+    frame.gcd2a_marker = frame:CreateLine()
+    frame.gcd2a_marker:SetDrawLayer("OVERLAY", -1)
+    frame.gcd2b_marker = frame:CreateLine()
+    frame.gcd2b_marker:SetDrawLayer("OVERLAY", -1)
+
     self:configure_gcd_markers(hand)
 
     -- Finally show the frame
@@ -108,16 +114,28 @@ end
 -- These all operate on a given hand.
 ------------------------------------------------------------------------------------
 function ST:configure_gcd_markers(hand)
+    -- Configure textures and marker widths.
     local db = self:get_hand_table(hand)
     local f = self:get_frame(hand)
-    f.gcd1_line:SetColorTexture(
+    f.gcd1a_marker:SetColorTexture(
         self:convert_color(db.gcd_marker_color)
     )
-    f.gcd2_line:SetColorTexture(
+    f.gcd1b_marker:SetColorTexture(
         self:convert_color(db.gcd_marker_color)
     )
-    f.gcd1_line:SetThickness(db.gcd_marker_width)
-    f.gcd2_line:SetThickness(db.gcd_marker_width)
+
+    f.gcd2a_marker:SetColorTexture(
+        self:convert_color(db.gcd_marker_color)
+    )
+    f.gcd2b_marker:SetColorTexture(
+        self:convert_color(db.gcd_marker_color)
+    )
+
+    f.gcd1a_marker:SetThickness(db.gcd_marker_width)
+    f.gcd1b_marker:SetThickness(db.gcd_marker_width)
+
+    f.gcd2a_marker:SetThickness(db.gcd_marker_width)
+    f.gcd2b_marker:SetThickness(db.gcd_marker_width)
 end
 
 function ST:configure_deadzone(hand)
@@ -129,17 +147,29 @@ function ST:configure_deadzone(hand)
     )
 end
 
-function ST:configure_fonts(hand)
+function ST:configure_texts(hand)
     local db = self:get_hand_table(hand)
 	local frame = self:get_frame(hand)
 	local font_path = LSM:Fetch('font', db.text_font)
-	local opt_string = self.outline_map[db.font_outline_key]
-	frame.left_text:SetFont(font_path, db.font_size, opt_string)
-	frame.right_text:SetFont(font_path, db.font_size, opt_string)
-	frame.left_text:SetPoint("TOPLEFT", 3, -(db.bar_height / 2) + (db.font_size / 2))
-	frame.right_text:SetPoint("TOPRIGHT", -3, -(db.bar_height / 2) + (db.font_size / 2))
-	frame.left_text:SetTextColor(unpack(db.font_color))
-	frame.right_text:SetTextColor(unpack(db.font_color))
+	local opt_string = self.outline_map[db.text_outline_key]
+
+    frame.left_text:SetFont(font_path, db.text_size, opt_string)
+    frame.left_text:SetPoint("TOPLEFT", 3, -(db.bar_height / 2) + (db.text_size / 2))
+	frame.left_text:SetTextColor(unpack(db.text_color))
+    if db.left_text_enabled then
+        frame.left_text:Show()
+    else
+        frame.left_text:Hide()
+    end
+
+    frame.right_text:SetFont(font_path, db.text_size, opt_string)
+	frame.right_text:SetPoint("TOPRIGHT", -3, -(db.bar_height / 2) + (db.text_size / 2))
+	frame.right_text:SetTextColor(unpack(db.text_color))
+    if db.right_text_enabled then
+        frame.right_text:Show()
+    else
+        frame.right_text:Hide()
+    end
 end
 
 function ST:configure_bar_outline(hand)
@@ -274,11 +304,6 @@ end
 -- Collections of widget altering funcs to be called on specific events/conditions
 -- Some operate generally, others on a given hand.
 --=========================================================================================
-function ST:on_attack_speed_change(hand)
-    self:set_deadzone_width(hand)
-    self:set_bar_texts(hand)
-end
-
 function ST:on_latency_update()
     for hand in self:iter_hands() do
         self:set_deadzone_width(hand)
@@ -289,9 +314,63 @@ function ST:on_gcd_length_change()
     -- This function fires when the *predicted length* of a GCD
     -- changes, and doesn't refer to any active GCD.
     for hand in self:iter_hands() do
-
     end
+end
 
+function ST:on_attack_speed_change(hand)
+    self:set_deadzone_width(hand)
+    self:set_bar_texts(hand)
+end
+
+function ST:on_bar_active(hand)
+    -- Called when the bar enters the active state.
+    -- This is whenever the player goes from a persistently idle state
+    -- to actively swinging.
+    local db = self:get_hand_table(hand)
+    local frame = self:get_frame(hand)
+    if db.gcd1_marker_enabled then
+        frame.gcd1a_marker:Show()
+        frame.gcd1b_marker:Show()
+    end
+    
+    if db.gcd2_marker_enabled then
+        frame.gcd2a_marker:Show()
+        frame.gcd2b_marker:Show()
+    end
+    if db.enable_deadzone then
+        frame.deadzone:Show()
+    end
+    if db.left_text_hide_inactive then
+        frame.left_text:Hide()
+    end
+    if db.right_text_hide_inactive then
+        frame.right_text:Hide()
+    end
+end
+
+function ST:on_bar_inactive(hand)
+    -- Called when the bar enters the inactive state.
+    -- This is when the player stops swinging with a full timer for 
+    -- some finite and configurable period of time.
+    local db = self:get_hand_table(hand)
+    local frame = self:get_frame(hand)
+    if db.gcd1_marker_hide_inactive then
+        frame.gcd1a_marker:Hide()
+        frame.gcd1b_marker:Hide()
+    end
+    if db.gcd2_marker_hide_inactive then
+        frame.gcd2a_marker:Hide()
+        frame.gcd2b_marker:Hide()
+    end
+    if db.deadzone_hide_inactive then
+        frame.deadzone:Hide()
+    end
+    if db.left_text_hide_inactive then
+        frame.left_text:Hide()
+    end
+    if db.right_text_hide_inactive then
+        frame.right_text:Hide()
+    end
 end
 
 --=========================================================================================
@@ -325,12 +404,19 @@ function ST:set_gcd_width(hand, timer_width, progress)
     frame.gcd_bar:SetPoint("TOPLEFT", timer_width, 0)
 end
 
-function ST:set_gcd_marker_width(hand)
+function ST:set_gcd_marker_positions(hand)
+    -- This function's task is to first check if any GCD markers should
+    -- be shown. It should then take into account any offset modes,
+    -- and which type of GCDs are being requested.
+    -- It then calculates the necessary offsets from the end of the bar,
+    -- and sets them.
     local db = self:get_hand_table(hand)
     local frame = self:get_frame(hand)
+
 end
 
 function ST:set_bar_texts(hand)
+    -- Function to set the requisite texts on the bar.
     local frame = self[hand].frame
     local db = self:get_hand_table(hand)
     -- Set texts
@@ -341,8 +427,8 @@ function ST:set_bar_texts(hand)
         attack_speed=format("%.1f", st.utils.simple_round(speed, 0.1)),
         swing_timer=format("%.1f", st.utils.simple_round(timer, 0.1)),
     }
-    local left = lookup[db.left_text]
-    local right = lookup[db.right_text]
+    local left = lookup[db.left_text_key]
+    local right = lookup[db.right_text_key]
     -- Update the main bars text, hide right text if bar full
     frame.left_text:SetText(left)
     frame.right_text:SetText(right)
@@ -358,7 +444,6 @@ function ST:set_deadzone_width(hand)
     end
     local frac = (self.latency.world_ms / 1000) / self[hand].speed
     frac = frac * db_shared.deadzone_scale_factor
-    -- print(frac)
     frame:SetWidth(max(1, frac * db.bar_width))
 end
 

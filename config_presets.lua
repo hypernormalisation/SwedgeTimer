@@ -5,6 +5,11 @@ local addon_name, st = ...
 local LSM = LibStub("LibSharedMedia-3.0")
 local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
 
+-- This table is used for any per-class settings that should apply globally.
+ST.class_defaults = {
+
+}
+
 
 -- This table is used by AceDB's smart defaults feature
 -- so we only have to override behaviour in class-specific tables.
@@ -41,36 +46,45 @@ ST.bar_defaults = {
     border_mode_key = "Solid",
     backplane_outline_width = 1.5,
 
-    -- Fonts
-    font_size = 12,
-    font_color = {1.0, 1.0, 1.0, 1.0},
+    -- Bar Texts
+    text_size = 12,
+    text_color = {1.0, 1.0, 1.0, 1.0},
     text_font = "PT Sans Narrow",
-    font_outline_key = "outline",
-    left_text = "attack_speed",
-    right_text = "swing_timer",
+    text_outline_key = "outline",
+
+    left_text_key  = "attack_speed",
+    left_text_enabled = true,
+    left_text_hide_inactive = false,
+
+    right_text_key = "swing_timer",
+    right_text_enabled = true,
+    right_text_hide_inactive = true,
 
     -- GCD underlay
-    gcd = {
-        test1 = 'the default',
-        test2 = 'another default',
-    },
     show_gcd_underlay = true,
     bar_color_gcd = {0.42, 0.42, 0.42, 0.8},
     gcd_texture_key = "Solid",
 
     -- GCD markers
     gcd1_marker_enabled = true,
+    gcd1_marker_hide_inactive = true,
+
     gcd2_marker_enabled = false,
+    gcd2_marker_hide_inactive = true,
+
     gcd_marker_width = 3,
+    gcd_marker_fractional_height = 0.2,
     gcd_marker_color = {230, 230, 230, 1.0},
 
     -- Deadzone settings
     enable_deadzone = false,
     deadzone_texture_key = "Solid",
     deadzone_bar_color = {141, 59, 81, 0.82},
+    deadzone_hide_inactive = false,
 
     -- Show range
     show_range_finder = false,
+
 }
 
 ------------------------------------------------------------------------------------

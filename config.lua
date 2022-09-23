@@ -85,9 +85,9 @@ local outlines = {
 	outline="Outline",
 	thick_outline="Thick Outline",
 }
+ST.outlines = outlines
 
 local texts = {
-	_none="Not shown",
 	attack_speed="Attack speed",
 	swing_timer="Swing timer",
 }
