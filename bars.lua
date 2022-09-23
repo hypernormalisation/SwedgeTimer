@@ -60,7 +60,6 @@ function ST:init_visuals_template(hand)
 
     -- Create the GCD timer bar
     frame.gcd_bar = frame:CreateTexture(nil, "ARTWORK")
-    -- frame.gcd_bar:SetPoint("TOPRIGHT", 0, 0)
     frame.gcd_bar:SetHeight(db.bar_height)
     frame.gcd_bar:SetTexture(LSM:Fetch('statusbar', db.gcd_texture_key))
     frame.gcd_bar:SetVertexColor(unpack(db.bar_color_gcd))
@@ -330,7 +329,6 @@ function ST:on_bar_active(hand)
         frame.gcd1a_marker:Show()
         frame.gcd1b_marker:Show()
     end
-    
     if db.gcd2_marker_enabled then
         frame.gcd2a_marker:Show()
         frame.gcd2b_marker:Show()
@@ -417,7 +415,6 @@ function ST:set_bar_texts(hand)
     -- Function to set the requisite texts on the bar.
     local frame = self[hand].frame
     local db = self:get_hand_table(hand)
-    -- Set texts
     local t = GetTime()
     local speed = self[hand].speed
     local timer = max(0, self[hand].ends_at - t)
@@ -425,11 +422,20 @@ function ST:set_bar_texts(hand)
         attack_speed=format("%.1f", st.utils.simple_round(speed, 0.1)),
         swing_timer=format("%.1f", st.utils.simple_round(timer, 0.1)),
     }
-    local left = lookup[db.left_text_key]
-    local right = lookup[db.right_text_key]
-    -- Update the main bars text, hide right text if bar full
-    frame.left_text:SetText(left)
-    frame.right_text:SetText(right)
+    if db.left_text_enabled then
+        local text = lookup[db.left_text_key]
+        frame.left_text:SetText(text)
+        frame.left_text:Show()
+    else
+        frame.left_text:Hide()
+    end
+    if db.right_text_enabled then
+        local text = lookup[db.right_text_key]
+        frame.right_text:SetText(text)
+        frame.right_text:Show()
+    else
+        frame.right_text:Hide()
+    end
 end
 
 function ST:set_deadzone_width(hand)

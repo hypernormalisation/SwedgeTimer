@@ -10,13 +10,7 @@ local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
 --=========================================================================================
 -- Functions to handle options
 --=========================================================================================
-function ST:get_class_options_table()
-	return self.db.profile[self.player_class]
-end
 
-function ST:get_hand_table(hand)
-	return self.db.profile[self.player_class][hand]
-end
 
 function ST:convert_color(t, new_alpha)
 	local r,g,b,a = unpack(t)
@@ -43,6 +37,16 @@ ST.defaults = {
 
 		-- Bar visual behaviour
 		bar_full_delay = 0.1,
+
+		-- Latency scale factors.
+		latency_linear_offset = 0.0,
+		latency_scale_factor = 1.0,
+
+		-- GCD marker offsets
+		gcd_marker_mode = "Both",
+		gcd_marker_offset_mode = "Dynamic",
+		gcd_marker_offset_scale_factor = 1.0,
+		gcd_marker_fixed_offset = 100,
 
 		-- Deadzone
 		deadzone_scale_factor = 1.4,

@@ -176,14 +176,21 @@ function ST:OnInitialize()
 	self.gcd.phys_length = nil
 	self.gcd.spell_length = nil
 
-    self.gcd1_marker_position = nil
+	self.gcd1_phys_time_before_swing = nil
+	self.gcd1_spell_time_before_swing = nil
+	self.gcd1_marker_position = nil
+
+	self.gcd2_phys_time_before_swing = nil
+	self.gcd2_spell_time_before_swing = nil
 	self.gcd2_marker_position = nil
 
 	-- Latency info containers
 	self.latency = {}
 	self.latency.update_interval_s = 1
-	self.latency.home_ms = nil
-	self.latency.world_ms = nil
+	self.latency.home_ms = 0
+	self.latency.calibrated_home_ms = 0
+	self.latency.world_ms = 0
+	self.latency.calibrated_world_ms = 0
 
 	-----------------------------------------------------------
 	-- Register events
@@ -312,6 +319,8 @@ end
 function ST:LATENCY_CHANGED(_, home, world)
 	self.latency.home_ms = home
 	self.latency.world_ms = world
+	self:set_adjusted_latencies()
+	self.set_gcd_times_before_swing_seconds()
 	if self.interfaces_are_initialised then
 		self:on_latency_update()
 	end
@@ -417,6 +426,44 @@ function ST:UNIT_TARGET(event, unitId)
 end
 
 ------------------------------------------------------------------------------------
+-- Latency
+------------------------------------------------------------------------------------
+function ST:set_adjusted_latencies()
+	-- Set the calibrated latencies
+	local db = self:get_profile_options_table()
+	local home = (self.latency.home_ms * db.latency_scale_factor) + db.latency_linear_offset
+	self.latency.calibrated_home_ms = home
+	local world = (self.latency.world_ms * db.latency_scale_factor) + db.latency_linear_offset
+	self.latency.calibrated_home_ms = world
+end
+
+function ST:get_gcd_marker_time_offset_seconds()
+	-- Gets the time offset in seconds according to the settings.
+	local db = self:get_profile_options_table()
+	local offset = 0
+	if db.gcd_marker_offset_mode == "Dynamic" then
+		offset = self.latency.world_ms
+	elseif db.gcd_marker_offset_mode == "Calibrated" then
+		offset = self.latency.calibrated_world_ms
+	elseif db.gcd_marker_offset_mode == "Fixed" then
+		offset = db.gcd_marker_fixed_offset
+	end
+	offset = offset / 1000
+	return offset
+end
+
+function ST:set_gcd_times_before_swing_seconds()
+	-- Set all of the calculated times before our next swing.
+	local base_phys = self.gcd.phys_length
+	local base_spell = self.gcd.spell_length
+	local offset = self:get_gcd_marker_time_offset_seconds()
+	self.gcd.gcd1_phys_time_before_swing = base_phys + offset
+	self.gcd.gcd1_spell_time_before_swing = base_spell + offset
+	self.gcd.gcd2_phys_time_before_swing = (2 * base_phys) + offset
+	self.gcd.gcd2_spell_time_before_swing = (2 * base_spell) + offset
+end
+
+------------------------------------------------------------------------------------
 -- Range finding
 ------------------------------------------------------------------------------------
 function ST:init_range_finders()
@@ -461,7 +508,6 @@ end
 function ST:handle_oor_hand(hand)
 	local db = self:get_hand_table(hand)
 	local frame = self:get_frame(hand)
-
 	if db.oor_effect == "dim" then
 		if not self:get_in_range(hand) then
 			frame:SetAlpha(db.dim_alpha)
