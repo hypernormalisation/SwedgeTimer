@@ -265,7 +265,8 @@ end
 --=========================================================================================
 -- OnUpdate funcs
 --=========================================================================================
-function ST:onupdate_common(hand)
+function ST:onupdate_common(hand, elapsed)
+    -- Template OnUpdate function for each bar.
     local frame = self[hand].frame
     local d = self[hand]
     local t = GetTime()
@@ -273,31 +274,28 @@ function ST:onupdate_common(hand)
         (d.ends_at - d.start)
     )
     local db = self:get_hand_table(hand)
-
     -- Update the main bar's width
     local timer_width = db.bar_width * progress
     frame.bar:SetWidth(max(1, timer_width))
 	frame.bar:SetTexCoord(0, progress, 0, 1)
-
     -- Update the GCD underlay if necessary.
     if db.show_gcd_underlay and self.gcd.expires then
         self:set_gcd_width(hand, timer_width, progress)
     end
     -- Set texts
     self:set_bar_texts(hand)
-
 end
 
 ST.mainhand.onupdate = function(elapsed)
-    ST:onupdate_common("mainhand")
+    ST:onupdate_common("mainhand", elapsed)
 end
 
 ST.offhand.onupdate = function(elapsed)
-    ST:onupdate_common("offhand")
+    ST:onupdate_common("offhand", elapsed)
 end
 
 ST.ranged.onupdate = function(elapsed)
-    ST:onupdate_common("ranged")
+    ST:onupdate_common("ranged", elapsed)
 end
 
 --=========================================================================================
