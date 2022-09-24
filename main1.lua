@@ -18,7 +18,6 @@ end
 function table.pack(...)
 	return { n = select("#", ...), ... }
   end
-  
 
 --=========================================================================================
 -- Funcs/iterables to automate common tasks and retrieve objects.
@@ -139,6 +138,14 @@ function ST:OnInitialize()
 	self.has_target = false
 	self.has_attackable_target = false
 
+	self.form_index = GetShapeshiftForm()
+	self.is_cat_or_bear = false
+	if self.player_class == "DRUID" then
+		if self.form_index == 1 or self.form_index == 3 then
+			self.is_cat_or_bear = true
+		end
+	end
+
 	-- MH timer containers
 	self.mainhand.start = nil
 	self.mainhand.speed = nil
@@ -204,6 +211,7 @@ function ST:OnInitialize()
 	self:RegisterEvent("PLAYER_ENTER_COMBAT")
 	self:RegisterEvent("PLAYER_LEAVE_COMBAT")
 	self:RegisterEvent("UNIT_TARGET")
+	self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
 
 	-----------------------------------------------------------
 	-- Register Slashcommands
@@ -425,8 +433,20 @@ function ST:UNIT_TARGET(event, unitId)
 	end
 end
 
+function ST:UPDATE_SHAPESHIFT_FORM()
+	if not self.class == "DRUID" then
+        return
+    end
+    self.form_index = GetShapeshiftForm()
+    if self.form_index == 1 or self.form_index ==3 then
+        self.is_cat_or_bear = true
+    else
+        self.is_cat_or_bear = false
+    end
+end
+
 ------------------------------------------------------------------------------------
--- Latency
+-- Latency and GCD markers
 ------------------------------------------------------------------------------------
 function ST:set_adjusted_latencies()
 	-- Set the calibrated latencies

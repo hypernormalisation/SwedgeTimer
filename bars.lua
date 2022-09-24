@@ -317,6 +317,7 @@ end
 function ST:on_attack_speed_change(hand)
     self:set_deadzone_width(hand)
     self:set_bar_texts(hand)
+    self:set_gcd_marker_positions(hand)
 end
 
 function ST:on_bar_active(hand)
@@ -402,12 +403,64 @@ end
 
 function ST:set_gcd_marker_positions(hand)
     -- This function's task is to first check if any GCD markers should
-    -- be shown. It should then take into account any offset modes,
-    -- and which type of GCDs are being requested.
-    -- It then calculates the necessary offsets from the end of the bar,
+    -- be shown. It then calculates the necessary offsets from the end of the bar,
     -- and sets them.
-    local db = self:get_hand_table(hand)
+    local db_hand = self:get_hand_table(hand)
+    local db_class = self:get_class_options_table()
     local frame = self:get_frame(hand)
+    -- Swing start/end times
+    local t0 = self[hand].start
+    local t1 = self[hand].expires
+
+    -- Set the appropriate spell or phys GCDs.
+    local gcd1a_t_before = self.gcd1_phys_time_before_swing
+    local gcd1b_t_before = self.gcd1_phys_time_before_swing
+    local gcd2a_t_before = self.gcd1_phys_time_before_swing
+    local gcd2b_t_before = self.gcd1_phys_time_before_swing
+    if db_class.gcd_marker_mode == "spell" then
+        local gcd1a_t_before = self.gcd1_spell_time_before_swing
+        local gcd1b_t_before = self.gcd1_spell_time_before_swing
+        local gcd2a_t_before = self.gcd1_spell_time_before_swing
+        local gcd2b_t_before = self.gcd1_spell_time_before_swing
+    elseif db_class.gcd_marker_mode == "both1" then
+        local gcd1a_t_before = self.gcd1_spell_time_before_swing
+        local gcd1b_t_before = self.gcd1_spell_time_before_swing
+    elseif db_class.gcd_marker_mode == "both2" then
+        local gcd2a_t_before = self.gcd1_spell_time_before_swing
+        local gcd2b_t_before = self.gcd1_spell_time_before_swing
+    elseif db_class.gcd_marker_mode == "form" then
+        if not self.is_cat_or_bear then
+            local gcd1a_t_before = self.gcd1_spell_time_before_swing
+            local gcd1b_t_before = self.gcd1_spell_time_before_swing
+            local gcd2a_t_before = self.gcd1_spell_time_before_swing
+            local gcd2b_t_before = self.gcd1_spell_time_before_swing
+        end
+    end
+
+    -- Times the GCD should be before the next swing
+    local gcd1a_t = t1 - gcd1a_t_before
+    local gcd1b_t = t1 - gcd1b_t_before
+    local gcd2a_t = t1 - gcd2a_t_before
+    local gcd2b_t = t1 - gcd2b_t_before
+
+    local progress_1a = (gcd1a_t_before / (t1 - t0))
+    if progress_1a < 1 then
+        local offset_1a = progress_1a * db_hand.bar_width * -1
+        frame.gcd1a_marker:SetStartPoint("TOPRIGHT", offset_1a, 0)
+        local v_offset = db_hand.bar_height * 
+        frame.gcd1a_marker:SetStartPoint("TOPRIGHT", offset_1a, 0)
+        print("hand progress: " .. tostring(progress_1a))
+    end
+
+    local offset_1a = (gcd1a_t_before / (t1 - t0)) * db_hand.bar_width * -1
+    frame.gcd1a_marker:SetStartPoint("TOPRIGHT", offset_1a, 0)
+    frame.gcd1a_marker:SetStartPoint("BOTTOMRIGHT", offset_1a, 0)
+
+    local progess_1a = (t1 - gcd1a_t) / (t1 - t0)
+    local progess_1b = (t1 - gcd1b_t) / (t1 - t0)
+    local progess_2a = (t1 - gcd2a_t) / (t1 - t0)
+    local progess_2b = (t1 - gcd2b_t) / (t1 - t0)
+    
 
 end
 

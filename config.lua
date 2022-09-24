@@ -43,7 +43,6 @@ ST.defaults = {
 		latency_scale_factor = 1.0,
 
 		-- GCD marker offsets
-		gcd_marker_mode = "Both",
 		gcd_marker_offset_mode = "Dynamic",
 		gcd_marker_offset_scale_factor = 1.0,
 		gcd_marker_fixed_offset = 100,
@@ -52,10 +51,19 @@ ST.defaults = {
 		deadzone_scale_factor = 1.4,
 
 		-- Class-specific defaults
+		['**'] = ST.class_defaults,
 		ROGUE = ST.ROGUE.defaults,
 		DRUID = ST.DRUID.defaults,
     },
 
+}
+
+ST.marker_mode_map = {
+	spell = "Spell GCD",
+	phys = "Physical GCD",
+	both1 = "Spell top/Physical Bottom",
+	both2 = "Physical top/Spell Bottom",
+	form = "Form-sensitive (Druid Only)",
 }
 
 local bar_visibility_values = {
