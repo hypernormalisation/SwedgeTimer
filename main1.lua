@@ -301,13 +301,13 @@ end
 --=========================================================================================
 function ST.callback_event_handler(event, ...)
 	-- Func to pass all callbacks to their relevant handler
-	-- print('===============')
-	-- print(event)
-	-- local args = table.pack(...)
-	-- for i=1, args.n do
-	-- 	print(tostring(args[i]))
-	-- end
-	-- print('---------------')
+	print('===============')
+	print(event)
+	local args = table.pack(...)
+	for i=1, args.n do
+		print(tostring(args[i]))
+	end
+	print('---------------')
 	ST[event](ST, event, ...)
 end
 
@@ -393,6 +393,7 @@ function ST:SWING_TIMER_UPDATE(_, speed, expiration_time, hand)
 	end
 	self[hand].is_paused = false
 	self[hand].speed = speed
+	self[hand].start = expiration_time - speed
 	self[hand].ends_at = expiration_time
 	-- print('New speed = ' .. tostring(speed))
 	self:on_attack_speed_change(hand)
