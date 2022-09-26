@@ -276,6 +276,7 @@ function ST:onupdate_common(hand, elapsed)
         local gcd_d = self:get_gcd_marker_duration(hand, '1a')
         local gcd_additional_progress = gcd_d / d.speed
         local combined_progress = progress + gcd_additional_progress
+        frame.gcd1a_marker:Show()
         if combined_progress > 1.0 then
             if db.gcd1a_swing_anchor_wrap then
                 while combined_progress > 1.0 do
@@ -283,6 +284,7 @@ function ST:onupdate_common(hand, elapsed)
                 end
             else
                 combined_progress = 1.0
+                frame.gcd1a_marker:Hide()
             end
         end
         -- print(combined_progress)
