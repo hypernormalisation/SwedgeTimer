@@ -306,6 +306,30 @@ function ST:onupdate_common(hand, elapsed)
         frame.gcd1a_marker:SetStartPoint("TOPLEFT", offset, 0)
         frame.gcd1a_marker:SetEndPoint("TOPLEFT", offset, v_offset)
     end
+    if db.gcd1b_marker_enabled and db.gcd1b_marker_anchor == "swing" then
+        local gcd_d = self:get_gcd_marker_duration(hand, '1b')
+        -- print(gcd_d)
+        local gcd_additional_progress = gcd_d / d.speed
+        local combined_progress = progress + gcd_additional_progress
+        if not d.is_full then
+            frame.gcd1b_marker:Show()
+        end
+        if combined_progress > 1.0 then
+            if db.gcd1b_swing_anchor_wrap then
+                while combined_progress > 1.0 do
+                    combined_progress = combined_progress - 1.0
+                end
+            else
+                combined_progress = 1.0
+                frame.gcd1b_marker:Hide()
+            end
+        end
+        -- print(combined_progress)
+        local offset = combined_progress * db.bar_width
+        local v_offset = db.bar_height * db.gcd1b_marker_fractional_height
+        frame.gcd1b_marker:SetStartPoint("BOTTOMLEFT", offset, 0)
+        frame.gcd1b_marker:SetEndPoint("BOTTOMLEFT", offset, v_offset)
+    end
     -- Set texts
     self:set_bar_texts(hand)
 end

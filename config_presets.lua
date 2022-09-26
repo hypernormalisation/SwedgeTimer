@@ -74,13 +74,13 @@ ST.bar_defaults = {
     gcd1a_swing_anchor_wrap = true,
 
     gcd1b_marker_enabled = true,
-    gcd1b_marker_anchor = "endofswing",
+    gcd1b_marker_anchor = "swing",
     gcd1b_marker_hide_inactive = true,
     gcd1b_marker_mode = "phys",
     gcd1b_marker_color = {230, 230, 230, 1.0},
     gcd1b_marker_width = 2,
     gcd1b_marker_fractional_height = 0.25,
-    gcd1b_swing_anchor_wrap = false,
+    gcd1b_swing_anchor_wrap = true,
 
     -- Deadzone settings
     enable_deadzone = false,
