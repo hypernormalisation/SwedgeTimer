@@ -287,7 +287,9 @@ function ST:onupdate_common(hand, elapsed)
         local gcd_d = self:get_gcd_marker_duration(hand, '1a')
         local gcd_additional_progress = gcd_d / d.speed
         local combined_progress = progress + gcd_additional_progress
-        frame.gcd1a_marker:Show()
+        if not d.is_full then
+            frame.gcd1a_marker:Show()
+        end
         if combined_progress > 1.0 then
             if db.gcd1a_swing_anchor_wrap then
                 while combined_progress > 1.0 do
@@ -349,13 +351,11 @@ function ST:on_bar_active(hand)
     -- to actively swinging.
     local db = self:get_hand_table(hand)
     local frame = self:get_frame(hand)
-    if db.gcd1_marker_enabled then
+    if db.gcd1a_marker_enabled then
         frame.gcd1a_marker:Show()
-        frame.gcd1b_marker:Show()
     end
-    if db.gcd2_marker_enabled then
-        frame.gcd2a_marker:Show()
-        frame.gcd2b_marker:Show()
+    if db.gcd1b_marker_enabled then
+        frame.gcd1b_marker:Show()
     end
     if db.enable_deadzone then
         frame.deadzone:Show()
@@ -368,30 +368,28 @@ function ST:on_bar_active(hand)
     end
 end
 
--- function ST:on_bar_inactive(hand)
---     -- Called when the bar enters the inactive state.
---     -- This is when the player stops swinging with a full timer for 
---     -- some finite and configurable period of time.
---     local db = self:get_hand_table(hand)
---     local frame = self:get_frame(hand)
---     if db.gcd1_marker_hide_inactive then
---         frame.gcd1a_marker:Hide()
---         frame.gcd1b_marker:Hide()
---     end
---     if db.gcd2_marker_hide_inactive then
---         frame.gcd2a_marker:Hide()
---         frame.gcd2b_marker:Hide()
---     end
---     if db.deadzone_hide_inactive then
---         frame.deadzone:Hide()
---     end
---     if db.left_text_hide_inactive then
---         frame.left_text:Hide()
---     end
---     if db.right_text_hide_inactive then
---         frame.right_text:Hide()
---     end
--- end
+function ST:on_bar_inactive(hand)
+    -- Called when the bar enters the inactive state.
+    -- This is when the player stops swinging with a full timer for 
+    -- some finite and configurable period of time.
+    local db = self:get_hand_table(hand)
+    local frame = self:get_frame(hand)
+    if db.gcd1a_marker_hide_inactive then
+        frame.gcd1a_marker:Hide()
+    end
+    if db.gcd1b_marker_hide_inactive then
+        frame.gcd1b_marker:Hide()
+    end
+    if db.deadzone_hide_inactive then
+        frame.deadzone:Hide()
+    end
+    if db.left_text_hide_inactive then
+        frame.left_text:Hide()
+    end
+    if db.right_text_hide_inactive then
+        frame.right_text:Hide()
+    end
+end
 
 --=========================================================================================
 -- Funcs to alter widgets outside of configuration changes.

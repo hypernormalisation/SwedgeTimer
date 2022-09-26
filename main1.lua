@@ -290,7 +290,8 @@ function ST:post_init()
 	-- The last thing we should do is set the bar full states.
 	for hand in self:iter_hands() do
 		self:set_gcd_marker_positions(hand)
-		self:set_bar_full_state(hand)
+		-- self:set_bar_full_state(hand)
+		self:on_bar_inactive(hand)
 		self[hand].is_full = true
 	end
 end
@@ -300,13 +301,13 @@ end
 --=========================================================================================
 function ST.callback_event_handler(event, ...)
 	-- Func to pass all callbacks to their relevant handler
-	print('===============')
-	print(event)
-	local args = table.pack(...)
-	for i=1, args.n do
-		print(tostring(args[i]))
-	end
-	print('---------------')
+	-- print('===============')
+	-- print(event)
+	-- local args = table.pack(...)
+	-- for i=1, args.n do
+	-- 	print(tostring(args[i]))
+	-- end
+	-- print('---------------')
 	ST[event](ST, event, ...)
 end
 
@@ -363,10 +364,12 @@ end
 function ST:SWING_TIMER_START(_, speed, expiration_time, hand)
 	if self[hand].is_full_timer then
 		self[hand].is_full_timer:Cancel()
-		self:set_filling_state(hand)
+		-- self:set_filling_state(hand)
+		self:on_bar_active(hand)
 	elseif self[hand].is_full then
 		self[hand].is_full = false
-		self:set_filling_state(hand)
+		-- self:set_filling_state(hand)
+		self:on_bar_active(hand)
 	end
 	self[hand].is_paused = false
 	self[hand].start = GetTime()
@@ -377,8 +380,9 @@ end
 function ST:SWING_TIMER_STOP(_, hand)
 	local db_shared = self.db.profile
 	self[hand].is_full_timer = C_Timer.NewTimer(db_shared.bar_full_delay, function()
-		self:set_bar_full_state(hand)
+		-- self:set_bar_full_state(hand)
 		self[hand].is_full = true
+		self:on_bar_inactive(hand)
 	end)
 end
 
@@ -632,7 +636,8 @@ function ST:set_bar_full_state(hand)
 end
 
 function ST:set_filling_state(hand)
-	self:set_bar_color(hand)
+	-- self:set_bar_color(hand)
+
 end
 
 ------------------------------------------------------------------------------------

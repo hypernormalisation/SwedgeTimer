@@ -71,7 +71,7 @@ ST.bar_defaults = {
     gcd1a_marker_color = {230, 230, 230, 1.0},
     gcd1a_marker_width = 2,
     gcd1a_marker_fractional_height = 0.25,
-    gcd1a_swing_anchor_wrap = false,
+    gcd1a_swing_anchor_wrap = true,
 
     gcd1b_marker_enabled = true,
     gcd1b_marker_anchor = "endofswing",
@@ -86,7 +86,7 @@ ST.bar_defaults = {
     enable_deadzone = false,
     deadzone_texture_key = "Solid",
     deadzone_bar_color = {141, 59, 81, 0.82},
-    deadzone_hide_inactive = false,
+    deadzone_hide_inactive = true,
 
     -- Show range
     show_range_finder = false,
