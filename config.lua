@@ -43,7 +43,7 @@ ST.defaults = {
 		latency_scale_factor = 1.0,
 
 		-- GCD marker offsets
-		gcd_marker_offset_mode = "Dynamic",
+		gcd_marker_offset_mode = "None",
 		gcd_marker_offset_scale_factor = 1.0,
 		gcd_marker_fixed_offset = 100,
 

@@ -7,7 +7,6 @@ local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
 
 -- This table is used for any per-class settings that should apply globally.
 ST.class_defaults = {
-    gcd_marker_mode = "Both",
 }
 
 -- This table is used by AceDB's smart defaults feature
