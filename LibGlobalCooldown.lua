@@ -161,6 +161,12 @@ function lib:UNIT_AURA()
     self:calculate_expected_spell_gcd()
 end
 
+function lib:UNIT_SPELLCAST_INTERRUPTED()
+    if self.gcd_duration then
+        self:release_gcd_lock()
+    end
+end
+
 function lib:UPDATE_SHAPESHIFT_FORM()
     -- Only druids have their physical gcd change.
     if not self.class == "DRUID" then
@@ -191,6 +197,7 @@ function lib:activate()
         frame:RegisterEvent("SPELL_UPDATE_COOLDOWN")
         frame:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
         frame:RegisterUnitEvent("UNIT_AURA", "player")
+        frame:RegisterUnitEvent("UNIT_SPELLCAST_INTERRUPTED", "player")
     end
     self.frame:SetScript("OnEvent", function(_, event, ...)
             lib[event](lib, event, ...)
