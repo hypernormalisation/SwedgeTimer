@@ -66,14 +66,15 @@ ST.bar_defaults = {
 
     -- GCD markers
     gcd1_marker_enabled = true,
+    gcd1_marker_anchor = "swing",
     gcd1_marker_hide_inactive = true,
 
-    gcd2_marker_enabled = false,
-    gcd2_marker_hide_inactive = true,
+    -- gcd2_marker_enabled = false,
+    -- gcd2_marker_hide_inactive = true,
 
-    gcd_marker_width = 3,
-    gcd_marker_fractional_height = 0.2,
-    gcd_marker_color = {230, 230, 230, 1.0},
+    -- gcd_marker_width = 2,
+    -- gcd_marker_fractional_height = 0.2,
+    -- gcd_marker_color = {230, 230, 230, 1.0},
 
     -- Deadzone settings
     enable_deadzone = false,
@@ -108,6 +109,8 @@ ST.ROGUE.defaults = {
 		bar_y_offset = -144,
 		bar_color_default = {1, 66, 69, 0.8},
         show_gcd_underlay = false,
+        gcd1_marker_enabled = false,
+
 	},
 
 	-- Ranged options
@@ -139,6 +142,42 @@ ST.DRUID.defaults = {
         bar_color_default = {247, 181, 1, 0.8},
     },
 }
+
+
+------------------------------------------------------------------------------------
+-- WARRIOR
+------------------------------------------------------------------------------------
+ST.WARRIOR = {}
+ST.WARRIOR.defaults = {
+    tag = "WARRIOR",
+    ['**'] = ST.bar_defaults,
+	-- Mainhand options
+	mainhand = {
+        enable_deadzone = true,
+    },
+	-- Offhand options
+	offhand = {
+		bar_x_offset = 0,
+		bar_y_offset = -144,
+		bar_color_default = {1, 66, 69, 0.8},
+        show_gcd_underlay = false,
+	},
+	-- Ranged options
+	ranged = {
+        require_in_range = true,
+        force_show_in_combat = false,
+		bar_height = 13,
+		bar_width = 200,
+		bar_x_offset = 0,
+		bar_y_offset = -102,
+		bar_color_default = {115, 17, 42, 0.8},
+		font_size = 11,
+        show_gcd_underlay = false,
+        show_gcd_markers = false,
+        show_range_finder = true,
+	},
+}
+
 --=========================================================================================
 -- End, if debug verify module was read.
 --=========================================================================================

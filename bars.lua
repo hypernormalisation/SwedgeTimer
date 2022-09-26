@@ -345,30 +345,30 @@ function ST:on_bar_active(hand)
     end
 end
 
-function ST:on_bar_inactive(hand)
-    -- Called when the bar enters the inactive state.
-    -- This is when the player stops swinging with a full timer for 
-    -- some finite and configurable period of time.
-    local db = self:get_hand_table(hand)
-    local frame = self:get_frame(hand)
-    if db.gcd1_marker_hide_inactive then
-        frame.gcd1a_marker:Hide()
-        frame.gcd1b_marker:Hide()
-    end
-    if db.gcd2_marker_hide_inactive then
-        frame.gcd2a_marker:Hide()
-        frame.gcd2b_marker:Hide()
-    end
-    if db.deadzone_hide_inactive then
-        frame.deadzone:Hide()
-    end
-    if db.left_text_hide_inactive then
-        frame.left_text:Hide()
-    end
-    if db.right_text_hide_inactive then
-        frame.right_text:Hide()
-    end
-end
+-- function ST:on_bar_inactive(hand)
+--     -- Called when the bar enters the inactive state.
+--     -- This is when the player stops swinging with a full timer for 
+--     -- some finite and configurable period of time.
+--     local db = self:get_hand_table(hand)
+--     local frame = self:get_frame(hand)
+--     if db.gcd1_marker_hide_inactive then
+--         frame.gcd1a_marker:Hide()
+--         frame.gcd1b_marker:Hide()
+--     end
+--     if db.gcd2_marker_hide_inactive then
+--         frame.gcd2a_marker:Hide()
+--         frame.gcd2b_marker:Hide()
+--     end
+--     if db.deadzone_hide_inactive then
+--         frame.deadzone:Hide()
+--     end
+--     if db.left_text_hide_inactive then
+--         frame.left_text:Hide()
+--     end
+--     if db.right_text_hide_inactive then
+--         frame.right_text:Hide()
+--     end
+-- end
 
 --=========================================================================================
 -- Funcs to alter widgets outside of configuration changes.
@@ -405,35 +405,38 @@ function ST:set_gcd_marker_positions(hand)
     -- This function's task is to first check if any GCD markers should
     -- be shown. It then calculates the necessary offsets from the end of the bar,
     -- and sets them.
+    print('Setting marker positions for hand: ' .. tostring(hand))
     local db_hand = self:get_hand_table(hand)
     local db_class = self:get_class_options_table()
+    local db_profile = self:get_profile_options_table()
     local frame = self:get_frame(hand)
-    -- Swing start/end times
+    -- Swing start/end times and speed
     local t0 = self[hand].start
-    local t1 = self[hand].expires
+    local t1 = self[hand].ends_at
+    local s = self[hand].speed
 
     -- Set the appropriate spell or phys GCDs.
-    local gcd1a_t_before = self.gcd1_phys_time_before_swing
-    local gcd1b_t_before = self.gcd1_phys_time_before_swing
-    local gcd2a_t_before = self.gcd1_phys_time_before_swing
-    local gcd2b_t_before = self.gcd1_phys_time_before_swing
+    local gcd1a_t_before = self.gcd.gcd1_phys_time_before_swing
+    local gcd1b_t_before = self.gcd.gcd1_phys_time_before_swing
+    -- local gcd2a_t_before = self.gcd.gcd1_phys_time_before_swing
+    -- local gcd2b_t_before = self.gcd.gcd1_phys_time_before_swing
     if db_class.gcd_marker_mode == "spell" then
-        local gcd1a_t_before = self.gcd1_spell_time_before_swing
-        local gcd1b_t_before = self.gcd1_spell_time_before_swing
-        local gcd2a_t_before = self.gcd1_spell_time_before_swing
-        local gcd2b_t_before = self.gcd1_spell_time_before_swing
+        local gcd1a_t_before = self.gcd.gcd1_spell_time_before_swing
+        local gcd1b_t_before = self.gcd.gcd1_spell_time_before_swing
+        local gcd2a_t_before = self.gcd.gcd1_spell_time_before_swing
+        local gcd2b_t_before = self.gcd.gcd1_spell_time_before_swing
     elseif db_class.gcd_marker_mode == "both1" then
-        local gcd1a_t_before = self.gcd1_spell_time_before_swing
-        local gcd1b_t_before = self.gcd1_spell_time_before_swing
+        local gcd1a_t_before = self.gcd.gcd1_spell_time_before_swing
+        local gcd1b_t_before = self.gcd.gcd1_spell_time_before_swing
     elseif db_class.gcd_marker_mode == "both2" then
-        local gcd2a_t_before = self.gcd1_spell_time_before_swing
-        local gcd2b_t_before = self.gcd1_spell_time_before_swing
+        local gcd2a_t_before = self.gcd.gcd1_spell_time_before_swing
+        local gcd2b_t_before = self.gcd.gcd1_spell_time_before_swing
     elseif db_class.gcd_marker_mode == "form" then
         if not self.is_cat_or_bear then
-            local gcd1a_t_before = self.gcd1_spell_time_before_swing
-            local gcd1b_t_before = self.gcd1_spell_time_before_swing
-            local gcd2a_t_before = self.gcd1_spell_time_before_swing
-            local gcd2b_t_before = self.gcd1_spell_time_before_swing
+            local gcd1a_t_before = self.gcd.gcd1_spell_time_before_swing
+            local gcd1b_t_before = self.gcd.gcd1_spell_time_before_swing
+            local gcd2a_t_before = self.gcd.gcd1_spell_time_before_swing
+            local gcd2b_t_before = self.gcd.gcd1_spell_time_before_swing
         end
     end
 
@@ -443,24 +446,44 @@ function ST:set_gcd_marker_positions(hand)
     local gcd2a_t = t1 - gcd2a_t_before
     local gcd2b_t = t1 - gcd2b_t_before
 
-    local progress_1a = (gcd1a_t_before / (t1 - t0))
-    if progress_1a < 1 then
-        local offset_1a = progress_1a * db_hand.bar_width * -1
-        frame.gcd1a_marker:SetStartPoint("TOPRIGHT", offset_1a, 0)
-        local v_offset = db_hand.bar_height * 
-        frame.gcd1a_marker:SetStartPoint("TOPRIGHT", offset_1a, 0)
-        print("hand progress: " .. tostring(progress_1a))
-    end
+    local v_offseta = db_hand.bar_height * db_hand.gcd_marker_fractional_height * -1
+    local v_offsetb = v_offseta * -1
+    -- v_offseta = math.floor(v_offseta)
+    -- v_offsetb = math.floor(v_offsetb)
 
-    local offset_1a = (gcd1a_t_before / (t1 - t0)) * db_hand.bar_width * -1
+    local progress_1a = gcd1a_t_before / s
+    local offset_1a = progress_1a * db_hand.bar_width * -1
+
+    local progress_1b = (gcd1b_t_before / s)
+    local offset_1b = progress_1b * db_hand.bar_width * -1
+    -- print(string.format("t0 = %f, t1 = %f", t0, t1))
+    -- print(string.format("s = %f", s))
+    -- print("hand progress: " .. tostring(progress_1a))
+
     frame.gcd1a_marker:SetStartPoint("TOPRIGHT", offset_1a, 0)
-    frame.gcd1a_marker:SetStartPoint("BOTTOMRIGHT", offset_1a, 0)
+    frame.gcd1a_marker:SetEndPoint("TOPRIGHT", offset_1a, v_offseta)
 
-    local progess_1a = (t1 - gcd1a_t) / (t1 - t0)
-    local progess_1b = (t1 - gcd1b_t) / (t1 - t0)
-    local progess_2a = (t1 - gcd2a_t) / (t1 - t0)
-    local progess_2b = (t1 - gcd2b_t) / (t1 - t0)
-    
+    frame.gcd1b_marker:SetStartPoint("BOTTOMRIGHT", offset_1b, 0)
+    frame.gcd1b_marker:SetEndPoint("BOTTOMRIGHT", offset_1b, v_offsetb)
+    -- if true -- progress_1a < 1 then
+        -- local offset_1a = progress_1a * db_hand.bar_width * -1
+        -- frame.gcd1a_marker:SetStartPoint("TOPRIGHT", offset_1a, 0)
+        -- local v_offset = db_hand.bar_height * db_hand.gcd_marker_fractional_height * -1
+    print("v offseta: "..tostring(v_offseta))
+    print("v offsetb: "..tostring(v_offsetb))
+        -- frame.gcd1a_marker:SetEndPoint("TOPRIGHT", offset_1a, v_offset)
+        -- print("hand progress: " .. tostring(progress_1a))
+    -- end
+
+    -- local offset_1a = (gcd1a_t_before / (t1 - t0)) * db_hand.bar_width * -1
+    -- frame.gcd1a_marker:SetStartPoint("TOPRIGHT", offset_1a, 0)
+    -- frame.gcd1a_marker:SetStartPoint("BOTTOMRIGHT", offset_1a, 0)
+
+    -- local progess_1a = (t1 - gcd1a_t) / (t1 - t0)
+    -- local progess_1b = (t1 - gcd1b_t) / (t1 - t0)
+    -- local progess_2a = (t1 - gcd2a_t) / (t1 - t0)
+    -- local progess_2b = (t1 - gcd2b_t) / (t1 - t0)
+
 
 end
 
@@ -517,3 +540,6 @@ function ST:set_bar_color(hand, color_table)
         )
     end
 end
+
+
+if st.debug then st.utils.print_msg('-- Parsed bars.lua module correctly') end

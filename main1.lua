@@ -74,8 +74,11 @@ function ST:OnInitialize()
 	-- print(string.format("init count: %i", ST.some_counter))
 
 	-- Addon database
+	-- print('initing acedb')
 	local SwedgeTimerDB = LibStub("AceDB-3.0"):New(addon_name.."DB", self.defaults, true)
 	self.db = SwedgeTimerDB
+	-- print('self.db says:')
+	-- self:Print(self.db)
 	print("unit class says: "..tostring(select(2, UnitClass("player"))))
 	-- Options table
 	local AC = LibStub("AceConfig-3.0")
@@ -278,7 +281,11 @@ end
 function ST:post_init()
 	-- Takes care of any miscellaneous widget/state manipulation that needs to run
 	-- once the libraries and addon are initialised.
+	self:set_gcd_times_before_swing_seconds()
+	self:on_latency_update()
+	-- The last thing we should do is set the bar full states.
 	for hand in self:iter_hands() do
+		self:set_gcd_marker_positions(hand)
 		self:set_bar_full_state(hand)
 		self[hand].is_full = true
 	end
@@ -295,7 +302,7 @@ function ST.callback_event_handler(event, ...)
 	-- for i=1, args.n do
 	-- 	print(tostring(args[i]))
 	-- end
-	-- print('===============')
+	-- print('---------------')
 	ST[event](ST, event, ...)
 end
 
@@ -328,8 +335,8 @@ function ST:LATENCY_CHANGED(_, home, world)
 	self.latency.home_ms = home
 	self.latency.world_ms = world
 	self:set_adjusted_latencies()
-	self.set_gcd_times_before_swing_seconds()
 	if self.interfaces_are_initialised then
+		self:set_gcd_times_before_swing_seconds()
 		self:on_latency_update()
 	end
 end
@@ -613,7 +620,7 @@ end
 -- State setting
 ------------------------------------------------------------------------------------
 function ST:set_bar_full_state(hand)
-	self:set_bar_color(hand, {0.5, 0.5, 0.5, 1.0})
+	-- self:set_bar_color(hand, {0.5, 0.5, 0.5, 1.0})
 end
 
 function ST:set_filling_state(hand)
@@ -652,3 +659,6 @@ function ST:SlashCommand(input, editbox)
 	local ACD = LibStub("AceConfigDialog-3.0")
 	ACD:Open(addon_name.."_Options")
 end
+
+
+if st.debug then st.utils.print_msg('-- Parsed main1.lua module correctly') end

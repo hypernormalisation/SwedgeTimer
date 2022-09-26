@@ -36,7 +36,7 @@ ST.defaults = {
 		draw_level = 10,
 
 		-- Bar visual behaviour
-		bar_full_delay = 0.1,
+		bar_full_delay = 0.3,
 
 		-- Latency scale factors.
 		latency_linear_offset = 0.0,
@@ -54,6 +54,7 @@ ST.defaults = {
 		['**'] = ST.class_defaults,
 		ROGUE = ST.ROGUE.defaults,
 		DRUID = ST.DRUID.defaults,
+		WARRIOR = ST.WARRIOR.defaults,
     },
 
 }
