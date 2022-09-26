@@ -157,6 +157,9 @@ function ST:OnInitialize()
 	self.mainhand.has_weapon = true
 	self.mainhand.is_full = true  -- deliberately true
 	self.mainhand.is_full_timer = nil
+	self.mainhand.is_paused = false
+	self.mainhand.current_progress = false
+
 	self.mainhand.frame = CreateFrame("Frame", addon_name .. "MHBarFrame", UIParent)
 
 	-- OH containers
@@ -166,7 +169,8 @@ function ST:OnInitialize()
 	self.offhand.inactive_timer = nil
 	self.offhand.has_weapon = nil
 	self.offhand.is_full = false
-	self.mainhand.is_full_timer = nil
+	self.offhand.is_full_timer = nil
+	self.offhand.is_paused = false
 	self.offhand.frame = CreateFrame("Frame", addon_name .. "OHBarFrame", UIParent)
 
 	-- ranged containers
@@ -296,13 +300,13 @@ end
 --=========================================================================================
 function ST.callback_event_handler(event, ...)
 	-- Func to pass all callbacks to their relevant handler
-	-- print('===============')
-	-- print(event)
-	-- local args = table.pack(...)
-	-- for i=1, args.n do
-	-- 	print(tostring(args[i]))
-	-- end
-	-- print('---------------')
+	print('===============')
+	print(event)
+	local args = table.pack(...)
+	for i=1, args.n do
+		print(tostring(args[i]))
+	end
+	print('---------------')
 	ST[event](ST, event, ...)
 end
 
@@ -352,6 +356,8 @@ function ST:SWING_TIMER_DELTA(_, delta)
 end
 
 function ST:SWING_TIMER_PAUSED(_, hand)
+	print(hand)
+	self[hand].is_paused = true
 end
 
 function ST:SWING_TIMER_START(_, speed, expiration_time, hand)
@@ -362,6 +368,7 @@ function ST:SWING_TIMER_START(_, speed, expiration_time, hand)
 		self[hand].is_full = false
 		self:set_filling_state(hand)
 	end
+	self[hand].is_paused = false
 	self[hand].start = GetTime()
 	self[hand].speed = speed
 	self[hand].ends_at = expiration_time
@@ -380,6 +387,7 @@ function ST:SWING_TIMER_UPDATE(_, speed, expiration_time, hand)
 	if expiration_time < t then
 		expiration_time = t
 	end
+	self[hand].is_paused = false
 	self[hand].speed = speed
 	self[hand].ends_at = expiration_time
 	-- print('New speed = ' .. tostring(speed))

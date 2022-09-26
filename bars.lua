@@ -258,10 +258,21 @@ function ST:onupdate_common(hand, elapsed)
     local frame = self[hand].frame
     local d = self[hand]
     local t = GetTime()
-    local progress = math.min(1, (t - d.start) /
-        (d.ends_at - d.start)
-    )
     local db = self:get_hand_table(hand)
+    if not d.is_paused then
+        
+        d.current_progress = math.min(1, (t - d.start) /
+            (d.ends_at - d.start)
+        )
+    else
+        -- print('paused: ' ..tostring(hand))
+    end
+    local timer_width = db.bar_width * d.current_progress
+    frame.bar:SetWidth(max(1, timer_width))
+    frame.bar:SetTexCoord(0, d.current_progress, 0, 1)
+    local progress = d.current_progress
+    -- print(progress)
+
     -- Update the main bar's width
     local timer_width = db.bar_width * progress
     frame.bar:SetWidth(max(1, timer_width))
@@ -468,6 +479,7 @@ end
 
 function ST:set_bar_texts(hand)
     -- Function to set the requisite texts on the bar.
+    if self[hand].is_paused then return end
     local frame = self[hand].frame
     local db = self:get_hand_table(hand)
     local t = GetTime()
