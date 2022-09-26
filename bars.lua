@@ -97,10 +97,10 @@ function ST:init_visuals_template(hand)
     frame.gcd1b_marker = frame:CreateLine()
     frame.gcd1b_marker:SetDrawLayer("OVERLAY", -1)
 
-    frame.gcd2a_marker = frame:CreateLine()
-    frame.gcd2a_marker:SetDrawLayer("OVERLAY", -1)
-    frame.gcd2b_marker = frame:CreateLine()
-    frame.gcd2b_marker:SetDrawLayer("OVERLAY", -1)
+    -- frame.gcd2a_marker = frame:CreateLine()
+    -- frame.gcd2a_marker:SetDrawLayer("OVERLAY", -1)
+    -- frame.gcd2b_marker = frame:CreateLine()
+    -- frame.gcd2b_marker:SetDrawLayer("OVERLAY", -1)
 
     self:configure_gcd_markers(hand)
 
@@ -117,24 +117,13 @@ function ST:configure_gcd_markers(hand)
     local db = self:get_hand_table(hand)
     local f = self:get_frame(hand)
     f.gcd1a_marker:SetColorTexture(
-        self:convert_color(db.gcd_marker_color)
+        self:convert_color(db.gcd1a_marker_color)
     )
     f.gcd1b_marker:SetColorTexture(
-        self:convert_color(db.gcd_marker_color)
+        self:convert_color(db.gcd1b_marker_color)
     )
-
-    f.gcd2a_marker:SetColorTexture(
-        self:convert_color(db.gcd_marker_color)
-    )
-    f.gcd2b_marker:SetColorTexture(
-        self:convert_color(db.gcd_marker_color)
-    )
-
-    f.gcd1a_marker:SetThickness(db.gcd_marker_width)
-    f.gcd1b_marker:SetThickness(db.gcd_marker_width)
-
-    f.gcd2a_marker:SetThickness(db.gcd_marker_width)
-    f.gcd2b_marker:SetThickness(db.gcd_marker_width)
+    f.gcd1a_marker:SetThickness(db.gcd1a_marker_width)
+    f.gcd1b_marker:SetThickness(db.gcd1b_marker_width)
 end
 
 function ST:configure_deadzone(hand)
@@ -281,6 +270,27 @@ function ST:onupdate_common(hand, elapsed)
     if db.show_gcd_underlay and self.gcd.expires then
         self:set_gcd_width(hand, timer_width, progress)
     end
+    -- If any gcd marker is anchored to the bar position, handle
+    -- that here.
+    if db.gcd1a_marker_enabled and db.gcd1a_marker_anchor == "swing" then
+        local gcd_d = self:get_gcd_marker_duration(hand, '1a')
+        local gcd_additional_progress = gcd_d / d.speed
+        local combined_progress = progress + gcd_additional_progress
+        if combined_progress > 1.0 then
+            if db.gcd1a_swing_anchor_wrap then
+                while combined_progress > 1.0 do
+                    combined_progress = combined_progress - 1.0
+                end
+            else
+                combined_progress = 1.0
+            end
+        end
+        -- print(combined_progress)
+        local offset = combined_progress * db.bar_width
+        local v_offset = db.bar_height * db.gcd1a_marker_fractional_height * -1
+        frame.gcd1a_marker:SetStartPoint("TOPLEFT", offset, 0)
+        frame.gcd1a_marker:SetEndPoint("TOPLEFT", offset, v_offset)
+    end
     -- Set texts
     self:set_bar_texts(hand)
 end
@@ -401,6 +411,31 @@ function ST:set_gcd_width(hand, timer_width, progress)
     frame.gcd_bar:SetPoint("TOPLEFT", timer_width, 0)
 end
 
+function ST:get_gcd_marker_duration(hand, marker)
+    local db = self:get_hand_table(hand)
+    if marker == '1a' then
+        local t = self.gcd.gcd1_phys_time_before_swing
+        if db.gcd1a_marker_mode == "spell" then
+            t = self.gcd.gcd1_spell_time_before_swing
+        elseif db.gcd1a_marker_mode == "form" then
+            if not self.is_cat_or_bear then
+                t = self.gcd.gcd1_spell_time_before_swing
+            end
+        end
+        return t
+    elseif marker == '1b' then
+        local t = self.gcd.gcd1_phys_time_before_swing
+        if db.gcd1b_marker_mode == "spell" then
+            t = self.gcd.gcd1_spell_time_before_swing
+        elseif db.gcd1b_marker_mode == "form" then
+            if not self.is_cat_or_bear then
+                t = self.gcd.gcd1_spell_time_before_swing
+            end
+        end
+        return t
+    end
+end
+
 function ST:set_gcd_marker_positions(hand)
     -- This function's task is to first check if any GCD markers should
     -- be shown. It then calculates the necessary offsets from the end of the bar,
@@ -408,83 +443,25 @@ function ST:set_gcd_marker_positions(hand)
     print('Setting marker positions for hand: ' .. tostring(hand))
     local db_hand = self:get_hand_table(hand)
     local db_class = self:get_class_options_table()
-    local db_profile = self:get_profile_options_table()
     local frame = self:get_frame(hand)
-    -- Swing start/end times and speed
-    local t0 = self[hand].start
-    local t1 = self[hand].ends_at
     local s = self[hand].speed
 
-    -- Set the appropriate spell or phys GCDs.
-    local gcd1a_t_before = self.gcd.gcd1_phys_time_before_swing
-    local gcd1b_t_before = self.gcd.gcd1_phys_time_before_swing
-    -- local gcd2a_t_before = self.gcd.gcd1_phys_time_before_swing
-    -- local gcd2b_t_before = self.gcd.gcd1_phys_time_before_swing
-    if db_class.gcd_marker_mode == "spell" then
-        local gcd1a_t_before = self.gcd.gcd1_spell_time_before_swing
-        local gcd1b_t_before = self.gcd.gcd1_spell_time_before_swing
-        local gcd2a_t_before = self.gcd.gcd1_spell_time_before_swing
-        local gcd2b_t_before = self.gcd.gcd1_spell_time_before_swing
-    elseif db_class.gcd_marker_mode == "both1" then
-        local gcd1a_t_before = self.gcd.gcd1_spell_time_before_swing
-        local gcd1b_t_before = self.gcd.gcd1_spell_time_before_swing
-    elseif db_class.gcd_marker_mode == "both2" then
-        local gcd2a_t_before = self.gcd.gcd1_spell_time_before_swing
-        local gcd2b_t_before = self.gcd.gcd1_spell_time_before_swing
-    elseif db_class.gcd_marker_mode == "form" then
-        if not self.is_cat_or_bear then
-            local gcd1a_t_before = self.gcd.gcd1_spell_time_before_swing
-            local gcd1b_t_before = self.gcd.gcd1_spell_time_before_swing
-            local gcd2a_t_before = self.gcd.gcd1_spell_time_before_swing
-            local gcd2b_t_before = self.gcd.gcd1_spell_time_before_swing
-        end
+    if db_hand.gcd1a_marker_enabled and db_hand.gcd1a_marker_anchor == "endofswing" then
+        local t_before = self:get_gcd_marker_duration(hand, '1a')
+        local progress = t_before / s
+        local offset = progress * db_hand.bar_width * -1
+        local v_offset = db_hand.bar_height * db_hand.gcd1a_marker_fractional_height * -1
+        frame.gcd1a_marker:SetStartPoint("TOPRIGHT", offset, 0)
+        frame.gcd1a_marker:SetEndPoint("TOPRIGHT", offset, v_offset)
     end
-
-    -- Times the GCD should be before the next swing
-    local gcd1a_t = t1 - gcd1a_t_before
-    local gcd1b_t = t1 - gcd1b_t_before
-    local gcd2a_t = t1 - gcd2a_t_before
-    local gcd2b_t = t1 - gcd2b_t_before
-
-    local v_offseta = db_hand.bar_height * db_hand.gcd_marker_fractional_height * -1
-    local v_offsetb = v_offseta * -1
-    -- v_offseta = math.floor(v_offseta)
-    -- v_offsetb = math.floor(v_offsetb)
-
-    local progress_1a = gcd1a_t_before / s
-    local offset_1a = progress_1a * db_hand.bar_width * -1
-
-    local progress_1b = (gcd1b_t_before / s)
-    local offset_1b = progress_1b * db_hand.bar_width * -1
-    -- print(string.format("t0 = %f, t1 = %f", t0, t1))
-    -- print(string.format("s = %f", s))
-    -- print("hand progress: " .. tostring(progress_1a))
-
-    frame.gcd1a_marker:SetStartPoint("TOPRIGHT", offset_1a, 0)
-    frame.gcd1a_marker:SetEndPoint("TOPRIGHT", offset_1a, v_offseta)
-
-    frame.gcd1b_marker:SetStartPoint("BOTTOMRIGHT", offset_1b, 0)
-    frame.gcd1b_marker:SetEndPoint("BOTTOMRIGHT", offset_1b, v_offsetb)
-    -- if true -- progress_1a < 1 then
-        -- local offset_1a = progress_1a * db_hand.bar_width * -1
-        -- frame.gcd1a_marker:SetStartPoint("TOPRIGHT", offset_1a, 0)
-        -- local v_offset = db_hand.bar_height * db_hand.gcd_marker_fractional_height * -1
-    print("v offseta: "..tostring(v_offseta))
-    print("v offsetb: "..tostring(v_offsetb))
-        -- frame.gcd1a_marker:SetEndPoint("TOPRIGHT", offset_1a, v_offset)
-        -- print("hand progress: " .. tostring(progress_1a))
-    -- end
-
-    -- local offset_1a = (gcd1a_t_before / (t1 - t0)) * db_hand.bar_width * -1
-    -- frame.gcd1a_marker:SetStartPoint("TOPRIGHT", offset_1a, 0)
-    -- frame.gcd1a_marker:SetStartPoint("BOTTOMRIGHT", offset_1a, 0)
-
-    -- local progess_1a = (t1 - gcd1a_t) / (t1 - t0)
-    -- local progess_1b = (t1 - gcd1b_t) / (t1 - t0)
-    -- local progess_2a = (t1 - gcd2a_t) / (t1 - t0)
-    -- local progess_2b = (t1 - gcd2b_t) / (t1 - t0)
-
-
+    if db_hand.gcd1b_marker_enabled and db_hand.gcd1b_marker_anchor == "endofswing" then
+        local t_before = self:get_gcd_marker_duration(hand, '1b')
+        local progress = t_before / s
+        local offset = progress * db_hand.bar_width * -1
+        local v_offset = db_hand.bar_height * db_hand.gcd1b_marker_fractional_height
+        frame.gcd1b_marker:SetStartPoint("BOTTOMRIGHT", offset, 0)
+        frame.gcd1b_marker:SetEndPoint("BOTTOMRIGHT", offset, v_offset)
+    end
 end
 
 function ST:set_bar_texts(hand)

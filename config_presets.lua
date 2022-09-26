@@ -65,16 +65,23 @@ ST.bar_defaults = {
     gcd_texture_key = "Solid",
 
     -- GCD markers
-    gcd1_marker_enabled = true,
-    gcd1_marker_anchor = "swing",
-    gcd1_marker_hide_inactive = true,
+    gcd1a_marker_enabled = true,
+    gcd1a_marker_anchor = "swing",
+    gcd1a_marker_hide_inactive = true,
+    gcd1a_marker_mode = "phys",
+    gcd1a_marker_color = {230, 230, 230, 1.0},
+    gcd1a_marker_width = 2,
+    gcd1a_marker_fractional_height = 0.25,
+    gcd1a_swing_anchor_wrap = false,
 
-    -- gcd2_marker_enabled = false,
-    -- gcd2_marker_hide_inactive = true,
-
-    -- gcd_marker_width = 2,
-    -- gcd_marker_fractional_height = 0.2,
-    -- gcd_marker_color = {230, 230, 230, 1.0},
+    gcd1b_marker_enabled = true,
+    gcd1b_marker_anchor = "endofswing",
+    gcd1b_marker_hide_inactive = true,
+    gcd1b_marker_mode = "phys",
+    gcd1b_marker_color = {230, 230, 230, 1.0},
+    gcd1b_marker_width = 2,
+    gcd1b_marker_fractional_height = 0.25,
+    gcd1b_swing_anchor_wrap = false,
 
     -- Deadzone settings
     enable_deadzone = false,
@@ -161,6 +168,8 @@ ST.WARRIOR.defaults = {
 		bar_y_offset = -144,
 		bar_color_default = {1, 66, 69, 0.8},
         show_gcd_underlay = false,
+        gcd1a_marker_enabled = false,
+        gcd1b_marker_enabled = false,
 	},
 	-- Ranged options
 	ranged = {
