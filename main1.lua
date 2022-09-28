@@ -657,7 +657,7 @@ end
 -- Slashcommands
 ------------------------------------------------------------------------------------
 function ST:register_slashcommands()
-	local register_func_string = "SlashCommand"
+	local register_func_string = "open_menu"
 	self:RegisterChatCommand("st", register_func_string)
 	self:RegisterChatCommand("swedgetimer", register_func_string)
 	self:RegisterChatCommand("test1", "test1")
@@ -669,10 +669,9 @@ function ST:test1()
 	-- self.mainhand.frame.gcd_bar
 end
 
-function ST:SlashCommand(input, editbox)
+function ST:open_menu()
 	local ACD = LibStub("AceConfigDialog-3.0")
 	ACD:Open(addon_name.."_Options")
 end
-
 
 if st.debug then st.utils.print_msg('-- Parsed main1.lua module correctly') end
