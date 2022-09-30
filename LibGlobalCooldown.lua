@@ -84,7 +84,7 @@ function lib:calculate_expected_spell_gcd()
     end
 
     -- Round to 4 decimal places
-    current = simple_floor(current, 0.0001)
+    -- current = simple_floor(current, 0.0001)
 
     -- If has changed, fire a SPELL_GCD_UPDATE event.
     if not current == self.current_spell_gcd then
@@ -119,7 +119,7 @@ function lib:poll_gcd()
 	self.gcd_expires = expires
     -- print(duration_reported)
     self:Fire(self.GCD_STARTED, duration_actual, expires)
-	C_Timer.After(self.gcd_duration, function() self:release_gcd_lock() end)
+	C_Timer.After(duration_actual, function() self:release_gcd_lock() end)
 end
 
 -----------------------------------------------------------

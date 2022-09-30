@@ -260,27 +260,27 @@ function ST:onupdate_common(hand, elapsed)
     local t = GetTime()
     local db = self:get_hand_table(hand)
     if not d.is_paused then
-        
         d.current_progress = math.min(1, (t - d.start) /
             (d.ends_at - d.start)
         )
     else
-        -- print('paused: ' ..tostring(hand))
     end
+
     local timer_width = db.bar_width * d.current_progress
     frame.bar:SetWidth(max(1, timer_width))
     frame.bar:SetTexCoord(0, d.current_progress, 0, 1)
     local progress = d.current_progress
-    -- print(progress)
-
+    
     -- Update the main bar's width
     local timer_width = db.bar_width * progress
     frame.bar:SetWidth(max(1, timer_width))
 	frame.bar:SetTexCoord(0, progress, 0, 1)
+    
     -- Update the GCD underlay if necessary.
     if db.show_gcd_underlay and self.gcd.expires then
         self:set_gcd_width(hand, timer_width, progress)
     end
+
     -- If any gcd marker is anchored to the bar position, handle
     -- that here.
     if db.gcd1a_marker_enabled and db.gcd1a_marker_anchor == "swing" then
@@ -300,7 +300,6 @@ function ST:onupdate_common(hand, elapsed)
                 frame.gcd1a_marker:Hide()
             end
         end
-        -- print(combined_progress)
         local offset = combined_progress * db.bar_width
         local v_offset = db.bar_height * db.gcd1a_marker_fractional_height * -1
         frame.gcd1a_marker:SetStartPoint("TOPLEFT", offset, 0)
@@ -330,6 +329,7 @@ function ST:onupdate_common(hand, elapsed)
         frame.gcd1b_marker:SetStartPoint("BOTTOMLEFT", offset, 0)
         frame.gcd1b_marker:SetEndPoint("BOTTOMLEFT", offset, v_offset)
     end
+
     -- Set texts
     self:set_bar_texts(hand)
 end
@@ -477,7 +477,7 @@ function ST:set_gcd_marker_positions(hand)
     -- This function's task is to first check if any GCD markers should
     -- be shown. It then calculates the necessary offsets from the end of the bar,
     -- and sets them.
-    print('Setting marker positions for hand: ' .. tostring(hand))
+    -- print('Setting marker positions for hand: ' .. tostring(hand))
     local db_hand = self:get_hand_table(hand)
     local db_class = self:get_class_options_table()
     local frame = self:get_frame(hand)
@@ -486,12 +486,12 @@ function ST:set_gcd_marker_positions(hand)
     if db_hand.gcd1a_marker_enabled and db_hand.gcd1a_marker_anchor == "endofswing" then
         local t_before = self:get_gcd_marker_duration(hand, '1a')
         local progress = t_before / s
-        print(progress)
-        print(self[hand].is_full)
+        -- print(progress)
+        -- print(self[hand].is_full)
         if progress > 1 then
             frame.gcd1a_marker:Hide()
         elseif not self[hand].is_full then
-            print("showing 1a")
+            -- print("showing 1a")
             frame.gcd1a_marker:Show()
         end
         local offset = progress * db_hand.bar_width * -1

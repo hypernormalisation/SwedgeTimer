@@ -337,13 +337,15 @@ end
 --=========================================================================================
 function ST.callback_event_handler(event, ...)
 	-- Func to pass all callbacks to their relevant handler
-	print('===============')
-	print(event)
-	local args = table.pack(...)
-	for i=1, args.n do
-		print(tostring(args[i]))
+	if string.find(event, "GCD") then
+		print('===============')
+		print(event)
+		local args = table.pack(...)
+		for i=1, args.n do
+			print(tostring(args[i]))
+		end
+		print('---------------')
 	end
-	print('---------------')
 	ST[event](ST, event, ...)
 end
 
