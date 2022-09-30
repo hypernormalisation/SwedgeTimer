@@ -156,6 +156,14 @@ ST.DRUID.defaults = {
 ST.WARRIOR = {}
 ST.WARRIOR.defaults = {
     tag = "WARRIOR",
+
+    enable_hs_color = true,
+    hs_color = {224, 76, 116, 1.0},
+
+    enable_cleave_color = true,
+    cleave_color = {154, 219, 68, 1.0},
+    insufficient_rage_color = {140, 140, 140, 1.0},
+
     ['**'] = ST.bar_defaults,
 	-- Mainhand options
 	mainhand = {

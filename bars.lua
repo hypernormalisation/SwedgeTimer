@@ -216,7 +216,7 @@ function ST:drag_stop_template(hand)
     db.bar_point = point
     db.bar_rel_point = rel_point
     self:configure_bar_position(hand)
-    self:set_bar_color(hand)
+    -- self:set_bar_color(hand)
 end
 
 function ST:drag_start_template(hand)
@@ -543,11 +543,23 @@ end
 function ST:set_bar_color(hand, color_table)
     local db = self:get_hand_table(hand)
     local frame = self[hand].frame
+
+    -- If given a manual color, set that.
     if color_table then
         frame.bar:SetVertexColor(
             unpack(color_table)
         )
-    else
+        return
+    end
+
+    -- If a class override exists, use it.
+    local result = false
+    if self[self.player_class].set_bar_color then
+        result = self[self.player_class].set_bar_color(self, hand)
+    end
+
+    -- If no special behaviour was triggered, revert to the default.
+    if not result then
         frame.bar:SetVertexColor(
             self:convert_color(db.bar_color_default)
         )

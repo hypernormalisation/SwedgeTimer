@@ -19,6 +19,17 @@ function table.pack(...)
 	return { n = select("#", ...), ... }
   end
 
+-- Empty tables for classes without their own SwedgeTimer module.
+ST.DEATHKNIGHT = {}
+ST.DRUID = {}
+ST.HUNTER = {}
+ST.MAGE = {}
+ST.PALADIN = {}
+ST.PRIEST = {}
+ST.ROGUE = {}
+ST.SHAMAN = {}
+ST.WARLOCK = {}
+
 --=========================================================================================
 -- Funcs/iterables to automate common tasks and retrieve objects.
 --=========================================================================================
@@ -42,6 +53,26 @@ function ST:iter_hands()
 		end
 		return nil
 	end
+end
+
+function ST:generic_iter(array)
+	local i = 0
+	local n = #array
+	return function()
+		i = i + 1
+		while i <= n do
+			return array[i]
+		end
+	end
+end
+
+function ST:is_value_in_array(value, array)
+	for _, v in pairs(array) do
+		if v == value then
+			return true
+		end
+	end
+	return false
 end
 
 function ST:get_frame(hand)
@@ -194,9 +225,9 @@ function ST:OnInitialize()
 	self.gcd1_spell_time_before_swing = nil
 	self.gcd1_marker_position = nil
 
-	self.gcd2_phys_time_before_swing = nil
-	self.gcd2_spell_time_before_swing = nil
-	self.gcd2_marker_position = nil
+	-- self.gcd2_phys_time_before_swing = nil
+	-- self.gcd2_spell_time_before_swing = nil
+	-- self.gcd2_marker_position = nil
 
 	-- Latency info containers
 	self.latency = {}
@@ -207,8 +238,9 @@ function ST:OnInitialize()
 	self.latency.calibrated_world_ms = 0
 
 	-----------------------------------------------------------
-	-- Register events
+	-- Register WoW API events
 	-----------------------------------------------------------
+	self:RegisterEvent("CURRENT_SPELL_CAST_CHANGED")
 	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
@@ -217,6 +249,10 @@ function ST:OnInitialize()
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 	self:RegisterEvent("PLAYER_ENTER_COMBAT")
 	self:RegisterEvent("PLAYER_LEAVE_COMBAT")
+	self:RegisterEvent("UNIT_AURA")
+	self:RegisterEvent("UNIT_POWER_FREQUENT")
+	self:RegisterEvent("UNIT_SPELLCAST_FAILED_QUIET")
+	self:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	self:RegisterEvent("UNIT_TARGET")
 	self:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
 
@@ -375,6 +411,7 @@ function ST:SWING_TIMER_START(_, speed, expiration_time, hand)
 	self[hand].start = GetTime()
 	self[hand].speed = speed
 	self[hand].ends_at = expiration_time
+	self:set_bar_color(hand)
 end
 
 function ST:SWING_TIMER_STOP(_, hand)
@@ -400,8 +437,12 @@ function ST:SWING_TIMER_UPDATE(_, speed, expiration_time, hand)
 end
 
 ------------------------------------------------------------------------------------
--- AceEvent callbacks
+-- Wow API event callbacks
 ------------------------------------------------------------------------------------
+function ST:CURRENT_SPELL_CAST_CHANGED(event, is_cancelled)
+	self:class_on_current_spell_cast_changed(is_cancelled)
+end
+
 function ST:PLAYER_ENTERING_WORLD(event, is_initial_login, is_reloading_ui)
 end
 
@@ -438,6 +479,40 @@ function ST:PLAYER_TARGET_SET_ATTACKING()
 	if old_start + self.offhand.speed < t then
 		self:set_bar_color('offhand')
 		self.offhand.start = GetTime() - self.offhand.speed
+	end
+end
+
+function ST:UNIT_AURA(event, unit_id, is_full_update, updated_auras)
+end
+
+function ST:UNIT_POWER_FREQUENT(event, unit_id, powerType)
+	if unit_id ~= "player" then
+		return
+	end
+	if powerType == "RAGE" then
+		if self[self.player_class].on_rage_update then
+			self[self.player_class].on_rage_update(self)
+		end
+	end
+end
+
+function ST:UNIT_SPELLCAST_FAILED_QUIET(event, unit_id, cast_guid, spell_id)
+	if unit_id ~= "player" then
+		return
+	end
+	-- Trigger any class-specific behaviour
+	if self[self.player_class].on_spellcast_failed_quiet then
+		self[self.player_class].on_spellcast_failed_quiet(self, unit_id, cast_guid, spell_id)
+	end
+end
+
+function ST:UNIT_SPELLCAST_SUCCEEDED(event, unit_id, cast_guid, spell_id)
+	if unit_id ~= "player" then
+		return
+	end
+	-- Trigger any class-specific behaviour
+	if self[self.player_class].on_spellcast_succeeded then
+		self[self.player_class].on_spellcast_succeeded(self, unit_id, cast_guid, spell_id)
 	end
 end
 
@@ -675,3 +750,22 @@ function ST:open_menu()
 end
 
 if st.debug then st.utils.print_msg('-- Parsed main1.lua module correctly') end
+
+--=========================================================================================
+-- Funcs to apply per-class settings
+--=========================================================================================
+function ST:class_on_aura_change()
+	local c = self.player_class
+	if self[c].on_aura_change then
+		self[c].on_aura_change(self)
+	end
+end
+
+function ST:class_on_current_spell_cast_changed(is_cancelled)
+	local c = self.player_class
+	if self[c].on_current_spell_cast_changed then
+		self[c].on_current_spell_cast_changed(self, is_cancelled)
+	end
+end
+
+-- function ST:class_on_spellcast_successed()

@@ -30,3 +30,4 @@ main1.lua
 bars.lua
 config_presets.lua
 config.lua
+classes\warrior.lua
