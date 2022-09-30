@@ -399,7 +399,7 @@ function ST:SWING_TIMER_DELTA(_, delta)
 end
 
 function ST:SWING_TIMER_PAUSED(_, hand)
-	print(hand)
+	-- print(hand)
 	self[hand].is_paused = true
 end
 
@@ -503,6 +503,10 @@ function ST:PLAYER_TARGET_SET_ATTACKING()
 end
 
 function ST:UNIT_AURA(event, unit_id, is_full_update, updated_auras)
+	if unit_id ~= "player" or (not self.interfaces_are_initialised) then
+		return
+	end
+	self:class_on_aura_change()
 end
 
 function ST:UNIT_POWER_FREQUENT(event, unit_id, powerType)

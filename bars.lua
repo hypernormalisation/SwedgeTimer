@@ -289,6 +289,8 @@ function ST:onupdate_common(hand, elapsed)
         local combined_progress = progress + gcd_additional_progress
         if not d.is_full then
             frame.gcd1a_marker:Show()
+        else
+            frame.gcd1a_marker:Hide()
         end
         if combined_progress > 1.0 then
             if db.gcd1a_swing_anchor_wrap then
@@ -312,6 +314,8 @@ function ST:onupdate_common(hand, elapsed)
         local combined_progress = progress + gcd_additional_progress
         if not d.is_full then
             frame.gcd1b_marker:Show()
+        else
+            frame.gcd1b_marker:Hide()
         end
         if combined_progress > 1.0 then
             if db.gcd1b_swing_anchor_wrap then

@@ -52,8 +52,9 @@ ST.defaults = {
 
 		-- Class-specific defaults
 		['**'] = ST.class_defaults,
-		ROGUE = ST.ROGUE.defaults,
 		DRUID = ST.DRUID.defaults,
+		PALADIN = ST.PALADIN.defaults,
+		ROGUE = ST.ROGUE.defaults,
 		WARRIOR = ST.WARRIOR.defaults,
     },
 

@@ -128,21 +128,35 @@ ST.DRUID.defaults = {
 }
 
 ------------------------------------------------------------------------------------
+-- PALADIN
+------------------------------------------------------------------------------------
+ST.PALADIN.defaults = {
+    tag = "PALADIN",
+
+    -- Bar options
+    ['**'] = ST.bar_defaults,
+	mainhand = {
+        enable_deadzone = true,
+        bar_color_default = {120, 120, 120, 0.95},
+        gcd1a_marker_mode = "spell",
+        gcd1b_marker_mode = "phys",
+        gcd1a_marker_anchor = "swing",
+        gcd1b_marker_anchor = "swing",
+    },
+}
+
+------------------------------------------------------------------------------------
 -- ROGUE
 ------------------------------------------------------------------------------------
 ST.ROGUE.defaults = {
 
     tag = "ROGUE",
 
-    -- Inherit defaults
+    -- Bar options
     ['**'] = ST.bar_defaults,
-
-	-- Mainhand options
 	mainhand = {
         enable_deadzone = true,
     },
-
-	-- Offhand options
 	offhand = {
 		bar_x_offset = 0,
 		bar_y_offset = -144,
@@ -151,8 +165,6 @@ ST.ROGUE.defaults = {
         gcd1_marker_enabled = false,
 
 	},
-
-	-- Ranged options
 	ranged = {
         require_in_range = true,
         force_show_in_combat = false,
