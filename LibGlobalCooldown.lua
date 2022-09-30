@@ -178,13 +178,17 @@ function lib:UPDATE_SHAPESHIFT_FORM()
     else
         self.phys_gcd = 1.5
     end
-    -- If shifting to or from cat form, Fire an event.
-    if i == 3 or self.current_form == 3 then
-        if not i == self.current_form then
-            self:Fire(self.GCD_PHYS_UPDATED, lib.phys_gcd)
-            self:Fire(self.GCD_DURATIONS_UPDATED, lib.phys_gcd, lib.current_spell_gcd)
-        end
-    end
+    -- print('detected shapeshift')
+    -- -- If shifting to or from cat form, Fire an event.
+    -- print(i, self.current_form)
+    -- if i == 3 or self.current_form == 3 then
+    --     if not i == self.current_form then
+    --         print('Firing change to/from cat')
+    self.current_form = i
+    self:Fire(self.GCD_PHYS_UPDATED, lib.phys_gcd)
+    self:Fire(self.GCD_DURATIONS_UPDATED, lib.phys_gcd, lib.current_spell_gcd)
+    --     end
+    -- end
 end
 
 function lib:activate()
@@ -192,6 +196,9 @@ function lib:activate()
         local frame = CreateFrame("Frame")
         self.frame = frame
         frame:RegisterEvent("PLAYER_LOGIN")
+        -- print('first load:')
+        -- print(GetShapeshiftForm())
+        self.current_form = GetShapeshiftForm()
         -- frame:RegisterEvent("PLAYER_REGEN_DISABLED")
         -- frame:RegisterEvent("PLAYER_REGEN_ENABLED")
         frame:RegisterEvent("SPELL_UPDATE_COOLDOWN")

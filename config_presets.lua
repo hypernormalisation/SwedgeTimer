@@ -116,6 +116,8 @@ ST.DRUID.defaults = {
     mainhand = {
         enable_deadzone = true,
         bar_color_default = {18, 85, 201, 1.0},
+        gcd1a_marker_mode = "form",
+        gcd1b_marker_mode = "form",
     },
     offhand = {
         enabled = false,

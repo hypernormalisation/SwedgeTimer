@@ -366,7 +366,11 @@ end
 function ST:GCD_DURATIONS_UPDATED(_, phys_length, spell_length)
 	self.gcd.spell_length = spell_length
 	self.gcd.phys_length = phys_length
-	self:on_gcd_length_change()
+	print(self.gcd.phys_length)
+	self:set_gcd_times_before_swing_seconds()
+	if self.interfaces_are_initialised then
+		self:on_gcd_length_change()
+	end
 end
 
 -----------------------------------------------------------
@@ -413,6 +417,10 @@ function ST:SWING_TIMER_START(_, speed, expiration_time, hand)
 	self[hand].speed = speed
 	self[hand].ends_at = expiration_time
 	self:set_bar_color(hand)
+	if self.recent_form_change then
+		self:on_gcd_length_change()
+		self.recent_form_change = false
+	end
 end
 
 function ST:SWING_TIMER_STOP(_, hand)
@@ -436,7 +444,8 @@ function ST:SWING_TIMER_UPDATE(_, speed, expiration_time, hand)
 	self[hand].speed = speed
 	self[hand].start = expiration_time - speed
 	self[hand].ends_at = expiration_time
-	if t > expiration_time then
+	-- print(string.format("%f : %f", t, expiration_time))
+	if t >= expiration_time then
 		self[hand].is_full = true
 	else
 		self[hand].is_full = false
@@ -527,8 +536,8 @@ function ST:UNIT_SPELLCAST_SUCCEEDED(event, unit_id, cast_guid, spell_id)
 	end
 end
 
-function ST:UNIT_TARGET(event, unitId)
-	if unitId ~= "player" then
+function ST:UNIT_TARGET(event, unit_id)
+	if unit_id ~= "player" then
 		return
 	end
 	if UnitExists("target") then self.has_target = true else self.has_target = false end
@@ -549,8 +558,14 @@ function ST:UPDATE_SHAPESHIFT_FORM()
     else
         self.is_cat_or_bear = false
     end
-	self:on_attack_speed_change("mainhand")
-	self:set_bar_color("mainhand")
+
+	-- Set a flag to ensure a recalculation of bar elements at the next swing
+	-- in case of any snapshotting
+	self.recent_form_change = true
+	if self.interfaces_are_initialised then
+		self:on_attack_speed_change("mainhand")
+		self:set_bar_color("mainhand")
+	end
 
 end
 

@@ -360,7 +360,7 @@ function ST:on_gcd_length_change()
     -- This function fires when the *predicted length* of a GCD
     -- changes, and doesn't refer to any active GCD.
     for hand in self:iter_hands() do
-        self:get_gcd_marker_duration(hand)
+        self:set_gcd_marker_positions(hand)
     end
 end
 
@@ -487,6 +487,7 @@ function ST:set_gcd_marker_positions(hand)
         local t_before = self:get_gcd_marker_duration(hand, '1a')
         local progress = t_before / s
         print(progress)
+        print(self[hand].is_full)
         if progress > 1 then
             frame.gcd1a_marker:Hide()
         elseif not self[hand].is_full then
