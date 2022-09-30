@@ -360,6 +360,7 @@ function ST:on_gcd_length_change()
     -- This function fires when the *predicted length* of a GCD
     -- changes, and doesn't refer to any active GCD.
     for hand in self:iter_hands() do
+        self:get_gcd_marker_duration(hand)
     end
 end
 
@@ -375,12 +376,13 @@ function ST:on_bar_active(hand)
     -- to actively swinging.
     local db = self:get_hand_table(hand)
     local frame = self:get_frame(hand)
-    if db.gcd1a_marker_enabled then
-        frame.gcd1a_marker:Show()
+    if db.gcd1a_marker_enabled or db.gcd1b_marker_enabled then
+        self:set_gcd_marker_positions(hand)
+        -- frame.gcd1a_marker:Show()
     end
-    if db.gcd1b_marker_enabled then
-        frame.gcd1b_marker:Show()
-    end
+    -- if db.gcd1b_marker_enabled then
+    --     frame.gcd1b_marker:Show()
+    -- end
     if db.enable_deadzone then
         frame.deadzone:Show()
     end
@@ -484,6 +486,13 @@ function ST:set_gcd_marker_positions(hand)
     if db_hand.gcd1a_marker_enabled and db_hand.gcd1a_marker_anchor == "endofswing" then
         local t_before = self:get_gcd_marker_duration(hand, '1a')
         local progress = t_before / s
+        print(progress)
+        if progress > 1 then
+            frame.gcd1a_marker:Hide()
+        elseif not self[hand].is_full then
+            print("showing 1a")
+            frame.gcd1a_marker:Show()
+        end
         local offset = progress * db_hand.bar_width * -1
         local v_offset = db_hand.bar_height * db_hand.gcd1a_marker_fractional_height * -1
         frame.gcd1a_marker:SetStartPoint("TOPRIGHT", offset, 0)
@@ -492,6 +501,11 @@ function ST:set_gcd_marker_positions(hand)
     if db_hand.gcd1b_marker_enabled and db_hand.gcd1b_marker_anchor == "endofswing" then
         local t_before = self:get_gcd_marker_duration(hand, '1b')
         local progress = t_before / s
+        if progress > 1 then
+            frame.gcd1b_marker:Hide()
+        elseif not self[hand].is_full then
+            frame.gcd1b_marker:Show()
+        end
         local offset = progress * db_hand.bar_width * -1
         local v_offset = db_hand.bar_height * db_hand.gcd1b_marker_fractional_height
         frame.gcd1b_marker:SetStartPoint("BOTTOMRIGHT", offset, 0)

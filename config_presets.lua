@@ -94,9 +94,40 @@ ST.bar_defaults = {
 }
 
 ------------------------------------------------------------------------------------
+-- DRUID
+------------------------------------------------------------------------------------
+ST.DRUID.defaults = {
+    tag = "DRUID",
+
+    -- Class-level options
+    enable_maul_color = true,
+    maul_color = {224, 76, 116, 1.0},
+    insufficient_rage_color = {140, 140, 140, 1.0},
+
+    use_form_colors = true,
+    form_color_bear = {159, 4, 44, 1.0},
+    form_color_cat = {189, 126, 9, 1.0},
+    form_color_moonkin = {4, 148, 214, 1.0},
+    form_color_tree = {4, 204, 124, 1.0},
+    -- form_color_normal = {4, 148, 214, 1.0},
+
+    -- Bar options
+    ['**'] = ST.bar_defaults,
+    mainhand = {
+        enable_deadzone = true,
+        bar_color_default = {18, 85, 201, 1.0},
+    },
+    offhand = {
+        enabled = false,
+    },
+    ranged = {
+        enabled = false,
+    },
+}
+
+------------------------------------------------------------------------------------
 -- ROGUE
 ------------------------------------------------------------------------------------
-ST.ROGUE = {}
 ST.ROGUE.defaults = {
 
     tag = "ROGUE",
@@ -136,36 +167,8 @@ ST.ROGUE.defaults = {
 }
 
 ------------------------------------------------------------------------------------
--- DRUID
-------------------------------------------------------------------------------------
-ST.DRUID = {}
-ST.DRUID.defaults = {
-    tag = "DRUID",
-
-    -- Class-level options
-    enable_maul_color = true,
-    maul_color = {224, 76, 116, 1.0},
-    insufficient_rage_color = {140, 140, 140, 1.0},
-
-    -- Bar options
-    ['**'] = ST.bar_defaults,
-    mainhand = {
-        enable_deadzone = true,
-        bar_color_default = {247, 181, 1, 0.8},
-    },
-    offhand = {
-        enabled = false,
-    },
-    ranged = {
-        enabled = false,
-    },
-}
-
-
-------------------------------------------------------------------------------------
 -- WARRIOR
 ------------------------------------------------------------------------------------
-ST.WARRIOR = {}
 ST.WARRIOR.defaults = {
     tag = "WARRIOR",
 

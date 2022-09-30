@@ -4,8 +4,6 @@
 local addon_name, st = ...
 local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
 
-ST.DRUID = {}
-
 local maul_ids = {
     6807, 6808, 6809, 8972, 9745, 9880, 9881, 26996, 48479, 48480
 }
@@ -47,7 +45,6 @@ function ST.DRUID.on_current_spell_cast_changed(self, is_cancelled)
     -- This function detects when the player queues up a maul
     -- and sets relevant flags for the func to set bar colors.
     local db = self:get_class_options_table()
-    print("spell cast changed")
     -- Only run this logic if special on-next-attack colors are enabled in the druid settings.
     if not db.enable_maul_color then
         return
@@ -94,6 +91,31 @@ function ST.DRUID.set_bar_color(self, hand)
             self:convert_color(db_class.insufficient_rage_color)
         )
         return true
+    end
+
+    -- Form-specific behaviours.
+    if db_class.use_form_colors then
+        if self.form_index == 1 then
+            frame.bar:SetVertexColor(
+                self:convert_color(db_class.form_color_bear)
+            )
+            return true
+        elseif self.form_index == 3 then
+            frame.bar:SetVertexColor(
+                self:convert_color(db_class.form_color_cat)
+            )
+            return true
+        elseif self.form_index == 5 then
+            frame.bar:SetVertexColor(
+                self:convert_color(db_class.form_color_moonkin)
+            )
+            return true
+        elseif self.form_index == 6 then
+            frame.bar:SetVertexColor(
+                self:convert_color(db_class.form_color_tree)
+            )
+            return true
+        end
     end
 
     return false

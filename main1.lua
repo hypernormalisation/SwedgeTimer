@@ -19,8 +19,8 @@ function table.pack(...)
 	return { n = select("#", ...), ... }
   end
 
--- Empty tables for classes without their own SwedgeTimer module.
 ST.DEATHKNIGHT = {}
+ST.DRUID = {}
 ST.HUNTER = {}
 ST.MAGE = {}
 ST.PALADIN = {}
@@ -28,6 +28,7 @@ ST.PRIEST = {}
 ST.ROGUE = {}
 ST.SHAMAN = {}
 ST.WARLOCK = {}
+ST.WARRIOR = {}
 
 --=========================================================================================
 -- Funcs/iterables to automate common tasks and retrieve objects.
@@ -397,13 +398,13 @@ function ST:SWING_TIMER_PAUSED(_, hand)
 end
 
 function ST:SWING_TIMER_START(_, speed, expiration_time, hand)
-
+	-- if not ST.interfaces_are_initialised then return end
 	if self[hand].is_full_timer then
 		self[hand].is_full_timer:Cancel()
-		-- self:set_filling_state(hand)
+		self[hand].is_full = false
 		self:on_bar_active(hand)
 	elseif self[hand].is_full then
-		-- self:set_filling_state(hand)
+		self[hand].is_full = false
 		self:on_bar_active(hand)
 	end
 	self[hand].is_full = false
@@ -421,6 +422,9 @@ function ST:SWING_TIMER_STOP(_, hand)
 		self[hand].is_full = true
 		self:on_bar_inactive(hand)
 	end)
+	if self.player_class == "DRUID" then
+		self:on_attack_speed_change(hand)
+	end
 end
 
 function ST:SWING_TIMER_UPDATE(_, speed, expiration_time, hand)
@@ -545,6 +549,9 @@ function ST:UPDATE_SHAPESHIFT_FORM()
     else
         self.is_cat_or_bear = false
     end
+	self:on_attack_speed_change("mainhand")
+	self:set_bar_color("mainhand")
+
 end
 
 ------------------------------------------------------------------------------------
