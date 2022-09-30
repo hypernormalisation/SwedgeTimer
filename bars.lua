@@ -512,16 +512,24 @@ function ST:set_bar_texts(hand)
         swing_timer=format("%.1f", st.utils.simple_round(timer, 0.1)),
     }
     if db.left_text_enabled then
-        local text = lookup[db.left_text_key]
-        frame.left_text:SetText(text)
-        frame.left_text:Show()
+        if db.left_text_hide_inactive and self[hand].is_full then
+            frame.left_text:Hide()
+        else
+            local text = lookup[db.left_text_key]
+            frame.left_text:SetText(text)
+            frame.left_text:Show()
+        end
     else
         frame.left_text:Hide()
     end
     if db.right_text_enabled then
-        local text = lookup[db.right_text_key]
-        frame.right_text:SetText(text)
-        frame.right_text:Show()
+        if db.right_text_hide_inactive and self[hand].is_full then
+            frame.right_text:Hide()
+        else
+            local text = lookup[db.right_text_key]
+            frame.right_text:SetText(text)
+            frame.right_text:Show()
+        end
     else
         frame.right_text:Hide()
     end

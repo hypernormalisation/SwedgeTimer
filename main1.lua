@@ -21,7 +21,6 @@ function table.pack(...)
 
 -- Empty tables for classes without their own SwedgeTimer module.
 ST.DEATHKNIGHT = {}
-ST.DRUID = {}
 ST.HUNTER = {}
 ST.MAGE = {}
 ST.PALADIN = {}
@@ -398,15 +397,16 @@ function ST:SWING_TIMER_PAUSED(_, hand)
 end
 
 function ST:SWING_TIMER_START(_, speed, expiration_time, hand)
+
 	if self[hand].is_full_timer then
 		self[hand].is_full_timer:Cancel()
 		-- self:set_filling_state(hand)
 		self:on_bar_active(hand)
 	elseif self[hand].is_full then
-		self[hand].is_full = false
 		-- self:set_filling_state(hand)
 		self:on_bar_active(hand)
 	end
+	self[hand].is_full = false
 	self[hand].is_paused = false
 	self[hand].start = GetTime()
 	self[hand].speed = speed
@@ -432,6 +432,11 @@ function ST:SWING_TIMER_UPDATE(_, speed, expiration_time, hand)
 	self[hand].speed = speed
 	self[hand].start = expiration_time - speed
 	self[hand].ends_at = expiration_time
+	if t > expiration_time then
+		self[hand].is_full = true
+	else
+		self[hand].is_full = false
+	end
 	-- print('New speed = ' .. tostring(speed))
 	self:on_attack_speed_change(hand)
 end
@@ -486,7 +491,9 @@ function ST:UNIT_AURA(event, unit_id, is_full_update, updated_auras)
 end
 
 function ST:UNIT_POWER_FREQUENT(event, unit_id, powerType)
-	if unit_id ~= "player" then
+	-- Used to track if a warrior or druid has enough rage to cast
+	-- any currently queued on-next-cast ability
+	if unit_id ~= "player" or (not self.interfaces_are_initialised) then
 		return
 	end
 	if powerType == "RAGE" then
@@ -497,7 +504,7 @@ function ST:UNIT_POWER_FREQUENT(event, unit_id, powerType)
 end
 
 function ST:UNIT_SPELLCAST_FAILED_QUIET(event, unit_id, cast_guid, spell_id)
-	if unit_id ~= "player" then
+	if unit_id ~= "player" or (not self.interfaces_are_initialised) then
 		return
 	end
 	-- Trigger any class-specific behaviour
@@ -767,5 +774,3 @@ function ST:class_on_current_spell_cast_changed(is_cancelled)
 		self[c].on_current_spell_cast_changed(self, is_cancelled)
 	end
 end
-
--- function ST:class_on_spellcast_successed()

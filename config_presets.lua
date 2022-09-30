@@ -65,7 +65,7 @@ ST.bar_defaults = {
 
     -- GCD markers
     gcd1a_marker_enabled = true,
-    gcd1a_marker_anchor = "swing",
+    gcd1a_marker_anchor = "endofswing",
     gcd1a_marker_hide_inactive = true,
     gcd1a_marker_mode = "phys",
     gcd1a_marker_color = {230, 230, 230, 1.0},
@@ -74,7 +74,7 @@ ST.bar_defaults = {
     gcd1a_swing_anchor_wrap = true,
 
     gcd1b_marker_enabled = true,
-    gcd1b_marker_anchor = "swing",
+    gcd1b_marker_anchor = "endofswing",
     gcd1b_marker_hide_inactive = true,
     gcd1b_marker_mode = "phys",
     gcd1b_marker_color = {230, 230, 230, 1.0},
@@ -141,11 +141,23 @@ ST.ROGUE.defaults = {
 ST.DRUID = {}
 ST.DRUID.defaults = {
     tag = "DRUID",
+
+    -- Class-level options
+    enable_maul_color = true,
+    maul_color = {224, 76, 116, 1.0},
+    insufficient_rage_color = {140, 140, 140, 1.0},
+
+    -- Bar options
     ['**'] = ST.bar_defaults,
-    -- Mainhand options
-	mainhand = {
+    mainhand = {
         enable_deadzone = true,
         bar_color_default = {247, 181, 1, 0.8},
+    },
+    offhand = {
+        enabled = false,
+    },
+    ranged = {
+        enabled = false,
     },
 }
 
@@ -157,19 +169,18 @@ ST.WARRIOR = {}
 ST.WARRIOR.defaults = {
     tag = "WARRIOR",
 
+    -- Class-level options
     enable_hs_color = true,
     hs_color = {224, 76, 116, 1.0},
-
     enable_cleave_color = true,
     cleave_color = {154, 219, 68, 1.0},
     insufficient_rage_color = {140, 140, 140, 1.0},
 
+    -- Bar options
     ['**'] = ST.bar_defaults,
-	-- Mainhand options
 	mainhand = {
         enable_deadzone = true,
     },
-	-- Offhand options
 	offhand = {
 		bar_x_offset = 0,
 		bar_y_offset = -144,
@@ -178,7 +189,6 @@ ST.WARRIOR.defaults = {
         gcd1a_marker_enabled = false,
         gcd1b_marker_enabled = false,
 	},
-	-- Ranged options
 	ranged = {
         require_in_range = true,
         force_show_in_combat = false,
@@ -191,6 +201,8 @@ ST.WARRIOR.defaults = {
         show_gcd_underlay = false,
         show_gcd_markers = false,
         show_range_finder = true,
+        gcd1a_marker_enabled = false,
+        gcd1b_marker_enabled = false,
 	},
 }
 
