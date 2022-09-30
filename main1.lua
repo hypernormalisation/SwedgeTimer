@@ -323,13 +323,18 @@ function ST:post_init()
 	-- once the libraries and addon are initialised.
 	self:set_gcd_times_before_swing_seconds()
 	self:on_latency_update()
-	-- The last thing we should do is set the bar full states.
+
 	for hand in self:iter_hands() do
 		self:set_gcd_marker_positions(hand)
 		-- self:set_bar_full_state(hand)
 		self:on_bar_inactive(hand)
 		self[hand].is_full = true
 	end
+
+	if self[self.player_class].post_init then
+		self[self.player_class].post_init(self)
+	end
+
 end
 
 --=========================================================================================

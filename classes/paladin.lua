@@ -6,13 +6,19 @@ local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
 
 -- Seal IDs
 local soc_id = 20375
-local sov_id = 31801
+local sov_ids = {
+    31801, 348704
+}
 local sol_id = 20165
 local sow_id = 20166
 local sor_id = 21084
 
 -- Art of War
 local aow_id = 59578
+
+function ST.PALADIN.post_init(self)
+    self.PALADIN.on_aura_change(self)
+end
 
 function ST.PALADIN.on_aura_change(self)
     -- Parse seals and art of war
@@ -34,7 +40,7 @@ function ST.PALADIN.on_aura_change(self)
         if spell_id == soc_id then
             self.has_soc = true
         end
-        if spell_id == sov_id then
+        if self:is_value_in_array(spell_id, sov_ids) then
             self.has_sov = true
         end
         if spell_id == sol_id then
