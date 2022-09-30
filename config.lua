@@ -52,9 +52,15 @@ ST.defaults = {
 
 		-- Class-specific defaults
 		['**'] = ST.class_defaults,
+		DEATHKNIGHT = {},
 		DRUID = ST.DRUID.defaults,
+		HUNTER = {},
+		MAGE = {},
 		PALADIN = ST.PALADIN.defaults,
+		PRIEST = {},
 		ROGUE = ST.ROGUE.defaults,
+		SHAMAN = {},
+		WARLOCK = {},
 		WARRIOR = ST.WARRIOR.defaults,
     },
 

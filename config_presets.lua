@@ -135,7 +135,7 @@ ST.PALADIN.defaults = {
 
     use_seal_colors = true,
     soc_color = {70, 150, 36, 1.0},
-    sov_color = {181, 181, 5, 1.0},
+    sov_color = {199, 157, 18, 1.0},
     sol_color = {42, 189, 125, 1.0},
     sow_color = {36, 171, 201, 1.0},
     sor_color = {102, 96, 209, 1.0},

@@ -40,6 +40,12 @@ lib.base_spell_gcd = 1.5
 lib.current_spell_gcd = nil
 lib.has_bloodlust = false
 lib.has_breath_haste = false
+lib.current_spell_haste = nil
+
+-- A cast time that will be guaranteed to not benefit from a class's 
+-- instant cast procs. Defaults to Flash of Light, but if the player is a 
+-- Paladin we'll change this to rank 1 Frostbolt to avoid AoW instant casts.
+lib.cast_time_1500ms_spell_id = 19750
 
 function lib:Fire(event, ...)
 	self.callbacks:Fire(event, ...)
@@ -70,28 +76,29 @@ function lib:calculate_expected_spell_gcd()
     -- for the spell GCD duration, in case we miss any multiplicative buffs.
     -- If there are any debuffs decreasing cast speed, this will be wrong,
     -- and we'll fallback on the first principles calc.
-	local spell_id_fol = 19750
-	local cast_time_fol = select(4, GetSpellInfo(spell_id_fol))
-	cast_time_fol = cast_time_fol or 1500
-	cast_time_fol = cast_time_fol / 1000 -- change from ms to s
+	local cast_time_test = select(4, GetSpellInfo(self.cast_time_1500ms_spell_id))
+	cast_time_test = cast_time_test or 1500
+	cast_time_test = cast_time_test / 1000 -- change from ms to s
 
 	-- Get the minimum of the 2 methods, which should be the more accurate.
-	current = math.min(current, cast_time_fol)
+    -- print(current, cast_time_test)
+	current = math.min(current, cast_time_test)
 
     -- The minimum GCD for all classes is 1s.
     if current < 1 then
         current = 1.0
     end
-
+    -- print(string.format("current: %f, old: %f", current, self.current_spell_gcd))
+    -- print(current, self.current_spell_gcd)
     -- Round to 4 decimal places
     -- current = simple_floor(current, 0.0001)
 
-    -- If has changed, fire a SPELL_GCD_UPDATE event.
-    if not current == self.current_spell_gcd then
-        self:Fire(self.GCD_SPELL_UPDATED, lib.current_spell_gcd)
-        self:Fire(lib.GCD_DURATIONS_UPDATED, lib.phys_gcd, lib.current_spell_gcd)
+    -- If has changed, fire relevant triggers.
+    if current ~= self.current_spell_gcd then
+        self.current_spell_gcd = current
+        self:Fire(self.GCD_SPELL_UPDATED, self.current_spell_gcd)
+        self:Fire(self.GCD_DURATIONS_UPDATED, self.phys_gcd, self.current_spell_gcd)
     end
-    self.current_spell_gcd = current
     -- print(string.format('spell GCD: %f, phys GCD: %f', current, self.phys_gcd))
 end
 
@@ -125,11 +132,26 @@ end
 -----------------------------------------------------------
 -- Event handlers
 -----------------------------------------------------------
+function lib:COMBAT_RATING_UPDATE()
+    local new_spell_haste = GetCombatRating(CR_HASTE_SPELL)
+    -- print(new_spell_haste)
+    if new_spell_haste ~= self.current_spell_haste then
+        -- print('spell haste changed')
+        self.current_spell_haste = new_spell_haste
+        self:calculate_expected_spell_gcd()
+    end
+end
+
 function lib:PLAYER_LOGIN()
     -- Populate info on class here.
     local class = select(2, UnitClass("player"))
     -- print("class says: "..tostring(class))
     self.class = class
+
+    if self.class == "PALADIN" then
+        print('setting frostbolt as spell id')
+        self.cast_time_1500ms_spell_id = 116
+    end
     lib.phys_gcd = 1.5
     lib.base_spell_gcd = 1.5
     -- Set the phys gcds for special cases i.e. rogue/cat.
@@ -140,7 +162,9 @@ function lib:PLAYER_LOGIN()
         if i == 3 then
             lib.phys_gcd = 1
         end
+        self.current_form = i
     end
+
     self:calculate_expected_spell_gcd()
     self:Fire("GCD_DURATIONS_UPDATED", lib.phys_gcd, lib.current_spell_gcd)
 end
@@ -198,9 +222,11 @@ function lib:activate()
         frame:RegisterEvent("PLAYER_LOGIN")
         -- print('first load:')
         -- print(GetShapeshiftForm())
-        self.current_form = GetShapeshiftForm()
+
+
         -- frame:RegisterEvent("PLAYER_REGEN_DISABLED")
         -- frame:RegisterEvent("PLAYER_REGEN_ENABLED")
+        frame:RegisterEvent("COMBAT_RATING_UPDATE")
         frame:RegisterEvent("SPELL_UPDATE_COOLDOWN")
         frame:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
         frame:RegisterUnitEvent("UNIT_AURA", "player")
