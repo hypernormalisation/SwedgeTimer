@@ -13,6 +13,9 @@ externals:
   Libs/LibClassicSwingTimerAPI:
     url: https://github.com/Ralgathor/LibClassicSwingTimerAPI
     tag: main
+  Libs/LibCustomGlow-1.0:
+    url: https://github.com/Stanzilla/LibCustomGlow
+    tag: master
 
 ignore:
   - README.md
