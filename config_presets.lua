@@ -143,10 +143,21 @@ ST.PALADIN.defaults = {
     use_aow_color = false,
     aow_color = {235, 235, 174, 1.0},
 
+    use_aow_glow = true,
+    aow_glow_color = {209, 198, 115, 1.0},
+    aow_glow_nlines = 16,
+    aow_glow_freq = 0.05,
+    aow_glow_line_length = 12,
+    aow_glow_line_thickness = 1,
+    aow_glow_offset = 1,
+
     -- Bar options
     ['**'] = ST.bar_defaults,
 	mainhand = {
         enable_deadzone = true,
+        bar_height = 22,
+        bar_width = 285,
+        text_size = 13,
         bar_color_default = {120, 120, 120, 0.95},
         gcd1a_marker_mode = "phys",
         gcd1b_marker_mode = "spell",

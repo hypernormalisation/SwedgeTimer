@@ -3,6 +3,7 @@
 --=========================================================================================
 local addon_name, st = ...
 local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
+local LCG = LibStub("LibCustomGlow-1.0")
 
 -- Seal IDs
 local soc_id = 20375
@@ -73,12 +74,29 @@ function ST.PALADIN.set_bar_color(self, hand)
     local db_class = self:get_class_options_table()
     local frame = self:get_frame(hand)
 
-    -- If enabled, Art of War color takes precedence.
-    if db_class.use_aow_color and self.has_aow then
-        frame.bar:SetVertexColor(
-            self:convert_color(db_class.aow_color)
+    -- -- If enabled, Art of War color takes precedence.
+    -- if db_class.use_aow_color and self.has_aow then
+    --     frame.bar:SetVertexColor(
+    --         self:convert_color(db_class.aow_color)
+    --     )
+    --     return true
+    -- end
+
+    -- Art of War glow
+    if self.has_aow and db_class.use_aow_glow then
+        LCG.PixelGlow_Start(frame,
+            -- {0.75, 0.75, 0.27, 1.0},
+            {self:convert_color(db_class.aow_glow_color)},
+            db_class.aow_glow_nlines,
+            db_class.aow_glow_freq,
+            db_class.aow_glow_line_length,
+            db_class.aow_glow_line_thickness,
+            db_class.aow_glow_offset,
+            db_class.aow_glow_offset,
+            true
         )
-        return true
+    else
+        LCG.PixelGlow_Stop(frame)
     end
 
     -- Seal colors    
