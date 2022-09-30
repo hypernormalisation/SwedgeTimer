@@ -492,7 +492,7 @@ function ST:set_gcd_marker_positions(hand)
         local progress = t_before / s
         -- print(progress)
         -- print(self[hand].is_full)
-        if progress > 1 then
+        if progress >= 1 then
             frame.gcd1a_marker:Hide()
         elseif not self[hand].is_full then
             -- print("showing 1a")
@@ -506,7 +506,7 @@ function ST:set_gcd_marker_positions(hand)
     if db_hand.gcd1b_marker_enabled and db_hand.gcd1b_marker_anchor == "endofswing" then
         local t_before = self:get_gcd_marker_duration(hand, '1b')
         local progress = t_before / s
-        if progress > 1 then
+        if progress >= 1 then
             frame.gcd1b_marker:Hide()
         elseif not self[hand].is_full then
             frame.gcd1b_marker:Show()
