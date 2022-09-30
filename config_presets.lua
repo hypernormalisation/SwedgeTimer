@@ -133,6 +133,16 @@ ST.DRUID.defaults = {
 ST.PALADIN.defaults = {
     tag = "PALADIN",
 
+    use_seal_colors = true,
+    soc_color = {70, 150, 36, 1.0},
+    sov_color = {181, 181, 5, 1.0},
+    sol_color = {42, 189, 125, 1.0},
+    sow_color = {36, 171, 201, 1.0},
+    sor_color = {102, 96, 209, 1.0},
+
+    use_aow_color = true,
+    aow_color = {235, 235, 174, 1.0},
+
     -- Bar options
     ['**'] = ST.bar_defaults,
 	mainhand = {
@@ -142,6 +152,8 @@ ST.PALADIN.defaults = {
         gcd1b_marker_mode = "phys",
         gcd1a_marker_anchor = "swing",
         gcd1b_marker_anchor = "swing",
+        gcd1a_swing_anchor_wrap = false,
+        gcd1b_swing_anchor_wrap = false,
     },
 }
 
