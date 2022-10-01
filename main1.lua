@@ -39,12 +39,26 @@ ST.interfaces_are_initialised = false
 ST.mainhand = {}
 ST.offhand = {}
 ST.ranged = {}
-ST.hands = {"mainhand", "offhand", "ranged"}
+
+ST.class_hands = {
+	DEATHKNIGHT = {"mainhand", "offhand"},
+	DRUID = {"mainhand"},
+	HUNTER = {"mainhand", "offhand", "ranged"},
+	MAGE = {"mainhand", "ranged"},
+	PALADIN = {"mainhand"},
+	PRIEST = {"mainhand", "offhand"},
+	ROGUE = {"mainhand", "offhand", "ranged"},
+	SHAMAN = {"mainhand", "offhand"},
+	WARLOCK = {"mainhand", "offhand"},
+	WARRIOR = {"mainhand", "offhand", "ranged"},
+}
+
+-- ST.hands = {"mainhand", "offhand", "ranged"}
 
 function ST:iter_hands()
 	-- Iterates over melee/ranged/offhand 
 	local i = 0
-	local hands = self.hands
+	local hands = self.class_hands[self.player_class]
 	local n = #hands
 	return function ()
 		i = i + 1
@@ -342,7 +356,7 @@ end
 --=========================================================================================
 function ST.callback_event_handler(event, ...)
 	-- Func to pass all callbacks to their relevant handler
-	if string.find(event, "GCD") then
+	if true then -- string.find(event, "GCD") then
 		print('===============')
 		print(event)
 		local args = table.pack(...)
@@ -473,7 +487,6 @@ end
 
 function ST:PLAYER_EQUIPMENT_CHANGED(event, slot, has_current)
 	print('slot says: '..tostring(slot))
-	-- print(slot)
 	if slot == 16 or slot == 17 or slot == 18 then
 		self:check_weapons()
 		print('has_oh: '.. tostring(self.offhand.has_weapon))
@@ -498,7 +511,7 @@ function ST:PLAYER_LEAVE_COMBAT()
 end
 
 function ST:PLAYER_TARGET_SET_ATTACKING()
-	-- print('offsetting offhand')
+	if not self.has_oh then return end
 	local t = GetTime()
 	local old_start = self.offhand.start
 	if old_start + self.offhand.speed < t then
@@ -779,9 +792,9 @@ function ST:register_slashcommands()
 end
 
 function ST:test1()
-    local db = self:get_hand_table("mainhand")
-	local f = self:get_frame("mainhand")
-	-- self.mainhand.frame.gcd_bar
+	for hand in self:iter_hands() do
+		print(hand)
+	end
 end
 
 function ST:open_menu()

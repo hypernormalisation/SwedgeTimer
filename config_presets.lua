@@ -94,6 +94,15 @@ ST.bar_defaults = {
 }
 
 ------------------------------------------------------------------------------------
+-- DEATHKNIGHT
+------------------------------------------------------------------------------------
+ST.DEATHKNIGHT.defaults = {
+    tag = "DEATHKNIGHT",
+    -- Bar options
+    ['**'] = ST.bar_defaults,
+}
+
+------------------------------------------------------------------------------------
 -- DRUID
 ------------------------------------------------------------------------------------
 ST.DRUID.defaults = {
@@ -125,6 +134,57 @@ ST.DRUID.defaults = {
     ranged = {
         enabled = false,
     },
+}
+
+------------------------------------------------------------------------------------
+-- HUNTER
+------------------------------------------------------------------------------------
+ST.HUNTER.defaults = {
+    tag = "HUNTER",
+    -- Bar options
+    ['**'] = ST.bar_defaults,
+    mainhand = {
+        require_in_range = true,
+    },
+    offhand = {
+        require_in_range = true,
+		bar_x_offset = 0,
+		bar_y_offset = -144,
+		bar_color_default = {1, 66, 69, 0.8},
+        show_gcd_underlay = false,
+        gcd1_marker_enabled = false,
+
+	},
+	ranged = {
+        require_in_range = false,
+        force_show_in_combat = false,
+		bar_height = 13,
+		bar_width = 200,
+		bar_x_offset = 0,
+		bar_y_offset = -102,
+		bar_color_default = {115, 17, 42, 0.8},
+		font_size = 11,
+        show_gcd_underlay = false,
+        show_gcd_markers = false,
+        show_range_finder = true,
+	},
+}
+
+------------------------------------------------------------------------------------
+-- MAGE
+------------------------------------------------------------------------------------
+ST.MAGE.defaults = {
+    tag = "MAGE",
+    -- Bar options
+    ['**'] = ST.bar_defaults,
+    mainhand = {
+        enabled = false,
+    },
+    ranged = {
+        bar_x_offset = 0,
+		bar_y_offset = -102,
+        bar_color_default = {10, 160, 201, 1.0},
+    }
 }
 
 ------------------------------------------------------------------------------------
@@ -169,12 +229,27 @@ ST.PALADIN.defaults = {
 }
 
 ------------------------------------------------------------------------------------
+-- PRIEST
+------------------------------------------------------------------------------------
+ST.PRIEST.defaults = {
+    tag = "PRIEST",
+    -- Bar options
+    ['**'] = ST.bar_defaults,
+    mainhand = {
+        enabled = false,
+    },
+    ranged = {
+        bar_x_offset = 0,
+		bar_y_offset = -102,
+        bar_color_default = {159, 194, 204, 1.0},
+    }
+}
+
+------------------------------------------------------------------------------------
 -- ROGUE
 ------------------------------------------------------------------------------------
 ST.ROGUE.defaults = {
-
     tag = "ROGUE",
-
     -- Bar options
     ['**'] = ST.bar_defaults,
 	mainhand = {
@@ -183,7 +258,7 @@ ST.ROGUE.defaults = {
 	offhand = {
 		bar_x_offset = 0,
 		bar_y_offset = -144,
-		bar_color_default = {1, 66, 69, 0.8},
+		bar_color_default = {1, 66, 69, 1.0},
         show_gcd_underlay = false,
         gcd1_marker_enabled = false,
 
@@ -195,7 +270,7 @@ ST.ROGUE.defaults = {
 		bar_width = 200,
 		bar_x_offset = 0,
 		bar_y_offset = -102,
-		bar_color_default = {115, 17, 42, 0.8},
+		bar_color_default = {115, 17, 42, 1.0},
 		font_size = 11,
         show_gcd_underlay = false,
         show_gcd_markers = false,
@@ -204,18 +279,53 @@ ST.ROGUE.defaults = {
 }
 
 ------------------------------------------------------------------------------------
+-- SHAMAN
+------------------------------------------------------------------------------------
+ST.SHAMAN.defaults = {
+    tag = "SHAMAN",
+    -- Bar options
+    ['**'] = ST.bar_defaults,
+	mainhand = {
+        bar_color_default = {35, 39, 173, 1.0},
+        enable_deadzone = true,
+    },
+	offhand = {
+		bar_x_offset = 0,
+		bar_y_offset = -144,
+		bar_color_default = {95, 98, 194, 1.0},
+        show_gcd_underlay = false,
+        gcd1_marker_enabled = false,
+	},
+}
+
+------------------------------------------------------------------------------------
+-- WARLOCK
+------------------------------------------------------------------------------------
+ST.WARLOCK.defaults = {
+    tag = "WARLOCK",
+    -- Bar options
+    ['**'] = ST.bar_defaults,
+    mainhand = {
+        enabled = false,
+    },
+    ranged = {
+        bar_x_offset = 0,
+		bar_y_offset = -102,
+        bar_color_default = {125, 10, 201, 1.0},
+    }
+}
+
+------------------------------------------------------------------------------------
 -- WARRIOR
 ------------------------------------------------------------------------------------
 ST.WARRIOR.defaults = {
     tag = "WARRIOR",
-
     -- Class-level options
     enable_hs_color = true,
     hs_color = {224, 76, 116, 1.0},
     enable_cleave_color = true,
     cleave_color = {154, 219, 68, 1.0},
     insufficient_rage_color = {140, 140, 140, 1.0},
-
     -- Bar options
     ['**'] = ST.bar_defaults,
 	mainhand = {
