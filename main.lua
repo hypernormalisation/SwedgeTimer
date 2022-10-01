@@ -113,8 +113,6 @@ end
 -- Funcs to initialise the addon
 --=========================================================================================
 function ST:OnInitialize()
-	-- ST.some_counter = ST.some_counter + 1
-	-- print(string.format("init count: %i", ST.some_counter))
 
 	-- Addon database
 	-- print('initing acedb')

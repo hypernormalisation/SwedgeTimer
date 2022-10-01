@@ -149,7 +149,6 @@ function lib:PLAYER_LOGIN()
     self.class = class
 
     if self.class == "PALADIN" then
-        print('setting frostbolt as spell id')
         self.cast_time_1500ms_spell_id = 116
     end
     lib.phys_gcd = 1.5

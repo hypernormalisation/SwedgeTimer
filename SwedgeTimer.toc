@@ -26,7 +26,7 @@ Libs\AceGUI-3.0-SharedMediaWidgets\widget.xml
 Libs\AceConfig-3.0\AceConfig-3.0.xml
 
 utils.lua
-main1.lua
+main.lua
 bars.lua
 config_presets.lua
 config.lua

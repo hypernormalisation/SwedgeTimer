@@ -51,7 +51,7 @@ function ST:init_visuals_template(hand)
     self:configure_bar_outline(hand)
 
     -- Create the swing timer bar
-    frame.bar = frame:CreateTexture(nil,"ARTWORK")
+    frame.bar = frame:CreateTexture(nil, "ARTWORK")
     frame.bar:SetPoint("TOPLEFT", 0, 0)
     frame.bar:SetHeight(db.bar_height)
     frame.bar:SetTexture(LSM:Fetch('statusbar', db.bar_texture_key))

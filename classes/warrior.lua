@@ -1,10 +1,8 @@
 --=========================================================================================
--- Module for warrior-specific behaviours
+-- Module for Warrior-specific behaviours
 --=========================================================================================
 local addon_name, st = ...
 local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
-
-ST.WARRIOR = {}
 
 local hs_ids = {
     47450, 47449, 30324, 29707, 25286, 11567, 11566,
