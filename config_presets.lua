@@ -42,7 +42,7 @@ ST.bar_defaults = {
     backplane_alpha = 0.85,
     backplane_texture_key = "Solid",
     border_mode_key = "Solid",
-    backplane_outline_width = 1.5,
+    backplane_outline_width = 2.0,
 
     -- Bar Texts
     text_size = 12,
@@ -205,9 +205,9 @@ ST.PALADIN.defaults = {
 
     use_aow_glow = true,
     aow_glow_color = {209, 198, 115, 1.0},
-    aow_glow_nlines = 16,
-    aow_glow_freq = 0.05,
-    aow_glow_line_length = 12,
+    aow_glow_nlines = 12,
+    aow_glow_freq = 0.03,
+    aow_glow_line_length = 24,
     aow_glow_line_thickness = 1,
     aow_glow_offset = 1,
 

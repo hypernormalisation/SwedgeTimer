@@ -402,6 +402,7 @@ function ST:on_bar_inactive(hand)
     -- Called when the bar enters the inactive state.
     -- This is when the player stops swinging with a full timer for 
     -- some finite and configurable period of time.
+    -- print("TRIGGERING BAR INACTIVE")
     local db = self:get_hand_table(hand)
     local frame = self:get_frame(hand)
     if db.gcd1a_marker_hide_inactive then
@@ -487,14 +488,17 @@ function ST:set_gcd_marker_positions(hand)
     local frame = self:get_frame(hand)
     local s = self[hand].speed
 
+    local hand_is_full = GetTime() >= self[hand].ends_at
+    -- print('hand_is_full says: '..tostring(hand_is_full))
+
     if db_hand.gcd1a_marker_enabled and db_hand.gcd1a_marker_anchor == "endofswing" then
         local t_before = self:get_gcd_marker_duration(hand, '1a')
         local progress = t_before / s
         -- print(progress)
         -- print(self[hand].is_full)
-        if progress >= 1 then
+        if progress >= 1 or self[hand].is_full then
             frame.gcd1a_marker:Hide()
-        elseif not self[hand].is_full then
+        else
             -- print("showing 1a")
             frame.gcd1a_marker:Show()
         end
@@ -506,9 +510,9 @@ function ST:set_gcd_marker_positions(hand)
     if db_hand.gcd1b_marker_enabled and db_hand.gcd1b_marker_anchor == "endofswing" then
         local t_before = self:get_gcd_marker_duration(hand, '1b')
         local progress = t_before / s
-        if progress >= 1 then
+        if progress >= 1 or self[hand].is_full then
             frame.gcd1b_marker:Hide()
-        elseif not self[hand].is_full then
+        else
             frame.gcd1b_marker:Show()
         end
         local offset = progress * db_hand.bar_width * -1

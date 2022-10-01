@@ -120,7 +120,7 @@ function ST:OnInitialize()
 	self.db = SwedgeTimerDB
 	-- print('self.db says:')
 	-- self:Print(self.db)
-	print("unit class says: "..tostring(select(2, UnitClass("player"))))
+	-- print("unit class says: "..tostring(select(2, UnitClass("player"))))
 	-- Options table
 	local AC = LibStub("AceConfig-3.0")
 	local ACD = LibStub("AceConfigDialog-3.0")
@@ -352,14 +352,14 @@ end
 --=========================================================================================
 function ST.callback_event_handler(event, ...)
 	-- Func to pass all callbacks to their relevant handler
-	if true then -- string.find(event, "GCD") then
-		print('===============')
+	if string.find(event, "SWING_TIMER") then
+		print('<===============')
 		print(event)
 		local args = table.pack(...)
 		for i=1, args.n do
 			print(tostring(args[i]))
 		end
-		print('---------------')
+		print('--------------->')
 	end
 	ST[event](ST, event, ...)
 end
@@ -383,7 +383,7 @@ end
 function ST:GCD_DURATIONS_UPDATED(_, phys_length, spell_length)
 	self.gcd.spell_length = spell_length
 	self.gcd.phys_length = phys_length
-	print(self.gcd.phys_length)
+	-- print(self.gcd.phys_length)
 	self:set_gcd_times_before_swing_seconds()
 	if self.interfaces_are_initialised then
 		self:on_gcd_length_change()
@@ -444,6 +444,7 @@ function ST:SWING_TIMER_STOP(_, hand)
 	local db_shared = self.db.profile
 	self[hand].is_full_timer = C_Timer.NewTimer(db_shared.bar_full_delay, function()
 		-- self:set_bar_full_state(hand)
+		-- print("C_Timer expired")
 		self[hand].is_full = true
 		self:on_bar_inactive(hand)
 	end)
@@ -464,6 +465,7 @@ function ST:SWING_TIMER_UPDATE(_, speed, expiration_time, hand)
 	-- print(string.format("%f : %f", t, expiration_time))
 	if t >= expiration_time then
 		self[hand].is_full = true
+		self:on_bar_inactive(hand)
 	else
 		self[hand].is_full = false
 	end
@@ -482,7 +484,7 @@ function ST:PLAYER_ENTERING_WORLD(event, is_initial_login, is_reloading_ui)
 end
 
 function ST:PLAYER_EQUIPMENT_CHANGED(event, slot, has_current)
-	print('slot says: '..tostring(slot))
+	-- print('slot says: '..tostring(slot))
 	if slot == 16 or slot == 17 or slot == 18 then
 		self:check_weapons()
 		print('has_oh: '.. tostring(self.offhand.has_weapon))
