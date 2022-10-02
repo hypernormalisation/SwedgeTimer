@@ -23,6 +23,19 @@ ST.opts_table = {
 -- We're going to add helper funcs to a table that the hand opts
 -- tables can reference for setters and getters.
 ST.opts_funcs = {}
+
+-- Setter and getter for global funcs
+ST.opts_funcs.global = {}
+ST.opts_funcs.global.getter = function(_, info)
+    local db = ST:get_profile_table()
+    return db[info[#info]]
+end
+ST.opts_funcs.global.setter = function(_, info, value)
+    local db = ST:get_profile_table()
+    db[info[#info]] = value
+end
+
+
 local opts_case_dict = {
     mainhand = {
         title = "Mainhand Controls",
@@ -64,7 +77,7 @@ local opts_case_dict = {
         "\n\nAny changes made here will apply to *both the mainhand and offhand bars*, use caution!\n",
         hands = {"mainhand", "offhand"},
         order_offset = 5,
-    }
+    },
 }
 
 -- This function will be run when the addon initialises to generate
@@ -109,6 +122,18 @@ function ST:set_opts_funcs()
             end
         end
 
+        -- A setter for bar appearances
+        ST.opts_funcs[hand].bar_setter = function(_, info, value)
+            for h in ST:generic_iter(settings.hands) do
+                local db = ST:get_hand_table(h)
+                db[info[#info]] = value
+                ST:configure_bar_appearances(h)
+                ST:configure_bar_outline(h)
+                ST:configure_gcd_markers(h)
+                ST:set_gcd_marker_positions(h)
+            end
+        end
+
         -- A getter for colors. Colors are stored in SwedgeTimer's 
         -- db as 0-255 ranges, and need converted to the expected
         -- 0-1 ranges for the client.
@@ -145,6 +170,9 @@ function ST:set_opts_funcs()
             end
         end
 
+        -------------------------------------------------------------------------
+        -- Disabler funcs
+        -------------------------------------------------------------------------
         -- Left text disabler
         ST.opts_funcs[hand].left_text_disable = function()
             if hand == "mainhand" or hand == "offhand" or hand == "ranged" then
@@ -163,7 +191,68 @@ function ST:set_opts_funcs()
             end
         end
 
+        -- Solid Border disabler
+        ST.opts_funcs[hand].solid_border_disable = function()
+            if hand == "mainhand" or hand == "offhand" or hand == "ranged" then
+                return ST:get_hand_table(hand).border_mode_key ~= "Solid"
+            else
+                return ST:get_hand_table("mainhand").border_mode_key ~= "Solid"
+            end
+        end
+
+        -- Texture Border disabler
+        ST.opts_funcs[hand].texture_border_disable = function()
+            if hand == "mainhand" or hand == "offhand" or hand == "ranged" then
+                return ST:get_hand_table(hand).border_mode_key ~= "Texture"
+            else
+                return ST:get_hand_table("mainhand").border_mode_key ~= "Texture"
+            end
+        end
+
     end
+end
+
+function ST:generate_class_options_table()
+    -- Function to generate the per-class settings.
+end
+
+function ST:generate_top_level_options_table()
+
+    -- Set the top-level options that are displayed above the settings menu.
+    self.opts_table.handler = self.opts_funcs.global
+    self.opts_table.args.enabled = {
+        type = "toggle",
+        order = 1.1,
+        name = "Global Enable/Disable",
+        desc = "Enables or disables all visuals in SwedgeTimer.",
+        get = "getter",
+        set = "setter",
+    }
+    self.opts_table.args.bars_locked = {
+        type = "toggle",
+        order = 1.2,
+        name = "Bars locked",
+        desc = "Prevents all swing timer bars from being dragged with the mouse.",
+        get = "getter",
+        set = function(_, input)
+            local db = ST:get_profile_table()
+            db.bars_locked = input
+            for hand in ST:iter_hands() do
+                local frame = self:get_frame(hand)
+                frame:SetMovable(not input)
+                frame:EnableMouse(not input)
+            end
+        end,
+    }
+    self.opts_table.args.welcome_message = {
+        type = "toggle",
+        order = 1.3,
+        name = "Welcome message",
+        desc = "Displays a login message showing the addon version on player login or reload.",
+        get = "getter",
+        set = "setter",
+    }
+
 end
 
 function ST:generate_hand_options_table(hand)
@@ -177,11 +266,12 @@ function ST:generate_hand_options_table(hand)
         handler = ST.opts_funcs[hand],
 		name = title,
 		type = "group",
+        desc = settings.desc,
         order = offset,
-		-- args = top_level_opts,
 	}
 
-    -- This will be the full options table for the hand.
+    -- This will be the options table for the hand.
+    -- All standard widgets are configured here.
     local opts = {
 
         -- Top level settings
@@ -204,6 +294,22 @@ function ST:generate_hand_options_table(hand)
             set = "setter",
         },
 
+        -- Bar appearance options go here.
+        bar_appearance_group = {
+            type = "group",
+            order = 1.50,
+            name = "Textures/Colors",
+            args = ST.bar_appearance_preset,
+        },
+
+        -- Border options go here.
+        bar_borders_group = {
+            type = "group",
+            order = 1.7,
+            name = "Borders/Outlines",
+            args = ST.borders_preset,
+        },
+
         -- Font options all go here.
         texts_group = {
             type = "group",
@@ -213,9 +319,19 @@ function ST:generate_hand_options_table(hand)
         },
 
     }
-
     opts_group.args = opts
-    -- print(opts_group)
+
+    -- Any optional groups should go here.
+    if hand == "mainhand" or hand == "ranged" then
+        opts_group.args.gcd_markers_group = {
+            type = "group",
+            order = 3.0,
+            name = "GCD Markers",
+            args = ST.gcd_markers_preset
+        }
+    end
+
+    -- Assign it
     self.opts_table.args[hand] = opts_group
 
 end

@@ -134,6 +134,7 @@ function ST:OnInitialize()
 	-- Dynamically construct the options tables
 	-----------------------------------------------------------
 	self:set_opts_funcs()
+	self:generate_top_level_options_table()
 
 	for hand in self:iter_hands() do
 		self:generate_hand_options_table(hand)

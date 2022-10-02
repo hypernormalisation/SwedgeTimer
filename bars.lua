@@ -54,19 +54,21 @@ function ST:init_visuals_template(hand)
     frame.bar = frame:CreateTexture(nil, "ARTWORK")
     frame.bar:SetPoint("TOPLEFT", 0, 0)
     frame.bar:SetHeight(db.bar_height)
-    frame.bar:SetTexture(LSM:Fetch('statusbar', db.bar_texture_key))
-    self:set_bar_color(hand)
+    -- frame.bar:SetTexture(LSM:Fetch('statusbar', db.bar_texture_key))
+    -- self:set_bar_color(hand)
     frame.bar:SetWidth(db.bar_width)
 
     -- Create the GCD timer bar
     frame.gcd_bar = frame:CreateTexture(nil, "ARTWORK")
     frame.gcd_bar:SetHeight(db.bar_height)
-    frame.gcd_bar:SetTexture(LSM:Fetch('statusbar', db.gcd_texture_key))
-    frame.gcd_bar:SetVertexColor(
-        self:convert_color(db.bar_color_gcd)
-    )
+    -- frame.gcd_bar:SetTexture(LSM:Fetch('statusbar', db.gcd_texture_key))
+    -- frame.gcd_bar:SetVertexColor(
+    --     self:convert_color(db.bar_color_gcd)
+    -- )
     frame.gcd_bar:SetDrawLayer("ARTWORK", -2)
     frame.gcd_bar:Hide()
+
+    self:configure_bar_appearances(hand)
 
     -- Create the deadzone bar
     frame.deadzone = frame:CreateTexture(nil, "ARTWORK")
@@ -114,6 +116,18 @@ end
 -- Configuration functions (called on frame inits and setting changes)
 -- These all operate on a given hand.
 ------------------------------------------------------------------------------------
+function ST:configure_bar_appearances(hand)
+    -- COnfigure textures/colors for bar and GCD underlay
+    local frame = self[hand].frame
+    local db = self:get_hand_table(hand)
+    frame.bar:SetTexture(LSM:Fetch('statusbar', db.bar_texture_key))
+    frame.gcd_bar:SetTexture(LSM:Fetch('statusbar', db.gcd_texture_key))
+    self:set_bar_color(hand)
+    frame.gcd_bar:SetVertexColor(
+        self:convert_color(db.bar_color_gcd)
+    )
+end
+
 function ST:configure_gcd_markers(hand)
     -- Configure textures and marker widths.
     local db = self:get_hand_table(hand)
@@ -204,8 +218,8 @@ function ST:configure_bar_position(hand)
 	frame.bar:SetPoint("TOPLEFT", 0, 0)
 	frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
 	frame.deadzone:SetPoint("TOPRIGHT", 0, 0)
-	frame.left_text:SetPoint("TOPLEFT", 3, -(db.bar_height / 2) + (db.font_size / 2))
-	frame.right_text:SetPoint("TOPRIGHT", -3, -(db.bar_height / 2) + (db.font_size / 2))
+	frame.left_text:SetPoint("TOPLEFT", 3, -(db.bar_height / 2) + (db.text_size / 2))
+	frame.right_text:SetPoint("TOPRIGHT", -3, -(db.bar_height / 2) + (db.text_size / 2))
 	self:configure_bar_outline(hand)
 end
 
@@ -522,6 +536,8 @@ function ST:set_gcd_marker_positions(hand)
         local v_offset = db_hand.bar_height * db_hand.gcd1a_marker_fractional_height * -1
         frame.gcd1a_marker:SetStartPoint("TOPRIGHT", offset, 0)
         frame.gcd1a_marker:SetEndPoint("TOPRIGHT", offset, v_offset)
+    else
+        frame.gcd1a_marker:Hide()
     end
     if db_hand.gcd1b_marker_enabled and db_hand.gcd1b_marker_anchor == "endofswing" then
         local t_before = self:get_gcd_marker_duration(hand, '1b')
@@ -535,6 +551,8 @@ function ST:set_gcd_marker_positions(hand)
         local v_offset = db_hand.bar_height * db_hand.gcd1b_marker_fractional_height
         frame.gcd1b_marker:SetStartPoint("BOTTOMRIGHT", offset, 0)
         frame.gcd1b_marker:SetEndPoint("BOTTOMRIGHT", offset, v_offset)
+    else
+        frame.gcd1b_marker:Hide()
     end
 end
 
