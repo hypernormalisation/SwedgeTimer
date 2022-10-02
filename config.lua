@@ -94,14 +94,13 @@ local bar_border_modes = {
 	None="None",
 }
 
-local outlines = {
+ST.outlines = {
 	_none="None",
 	outline="Outline",
 	thick_outline="Thick Outline",
 }
-ST.outlines = outlines
 
-local texts = {
+ST.texts = {
 	attack_speed="Attack speed",
 	swing_timer="Swing timer",
 }

@@ -128,6 +128,11 @@ function ST:OnInitialize()
 	-- Options table
 	local AC = LibStub("AceConfig-3.0")
 	local ACD = LibStub("AceConfigDialog-3.0")
+	
+	
+	-----------------------------------------------------------
+	-- Dynamically construct the options tables
+	-----------------------------------------------------------
 	self:set_opts_funcs()
 
 	for hand in self:iter_hands() do
@@ -138,7 +143,8 @@ function ST:OnInitialize()
 	if #hands ~= 1 then
 		self:generate_hand_options_table("all_hands")
 	end
-	if self:is_value_in_array("mainhand", hands) and self:is_value_in_array("offhand", hands) then
+	-- Only generate melee hands if class can use all three.
+	if #hands == 3 then
 		self:generate_hand_options_table("melee_hands")
 	end
 

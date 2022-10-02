@@ -1,30 +1,22 @@
 ------------------------------------------------------------------------------------
 -- Module to contain option table defaults
+--
+-- The module's purpose is to dynamically generate any options tables
+-- depending on player class that the addon need. So for example,
+-- a Paladin will only ever see the mainhand options, and the Paladin-specific 
+-- class options.
 ------------------------------------------------------------------------------------
 local addon_name, st = ...
 local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
 local LSM = LibStub("LibSharedMedia-3.0")
 local print = st.utils.print_msg
 
+-- This object will eventually be passed to AceConfig as the options
+-- table for the addon. We'll build it dynamically upon addon init.
 ST.opts_table = {
     name = "SwedgeTimer Options",
     type = "group",
     args = {},
-}
-
-ST.bar_texture_template = {
-    order = 2,
-    type = "select",
-    dialogControl = "LSM30_Statusbar",
-    values = LSM:HashTable("statusbar"),
-
-    -- name = "Bar Texture",
-    -- desc = "The texture of the swing bar.",
-    -- get = function(info) return ST.db.profile.bar_texture_key or LSM.DefaultMedia.statusbar end,
-    -- set = function(self, key)
-    --     ST.db.profile.bar_texture_key = key
-    --     st.bar.frame.bar:SetTexture(LSM:Fetch('statusbar', key))
-    -- end
 }
 
 
@@ -33,49 +25,52 @@ ST.bar_texture_template = {
 ST.opts_funcs = {}
 local opts_case_dict = {
     mainhand = {
-        title = "Mainhand",
+        title = "Mainhand Controls",
         panel_title = "Mainhand Settings",
-        desc = "This panel configures the settings for the mainhand bar.",
+        desc = "This panel and its subpanels configures the settings for the mainhand bar.\n",
         hands = {"mainhand"},
-        order_offset = 3,
-    },
-    offhand = {
-        title = "Offhand",
-        panel_title = "Offhand Settings",
-        desc = "This panel configures the settings for the offhand bar. It is only visible "..
-        "to classes that can use offhand weapons.",
-        hands = {"offhand"},
-        order_offset = 4,
-    },
-    ranged = {
-        title = "Ranged",
-        panel_title = "Ranged Settings",
-        desc = "This panel configures the settings for the ranged bar. It is only visible "..
-        "to classes that can use ranged weapons.",
-        hands = {"ranged"},
-        order_offset = 5,
-    },
-    all_hands = {
-        title = "All",
-        panel_title = "Settings for all bars",
-        desc = "This panel configures the settings for all bars. It is only visible "..
-        "to classes that can use multiple types of weapons (mainhand/offhand/ranged).",
-        hands = {"mainhand", "offhand", "ranged"},
         order_offset = 1,
     },
-    melee_hands = {
-        title = "Melee",
-        panel_title = "Settings for all melee bars",
-        desc = "This panel configures the settings for melee bars. It is only visible "..
-        "to classes that can use both a mainhand and an offhand.",
-        hands = {"mainhand", "offhand"},
+    offhand = {
+        title = "Offhand Controls",
+        panel_title = "Offhand Settings",
+        desc = "This panel and its subpanels configures the settings for the offhand bar. It is only visible "..
+        "to classes that can use offhand weapons.\n",
+        hands = {"offhand"},
         order_offset = 2,
+    },
+    ranged = {
+        title = "Ranged Controls",
+        panel_title = "Ranged Settings",
+        desc = "This panel and its subpanels configures the settings for the ranged bar. It is only visible "..
+        "to classes that can use ranged weapons.\n",
+        hands = {"ranged"},
+        order_offset = 3,
+    },
+    all_hands = {
+        title = "All Bar Controls",
+        panel_title = "Settings for all bars",
+        desc = "This panel and its subpanels configures the settings for all bars. It is only visible "..
+        "to classes that can use multiple types of weapons (mainhand/offhand/ranged)."..
+        "\n\nAny changes made here will apply to *all bars*, use caution!\n",
+        hands = {"mainhand", "offhand", "ranged"},
+        order_offset = 4,
+    },
+    melee_hands = {
+        title = "Melee Bar Controls",
+        panel_title = "Settings for all melee bars",
+        desc = "This panel and its subpanels configures the settings for melee bars. It is only visible "..
+        "to classes that can use all three of a mainhand, offhand, and ranged weapon."..
+        "\n\nAny changes made here will apply to *both the mainhand and offhand bars*, use caution!\n",
+        hands = {"mainhand", "offhand"},
+        order_offset = 5,
     }
 }
--- for _, hand in ipairs({"mainhand", "offhand", "ranged"}) do
 
 -- This function will be run when the addon initialises to generate
--- the getter and setter funcs for the hands
+-- the getter and setter funcs for the hands. These will be a little specialised
+-- to ensure the appropriate config functions in the addon are run when the user
+-- changes the settings.
 function ST:set_opts_funcs()
 
     for hand, settings in pairs(opts_case_dict) do
@@ -116,7 +111,7 @@ function ST:set_opts_funcs()
 
         -- A getter for colors. Colors are stored in SwedgeTimer's 
         -- db as 0-255 ranges, and need converted to the expected
-        -- 0-1 ranges.
+        -- 0-1 ranges for the client.
         if hand == "mainhand" or hand == "offhand" or hand == "ranged" then
             ST.opts_funcs[hand].color_getter = function(self, info)
                 local db = ST:get_hand_table(hand)
@@ -133,6 +128,8 @@ function ST:set_opts_funcs()
         end
 
         -- A setter for colors, which trigger text and bar color configs
+        -- We scale up the 0-1 ranges the client uses to the 0-255 ranges
+        -- that the SwedgeTimer db uses.
         ST.opts_funcs[hand].color_setter = function(self, info, r, g, b, a)
             for h in ST:generic_iter(settings.hands) do
                 local db = ST:get_hand_table(h)
@@ -147,30 +144,38 @@ function ST:set_opts_funcs()
                 ST:set_bar_color(h)
             end
         end
+
+        -- Left text disabler
+        ST.opts_funcs[hand].left_text_disable = function()
+            if hand == "mainhand" or hand == "offhand" or hand == "ranged" then
+                return not ST:get_hand_table(hand).left_text_enabled
+            else
+                return not ST:get_hand_table("mainhand").left_text_enabled
+            end
+        end
+
+        -- Right text disabler
+        ST.opts_funcs[hand].right_text_disable = function()
+            if hand == "mainhand" or hand == "offhand" or hand == "ranged" then
+                return not ST:get_hand_table(hand).right_text_enabled
+            else
+                return not ST:get_hand_table("mainhand").right_text_enabled
+            end
+        end
+
     end
 end
 
--- function ST.opts_funcs.test_getter_mh()
---     print('test_getter printout')
---     return true
--- end
-
 function ST:generate_hand_options_table(hand)
     -- Function to generate an options table for a hand object.
-
     local settings = opts_case_dict[hand]
     local offset = settings.order_offset
     local title = settings.title
 
-    local hand_title = title .. " Bar"
-    if not (hand == "mainhand" or hand == "offhand" or hand == "ranged") then
-        hand_title = hand_title .. "s"
-    end
-
-    print(hand_title)
+    -- print(hand_title)
     local opts_group = {
         handler = ST.opts_funcs[hand],
-		name = hand_title,
+		name = title,
 		type = "group",
         order = offset,
 		-- args = top_level_opts,
@@ -196,49 +201,17 @@ function ST:generate_hand_options_table(hand)
             name = "Bar enabled",
             desc = "Enables or disables the swing timer bar.",
             get = "getter",
-            set = function(info, val) print(hand) end,
+            set = "setter",
         },
 
-        -- font settings
-        texts_header = {
-            order=4.00,
-            type="header",
-            name="Texts",
+        -- Font options all go here.
+        texts_group = {
+            type = "group",
+            order = 2.00,
+            name = "Texts",
+            args = ST.fonts_table_preset,
         },
-        text_desc = {
-            type = "description",
-            order = 4.001,
-            name = string.format("Options for bar texts."),
-        },
-        text_size = {
-            type = "range",
-            order = 4.01,
-            name = "Text size",
-            desc = "The size of the bar texts.",
-            min = 10, max = 40, softMin = 8, softMax = 24,
-            step = 1,
-            get = "getter",
-            set = "text_setter",
-        },
-        text_color = {
-            order=4.03,
-            type="color",
-            name="Text color",
-            desc="The color of the addon texts.",
-            hasAlpha=false,
-            get = "color_getter",
-            set = "color_setter",
-        },
-        text_font = {
-            order = 4.02,
-            type = "select",
-            name = "Font",
-            desc = "The font to use in the addon texts.",
-            dialogControl = "LSM30_Font",
-            values = LSM:HashTable("font"),
-            get = "getter",
-            set = "text_setter",
-        },
+
     }
 
     opts_group.args = opts

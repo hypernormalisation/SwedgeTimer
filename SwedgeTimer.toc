@@ -29,6 +29,7 @@ utils.lua
 main.lua
 bars.lua
 config_presets.lua
+option_table_presets.lua
 option_tables.lua
 config.lua
 
