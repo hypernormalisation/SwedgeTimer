@@ -2,6 +2,8 @@
 -- Main module for SwedgeTimer
 --=========================================================================================
 local addon_name, st = ...
+-- local version = "@project-version@"
+local version = "2.0"
 local ST = LibStub("AceAddon-3.0"):NewAddon(addon_name, "AceConsole-3.0", "AceEvent-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local STL = LibStub("LibClassicSwingTimerAPI", true)
@@ -93,11 +95,11 @@ function ST:get_frame(hand)
 	return self[hand].frame
 end
 
-function ST:get_profile_options_table()
+function ST:get_profile_table()
 	return self.db.profile
 end
 
-function ST:get_class_options_table()
+function ST:get_class_table()
 	return self.db.profile[self.player_class]
 end
 
@@ -114,6 +116,8 @@ end
 --=========================================================================================
 function ST:OnInitialize()
 
+	self.player_class = select(2, UnitClass("player"))
+
 	-- Addon database
 	-- print('initing acedb')
 	local SwedgeTimerDB = LibStub("AceDB-3.0"):New(addon_name.."DB", self.defaults, true)
@@ -124,7 +128,27 @@ function ST:OnInitialize()
 	-- Options table
 	local AC = LibStub("AceConfig-3.0")
 	local ACD = LibStub("AceConfigDialog-3.0")
-	AC:RegisterOptionsTable(addon_name.."_Options", self.options)
+	self:set_opts_funcs()
+
+	for hand in self:iter_hands() do
+		self:generate_hand_options_table(hand)
+	end
+
+	local hands = self.class_hands[self.player_class]
+	if #hands ~= 1 then
+		self:generate_hand_options_table("all_hands")
+	end
+	if self:is_value_in_array("mainhand", hands) and self:is_value_in_array("offhand", hands) then
+		self:generate_hand_options_table("melee_hands")
+	end
+
+	-- print(self.opts_table)
+	-- print(self.opts_table.args.mainhand)
+	for k, v in pairs(self.opts_funcs.mainhand) do
+		print(k)
+	end
+
+	AC:RegisterOptionsTable(addon_name.."_Options", self.opts_table)
 	self.optionsFrame = ACD:AddToBlizOptions(addon_name.."_Options", addon_name)
 
 	-- Profile options
@@ -169,7 +193,6 @@ function ST:OnInitialize()
 	-----------------------------------------------------------
 	-- Character info containers
 	self.player_guid = UnitGUID("player")
-	self.player_class = select(2, UnitClass("player"))
 	self.has_oh = false
 	self.has_ranged = false
 	self.mh_timer = 0
@@ -287,6 +310,13 @@ function ST:init_libs()
 	self:init_range_finders()
 	self.interfaces_are_initialised = true
 	self:post_init()
+
+	-- If requested, print a welcome message once everything is
+	-- initialised properly.
+	local db = self:get_profile_table()
+	if db.welcome_message then
+		self:Print("Version " .. version .. " loaded!")
+	end
 end
 
 function ST:init_timers()
@@ -596,7 +626,7 @@ end
 ------------------------------------------------------------------------------------
 function ST:set_adjusted_latencies()
 	-- Set the calibrated latencies
-	local db = self:get_profile_options_table()
+	local db = self:get_profile_table()
 	local home = (self.latency.home_ms * db.latency_scale_factor) + db.latency_linear_offset
 	self.latency.calibrated_home_ms = home
 	local world = (self.latency.world_ms * db.latency_scale_factor) + db.latency_linear_offset
@@ -605,7 +635,7 @@ end
 
 function ST:get_gcd_marker_time_offset_seconds()
 	-- Gets the time offset in seconds according to the settings.
-	local db = self:get_profile_options_table()
+	local db = self:get_profile_table()
 	local offset = 0
 	if db.gcd_marker_offset_mode == "Dynamic" then
 		offset = self.latency.world_ms

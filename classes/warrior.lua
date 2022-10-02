@@ -78,7 +78,7 @@ end
 function ST.WARRIOR.on_current_spell_cast_changed(self, is_cancelled)
     -- This function detects when the player queues up a heroic strike or cleave
     -- and sets relevant flags for the func to set bar colors.
-    local db = self:get_class_options_table()
+    local db = self:get_class_table()
 
     -- Only run this logic if special on-next-attack colors are enabled in the warrior settings.
     if (not db.enable_hs_color) and not (db.enable_cleave_color) then
@@ -118,7 +118,7 @@ function ST.WARRIOR.set_bar_color(self, hand)
     -- Will set appropriate colors for HS/Cleave queued if requested in the settings,
     -- and will set a special color when the player has one of those queued up but has
     -- insufficient rage to cast them.
-    local db_class = self:get_class_options_table()
+    local db_class = self:get_class_table()
     local frame = self:get_frame(hand)
     
     if hand ~= "mainhand" then

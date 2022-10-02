@@ -1,25 +1,10 @@
 ------------------------------------------------------------------------------------
--- Module to contain config default dicts, the options table configuration,
--- and any helper funcs
+-- Module to contain config default
 ------------------------------------------------------------------------------------
 local addon_name, st = ...
 local LSM = LibStub("LibSharedMedia-3.0")
 local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
 -- local print = st.utils.print_msg
-
---=========================================================================================
--- Functions to handle options
---=========================================================================================
-
-
-function ST:convert_color(t, new_alpha)
-	local r,g,b,a = unpack(t)
-	a = new_alpha or a
-	r = r/255
-	g = g/255
-	b = b/255
-	return r, g, b, a
-end
 
 ------------------------------------------------------------------------------------
 -- Default settings for the addon.
@@ -66,20 +51,29 @@ ST.defaults = {
 
 }
 
-ST.marker_mode_map = {
-	spell = "Spell GCD",
-	phys = "Physical GCD",
-	both1 = "Spell top/Physical Bottom",
-	both2 = "Physical top/Spell Bottom",
-	form = "Form-sensitive (Druid Only)",
-}
+--=========================================================================================
+-- Functions to handle options
+--=========================================================================================
 
-local bar_visibility_values = {
-	always = "Always show",
-	in_combat = "In Combat",
-	contextual = "Contextual",
-	hidden = "Hidden",
-}
+function ST:convert_color(t, new_alpha)
+	-- Convert standard 0-255 colors down to WoW 0-1 ranges.
+	local r,g,b,a = unpack(t)
+	a = new_alpha or a
+	r = r/255
+	g = g/255
+	b = b/255
+	return r, g, b, a
+end
+
+function ST:convert_color_up(t, new_alpha)
+	-- Convert WoW 0-1 ranges up to standard 0-255 ranges.
+	local r,g,b,a = unpack(t)
+	a = new_alpha or a
+	r = r * 255
+	g = g * 255
+	b = b * 255
+	return r, g, b, a
+end
 
 local contextual_visibility_values = {
 	in_combat = "In Combat",
@@ -130,9 +124,100 @@ local valid_anchor_points = {
     CENTER="CENTER",
 }
 
-------------------------------------------------------------------------------------
--- Now configure the option table for our settings interface.
+--=========================================================================================
+-- The top-level opts that apply across classes.
+--=========================================================================================
+local top_level_opts = {
+	-- top-top level opts? silly name
+	top_header = {
+		type = "header",
+		order = 0.1,
+		name = "Top Level Options"
+	},
+	bar_enabled = {
+		type = "toggle",
+		order = 1,
+		name = "Enabled",
+		desc = "Enables or disables SwedgeTimer.",
+		get = "GetValue",
+		set = "SetValue",
+	},
+	welcome_message = {
+		type = "toggle",
+		order = 1.1,
+		name = "Welcome message",
+		desc = "Displays a login message showing the addon version on player login or reload.",
+		get = "GetValue",
+		set = "SetValue",
+	},
+	bar_full_delay = {
+		type = "range",
+		order = 1.2,
+		name = "Bar Full Visual Delay (s)",
+		desc = "SwedgeTimer allows for different bar configurations when the swing timer bar is " ..
+			"full or filling. A delay can be set to prevent these states rapidaly changing during normal " ..
+			"combat.",
+		get = "GetValue",
+		set = "SetValue",
+		min = 0, max = 1.0, step = 0.01,
+	},
+
+	-- Latency opts
+	top_latency_header = {
+		type = "header",
+		order = 2.0,
+		name = "Latency Options"
+	},
+	top_latency_desc = {
+		type = "description",
+		order = 2.1,
+		name = "These options control latency adjustments in SwedgeTimer's time-sensitive elements.",
+	},
+	gcd_padding_mode = {
+		order=8,
+		type="select",
+		values=gcd_padding_modes,
+		style="dropdown",
+		desc="The type of GCD offset, if any, to use.",
+		name="GCD offset mode",
+		get = "GetValue",
+		set = function(self, key)
+			ST.db.profile.gcd_padding_mode=key
+			st.bar.set_gcd_marker_offsets()
+		end,
+	},
+	-- latency_linear_offset = {
+	-- 	type = 
+	-- }
+}
+
+
 ST.options = {
+	type = "group",
+	name = addon_name,
+	handler = ST,
+	args = {
+		top_level = {
+			name = "Global Options",
+			type = "group",
+			args = top_level_opts,
+			-- args = {
+			-- 	some_group = {
+			-- 		name = "Test",
+			-- 		type = "group",
+			-- 		args = top_level_opts,
+			-- 	},
+			-- 	-- some_other_group = {
+			-- 	-- 	name = "Test2",
+			-- 	-- 	type = "group",
+			-- 	-- 	args = top_level_opts,
+			-- 	-- },
+			-- }
+		},
+	}
+}
+
+local old_opts = {
 	type = "group",
 	name = addon_name,
 	handler = ST,

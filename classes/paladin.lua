@@ -71,7 +71,7 @@ function ST.PALADIN.set_bar_color(self, hand)
     -- Returns true if any special setting was applied to let the parent func know 
     -- to revert to default behaviour.
     -- Will set appropriate colors for seals and AoW procs if requested.
-    local db_class = self:get_class_options_table()
+    local db_class = self:get_class_table()
     local frame = self:get_frame(hand)
 
     -- -- If enabled, Art of War color takes precedence.

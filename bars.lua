@@ -62,7 +62,9 @@ function ST:init_visuals_template(hand)
     frame.gcd_bar = frame:CreateTexture(nil, "ARTWORK")
     frame.gcd_bar:SetHeight(db.bar_height)
     frame.gcd_bar:SetTexture(LSM:Fetch('statusbar', db.gcd_texture_key))
-    frame.gcd_bar:SetVertexColor(unpack(db.bar_color_gcd))
+    frame.gcd_bar:SetVertexColor(
+        self:convert_color(db.bar_color_gcd)
+    )
     frame.gcd_bar:SetDrawLayer("ARTWORK", -2)
     frame.gcd_bar:Hide()
 
@@ -143,7 +145,9 @@ function ST:configure_texts(hand)
 
     frame.left_text:SetFont(font_path, db.text_size, opt_string)
     frame.left_text:SetPoint("TOPLEFT", 3, -(db.bar_height / 2) + (db.text_size / 2))
-	frame.left_text:SetTextColor(unpack(db.text_color))
+	frame.left_text:SetTextColor(
+        self:convert_color(db.text_color)
+    )
     if db.left_text_enabled then
         frame.left_text:Show()
     else
@@ -152,7 +156,9 @@ function ST:configure_texts(hand)
 
     frame.right_text:SetFont(font_path, db.text_size, opt_string)
 	frame.right_text:SetPoint("TOPRIGHT", -3, -(db.bar_height / 2) + (db.text_size / 2))
-	frame.right_text:SetTextColor(unpack(db.text_color))
+	frame.right_text:SetTextColor(
+        self:convert_color(db.text_color)
+    )
     if db.right_text_enabled then
         frame.right_text:Show()
     else
@@ -203,8 +209,18 @@ function ST:configure_bar_position(hand)
 	self:configure_bar_outline(hand)
 end
 
+function ST:configure_gcd_underlay(hand)
+    local db = self:get_hand_table(hand)
+	local frame = self:get_frame(hand)
+    frame.gcd_bar:SetTexture(LSM:Fetch('statusbar', db.gcd_texture_key))
+    frame.gcd_bar:SetVertexColor(
+        self:convert_color(db.bar_color_gcd)
+    )
+    frame.gcd_bar:SetDrawLayer("ARTWORK", -2)
+end
+
 --=========================================================================================
--- Drag and drop UIHANDLERs
+-- UIHANDLERs
 --=========================================================================================
 function ST:drag_stop_template(hand)
     local frame = self[hand].frame
@@ -220,7 +236,7 @@ function ST:drag_stop_template(hand)
 end
 
 function ST:drag_start_template(hand)
-    local db = self:get_hand_table(hand)
+    local db = self:get_profile_table(hand)
     if not db.bar_locked then
         ST[hand].frame:StartMoving()
     end
@@ -484,7 +500,7 @@ function ST:set_gcd_marker_positions(hand)
     -- and sets them.
     -- print('Setting marker positions for hand: ' .. tostring(hand))
     local db_hand = self:get_hand_table(hand)
-    local db_class = self:get_class_options_table()
+    local db_class = self:get_class_table()
     local frame = self:get_frame(hand)
     local s = self[hand].speed
 

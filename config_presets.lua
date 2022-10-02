@@ -5,6 +5,8 @@ local addon_name, st = ...
 local LSM = LibStub("LibSharedMedia-3.0")
 local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
 
+
+
 -- This table is used for any per-class settings that should apply globally.
 ST.class_defaults = {
 }
@@ -46,7 +48,7 @@ ST.bar_defaults = {
 
     -- Bar Texts
     text_size = 12,
-    text_color = {1.0, 1.0, 1.0, 1.0},
+    text_color = {255, 255, 255, 1.0},
     text_font = "PT Sans Narrow",
     text_outline_key = "outline",
 
@@ -60,7 +62,7 @@ ST.bar_defaults = {
 
     -- GCD underlay
     show_gcd_underlay = true,
-    bar_color_gcd = {0.42, 0.42, 0.42, 0.8},
+    bar_color_gcd = {140, 140, 140, 0.85},
     gcd_texture_key = "Solid",
 
     -- GCD markers
@@ -333,7 +335,7 @@ ST.WARRIOR.defaults = {
     },
 	offhand = {
 		bar_x_offset = 0,
-		bar_y_offset = -144,
+		bar_y_offset = -154,
 		bar_color_default = {1, 66, 69, 0.8},
         show_gcd_underlay = false,
         gcd1a_marker_enabled = false,
@@ -345,7 +347,7 @@ ST.WARRIOR.defaults = {
 		bar_height = 13,
 		bar_width = 200,
 		bar_x_offset = 0,
-		bar_y_offset = -102,
+		bar_y_offset = -120,
 		bar_color_default = {115, 17, 42, 0.8},
 		font_size = 11,
         show_gcd_underlay = false,
