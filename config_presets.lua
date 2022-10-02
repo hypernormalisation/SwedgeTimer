@@ -68,7 +68,7 @@ ST.bar_defaults = {
     -- GCD markers
     gcd1a_marker_enabled = true,
     gcd1a_marker_anchor = "endofswing",
-    gcd1a_marker_hide_inactive = true,
+    gcd1a_marker_hide_inactive = false,
     gcd1a_marker_mode = "phys",
     gcd1a_marker_color = {230, 230, 230, 1.0},
     gcd1a_marker_width = 2,
@@ -77,7 +77,7 @@ ST.bar_defaults = {
 
     gcd1b_marker_enabled = true,
     gcd1b_marker_anchor = "endofswing",
-    gcd1b_marker_hide_inactive = true,
+    gcd1b_marker_hide_inactive = false,
     gcd1b_marker_mode = "phys",
     gcd1b_marker_color = {230, 230, 230, 1.0},
     gcd1b_marker_width = 2,

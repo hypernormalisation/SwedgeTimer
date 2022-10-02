@@ -23,6 +23,11 @@ ST.bar_border_modes = {
 	None="None",
 }
 
+ST.gcd_anchor_points = {
+    endofswing = "End of Swing",
+    swing = "Swing",
+}
+
 -- The fonts
 ST.fonts_table_preset = {
     texts_header = {
@@ -298,6 +303,8 @@ ST.gcd_markers_preset = {
         "changing to the physical GCD duration for druids when in bear/cat form, and spell GCD duration when "..
         "in other forms.",
     },
+
+    -- Marker Appearance
     markers_appearance_header = {
         type = "header",
         name = "Marker Appearance",
@@ -362,7 +369,8 @@ ST.gcd_markers_preset = {
         set = "bar_setter",
     },
 
-    markers_beheaviour_header = {
+    -- Top Marker Behaviour
+    markers_beheaviour_header_top = {
         order=2.0,
         type="header",
         name="Top Marker Behaviour",
@@ -375,17 +383,83 @@ ST.gcd_markers_preset = {
         get = "getter",
         set = "bar_setter",
     },
-
+    gcd1a_marker_hide_inactive = {
+        type = "toggle",
+        order = 2.12,
+        name = "Hide when full",
+        desc = "Will hide the top GCD marker when the swing timer bar is full.",
+        get = "getter",
+        set = "bar_setter",
+        disabled = "gcd1a_anchor_disable",
+    },
     -- MODE WIDGET GETS INSERTED INTO THIS TABLE BY THE TABLE CREATION FUNC
     -- BECAUSE THE OPTIONS ARE CLASS-SENSITIVE. order = 2.2
-
     gcd1a_marker_anchor = {
         type = "select",
         order = 2.3,
         name = "Anchor point",
+        values=ST.gcd_anchor_points,
         desc = "The anchor point for the top GCD marker.",
         get = "getter",
         set = "bar_setter",
-    }
+        disabled = "gcd1a_anchor_disable",
+    },
+    gcd1a_swing_anchor_wrap = {
+        type = "toggle",
+        order = 2.4,
+        name = "Wrap markers",
+        desc = "If the marker anchor is Swing, toggles the marker wrapping back to the start of the bar "..
+            "when the GCD marker falls in the player's next swing.",
+        get = "getter",
+        set = "bar_setter",
+        disabled = "gcd1a_wrap_disable",
+    },
+
+    -- Bottom Marker Behaviour
+    markers_beheaviour_header_bottom = {
+        order=2.5,
+        type="header",
+        name="Top Marker Behaviour",
+    },
+    gcd1b_marker_enabled = {
+        type = "toggle",
+        order = 2.6,
+        name = "Enable",
+        desc = "Toggles drawing the bottom GCD marker on the bar.",
+        get = "getter",
+        set = "bar_setter",
+    },
+    gcd1b_marker_hide_inactive = {
+        type = "toggle",
+        order = 2.62,
+        name = "Hide when full",
+        desc = "Will hide the bottom GCD marker when the swing timer bar is full.",
+        get = "getter",
+        set = "bar_setter",
+        disabled = "gcd1a_anchor_disable",
+    },
+    -- MODE WIDGET GETS INSERTED INTO THIS TABLE BY THE TABLE CREATION FUNC
+    -- BECAUSE THE OPTIONS ARE CLASS-SENSITIVE. order = 2.7
+    gcd1b_marker_anchor = {
+        type = "select",
+        order = 2.8,
+        name = "Anchor point",
+        values=ST.gcd_anchor_points,
+        desc = "The anchor point for the bottom GCD marker.",
+        get = "getter",
+        set = "bar_setter",
+        disabled = "gcd1b_anchor_disable",
+    },
+    gcd1b_swing_anchor_wrap = {
+        type = "toggle",
+        order = 2.9,
+        name = "Wrap markers",
+        desc = "If the marker anchor is Swing, toggles the marker wrapping back to the start of the bar "..
+            "when the GCD marker falls in the player's next swing.",
+        get = "getter",
+        set = "bar_setter",
+        disabled = "gcd1b_wrap_disable",
+    },
+
 
 }

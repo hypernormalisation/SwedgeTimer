@@ -317,11 +317,15 @@ function ST:onupdate_common(hand, elapsed)
         local gcd_d = self:get_gcd_marker_duration(hand, '1a')
         local gcd_additional_progress = gcd_d / d.speed
         local combined_progress = progress + gcd_additional_progress
-        if not d.is_full then
-            frame.gcd1a_marker:Show()
-        else
+
+        -- Hide it only if the bar is full and hide_inactive is enabled, 
+        -- otherwise show.
+        if d.is_full and db.gcd1a_marker_hide_inactive then
             frame.gcd1a_marker:Hide()
+        else
+            frame.gcd1a_marker:Show()
         end
+
         if combined_progress > 1.0 then
             if db.gcd1a_swing_anchor_wrap then
                 while combined_progress > 1.0 do
@@ -342,10 +346,10 @@ function ST:onupdate_common(hand, elapsed)
         -- print(gcd_d)
         local gcd_additional_progress = gcd_d / d.speed
         local combined_progress = progress + gcd_additional_progress
-        if not d.is_full then
-            frame.gcd1b_marker:Show()
-        else
+        if d.is_full and db.gcd1b_marker_hide_inactive then
             frame.gcd1b_marker:Hide()
+        else
+            frame.gcd1b_marker:Show()
         end
         if combined_progress > 1.0 then
             if db.gcd1b_swing_anchor_wrap then
@@ -521,36 +525,49 @@ function ST:set_gcd_marker_positions(hand)
     local hand_is_full = GetTime() >= self[hand].ends_at
     -- print('hand_is_full says: '..tostring(hand_is_full))
 
-    if db_hand.gcd1a_marker_enabled and db_hand.gcd1a_marker_anchor == "endofswing" then
-        local t_before = self:get_gcd_marker_duration(hand, '1a')
-        local progress = t_before / s
-        -- print(progress)
-        -- print(self[hand].is_full)
-        if progress >= 1 or self[hand].is_full then
-            frame.gcd1a_marker:Hide()
-        else
-            -- print("showing 1a")
-            frame.gcd1a_marker:Show()
+    -- Only process if enabled
+    if db_hand.gcd1a_marker_enabled then
+        if db_hand.gcd1a_marker_anchor == "endofswing" then
+            local t_before = self:get_gcd_marker_duration(hand, '1a')
+            local progress = t_before / s
+            -- print(progress)
+            -- print(self[hand].is_full)
+            
+            -- If progress > 1 then the marker is pushed off the side of the bar, 
+            -- more than one standard swing, so *always* hide it.
+            if progress >= 1 then
+                frame.gcd1a_marker:Hide()
+            else
+                -- If the bar is full and hide_when_inactive, also hide
+                if (self[hand].is_full and db_hand.gcd1a_marker_hide_inactive) then
+                    frame.gcd1a_marker:Hide()
+                else
+                    -- If we get here, show it
+                    local offset = progress * db_hand.bar_width * -1
+                    local v_offset = db_hand.bar_height * db_hand.gcd1a_marker_fractional_height * -1
+                    frame.gcd1a_marker:SetStartPoint("TOPRIGHT", offset, 0)
+                    frame.gcd1a_marker:SetEndPoint("TOPRIGHT", offset, v_offset)
+                    frame.gcd1a_marker:Show()
+                end
+            end
         end
-        local offset = progress * db_hand.bar_width * -1
-        local v_offset = db_hand.bar_height * db_hand.gcd1a_marker_fractional_height * -1
-        frame.gcd1a_marker:SetStartPoint("TOPRIGHT", offset, 0)
-        frame.gcd1a_marker:SetEndPoint("TOPRIGHT", offset, v_offset)
     else
         frame.gcd1a_marker:Hide()
     end
-    if db_hand.gcd1b_marker_enabled and db_hand.gcd1b_marker_anchor == "endofswing" then
-        local t_before = self:get_gcd_marker_duration(hand, '1b')
-        local progress = t_before / s
-        if progress >= 1 or self[hand].is_full then
-            frame.gcd1b_marker:Hide()
-        else
-            frame.gcd1b_marker:Show()
+    if db_hand.gcd1b_marker_enabled then
+        if db_hand.gcd1b_marker_anchor == "endofswing" then
+            local t_before = self:get_gcd_marker_duration(hand, '1b')
+            local progress = t_before / s
+            if progress >= 1 or (self[hand].is_full and db_hand.gcd1b_marker_hide_inactive) then
+                frame.gcd1b_marker:Hide()
+            else
+                frame.gcd1b_marker:Show()
+            end
+            local offset = progress * db_hand.bar_width * -1
+            local v_offset = db_hand.bar_height * db_hand.gcd1b_marker_fractional_height
+            frame.gcd1b_marker:SetStartPoint("BOTTOMRIGHT", offset, 0)
+            frame.gcd1b_marker:SetEndPoint("BOTTOMRIGHT", offset, v_offset)
         end
-        local offset = progress * db_hand.bar_width * -1
-        local v_offset = db_hand.bar_height * db_hand.gcd1b_marker_fractional_height
-        frame.gcd1b_marker:SetStartPoint("BOTTOMRIGHT", offset, 0)
-        frame.gcd1b_marker:SetEndPoint("BOTTOMRIGHT", offset, v_offset)
     else
         frame.gcd1b_marker:Hide()
     end

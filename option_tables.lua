@@ -209,6 +209,48 @@ function ST:set_opts_funcs()
             end
         end
 
+        -- GCD1a anchor disabler
+        ST.opts_funcs[hand].gcd1a_anchor_disable = function()
+            if hand == "mainhand" or hand == "offhand" or hand == "ranged" then
+                return not ST:get_hand_table(hand).gcd1a_marker_enabled
+            else
+                return not ST:get_hand_table("mainhand").gcd1a_marker_enabled
+            end
+        end
+        -- GCD1a wrap disabler
+        ST.opts_funcs[hand].gcd1a_wrap_disable = function()
+            if hand == "mainhand" or hand == "offhand" or hand == "ranged" then
+                local marker_enabled = ST:get_hand_table(hand).gcd1a_marker_enabled
+                local is_anchored_swing = ST:get_hand_table(hand).gcd1a_marker_anchor == "swing"
+                return (not marker_enabled) or (not is_anchored_swing)
+            else
+                local marker_enabled = ST:get_hand_table("mainhand").gcd1a_marker_enabled
+                local is_anchored_swing = ST:get_hand_table("mainhand").gcd1a_marker_anchor == "swing"
+                return (not marker_enabled) or (not is_anchored_swing)
+            end
+        end
+        -- GCD1b anchor disabler
+        ST.opts_funcs[hand].gcd1b_anchor_disable = function()
+            if hand == "mainhand" or hand == "offhand" or hand == "ranged" then
+                return not ST:get_hand_table(hand).gcd1b_marker_enabled
+            else
+                return not ST:get_hand_table("mainhand").gcd1b_marker_enabled
+            end
+        end
+        -- GCD1b wrap disabler
+        ST.opts_funcs[hand].gcd1b_wrap_disable = function()
+            if hand == "mainhand" or hand == "offhand" or hand == "ranged" then
+                local marker_enabled = ST:get_hand_table(hand).gcd1b_marker_enabled
+                local is_anchored_swing = ST:get_hand_table(hand).gcd1b_marker_anchor == "swing"
+                return (not marker_enabled) or (not is_anchored_swing)
+            else
+                local marker_enabled = ST:get_hand_table("mainhand").gcd1b_marker_enabled
+                local is_anchored_swing = ST:get_hand_table("mainhand").gcd1b_marker_anchor == "swing"
+                return (not marker_enabled) or (not is_anchored_swing)
+            end
+        end
+
+
     end
 end
 
