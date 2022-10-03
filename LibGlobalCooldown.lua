@@ -192,16 +192,16 @@ end
 
 function lib:UPDATE_SHAPESHIFT_FORM()
     -- Only druids have their physical gcd change.
-    if not self.class == "DRUID" then
+    if self.class ~= "DRUID" then
         return
     end
+
     local i = GetShapeshiftForm()
     if i == 3 then
         self.phys_gcd = 1.0
     else
         self.phys_gcd = 1.5
     end
-    -- print('detected shapeshift')
     -- -- If shifting to or from cat form, Fire an event.
     -- print(i, self.current_form)
     -- if i == 3 or self.current_form == 3 then

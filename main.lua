@@ -389,7 +389,7 @@ end
 --=========================================================================================
 function ST.callback_event_handler(event, ...)
 	-- Func to pass all callbacks to their relevant handler
-	if string.find(event, "SWING_TIMER") then
+	if string.find(event, "GCD") then
 		print('<===============')
 		print(event)
 		local args = table.pack(...)
