@@ -34,7 +34,64 @@ ST.opts_funcs.global.setter = function(_, info, value)
     local db = ST:get_profile_table()
     db[info[#info]] = value
 end
+-- Setter for latency options.
+ST.opts_funcs.global.latency_setter = function(_, info, value)
+    local db = ST:get_profile_table()
+    db[info[#info]] = value
+    ST:set_adjusted_latencies()
+    ST:set_gcd_times_before_swing_seconds()
+    for hand in ST:iter_hands() do
+        ST:set_deadzone_width(hand)
+        ST:set_gcd_marker_positions(hand)
+    end
+end
 
+
+
+-- Disabler funcs for global prefs.
+
+function ST:generate_top_level_options_table()
+
+    -- Set the top-level options that are displayed above the settings menu.
+    self.opts_table.handler = self.opts_funcs.global
+    self.opts_table.args.enabled = {
+        type = "toggle",
+        order = 1.1,
+        name = "Global Enable/Disable",
+        desc = "Enables or disables all visuals in SwedgeTimer.",
+        get = "getter",
+        set = "setter",
+    }
+    self.opts_table.args.bars_locked = {
+        type = "toggle",
+        order = 1.2,
+        name = "Bars locked",
+        desc = "Prevents all swing timer bars from being dragged with the mouse.",
+        get = "getter",
+        set = function(_, input)
+            local db = ST:get_profile_table()
+            db.bars_locked = input
+            for hand in ST:iter_hands() do
+                local frame = self:get_frame(hand)
+                frame:SetMovable(not input)
+                frame:EnableMouse(not input)
+            end
+        end,
+    }
+    self.opts_table.args.welcome_message = {
+        type = "toggle",
+        order = 1.3,
+        name = "Welcome message",
+        desc = "Displays a login message showing the addon version on player login or reload.",
+        get = "getter",
+        set = "setter",
+    }
+
+    -- Add behaviour panel
+    ST.opts_table.args.behaviour = ST.behaviour_group
+
+
+end
 
 local opts_case_dict = {
     mainhand = {
@@ -258,44 +315,7 @@ function ST:generate_class_options_table()
     -- Function to generate the per-class settings.
 end
 
-function ST:generate_top_level_options_table()
 
-    -- Set the top-level options that are displayed above the settings menu.
-    self.opts_table.handler = self.opts_funcs.global
-    self.opts_table.args.enabled = {
-        type = "toggle",
-        order = 1.1,
-        name = "Global Enable/Disable",
-        desc = "Enables or disables all visuals in SwedgeTimer.",
-        get = "getter",
-        set = "setter",
-    }
-    self.opts_table.args.bars_locked = {
-        type = "toggle",
-        order = 1.2,
-        name = "Bars locked",
-        desc = "Prevents all swing timer bars from being dragged with the mouse.",
-        get = "getter",
-        set = function(_, input)
-            local db = ST:get_profile_table()
-            db.bars_locked = input
-            for hand in ST:iter_hands() do
-                local frame = self:get_frame(hand)
-                frame:SetMovable(not input)
-                frame:EnableMouse(not input)
-            end
-        end,
-    }
-    self.opts_table.args.welcome_message = {
-        type = "toggle",
-        order = 1.3,
-        name = "Welcome message",
-        desc = "Displays a login message showing the addon version on player login or reload.",
-        get = "getter",
-        set = "setter",
-    }
-
-end
 
 function ST:generate_hand_options_table(hand)
     -- Function to generate an options table for a hand object.
@@ -361,6 +381,7 @@ function ST:generate_hand_options_table(hand)
         },
 
     }
+
     opts_group.args = opts
 
     -- Any optional groups should go here.
@@ -371,6 +392,53 @@ function ST:generate_hand_options_table(hand)
             name = "GCD Markers",
             args = ST.gcd_markers_preset
         }
+        -- Add in the GCD mode options, which are class-dependent.
+        if self.player_class == "DRUID" then
+            opts_group.args.gcd_markers_group.args.gcd1a_marker_mode = {
+                order = 2.2,
+                type = "select",
+                name = "GCD type to show",
+                desc = "The GCD type to show (physical/spell). If set to Form Dependent, will show the physical "..
+                    "GCD duration in cat/bear form, and the spell GCD duration in all other forms.",
+                values = ST.gcd_marker_modes.DRUID,
+                get = "getter",
+                set = "bar_setter",
+                disabled = "gcd1a_anchor_disable"
+            }
+            opts_group.args.gcd_markers_group.args.gcd1b_marker_mode = {
+                order = 2.7,
+                type = "select",
+                name = "GCD type to show",
+                desc = "The GCD type to show (physical/spell). If set to Form Dependent, will show the physical "..
+                    "GCD duration in cat/bear form, and the spell GCD duration in all other forms.",
+                values = ST.gcd_marker_modes.DRUID,
+                get = "getter",
+                set = "bar_setter",
+                disabled = "gcd1b_anchor_disable"
+            }
+        else
+            opts_group.args.gcd_markers_group.args.gcd1a_marker_mode = {
+                order = 2.2,
+                type = "select",
+                name = "GCD type to show",
+                desc = "The GCD type to show (physical/spell).",
+                values = ST.gcd_marker_modes.NONDRUID,
+                get = "getter",
+                set = "bar_setter",
+                disabled = "gcd1a_anchor_disable"
+            }
+            opts_group.args.gcd_markers_group.args.gcd1b_marker_mode = {
+                order = 2.7,
+                type = "select",
+                name = "GCD type to show",
+                desc = "The GCD type to show (physical/spell).",
+                values = ST.gcd_marker_modes.NONDRUID,
+                get = "getter",
+                set = "bar_setter",
+                disabled = "gcd1b_anchor_disable"
+            }
+        end
+
     end
 
     -- Assign it

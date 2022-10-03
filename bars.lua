@@ -311,7 +311,7 @@ function ST:onupdate_common(hand, elapsed)
         self:set_gcd_width(hand, timer_width, progress)
     end
 
-    -- If any gcd marker is anchored to the bar position, handle
+    -- If any gcd marker is anchored to the swing, handle
     -- that here.
     if db.gcd1a_marker_enabled and db.gcd1a_marker_anchor == "swing" then
         local gcd_d = self:get_gcd_marker_duration(hand, '1a')

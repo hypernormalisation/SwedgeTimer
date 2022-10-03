@@ -5,7 +5,7 @@ local addon_name, st = ...
 local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
 local LSM = LibStub("LibSharedMedia-3.0")
 
-
+-- Selections for dropdowns
 ST.outlines = {
 	_none="None",
 	outline="Outline",
@@ -27,6 +27,79 @@ ST.gcd_anchor_points = {
     endofswing = "End of Swing",
     swing = "Swing",
 }
+
+ST.gcd_marker_modes = {
+    DRUID = {
+        phys = "Physical GCD",
+        spell = "Spell GCD",
+        form = "Form-dependent",
+    },
+    NONDRUID = {
+        phys = "Physical GCD",
+        spell = "Spell GCD",
+    }
+}
+
+ST.gcd_marker_offsets = {
+    None = "None",
+    Fixed = "Fixed",
+    Dynamic = "Dynamic",
+    Calibrated = "Calibrated",
+}
+
+
+-- Latency options
+ST.latency_presets = {
+    header = {
+        order = 3.0,
+        type = "header",
+        name = "GCD Marker Latency",
+    },
+    desc1 = {
+        order = 3.05,
+        type = "description",
+        name = "These options control fixed or latency-based offsets to the GCD marker positions.",
+    },
+    gcd_marker_offset_mode = {
+        type = "select",
+        order = 3.1,
+        name = "Marker Offset Mode",
+        desc = "The type of offset, if any, to apply to the GCD marker positions. Fixed applies the specified "..
+            "offset, Dynamic applies an offset based on latency, Calibrated combines the Fixed"..
+            "and Dynamic offsets.",
+        values = ST.gcd_marker_offsets,
+        get = "getter",
+        set = "latency_setter",
+    },
+    latency_linear_offset = {
+        type = "range",
+        order = 3.2,
+        name = "Fixed Offset (ms)",
+        desc = "Value in ms to add to Fixed or Calibrated latency.",
+        min = 0, max = 200, step = 1,
+        get = "getter",
+        set = "latency_setter",
+        disabled = function()
+            local db = ST:get_profile_table()
+            local is_fixed = db.gcd_marker_offset_mode == "Fixed"
+            local is_calibrated = db.gcd_marker_offset_mode == "Calibrated"
+            return not (is_fixed or is_calibrated)
+        end,
+    },
+
+}
+
+ST.behaviour_group = {
+    type = "group",
+    name = "Advanced Behaviour",
+    desc = "Panel controlling all global options for the addon.",
+    order = 9.0,
+    args = {},
+}
+for k, v in pairs(ST.latency_presets) do
+    ST.behaviour_group.args[k] = v
+end
+
 
 -- The fonts
 ST.fonts_table_preset = {
@@ -141,7 +214,7 @@ ST.fonts_table_preset = {
         set = "text_setter",
         disabled = "right_text_disable",
     },
-    Right_text_hide_inactive = {
+    right_text_hide_inactive = {
         type = "toggle",
         order = 4.12,
         name = "Hide when bar full",
@@ -293,6 +366,11 @@ ST.borders_preset = {
 }
 
 ST.gcd_markers_preset = {
+    header = {
+        type = "header",
+        name = "GCD Marker Settings",
+        order = 0.9,
+    },
     desc_1 = {
         type="description",
         order = 1.0,
@@ -436,7 +514,7 @@ ST.gcd_markers_preset = {
         desc = "Will hide the bottom GCD marker when the swing timer bar is full.",
         get = "getter",
         set = "bar_setter",
-        disabled = "gcd1a_anchor_disable",
+        disabled = "gcd1b_anchor_disable",
     },
     -- MODE WIDGET GETS INSERTED INTO THIS TABLE BY THE TABLE CREATION FUNC
     -- BECAUSE THE OPTIONS ARE CLASS-SENSITIVE. order = 2.7
@@ -460,6 +538,4 @@ ST.gcd_markers_preset = {
         set = "bar_setter",
         disabled = "gcd1b_wrap_disable",
     },
-
-
 }

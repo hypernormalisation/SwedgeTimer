@@ -31,7 +31,7 @@ ST.defaults = {
 		-- GCD marker offsets
 		gcd_marker_offset_mode = "None",
 		gcd_marker_offset_scale_factor = 1.0,
-		gcd_marker_fixed_offset = 100,
+		gcd_marker_fixed_offset = 50,
 
 		-- Deadzone
 		deadzone_scale_factor = 1.4,
@@ -189,68 +189,36 @@ local top_level_opts = {
 }
 
 
-ST.options = {
-	type = "group",
-	name = addon_name,
-	handler = ST,
-	args = {
-		top_level = {
-			name = "Global Options",
-			type = "group",
-			args = top_level_opts,
-			-- args = {
-			-- 	some_group = {
-			-- 		name = "Test",
-			-- 		type = "group",
-			-- 		args = top_level_opts,
-			-- 	},
-			-- 	-- some_other_group = {
-			-- 	-- 	name = "Test2",
-			-- 	-- 	type = "group",
-			-- 	-- 	args = top_level_opts,
-			-- 	-- },
-			-- }
-		},
-	}
-}
+-- ST.options = {
+-- 	type = "group",
+-- 	name = addon_name,
+-- 	handler = ST,
+-- 	args = {
+-- 		top_level = {
+-- 			name = "Global Options",
+-- 			type = "group",
+-- 			args = top_level_opts,
+-- 			-- args = {
+-- 			-- 	some_group = {
+-- 			-- 		name = "Test",
+-- 			-- 		type = "group",
+-- 			-- 		args = top_level_opts,
+-- 			-- 	},
+-- 			-- 	-- some_other_group = {
+-- 			-- 	-- 	name = "Test2",
+-- 			-- 	-- 	type = "group",
+-- 			-- 	-- 	args = top_level_opts,
+-- 			-- 	-- },
+-- 			-- }
+-- 		},
+-- 	}
+-- }
 
 local old_opts = {
 	type = "group",
 	name = addon_name,
 	handler = ST,
 	args = {
-
-		------------------------------------------------------------------------------------
-		-- top-level settings
-		welcome_message = {
-			type = "toggle",
-			order = 1.1,
-			name = "Welcome message",
-			desc = "Displays a login message showing the addon version on player login or reload.",
-			get = "GetValue",
-			set = "SetValue",
-		},
-		bar_enabled = {
-			type = "toggle",
-			order = 1,
-			name = "Enabled",
-			desc = "Enables or disables SwedgeTimer.",
-			get = "GetValue",
-			set = "SetValue",
-		},
-
-		bar_locked = {
-			type = "toggle",
-			order = 1.12,
-			name = "Bar locked",
-			desc = "Prevents the swing bar from being dragged with the mouse.",
-			get = "GetValue",
-			set = function(self, input)
-				ST.db.profile.bar_locked = input
-				st.bar.frame:SetMovable(not input)
-				st.bar.frame:EnableMouse(not input)
-			end,
-		},
 
 		------------------------------------------------------------------------------------
 		-- addon feature behaviour

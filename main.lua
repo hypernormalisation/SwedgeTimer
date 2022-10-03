@@ -135,11 +135,9 @@ function ST:OnInitialize()
 	-----------------------------------------------------------
 	self:set_opts_funcs()
 	self:generate_top_level_options_table()
-
 	for hand in self:iter_hands() do
 		self:generate_hand_options_table(hand)
 	end
-
 	local hands = self.class_hands[self.player_class]
 	if #hands ~= 1 then
 		self:generate_hand_options_table("all_hands")
@@ -637,7 +635,7 @@ function ST:set_adjusted_latencies()
 	local home = (self.latency.home_ms * db.latency_scale_factor) + db.latency_linear_offset
 	self.latency.calibrated_home_ms = home
 	local world = (self.latency.world_ms * db.latency_scale_factor) + db.latency_linear_offset
-	self.latency.calibrated_home_ms = world
+	self.latency.calibrated_world_ms = world
 end
 
 function ST:get_gcd_marker_time_offset_seconds()
@@ -649,7 +647,7 @@ function ST:get_gcd_marker_time_offset_seconds()
 	elseif db.gcd_marker_offset_mode == "Calibrated" then
 		offset = self.latency.calibrated_world_ms
 	elseif db.gcd_marker_offset_mode == "Fixed" then
-		offset = db.gcd_marker_fixed_offset
+		offset = db.latency_linear_offset
 	end
 	offset = offset / 1000
 	return offset
