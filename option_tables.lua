@@ -580,7 +580,30 @@ function ST:generate_hand_options_table(hand)
     end
 
     -- Assign it to the opts table.
-    self.opts_table.args[hand] = opts_group
-
+    if hand == "mainhand" or hand == "offhand" or hand == "ranged" then
+        self.opts_table.args[hand] = opts_group
+    else
+        -- If we need to, construct the multi-bar control panel and group.
+        if not self.opts_table.args.multi_control then
+            local mp_desc = "This panel allows the user to control multiple groups of bars at once."
+            self.opts_table.args.multi_control = {
+                name = "Multi-bar Controls",
+                type = "group",
+                desc = mp_desc,
+                args = {},
+            }
+            self.opts_table.args.multi_control.args.multi_header = {
+                name = "Control Multiple Bars at Once",
+                order = 0.1,
+                type = "header",
+            }
+            self.opts_table.args.multi_control.args.multi_desc = {
+                name = mp_desc,
+                order = 0.2,
+                type = "description",
+            }
+        end
+        self.opts_table.args.multi_control.args[hand] = opts_group
+    end
 end
 
