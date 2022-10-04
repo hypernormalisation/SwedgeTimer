@@ -437,6 +437,11 @@ function ST.class_opts_funcs.WARRIOR(self)
             order = 1.0,
             name = "Warrior Configuration",
         },
+        queue_desc = {
+            order = 1.02,
+            type = "description",
+            name = "The bar can be configured to turn a custom color when an on-next-attack ability is queued."
+        },
         enable_hs_color = {
             type = "toggle",
             order = 1.1,
@@ -453,6 +458,10 @@ function ST.class_opts_funcs.WARRIOR(self)
             hasAlpha=true,
             get = "color_getter",
             set = "color_setter",
+            disabled = function()
+                local db = ST:get_class_table()
+                return not db.enable_hs_color
+            end,
         },
         enable_cleave_color = {
             type = "toggle",
@@ -470,11 +479,20 @@ function ST.class_opts_funcs.WARRIOR(self)
             hasAlpha=true,
             get = "color_getter",
             set = "color_setter",
+            disabled = function()
+                local db = ST:get_class_table()
+                return not db.enable_cleave_color
+            end,
+        },
+        lb1 = {
+            type = "header",
+            order = 1.45,
+            name = "",
         },
         rage_desc = {
             order = 1.5,
             type = "description",
-            name = "If either of the above are enabled, the bar will turn a certain color when the player "..
+            name = "If either of the above are enabled, the mainhand bar will turn a certain color when the player "..
                 "has queued an on-next-attack ability, but has since dropped below the rage threshold necessary "..
                 "to use the ability."
         },
