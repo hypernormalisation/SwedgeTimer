@@ -20,32 +20,27 @@ local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
 function ST:init_visuals_template(hand)
     print("initing visuals for hand: "..tostring(hand))
     local frame = self[hand].frame
-    local db_shared = self.db.profile
+    local db_profile = self.db.profile
     local db = self:get_hand_table(hand)
 
     -- Set initial frame properties
     frame:SetPoint("CENTER")
-    frame:SetMovable(not db.bar_locked)
-    frame:EnableMouse(not db.bar_locked)
+    frame:SetMovable(not db_profile.bars_locked)
+    frame:EnableMouse(not db_profile.bars_locked)
     frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnDragStart", self[hand].on_drag_start)
     frame:SetScript("OnDragStop", self[hand].on_drag_stop)
     frame:SetHeight(db.bar_height)
     frame:SetWidth(db.bar_width)
+    -- self:configure_bar_size(hand)
     frame:ClearAllPoints()
     frame:SetPoint(db.bar_point, UIParent, db.bar_rel_point, db.bar_x_offset, db.bar_y_offset)
 
-    -- Create the backplane and border
-    frame.backplane = CreateFrame("Frame", addon_name .. "MHBarBackdropFrame",
-        frame, "BackdropTemplate"
-    )
-
-    -- Adjust the frame draw levels so the backplane is below the frame
-    frame:SetFrameLevel(db_shared.draw_level+1)
-    frame.backplane:SetFrameLevel(db_shared.draw_level)
-    -- Set to the requested frame strata
-    frame:SetFrameStrata(db_shared.frame_strata)
-    frame.backplane:SetFrameStrata(db_shared.frame_strata)
+    -- Create the backplane
+    frame.backplane = CreateFrame("Frame", addon_name .. "MHBarBackdropFrame", frame, "BackdropTemplate")
+    
+    -- Configure frame strata/draw levels
+    self:configure_frame_strata(hand)
 
     -- Configure the backplane/outline
     self:configure_bar_outline(hand)
@@ -54,20 +49,12 @@ function ST:init_visuals_template(hand)
     frame.bar = frame:CreateTexture(nil, "ARTWORK")
     frame.bar:SetPoint("TOPLEFT", 0, 0)
     frame.bar:SetHeight(db.bar_height)
-    -- frame.bar:SetTexture(LSM:Fetch('statusbar', db.bar_texture_key))
-    -- self:set_bar_color(hand)
     frame.bar:SetWidth(db.bar_width)
-
     -- Create the GCD timer bar
     frame.gcd_bar = frame:CreateTexture(nil, "ARTWORK")
     frame.gcd_bar:SetHeight(db.bar_height)
-    -- frame.gcd_bar:SetTexture(LSM:Fetch('statusbar', db.gcd_texture_key))
-    -- frame.gcd_bar:SetVertexColor(
-    --     self:convert_color(db.bar_color_gcd)
-    -- )
     frame.gcd_bar:SetDrawLayer("ARTWORK", -2)
     frame.gcd_bar:Hide()
-
     self:configure_bar_appearances(hand)
 
     -- Create the deadzone bar
@@ -77,9 +64,7 @@ function ST:init_visuals_template(hand)
     frame.deadzone:SetDrawLayer("ARTWORK", -1)
     self:configure_deadzone(hand)
     self:set_deadzone_width(hand)
-    if not db.enable_deadzone then
-        frame.deadzone:Hide()
-    end
+
 
     -- Create the attack speed/swing timer texts and init them
     frame.left_text = frame:CreateFontString(nil, "OVERLAY")
@@ -87,7 +72,6 @@ function ST:init_visuals_template(hand)
     frame.left_text:SetShadowOffset(1,-1)
     frame.left_text:SetJustifyV("CENTER")
     frame.left_text:SetJustifyH("LEFT")
-
     frame.right_text = frame:CreateFontString(nil, "OVERLAY")
     frame.right_text:SetShadowColor(0.0,0.0,0.0,1.0)
     frame.right_text:SetShadowOffset(1,-1)
@@ -100,12 +84,6 @@ function ST:init_visuals_template(hand)
     frame.gcd1a_marker:SetDrawLayer("OVERLAY", -1)
     frame.gcd1b_marker = frame:CreateLine()
     frame.gcd1b_marker:SetDrawLayer("OVERLAY", -1)
-
-    -- frame.gcd2a_marker = frame:CreateLine()
-    -- frame.gcd2a_marker:SetDrawLayer("OVERLAY", -1)
-    -- frame.gcd2b_marker = frame:CreateLine()
-    -- frame.gcd2b_marker:SetDrawLayer("OVERLAY", -1)
-
     self:configure_gcd_markers(hand)
 
     -- Finally show the frame
@@ -116,9 +94,34 @@ end
 -- Configuration functions (called on frame inits and setting changes)
 -- These all operate on a given hand.
 ------------------------------------------------------------------------------------
+function ST:configure_bar_size(hand)
+    local db = self:get_hand_table(hand)
+	local frame = self[hand].frame
+    frame:SetHeight(db.bar_height)
+    frame:SetWidth(db.bar_width)
+    frame.bar:SetPoint("TOPLEFT", 0, 0)
+    frame.bar:SetHeight(db.bar_height)
+    frame.bar:SetWidth(db.bar_width)
+    frame.gcd_bar:SetHeight(db.bar_height)
+    frame.deadzone:SetHeight(db.bar_height)
+    self:configure_texts(hand)
+    self:configure_gcd_markers(hand)
+end
+
+function ST:configure_frame_strata(hand)
+    local frame = self:get_frame(hand)
+    local db = self:get_profile_table()
+    -- Adjust the frame draw levels so the backplane is below the frame
+    frame:SetFrameLevel(db.draw_level+1)
+    frame.backplane:SetFrameLevel(db.draw_level)
+    -- Set to the requested frame strata
+    frame:SetFrameStrata(db.frame_strata)
+    frame.backplane:SetFrameStrata(db.frame_strata)
+end
+
 function ST:configure_bar_appearances(hand)
     -- COnfigure textures/colors for bar and GCD underlay
-    local frame = self[hand].frame
+    local frame = self:get_frame(hand)
     local db = self:get_hand_table(hand)
     frame.bar:SetTexture(LSM:Fetch('statusbar', db.bar_texture_key))
     frame.gcd_bar:SetTexture(LSM:Fetch('statusbar', db.gcd_texture_key))
@@ -145,6 +148,11 @@ end
 function ST:configure_deadzone(hand)
 	local db = self:get_hand_table(hand)
 	local f = self:get_frame(hand).deadzone
+    if not db.enable_deadzone then
+        f:Hide()
+    else
+        f:Show()
+    end
     f:SetTexture(LSM:Fetch('statusbar', db.deadzone_texture_key))
 	f:SetVertexColor(
         self:convert_color(db.deadzone_bar_color)
@@ -317,7 +325,6 @@ function ST:onupdate_common(hand, elapsed)
         local gcd_d = self:get_gcd_marker_duration(hand, '1a')
         local gcd_additional_progress = gcd_d / d.speed
         local combined_progress = progress + gcd_additional_progress
-
         -- Hide it only if the bar is full and hide_inactive is enabled, 
         -- otherwise show.
         if d.is_full and db.gcd1a_marker_hide_inactive then
@@ -325,7 +332,6 @@ function ST:onupdate_common(hand, elapsed)
         else
             frame.gcd1a_marker:Show()
         end
-
         if combined_progress > 1.0 then
             if db.gcd1a_swing_anchor_wrap then
                 while combined_progress > 1.0 do
@@ -343,7 +349,6 @@ function ST:onupdate_common(hand, elapsed)
     end
     if db.gcd1b_marker_enabled and db.gcd1b_marker_anchor == "swing" then
         local gcd_d = self:get_gcd_marker_duration(hand, '1b')
-        -- print(gcd_d)
         local gcd_additional_progress = gcd_d / d.speed
         local combined_progress = progress + gcd_additional_progress
         if d.is_full and db.gcd1b_marker_hide_inactive then
@@ -530,9 +535,6 @@ function ST:set_gcd_marker_positions(hand)
         if db_hand.gcd1a_marker_anchor == "endofswing" then
             local t_before = self:get_gcd_marker_duration(hand, '1a')
             local progress = t_before / s
-            -- print(progress)
-            -- print(self[hand].is_full)
-            
             -- If progress > 1 then the marker is pushed off the side of the bar, 
             -- more than one standard swing, so *always* hide it.
             if progress >= 1 then

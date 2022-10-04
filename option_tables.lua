@@ -14,11 +14,22 @@ local print = st.utils.print_msg
 -- This object will eventually be passed to AceConfig as the options
 -- table for the addon. We'll build it dynamically upon addon init.
 ST.opts_table = {
-    name = "SwedgeTimer Options",
+    name = "SwedgeTimer",
     type = "group",
-    args = {},
+    args = {
+        global_header = {
+            order = 0.01,
+            type = "header",
+            name = "Global Configuration",
+        },
+        -- This title breaks the bar submenus from the global one.
+        bar_header = {
+            order = 10,
+            type = "header",
+            name = "Bar Configuration",
+        },
+    },
 }
-
 
 -- We're going to add helper funcs to a table that the hand opts
 -- tables can reference for setters and getters.
@@ -45,8 +56,14 @@ ST.opts_funcs.global.latency_setter = function(_, info, value)
         ST:set_gcd_marker_positions(hand)
     end
 end
-
-
+-- Setter for strata options.
+ST.opts_funcs.global.strata_setter = function(_, info, value)
+    local db = ST:get_profile_table()
+    db[info[#info]] = value
+    for hand in ST:iter_hands() do
+        ST:configure_frame_strata(hand)
+    end
+end
 
 -- Disabler funcs for global prefs.
 
@@ -97,14 +114,14 @@ local opts_case_dict = {
     mainhand = {
         title = "Mainhand Controls",
         panel_title = "Mainhand Settings",
-        desc = "This panel and its subpanels configures the settings for the mainhand bar.\n",
+        desc = "This panel and its subpanels configure the settings for the mainhand bar.\n",
         hands = {"mainhand"},
         order_offset = 1,
     },
     offhand = {
         title = "Offhand Controls",
         panel_title = "Offhand Settings",
-        desc = "This panel and its subpanels configures the settings for the offhand bar. It is only visible "..
+        desc = "This panel and its subpanels configure the settings for the offhand bar. It is only visible "..
         "to classes that can use offhand weapons.\n",
         hands = {"offhand"},
         order_offset = 2,
@@ -112,7 +129,7 @@ local opts_case_dict = {
     ranged = {
         title = "Ranged Controls",
         panel_title = "Ranged Settings",
-        desc = "This panel and its subpanels configures the settings for the ranged bar. It is only visible "..
+        desc = "This panel and its subpanels configure the settings for the ranged bar. It is only visible "..
         "to classes that can use ranged weapons.\n",
         hands = {"ranged"},
         order_offset = 3,
@@ -120,7 +137,7 @@ local opts_case_dict = {
     all_hands = {
         title = "All Bar Controls",
         panel_title = "Settings for all bars",
-        desc = "This panel and its subpanels configures the settings for all bars. It is only visible "..
+        desc = "This panel and its subpanels configure the settings for all bars. It is only visible "..
         "to classes that can use multiple types of weapons (mainhand/offhand/ranged)."..
         "\n\nAny changes made here will apply to *all bars*, use caution!\n",
         hands = {"mainhand", "offhand", "ranged"},
@@ -129,7 +146,7 @@ local opts_case_dict = {
     melee_hands = {
         title = "Melee Bar Controls",
         panel_title = "Settings for all melee bars",
-        desc = "This panel and its subpanels configures the settings for melee bars. It is only visible "..
+        desc = "This panel and its subpanels configure the settings for melee bars. It is only visible "..
         "to classes that can use all three of a mainhand, offhand, and ranged weapon."..
         "\n\nAny changes made here will apply to *both the mainhand and offhand bars*, use caution!\n",
         hands = {"mainhand", "offhand"},
@@ -184,6 +201,7 @@ function ST:set_opts_funcs()
             for h in ST:generic_iter(settings.hands) do
                 local db = ST:get_hand_table(h)
                 db[info[#info]] = value
+                ST:configure_bar_size(h)
                 ST:configure_bar_appearances(h)
                 ST:configure_bar_outline(h)
                 ST:configure_gcd_markers(h)
@@ -354,6 +372,32 @@ function ST:generate_hand_options_table(hand)
             desc = "Enables or disables the swing timer bar.",
             get = "getter",
             set = "setter",
+        },
+
+        -- Bar size options here
+        size_header = {
+            order = 1.1,
+            name = "Bar Size",
+            type = "header",
+        },
+        bar_width = {
+            type = "range",
+            order = 2,
+            name = "Width",
+            desc = "The width of the swing timer bar.",
+            min = 100, max = 600, step = 1,
+            get = "getter",
+            set = "bar_setter",
+        },
+
+        bar_height = {
+            type = "range",
+            order = 3,
+            name = "Height",
+            desc = "The height of the swing timer bar.",
+            min = 6, max = 60, step = 1,
+            get = "getter",
+            set = "bar_setter",
         },
 
         -- Bar appearance options go here.

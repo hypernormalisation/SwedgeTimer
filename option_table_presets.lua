@@ -37,7 +37,7 @@ ST.gcd_marker_modes = {
     NONDRUID = {
         phys = "Physical GCD",
         spell = "Spell GCD",
-    }
+    },
 }
 
 ST.gcd_marker_offsets = {
@@ -50,22 +50,23 @@ ST.gcd_marker_offsets = {
 
 -- Latency options
 ST.latency_presets = {
-    header = {
+    header_latency = {
         order = 3.0,
         type = "header",
-        name = "GCD Marker Latency",
+        name = "GCD Marker Offsets",
     },
-    desc1 = {
+    desc_latency = {
         order = 3.05,
         type = "description",
-        name = "These options control fixed or latency-based offsets to the GCD marker positions.",
+        name = "These options control fixed or latency-based offsets to the GCD marker positions. "..
+        "This can help give a more representative picture of available time to act before a swing.",
     },
     gcd_marker_offset_mode = {
         type = "select",
         order = 3.1,
         name = "Marker Offset Mode",
         desc = "The type of offset, if any, to apply to the GCD marker positions. Fixed applies the specified "..
-            "offset, Dynamic applies an offset based on latency, Calibrated combines the Fixed"..
+            "offset, Dynamic applies an offset based on latency, Calibrated combines the Fixed "..
             "and Dynamic offsets.",
         values = ST.gcd_marker_offsets,
         get = "getter",
@@ -86,7 +87,43 @@ ST.latency_presets = {
             return not (is_fixed or is_calibrated)
         end,
     },
+}
 
+ST.draw_level_presets = {
+    header_strata = {
+        order = 4.0,
+        type = "header",
+        name = "Draw Levels",
+    },
+    desc_strata = {
+        order = 4.05,
+        type = "description",
+        name = "These options control the frame strata and draw levels of SwedgeTimer."..
+            " Anything higher than MEDIUM will be drawn over some in-game menus, "..
+            "so this is the highest strata allowed.",
+    },
+    frame_strata = {
+        order = 7.2,
+        type="select",
+        name = "Frame strata",
+        desc = "The frame strata the addon should be drawn at.",
+        values = {
+            BACKGROUND = "BACKGROUND",
+            LOW = "LOW",
+            MEDIUM = "MEDIUM",
+        },
+        get = "getter",
+        set = "strata_setter",
+    },
+    draw_level = {
+        type = "range",
+        order = 7.3,
+        name = "Draw level",
+        desc = "The bar's draw level within the frame strata.",
+        min = 1, max=100, step=1,
+        get = "getter",
+        set = "strata_setter",
+    },
 }
 
 ST.behaviour_group = {
@@ -99,7 +136,9 @@ ST.behaviour_group = {
 for k, v in pairs(ST.latency_presets) do
     ST.behaviour_group.args[k] = v
 end
-
+for k, v in pairs(ST.draw_level_presets) do
+    ST.behaviour_group.args[k] = v
+end
 
 -- The fonts
 ST.fonts_table_preset = {
