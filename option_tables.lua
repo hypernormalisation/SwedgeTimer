@@ -68,7 +68,6 @@ end
 -- Disabler funcs for global prefs.
 
 function ST:generate_top_level_options_table()
-
     -- Set the top-level options that are displayed above the settings menu.
     self.opts_table.handler = self.opts_funcs.global
     self.opts_table.args.enabled = {
@@ -107,7 +106,6 @@ function ST:generate_top_level_options_table()
     -- Add behaviour panel
     ST.opts_table.args.behaviour = ST.behaviour_group
 
-
 end
 
 --=========================================================================================
@@ -126,16 +124,14 @@ function ST:set_opts_case_dict()
         offhand = {
             title = "Offhand Controls",
             panel_title = string.format("%s Offhand", self.player_class_pretty),
-            desc = "This panel and its subpanels configure the settings for the offhand bar. It is only visible "..
-            "to classes that can use offhand weapons.\n",
+            desc = "This panel and its subpanels configure the settings for the offhand bar.\n",
             hands = {"offhand"},
             order_offset = 2,
         },
         ranged = {
             title = "Ranged Controls",
             panel_title = string.format("%s Ranged", self.player_class_pretty),
-            desc = "This panel and its subpanels configure the settings for the ranged bar. It is only visible "..
-            "to classes that can use ranged weapons.\n",
+            desc = "This panel and its subpanels configure the settings for the ranged bar.\n",
             hands = {"ranged"},
             order_offset = 3,
         },
@@ -151,8 +147,8 @@ function ST:set_opts_case_dict()
         melee_hands = {
             title = "Melee Bar Controls",
             panel_title = string.format("%s Melee hands", self.player_class_pretty),
-            desc = "This panel and its subpanels configure the settings for melee bars. It is only visible "..
-            "to classes that can use all three of a mainhand, offhand, and ranged weapon."..
+            desc = "This panel and its subpanels configure the settings for both melee bars. It is only visible "..
+            "to classes that can use mainhand, offhand, and ranged weapons."..
             "\n\nAny changes made here will apply to *both the mainhand and offhand bars*, use caution!\n",
             hands = {"mainhand", "offhand"},
             order_offset = 5,
@@ -160,59 +156,12 @@ function ST:set_opts_case_dict()
     }
 end
 
-
--- local opts_case_dict = {
---     mainhand = {
---         title = "Mainhand Controls",
---         panel_title = "Mainhand",
---         desc = "This panel and its subpanels configure the settings for the mainhand bar.\n",
---         hands = {"mainhand"},
---         order_offset = 1,
---     },
---     offhand = {
---         title = "Offhand Controls",
---         panel_title = "Offhand",
---         desc = "This panel and its subpanels configure the settings for the offhand bar. It is only visible "..
---         "to classes that can use offhand weapons.\n",
---         hands = {"offhand"},
---         order_offset = 2,
---     },
---     ranged = {
---         title = "Ranged Controls",
---         panel_title = "Ranged",
---         desc = "This panel and its subpanels configure the settings for the ranged bar. It is only visible "..
---         "to classes that can use ranged weapons.\n",
---         hands = {"ranged"},
---         order_offset = 3,
---     },
---     all_hands = {
---         title = "All Bar Controls",
---         panel_title = "Settings for all bars",
---         desc = "This panel and its subpanels configure the settings for all bars. It is only visible "..
---         "to classes that can use multiple types of weapons (mainhand/offhand/ranged)."..
---         "\n\nAny changes made here will apply to *all bars*, use caution!\n",
---         hands = {"mainhand", "offhand", "ranged"},
---         order_offset = 4,
---     },
---     melee_hands = {
---         title = "Melee Bar Controls",
---         panel_title = "Settings for all melee bars",
---         desc = "This panel and its subpanels configure the settings for melee bars. It is only visible "..
---         "to classes that can use all three of a mainhand, offhand, and ranged weapon."..
---         "\n\nAny changes made here will apply to *both the mainhand and offhand bars*, use caution!\n",
---         hands = {"mainhand", "offhand"},
---         order_offset = 5,
---     },
--- }
-
 -- This function will be run when the addon initialises to generate
 -- the getter and setter funcs for the hands. These will be a little specialised
 -- to ensure the appropriate config functions in the addon are run when the user
 -- changes the settings.
 function ST:set_opts_funcs()
-
     for hand, settings in pairs(ST.opts_case_dict) do
-
         ST.opts_funcs[hand] = {}
 
         -- A generic getter func for each hand
@@ -531,7 +480,60 @@ function ST:generate_hand_options_table(hand)
                 disabled = "gcd1b_anchor_disable"
             }
         end
+    end
 
+    -- Only basic hands and melee hands get visibility behaviour.
+    if hand == "mainhand" or hand == "offhand" or hand == "ranged" or hand == "melee_hands" then
+        local vis_opts = {
+            vis_header = {
+                type = "header",
+                order = 20.0,
+                name = "Bar visibility",
+            },
+            force_show_in_combat = {
+                type = "toggle",
+                order = 20.1,
+                name = "Show in combat",
+                desc = "Regardless of other settings, forces the bar to be shown when the player is in combat.",
+                get = "getter",
+                set = "setter",
+            },
+            hide_ooc = {
+                type = "toggle",
+                order = 20.2,
+                name = "Hide out-of-combat.",
+                desc = "Hides the bar when the player is out-of-combat.",
+                get = "getter",
+                set = "setter",
+            },
+            require_has_valid_target = {
+                type = "toggle",
+                order = 20.2,
+                name = "Show if valid target.",
+                desc = "If Hide out-of-combat, will show the bar when the player has an attackable target.",
+                get = "getter",
+                set = "setter",
+                disabled = function()
+                    local db = ST:get_profile_table()
+                    return not db.hide_ooc
+                end
+            },
+            require_in_range = {
+                type = "toggle",
+                order = 20.2,
+                name = "Require target in-range.",
+                desc = "If requiring a valid target, will show the bar when the player is in range with this hand.",
+                get = "getter",
+                set = "setter",
+                disabled = function()
+                    local db = ST:get_profile_table()
+                    return (not db.hide_ooc) or (not db.require_has_valid_target)
+                end
+            },
+        }
+        for k, v in pairs(vis_opts) do
+            opts_group.args[k] = v
+        end
     end
 
     -- Assign it to the opts table.

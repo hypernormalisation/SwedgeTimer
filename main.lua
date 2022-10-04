@@ -230,7 +230,6 @@ function ST:OnInitialize()
 	self.mainhand.is_full_timer = nil
 	self.mainhand.is_paused = false
 	self.mainhand.current_progress = false
-
 	self.mainhand.frame = CreateFrame("Frame", addon_name .. "MHBarFrame", UIParent)
 
 	-- OH containers
@@ -546,6 +545,8 @@ function ST:PLAYER_LEAVE_COMBAT()
 end
 
 function ST:PLAYER_TARGET_SET_ATTACKING()
+	-- Required to set the offhand timer delay when startattack or when
+	-- target is changed (both fire this event).
 	if not self.has_oh then return end
 	local t = GetTime()
 	local old_start = self.offhand.start
@@ -608,6 +609,8 @@ function ST:UNIT_TARGET(event, unit_id)
 end
 
 function ST:UPDATE_SHAPESHIFT_FORM()
+	-- At present, only druids care about shapeshifting, so the code
+	-- to handle their forms goes here.
 	if not self.class == "DRUID" then
         return
     end
@@ -670,7 +673,7 @@ end
 -- Range finding
 ------------------------------------------------------------------------------------
 function ST:init_range_finders()
-	self.rangefinder_interval = 0.1
+	self.rangefinder_interval = 0.05
 	self.melee_range_checker_func = LRC:GetHarmMaxChecker(LRC.MeleeRange)
 	local r = 30
 	if self.player_class == "HUNTER" then
@@ -791,18 +794,6 @@ function ST:set_bar_visibilities()
 		end
 	end
 end
-
--- ------------------------------------------------------------------------------------
--- -- State setting
--- ------------------------------------------------------------------------------------
--- function ST:set_bar_full_state(hand)
--- 	-- self:set_bar_color(hand, {0.5, 0.5, 0.5, 1.0})
--- end
-
--- function ST:set_filling_state(hand)
--- 	-- self:set_bar_color(hand)
-
--- end
 
 ------------------------------------------------------------------------------------
 -- GCD functionality

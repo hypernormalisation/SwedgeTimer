@@ -100,6 +100,7 @@ ST.bar_defaults = {
 ------------------------------------------------------------------------------------
 ST.DEATHKNIGHT.defaults = {
     tag = "DEATHKNIGHT",
+    has_class_options = false,
     -- Bar options
     ['**'] = ST.bar_defaults,
 }
@@ -109,7 +110,7 @@ ST.DEATHKNIGHT.defaults = {
 ------------------------------------------------------------------------------------
 ST.DRUID.defaults = {
     tag = "DRUID",
-
+    has_class_options = true,
     -- Class-level options
     enable_maul_color = true,
     maul_color = {224, 76, 116, 1.0},
@@ -143,6 +144,7 @@ ST.DRUID.defaults = {
 ------------------------------------------------------------------------------------
 ST.HUNTER.defaults = {
     tag = "HUNTER",
+    has_class_options = false,
     -- Bar options
     ['**'] = ST.bar_defaults,
     mainhand = {
@@ -177,6 +179,7 @@ ST.HUNTER.defaults = {
 ------------------------------------------------------------------------------------
 ST.MAGE.defaults = {
     tag = "MAGE",
+    has_class_options = false,
     -- Bar options
     ['**'] = ST.bar_defaults,
     mainhand = {
@@ -194,6 +197,7 @@ ST.MAGE.defaults = {
 ------------------------------------------------------------------------------------
 ST.PALADIN.defaults = {
     tag = "PALADIN",
+    has_class_options = true,
 
     use_seal_colors = true,
     soc_color = {70, 150, 36, 1.0},
@@ -235,6 +239,7 @@ ST.PALADIN.defaults = {
 ------------------------------------------------------------------------------------
 ST.PRIEST.defaults = {
     tag = "PRIEST",
+    has_class_options = false,
     -- Bar options
     ['**'] = ST.bar_defaults,
     mainhand = {
@@ -252,6 +257,7 @@ ST.PRIEST.defaults = {
 ------------------------------------------------------------------------------------
 ST.ROGUE.defaults = {
     tag = "ROGUE",
+    has_class_options = false,
     -- Bar options
     ['**'] = ST.bar_defaults,
 	mainhand = {
@@ -285,6 +291,7 @@ ST.ROGUE.defaults = {
 ------------------------------------------------------------------------------------
 ST.SHAMAN.defaults = {
     tag = "SHAMAN",
+    has_class_options = false,
     -- Bar options
     ['**'] = ST.bar_defaults,
 	mainhand = {
@@ -305,6 +312,7 @@ ST.SHAMAN.defaults = {
 ------------------------------------------------------------------------------------
 ST.WARLOCK.defaults = {
     tag = "WARLOCK",
+    has_class_options = false,
     -- Bar options
     ['**'] = ST.bar_defaults,
     mainhand = {
@@ -322,6 +330,7 @@ ST.WARLOCK.defaults = {
 ------------------------------------------------------------------------------------
 ST.WARRIOR.defaults = {
     tag = "WARRIOR",
+    has_class_options = true,
     -- Class-level options
     enable_hs_color = true,
     hs_color = {224, 76, 116, 1.0},

@@ -129,7 +129,7 @@ ST.draw_level_presets = {
 ST.behaviour_group = {
     type = "group",
     name = "Advanced Behaviour",
-    desc = "Panel controlling all global options for the addon.",
+    desc = "Panel controlling advanced addon behaviour.",
     order = 9.0,
     args = {},
 }
@@ -524,7 +524,7 @@ ST.gcd_markers_preset = {
     gcd1a_swing_anchor_wrap = {
         type = "toggle",
         order = 2.4,
-        name = "Wrap markers",
+        name = "Wrap Swing markers",
         desc = "If the marker anchor is Swing, toggles the marker wrapping back to the start of the bar "..
             "when the GCD marker falls in the player's next swing.",
         get = "getter",
@@ -570,7 +570,7 @@ ST.gcd_markers_preset = {
     gcd1b_swing_anchor_wrap = {
         type = "toggle",
         order = 2.9,
-        name = "Wrap markers",
+        name = "Wrap Swing markers",
         desc = "If the marker anchor is Swing, toggles the marker wrapping back to the start of the bar "..
             "when the GCD marker falls in the player's next swing.",
         get = "getter",
