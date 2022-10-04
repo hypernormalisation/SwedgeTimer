@@ -127,7 +127,6 @@ ST.DRUID.defaults = {
     form_color_cat = {189, 126, 9, 1.0},
     form_color_moonkin = {4, 148, 214, 1.0},
     form_color_tree = {4, 204, 124, 1.0},
-    -- form_color_normal = {4, 148, 214, 1.0},
 
     -- Bar options
     ['**'] = ST.bar_defaults,

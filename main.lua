@@ -169,8 +169,8 @@ function ST:OnInitialize()
 
 	-- Profile options
 	local profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
-	-- AC:RegisterOptionsTable(addon_name.."_Profiles", profiles)
-	-- ACD:AddToBlizOptions(addon_name.."_Profiles", "Profiles", addon_name)
+	AC:RegisterOptionsTable(addon_name.."_Profiles", profiles)
+	ACD:AddToBlizOptions(addon_name.."_Profiles", "Profiles", addon_name)
 
 	-----------------------------------------------------------
 	-- Callbackhandlers for letting the addon know that dependent

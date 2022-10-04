@@ -144,6 +144,33 @@ ST.draw_level_presets = {
     },
 }
 
+ST.delay_on_full_settings = {
+    delay_on_full_header = {
+        type = "header",
+        order = 9,
+        name = "Delay on Inactive State"
+    },
+    delay_on_full_desc = {
+        type = "description",
+        order = 9.1,
+        name = "SwedgeTimer allows for the bar's visual state to change when filling (active) and full "..
+            "(inactive). This setting allows the user to specify a delay once the bar fills up before "..
+            "the bar changes to the inactive state, to prevent discontinuities from latency and small "..
+            "swing timer calculation errors."
+    },
+    bar_full_delay = {
+        type = "range",
+        order = 9.2,
+        name = "Delay (s)",
+        desc = "SwedgeTimer allows for different bar configurations when the swing timer bar is " ..
+            "full or filling. A delay can be set to prevent these states rapidaly changing during normal " ..
+            "combat.",
+        get = "getter",
+        set = "setter",
+        min = 0, max = 1.0, step = 0.01,
+    },
+}
+
 ST.behaviour_group = {
     type = "group",
     name = "Advanced Behaviour",
@@ -155,6 +182,9 @@ for k, v in pairs(ST.latency_presets) do
     ST.behaviour_group.args[k] = v
 end
 for k, v in pairs(ST.draw_level_presets) do
+    ST.behaviour_group.args[k] = v
+end
+for k, v in pairs(ST.delay_on_full_settings) do
     ST.behaviour_group.args[k] = v
 end
 
