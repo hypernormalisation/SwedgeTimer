@@ -110,49 +110,100 @@ function ST:generate_top_level_options_table()
 
 end
 
-local opts_case_dict = {
-    mainhand = {
-        title = "Mainhand Controls",
-        panel_title = "Mainhand Settings",
-        desc = "This panel and its subpanels configure the settings for the mainhand bar.\n",
-        hands = {"mainhand"},
-        order_offset = 1,
-    },
-    offhand = {
-        title = "Offhand Controls",
-        panel_title = "Offhand Settings",
-        desc = "This panel and its subpanels configure the settings for the offhand bar. It is only visible "..
-        "to classes that can use offhand weapons.\n",
-        hands = {"offhand"},
-        order_offset = 2,
-    },
-    ranged = {
-        title = "Ranged Controls",
-        panel_title = "Ranged Settings",
-        desc = "This panel and its subpanels configure the settings for the ranged bar. It is only visible "..
-        "to classes that can use ranged weapons.\n",
-        hands = {"ranged"},
-        order_offset = 3,
-    },
-    all_hands = {
-        title = "All Bar Controls",
-        panel_title = "Settings for all bars",
-        desc = "This panel and its subpanels configure the settings for all bars. It is only visible "..
-        "to classes that can use multiple types of weapons (mainhand/offhand/ranged)."..
-        "\n\nAny changes made here will apply to *all bars*, use caution!\n",
-        hands = {"mainhand", "offhand", "ranged"},
-        order_offset = 4,
-    },
-    melee_hands = {
-        title = "Melee Bar Controls",
-        panel_title = "Settings for all melee bars",
-        desc = "This panel and its subpanels configure the settings for melee bars. It is only visible "..
-        "to classes that can use all three of a mainhand, offhand, and ranged weapon."..
-        "\n\nAny changes made here will apply to *both the mainhand and offhand bars*, use caution!\n",
-        hands = {"mainhand", "offhand"},
-        order_offset = 5,
-    },
-}
+--=========================================================================================
+-- This section sets the widget set/get functions using handlers.
+--=========================================================================================
+function ST:set_opts_case_dict()
+    -- This function sets a case dict for setting the bar sub-menus.
+    self.opts_case_dict = {
+        mainhand = {
+            title = "Mainhand Controls",
+            panel_title = string.format("%s Mainhand", self.player_class_pretty),
+            desc = "This panel and its subpanels configure the settings for the mainhand bar.\n",
+            hands = {"mainhand"},
+            order_offset = 1,
+        },
+        offhand = {
+            title = "Offhand Controls",
+            panel_title = string.format("%s Offhand", self.player_class_pretty),
+            desc = "This panel and its subpanels configure the settings for the offhand bar. It is only visible "..
+            "to classes that can use offhand weapons.\n",
+            hands = {"offhand"},
+            order_offset = 2,
+        },
+        ranged = {
+            title = "Ranged Controls",
+            panel_title = string.format("%s Ranged", self.player_class_pretty),
+            desc = "This panel and its subpanels configure the settings for the ranged bar. It is only visible "..
+            "to classes that can use ranged weapons.\n",
+            hands = {"ranged"},
+            order_offset = 3,
+        },
+        all_hands = {
+            title = "All Bar Controls",
+            panel_title = string.format("All %s hands", self.player_class_pretty),
+            desc = "This panel and its subpanels configure the settings for all bars. It is only visible "..
+            "to classes that can use multiple types of weapons (mainhand/offhand/ranged)."..
+            "\n\nAny changes made here will apply to *all bars*, use caution!\n",
+            hands = {"mainhand", "offhand", "ranged"},
+            order_offset = 4,
+        },
+        melee_hands = {
+            title = "Melee Bar Controls",
+            panel_title = string.format("%s Melee hands", self.player_class_pretty),
+            desc = "This panel and its subpanels configure the settings for melee bars. It is only visible "..
+            "to classes that can use all three of a mainhand, offhand, and ranged weapon."..
+            "\n\nAny changes made here will apply to *both the mainhand and offhand bars*, use caution!\n",
+            hands = {"mainhand", "offhand"},
+            order_offset = 5,
+        },
+    }
+end
+
+
+-- local opts_case_dict = {
+--     mainhand = {
+--         title = "Mainhand Controls",
+--         panel_title = "Mainhand",
+--         desc = "This panel and its subpanels configure the settings for the mainhand bar.\n",
+--         hands = {"mainhand"},
+--         order_offset = 1,
+--     },
+--     offhand = {
+--         title = "Offhand Controls",
+--         panel_title = "Offhand",
+--         desc = "This panel and its subpanels configure the settings for the offhand bar. It is only visible "..
+--         "to classes that can use offhand weapons.\n",
+--         hands = {"offhand"},
+--         order_offset = 2,
+--     },
+--     ranged = {
+--         title = "Ranged Controls",
+--         panel_title = "Ranged",
+--         desc = "This panel and its subpanels configure the settings for the ranged bar. It is only visible "..
+--         "to classes that can use ranged weapons.\n",
+--         hands = {"ranged"},
+--         order_offset = 3,
+--     },
+--     all_hands = {
+--         title = "All Bar Controls",
+--         panel_title = "Settings for all bars",
+--         desc = "This panel and its subpanels configure the settings for all bars. It is only visible "..
+--         "to classes that can use multiple types of weapons (mainhand/offhand/ranged)."..
+--         "\n\nAny changes made here will apply to *all bars*, use caution!\n",
+--         hands = {"mainhand", "offhand", "ranged"},
+--         order_offset = 4,
+--     },
+--     melee_hands = {
+--         title = "Melee Bar Controls",
+--         panel_title = "Settings for all melee bars",
+--         desc = "This panel and its subpanels configure the settings for melee bars. It is only visible "..
+--         "to classes that can use all three of a mainhand, offhand, and ranged weapon."..
+--         "\n\nAny changes made here will apply to *both the mainhand and offhand bars*, use caution!\n",
+--         hands = {"mainhand", "offhand"},
+--         order_offset = 5,
+--     },
+-- }
 
 -- This function will be run when the addon initialises to generate
 -- the getter and setter funcs for the hands. These will be a little specialised
@@ -160,7 +211,7 @@ local opts_case_dict = {
 -- changes the settings.
 function ST:set_opts_funcs()
 
-    for hand, settings in pairs(opts_case_dict) do
+    for hand, settings in pairs(ST.opts_case_dict) do
 
         ST.opts_funcs[hand] = {}
 
@@ -324,8 +375,6 @@ function ST:set_opts_funcs()
                 return (not marker_enabled) or (not is_anchored_swing)
             end
         end
-
-
     end
 end
 
@@ -337,14 +386,14 @@ end
 
 function ST:generate_hand_options_table(hand)
     -- Function to generate an options table for a hand object.
-    local settings = opts_case_dict[hand]
+    local settings = ST.opts_case_dict[hand]
     local offset = settings.order_offset
     local title = settings.title
 
     -- print(hand_title)
     local opts_group = {
         handler = ST.opts_funcs[hand],
-		name = title,
+		name = settings.panel_title,
 		type = "group",
         desc = settings.desc,
         order = offset,
@@ -485,7 +534,7 @@ function ST:generate_hand_options_table(hand)
 
     end
 
-    -- Assign it
+    -- Assign it to the opts table.
     self.opts_table.args[hand] = opts_group
 
 end

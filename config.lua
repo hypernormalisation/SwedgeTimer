@@ -55,7 +55,6 @@ ST.defaults = {
 --=========================================================================================
 -- Functions to handle options
 --=========================================================================================
-
 function ST:convert_color(t, new_alpha)
 	-- Convert standard 0-255 colors down to WoW 0-1 ranges.
 	local r,g,b,a = unpack(t)
@@ -188,32 +187,6 @@ local top_level_opts = {
 	},
 }
 
-
--- ST.options = {
--- 	type = "group",
--- 	name = addon_name,
--- 	handler = ST,
--- 	args = {
--- 		top_level = {
--- 			name = "Global Options",
--- 			type = "group",
--- 			args = top_level_opts,
--- 			-- args = {
--- 			-- 	some_group = {
--- 			-- 		name = "Test",
--- 			-- 		type = "group",
--- 			-- 		args = top_level_opts,
--- 			-- 	},
--- 			-- 	-- some_other_group = {
--- 			-- 	-- 	name = "Test2",
--- 			-- 	-- 	type = "group",
--- 			-- 	-- 	args = top_level_opts,
--- 			-- 	-- },
--- 			-- }
--- 		},
--- 	}
--- }
-
 local old_opts = {
 	type = "group",
 	name = addon_name,
@@ -252,50 +225,6 @@ local old_opts = {
 					set = "SetValue",
 				},
 
-				------------------------------------------------------------------------------------
-				-- marker options
-				marker_settings = {
-					order=6,
-					type="header",
-					name="Marker settings",
-				},
-				marker_descriptions = {
-					order=7,
-					type="description",
-					name="When GCD offset mode is Dynamic or Fixed, the GCD markers are pushed back "..
-					"from the end of the swing to account for player input/lag. When the mode is set to Dynamic, this uses the calibrated lag "..
-					"described in Lag Compensation."
-				},
-				gcd_padding_mode = {
-					order=8,
-					type="select",
-					values=gcd_padding_modes,
-					style="dropdown",
-					desc="The type of GCD offset, if any, to use.",
-					name="GCD offset mode",
-					get = "GetValue",
-					set = function(self, key)
-						ST.db.profile.gcd_padding_mode=key
-						st.bar.set_gcd_marker_offsets()
-					end,
-				},
-				gcd_static_padding_ms = {
-					type = "range",
-					order = 9,
-					name = "Fixed GCD offset (ms)",
-					desc = "The GCD markers are set at one and two standard GCDs before the swing ends, plus this offset.",
-					min = 0, max = 400,
-					step = 1,
-					get = "GetValue",
-					set = function(self, key)
-						ST.db.profile.gcd_static_padding_ms = key
-						st.bar.set_gcd_marker_offsets()
-					end,
-					disabled = function()
-						return ST.db.profile.gcd_padding_mode ~= "Fixed"
-					end,
-				},
-
 			},
 		},
 
@@ -307,42 +236,6 @@ local old_opts = {
 			handler = ST,
 			order = 2,
 			args = {
-
-				------------------------------------------------------------------------------------
-				-- size options
-				size_header = {
-					type='header',
-					name='Size',
-					order=1,
-				},
-
-				bar_width = {
-					type = "range",
-					order = 2,
-					name = "Width",
-					desc = "The width of the swing timer bar.",
-					min = 100, max = 600,
-					step = 1,
-					get = "GetValue",
-					set = function(self, key)
-						ST.db.profile.bar_width = key
-						set_bar_size()
-					end,
-				},
-
-				bar_height = {
-					type = "range",
-					order = 3,
-					name = "Height",
-					desc = "The height of the swing timer bar.",
-					min = 6, max = 60,
-					step = 1,
-					get = "GetValue",
-					set = function(self, key)
-						ST.db.profile.bar_height = key
-						set_bar_size()
-					end,
-				},
 
 				------------------------------------------------------------------------------------
 				-- position options
@@ -413,53 +306,6 @@ local old_opts = {
 						set_bar_position()
 					end,
 				},
-
-
-				------------------------------------------------------------------------------------
-				-- strata/draw level options
-				strata_header = {
-					type = 'header',
-					name = 'Frame Strata',
-					order = 7.0,
-				},
-				strata_description = {
-					type = 'description',
-					name = 'The frame strata the addon should be drawn at. Anything higher than MEDIUM '..
-                    'will be drawn over some in-game menus, so this is the highest strata allowed.',
-					order = 7.1,
-				},
-				frame_strata = {
-					order = 7.2,
-					type="select",
-					name = "Frame strata",
-					desc = "The frame strata the addon should be drawn at.",
-					values = {
-						BACKGROUND = "BACKGROUND",
-						LOW = "LOW",
-						MEDIUM = "MEDIUM",
-					},
-					get = "GetValue",
-					set = function(self, input)
-						ST.db.profile.frame_strata = input
-						st.bar.frame:SetFrameStrata(input)
-						st.bar.frame.backplane:SetFrameStrata(input)
-					end,
-				},
-				draw_level = {
-					type = "range",
-					order = 7.3,
-					name = "Draw level",
-					desc = "The bar's draw level within the frame strata.",
-					min = 1, max=100,
-					step=1,
-					get = "GetValue",
-					set = function(self, input)
-						ST.db.profile.draw_level = input
-						st.bar.frame:SetFrameLevel(input+1)
-						st.bar.frame.backplane:SetFrameLevel(input)
-					end
-				},
-
 			},
 		},
 

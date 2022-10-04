@@ -116,8 +116,9 @@ end
 --=========================================================================================
 function ST:OnInitialize()
 
-	self.player_class = select(2, UnitClass("player"))
-
+	-- self.player_class = select(2, UnitClass("player"))
+	self.player_class_pretty, self.player_class = UnitClass("player")
+	print(self.player_class_pretty)
 	-- Addon database
 	-- print('initing acedb')
 	local SwedgeTimerDB = LibStub("AceDB-3.0"):New(addon_name.."DB", self.defaults, true)
@@ -133,6 +134,7 @@ function ST:OnInitialize()
 	-----------------------------------------------------------
 	-- Dynamically construct the options tables
 	-----------------------------------------------------------
+	self:set_opts_case_dict()
 	self:set_opts_funcs()
 	self:generate_top_level_options_table()
 	for hand in self:iter_hands() do
