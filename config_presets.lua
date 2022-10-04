@@ -206,9 +206,6 @@ ST.PALADIN.defaults = {
     sow_color = {36, 171, 201, 1.0},
     sor_color = {102, 96, 209, 1.0},
 
-    use_aow_color = false,
-    aow_color = {235, 235, 174, 1.0},
-
     use_aow_glow = true,
     aow_glow_color = {209, 198, 115, 1.0},
     aow_glow_nlines = 12,

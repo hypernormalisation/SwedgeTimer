@@ -426,7 +426,193 @@ function ST:generate_class_options_table()
 end
 
 function ST.class_opts_funcs.PALADIN(self)
-    local opts_group = {}
+    local opts_group = {
+        -- class_header = {
+        --     type = "header",
+        --     order = 1.0,
+        --     name = "Paladin Configuration",
+        -- },
+        seal_header = {
+            type = "header",
+            order = 1.01,
+            name = "Seal Context Colors",
+        },
+        seal_desc = {
+            type = "description",
+            order = 1.1,
+            name = "The bar can be configured to turn a custom color depending on the paladin's active seal.",
+        },
+        use_seal_colors = {
+            type = "toggle",
+            order = 1.11,
+            name = "Use seal colors",
+            desc = "Enables custom colors for the mainhand bar based on active seal.",
+            get = "getter",
+            set = "setter",
+        },
+        soc_color = {
+            order=1.12,
+            type="color",
+            name="Seal of Command",
+            desc="Color to use when Seal of Command is active.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+            disabled = function()
+                local db = ST:get_class_table()
+                return not db.use_seal_colors
+            end,
+        },
+        sov_color = {
+            order=1.13,
+            type="color",
+            name="Seal of Corruption/Vengeance",
+            desc="Color to use when Seal of Corruption/Vengeance is active.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+            disabled = function()
+                local db = ST:get_class_table()
+                return not db.use_seal_colors
+            end,
+        },
+        sor_color = {
+            order=1.14,
+            type="color",
+            name="Seal of Righteousness",
+            desc="Color to use when Seal of Righteousness is active.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+            disabled = function()
+                local db = ST:get_class_table()
+                return not db.use_seal_colors
+            end,
+        },
+        sol_color = {
+            order=1.15,
+            type="color",
+            name="Seal of Light",
+            desc="Color to use when Seal of Light is active.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+            disabled = function()
+                local db = ST:get_class_table()
+                return not db.use_seal_colors
+            end,
+        },
+        sow_color = {
+            order=1.16,
+            type="color",
+            name="Seal of Wisdom",
+            desc="Color to use when Seal of Wisdom is active.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+            disabled = function()
+                local db = ST:get_class_table()
+                return not db.use_seal_colors
+            end,
+        },
+        aow_header = {
+            type = "header",
+            order = 2.0,
+            name = "Art of War Procs",
+        },
+        aow_desc = {
+            type = "description",
+            order = 2.1,
+            name = "The bar can be configured to glow when the Paladin has Art of War.",
+        },
+        use_aow_glow = {
+            type = "toggle",
+            order = 2.2,
+            name = "Art of War glow",
+            desc = "Enables a glow color when the Paladin has Art of War",
+            get = "getter",
+            set = "setter",
+        },
+        aow_glow_color = {
+            order=2.3,
+            type="color",
+            name="Color",
+            desc="Glow color to use when the Paladin has an Art of War proc.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+            disabled = function()
+                local db = ST:get_class_table()
+                return not db.use_aow_glow
+            end,
+        },
+        aow_glow_nlines = {
+            type = "range",
+            order = 2.4,
+            name = "Number of glow lines",
+            desc = "The number of lines to use in the glow effect.",
+            min = 1, max = 200,
+            step = 1,
+            get = "getter",
+            set = "setter",
+            disabled = function()
+                local db = ST:get_class_table()
+                return not db.use_aow_glow
+            end,
+        },
+        aow_glow_freq = {
+            type = "range",
+            order = 2.5,
+            name = "Glow frequency",
+            desc = "The rotation frequency of the glow effect.",
+            min = 0.01, max = 1.0, step = 0.01,
+            get = "getter",
+            set = "setter",
+            disabled = function()
+                local db = ST:get_class_table()
+                return not db.use_aow_glow
+            end,
+        },
+        aow_glow_line_length = {
+            type = "range",
+            order = 2.6,
+            name = "Glow line length",
+            desc = "The glow line length.",
+            min = 1, max = 100, step = 1,
+            get = "getter",
+            set = "setter",
+            disabled = function()
+                local db = ST:get_class_table()
+                return not db.use_aow_glow
+            end,
+        },
+        aow_glow_line_thickness = {
+            type = "range",
+            order = 2.7,
+            name = "Glow line thickness",
+            desc = "The glow line thickness.",
+            min = 1, max = 10, step = 1,
+            get = "getter",
+            set = "setter",
+            disabled = function()
+                local db = ST:get_class_table()
+                return not db.use_aow_glow
+            end,
+        },
+        aow_glow_offset = {
+            type = "range",
+            order = 2.8,
+            name = "Glow line offset",
+            desc = "The glow line offset from the bar.",
+            min = 1, max = 8, step = 1,
+            get = "getter",
+            set = "setter",
+            disabled = function()
+                local db = ST:get_class_table()
+                return not db.use_aow_glow
+            end,
+        }
+    }
     return opts_group
 end
 
