@@ -111,6 +111,15 @@ function ST:get_in_range(hand)
 	if hand == "ranged" then return self.in_ranged_range else return self.in_melee_range end
 end
 
+function ST:hide_bar(hand)
+	self:get_frame(hand):Hide()
+end
+
+function ST:show_bar(hand)
+	self:get_frame(hand):Show()
+end
+
+
 --=========================================================================================
 -- Funcs to initialise the addon
 --=========================================================================================
@@ -720,20 +729,14 @@ function ST:handle_oor_hand(hand)
 		else
 			frame:SetAlpha(1.0)
 		end
+	else
+		frame:SetAlpha(1.0)
 	end
 end
 
 ------------------------------------------------------------------------------------
 -- Bar visibility
 ------------------------------------------------------------------------------------
-function ST:hide_bar(hand)
-	self:get_frame(hand):Hide()
-end
-
-function ST:show_bar(hand)
-	self:get_frame(hand):Show()
-end
-
 function ST:bar_is_enabled(hand)
 	local db = self:get_hand_table(hand)
 	if hand == "mainhand" then -- always has weapon
@@ -750,36 +753,63 @@ function ST:bar_is_enabled(hand)
 end
 
 function ST:handle_bar_visibility(hand)
-	-- Out of combat requirement overrides all else
+	-- Determines if the bar should be shown or not.
 	local db = self:get_hand_table(hand)
-	if db.hide_ooc then
+	if db.show_behaviour == "always" then
+		self:show_bar(hand)
+		return
+	end
+	if db.show_condition == "in_combat" then
+		if self.in_combat then
+			self:show_bar(hand)
+		else
+			self:hide_bar(hand)
+		end
+	elseif db.show_condition == "has_target" then
+		if not self.has_attackable_target then
+			self:hide_bar(hand)
+			return
+		end
+		if db.require_in_range then
+			if not self:get_in_range(hand) then
+				self:hide_bar(hand)
+				return
+			end
+		end
+		self:show_bar(hand)
+	elseif db.show_condition == "both" then
 		if not self.in_combat then
 			self:hide_bar(hand)
 			return
 		end
-	end
-	if db.force_show_in_combat then
+		if not self.has_attackable_target then
+			self:hide_bar(hand)
+			return
+		end
+		if db.require_in_range then
+			if not self:get_in_range(hand) then
+				self:hide_bar(hand)
+				return
+			end
+		end
+		self:show_bar(hand)
+	elseif db.show_condition == "either" then
 		if self.in_combat then
 			self:show_bar(hand)
 			return
 		end
-	end
-	-- Then target and range checks
-	if db.require_has_valid_target then
-		if self.has_attackable_target then
-			if db.require_in_range then
-				if not self:get_in_range(hand) then
-					self:hide_bar(hand)
-					return
-				end
-			end
-		else
+		if not self.has_attackable_target then
 			self:hide_bar(hand)
 			return
 		end
+		if db.require_in_range then
+			if not self:get_in_range(hand) then
+				self:hide_bar(hand)
+				return
+			end
+		end
+		self:show_bar(hand)
 	end
-	-- If we get here, bar should be shown
-	self:show_bar(hand)
 end
 
 function ST:set_bar_visibilities()

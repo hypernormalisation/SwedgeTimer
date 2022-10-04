@@ -47,6 +47,24 @@ ST.gcd_marker_offsets = {
     Calibrated = "Calibrated",
 }
 
+ST.show_bar_opts = {
+    always = "Always",
+    conditional = "Conditionally",
+}
+
+ST.show_bar_conditions = {
+    in_combat = "In Combat",
+    has_target = "Has attackable target",
+    both = "In Combat and has target",
+    either = "In Combat or has target",
+}
+
+ST.show_bar_conditions_sorting = {
+    [1] = "in_combat",
+    [2] = "has_target",
+    [3] = "either",
+    [4] = "both",
+}
 
 -- Latency options
 ST.latency_presets = {
@@ -93,7 +111,7 @@ ST.draw_level_presets = {
     header_strata = {
         order = 4.0,
         type = "header",
-        name = "Draw Levels",
+        name = "Frame Strata and Draw Levels",
     },
     desc_strata = {
         order = 4.05,

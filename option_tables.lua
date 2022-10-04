@@ -324,6 +324,37 @@ function ST:set_opts_funcs()
                 return (not marker_enabled) or (not is_anchored_swing)
             end
         end
+
+        -- Bar vis disablers
+        ST.opts_funcs[hand].not_always_shown_disabler = function()
+            local db = ST:get_hand_table("mainhand")
+            if hand == "mainhand" or hand == "offhand" or hand == "ranged" then
+                db = ST:get_hand_table(hand)
+            end
+            return db.show_behaviour == "always"
+        end
+        ST.opts_funcs[hand].require_in_range_disabler = function()
+            local db = ST:get_hand_table("mainhand")
+            if hand == "mainhand" or hand == "offhand" or hand == "ranged" then
+                db = ST:get_hand_table(hand)
+            end
+            if db.show_behaviour == "always" then
+                return true
+            end
+            if db.show_condition == "in_combat" then
+                return true
+            end
+            return false
+        end
+
+        -- Range disablers
+        ST.opts_funcs[hand].oor_dim_alpha_disabler = function()
+            local db = ST:get_hand_table("mainhand")
+            if hand == "mainhand" or hand == "offhand" or hand == "ranged" then
+                db = ST:get_hand_table(hand)
+            end
+            return not db.dim_oor
+        end
     end
 end
 
@@ -353,16 +384,16 @@ function ST:generate_hand_options_table(hand)
     local opts = {
 
         -- Top level settings
-        top_header = {
-            order=1.001,
-            type="header",
-            name=settings.panel_title,
-        },
-        top_desc = {
-            type = "description",
-            order = 1.01,
-            name = settings.desc,
-        },
+        -- top_header = {
+        --     order=1.001,
+        --     type="header",
+        --     name=settings.panel_title,
+        -- },
+        -- top_desc = {
+        --     type = "description",
+        --     order = 1.01,
+        --     name = settings.desc,
+        -- },
         enabled = {
             type = "toggle",
             order = 1.04,
@@ -490,45 +521,34 @@ function ST:generate_hand_options_table(hand)
                 order = 20.0,
                 name = "Bar Visibility",
             },
-            force_show_in_combat = {
-                type = "toggle",
+            show_behaviour = {
+                type = "select",
                 order = 20.1,
-                name = "Show in combat",
-                desc = "Regardless of other settings, forces the bar to be shown when the player is in combat.",
+                name = "Show...",
+                values = ST.show_bar_opts,
+                desc = "Choose to always show the bar, or to require some conditions.",
                 get = "getter",
                 set = "setter",
             },
-            hide_ooc = {
-                type = "toggle",
+            show_condition = {
+                type = "select",
                 order = 20.2,
-                name = "Hide out-of-combat",
-                desc = "Hides the bar when the player is out-of-combat.",
+                name = "Conditions to show",
+                values = ST.show_bar_conditions,
+                desc = "Choose to always show the bar, or to require some conditions.",
                 get = "getter",
                 set = "setter",
-            },
-            require_has_valid_target = {
-                type = "toggle",
-                order = 20.2,
-                name = "Show if valid target",
-                desc = "If Hide out-of-combat, will show the bar when the player has an attackable target.",
-                get = "getter",
-                set = "setter",
-                disabled = function()
-                    local db = ST:get_profile_table()
-                    return not db.hide_ooc
-                end
+                sorting = ST.show_bar_conditions_sorting,
+                disabled = "not_always_shown_disabler",
             },
             require_in_range = {
                 type = "toggle",
-                order = 20.2,
+                order = 20.3,
                 name = "Require target in-range",
-                desc = "If requiring a valid target, will show the bar when the player is in range with this hand.",
+                desc = "If requiring a valid target, will only show the bar when the player is in range with this hand.",
                 get = "getter",
                 set = "setter",
-                disabled = function()
-                    local db = ST:get_profile_table()
-                    return (not db.hide_ooc) or (not db.require_has_valid_target)
-                end
+                disabled = "require_in_range_disabler",
             },
             range_header = {
                 type = "header",
@@ -539,7 +559,7 @@ function ST:generate_hand_options_table(hand)
                 type = "toggle",
                 order = 21.1,
                 name = "Dim out of range",
-                desc = "Dims the bar when the player is out of range with this hand.",
+                desc = "Dims the bar when the player is out of range with this hand, or has no target.",
                 get = "getter",
                 set = "setter",
             },
@@ -551,10 +571,7 @@ function ST:generate_hand_options_table(hand)
                 min = 0, max = 1, step = 0.01,
                 get = "getter",
                 set = "setter",
-                disabled = function()
-                    local db = ST:get_profile_table()
-                    return not db.dim_oor
-                end,
+                disabled = "oor_dim_alpha_disabler",
             }
         }
         for k, v in pairs(vis_opts) do

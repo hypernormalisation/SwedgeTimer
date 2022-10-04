@@ -17,10 +17,15 @@ ST.bar_defaults = {
     
     -- Visibility behaviour
     enabled = true,
+    show_behaviour = "conditional",  -- can be conditional or always
+    show_condition = "has_target",
+    require_in_range = false,
+
+
     force_show_in_combat = true, -- always overrides the other behaviours
     hide_ooc = false,
     require_has_valid_target = true,
-    require_in_range = false,
+
 
     -- Out of range behaviour
     -- oor_effect = "dim",
