@@ -116,7 +116,10 @@ function ST:hide_bar(hand)
 end
 
 function ST:show_bar(hand)
-	self:get_frame(hand):Show()
+	local db_class = self:get_class_table()
+	if db_class.class_enabled then
+		self:get_frame(hand):Show()
+	end
 end
 
 
@@ -814,8 +817,14 @@ end
 
 function ST:set_bar_visibilities()
 	-- Function hooked onto the rangefinder C_Timer to determine bar states
+	local db_class = self:get_class_table()
+	if not db_class.class_enabled then
+		for hand in self:iter_hands() do
+			self:hide_bar(hand)
+		end
+	end
+
 	for hand in self:iter_hands() do
-		-- Get appropriate range
 		-- print(string.format("%s in range: %s", hand, tostring(in_range)))
 		if not self:bar_is_enabled(hand) then
 			self:hide_bar(hand)

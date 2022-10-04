@@ -20,7 +20,7 @@ ST.opts_table = {
         global_header = {
             order = 0.01,
             type = "header",
-            name = "Global Configuration",
+            name = "Global and Class Configuration",
         },
         -- This title breaks the bar submenus from the global one.
         bar_header = {
@@ -70,13 +70,19 @@ end
 function ST:generate_top_level_options_table()
     -- Set the top-level options that are displayed above the settings menu.
     self.opts_table.handler = self.opts_funcs.global
-    self.opts_table.args.enabled = {
+    self.opts_table.args.class_enabled = {
         type = "toggle",
         order = 1.1,
-        name = "Global Enable/Disable",
-        desc = "Enables or disables all visuals in SwedgeTimer.",
-        get = "getter",
-        set = "setter",
+        name = string.format("%s Enable/Disable", self.player_class_pretty),
+        desc = "Enables or disables SwedgeTimer for this class.",
+        get = function()
+            local db = ST:get_class_table()
+            return db.class_enabled
+        end,
+        set = function(_, value)
+            local db = ST:get_class_table()
+            db.class_enabled = value
+        end,
     }
     self.opts_table.args.bars_locked = {
         type = "toggle",

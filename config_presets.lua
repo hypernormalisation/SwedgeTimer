@@ -9,26 +9,20 @@ local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
 
 -- This table is used for any per-class settings that should apply globally.
 ST.class_defaults = {
+    class_enabled = true
 }
 
 -- This table is used by AceDB's smart defaults feature
 -- so we only have to override behaviour in class-specific tables.
 ST.bar_defaults = {
-    
+
     -- Visibility behaviour
     enabled = true,
     show_behaviour = "conditional",  -- can be conditional or always
     show_condition = "has_target",
     require_in_range = false,
 
-
-    force_show_in_combat = true, -- always overrides the other behaviours
-    hide_ooc = false,
-    require_has_valid_target = true,
-
-
     -- Out of range behaviour
-    -- oor_effect = "dim",
     dim_oor = true,
     dim_alpha = 0.6,
 
@@ -183,6 +177,7 @@ ST.HUNTER.defaults = {
 -- MAGE
 ------------------------------------------------------------------------------------
 ST.MAGE.defaults = {
+    class_enabled = false,
     tag = "MAGE",
     has_class_options = false,
     -- Bar options
@@ -243,6 +238,7 @@ ST.PALADIN.defaults = {
 -- PRIEST
 ------------------------------------------------------------------------------------
 ST.PRIEST.defaults = {
+    class_enabled = false,
     tag = "PRIEST",
     has_class_options = false,
     -- Bar options
@@ -316,6 +312,7 @@ ST.SHAMAN.defaults = {
 -- WARLOCK
 ------------------------------------------------------------------------------------
 ST.WARLOCK.defaults = {
+    class_enabled = false,
     tag = "WARLOCK",
     has_class_options = false,
     -- Bar options
