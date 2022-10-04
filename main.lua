@@ -3,7 +3,7 @@
 --=========================================================================================
 local addon_name, st = ...
 -- local version = "@project-version@"
-local version = "2.0"
+local version = "3.0"
 local ST = LibStub("AceAddon-3.0"):NewAddon(addon_name, "AceConsole-3.0", "AceEvent-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local STL = LibStub("LibClassicSwingTimerAPI", true)
@@ -149,6 +149,7 @@ function ST:OnInitialize()
 	self:set_opts_case_dict()
 	self:set_opts_funcs()
 	self:generate_top_level_options_table()
+	self:generate_class_options_table()
 	for hand in self:iter_hands() do
 		self:generate_hand_options_table(hand)
 	end

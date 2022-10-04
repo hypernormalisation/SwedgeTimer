@@ -65,8 +65,6 @@ ST.opts_funcs.global.strata_setter = function(_, info, value)
     end
 end
 
--- Disabler funcs for global prefs.
-
 function ST:generate_top_level_options_table()
     -- Set the top-level options that are displayed above the settings menu.
     self.opts_table.handler = self.opts_funcs.global
@@ -122,21 +120,21 @@ function ST:set_opts_case_dict()
     self.opts_case_dict = {
         mainhand = {
             title = "Mainhand Controls",
-            panel_title = string.format("%s Mainhand", self.player_class_pretty),
+            panel_title = string.format("Mainhand", self.player_class_pretty),
             desc = "This panel and its subpanels configure the settings for the mainhand bar.\n",
             hands = {"mainhand"},
             order_offset = 1,
         },
         offhand = {
             title = "Offhand Controls",
-            panel_title = string.format("%s Offhand", self.player_class_pretty),
+            panel_title = string.format("Offhand", self.player_class_pretty),
             desc = "This panel and its subpanels configure the settings for the offhand bar.\n",
             hands = {"offhand"},
             order_offset = 2,
         },
         ranged = {
             title = "Ranged Controls",
-            panel_title = string.format("%s Ranged", self.player_class_pretty),
+            panel_title = string.format("Ranged", self.player_class_pretty),
             desc = "This panel and its subpanels configure the settings for the ranged bar.\n",
             hands = {"ranged"},
             order_offset = 3,
@@ -239,9 +237,7 @@ function ST:set_opts_funcs()
         ST.opts_funcs[hand].color_setter = function(self, info, r, g, b, a)
             for h in ST:generic_iter(settings.hands) do
                 local db = ST:get_hand_table(h)
-                ST:Print(r,g,b,a)
                 local color_table = {ST:convert_color_up({r, g, b, a})}
-                print(color_table)
                 db[info[#info]] = color_table
                 ST:configure_texts(h)
                 ST:configure_gcd_markers(h)
@@ -364,12 +360,141 @@ function ST:set_opts_funcs()
     end
 end
 
+--=========================================================================================
+-- Class settings/opts tables/getters and setters
+--=========================================================================================
+-- Generate getter and setters
+function ST:generate_class_getters_setters()
+    self.class_getsetters = {}
+
+    -- A generic getter func
+    ST.class_getsetters.getter = function(_, info)
+        local db = ST:get_class_table()
+        return db[info[#info]]
+    end
+
+    -- A generic setter func
+    ST.class_getsetters.setter = function(_, info, value)
+        local db = ST:get_class_table()
+        db[info[#info]] = value
+        for h in ST:iter_hands() do
+            ST:configure_texts(h)
+            ST:configure_bar_size(h)
+            ST:configure_bar_appearances(h)
+            ST:configure_bar_outline(h)
+            ST:configure_gcd_markers(h)
+            ST:set_gcd_marker_positions(h)
+        end
+    end
+
+    ST.class_getsetters.color_getter = function(self, info)
+        local db = ST:get_class_table()
+        local color_table = db[info[#info]]
+        return ST:convert_color(color_table)
+    end
+
+    ST.class_getsetters.color_setter = function(self, info, r, g, b, a)
+        local db = ST:get_class_table()
+        local color_table = {ST:convert_color_up({r, g, b, a})}
+        db[info[#info]] = color_table
+        for h in ST:iter_hands() do
+            ST:configure_texts(h)
+            ST:configure_gcd_markers(h)
+            ST:configure_deadzone(h)
+            ST:configure_bar_outline(h)
+            ST:set_bar_color(h)
+        end
+    end
+end
+
+ST.class_opts_funcs = {}
 function ST:generate_class_options_table()
+    self:generate_class_getters_setters()
     -- Function to generate the per-class settings.
+    if ST.class_opts_funcs[self.player_class] then
+        local args = self.class_opts_funcs[self.player_class](self)
+        ST.opts_table.args.class = {
+            name = string.format("%s Configuration", self.player_class_pretty),
+            type = "group",
+            desc = string.format("This panel contains settings specific to the %s class.",
+                self.player_class_pretty),
+            order = 0.5,
+            args = args,
+            handler = self.class_getsetters,
+        }
+    end
+end
+
+function ST.class_opts_funcs.PALADIN(self)
+    local opts_group = {}
+    return opts_group
+end
+
+function ST.class_opts_funcs.WARRIOR(self)
+    local opts_group = {
+        class_header = {
+            type = "header",
+            order = 1.0,
+            name = "Warrior Configuration",
+        },
+        enable_hs_color = {
+            type = "toggle",
+            order = 1.1,
+            name = "Heroic Strike color",
+            desc = "Enables a custom color for the mainhand bar when Heroic Strike is queued.",
+            get = "getter",
+            set = "setter",
+        },
+        hs_color = {
+            order=1.2,
+            type="color",
+            name="",
+            desc="Color to use when Heroic Strike is queued.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+        },
+        enable_cleave_color = {
+            type = "toggle",
+            order = 1.3,
+            name = "Cleave color",
+            desc = "Enables a custom color for the mainhand bar when Cleave is queued.",
+            get = "getter",
+            set = "setter",
+        },
+        cleave_color = {
+            order=1.4,
+            type="color",
+            name="",
+            desc="Color to use when Cleave is queued.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+        },
+        rage_desc = {
+            order = 1.5,
+            type = "description",
+            name = "If either of the above are enabled, the bar will turn a certain color when the player "..
+                "has queued an on-next-attack ability, but has since dropped below the rage threshold necessary "..
+                "to use the ability."
+        },
+        insufficient_rage_color = {
+            order=1.6,
+            type="color",
+            name="Insufficient Rage color",
+            desc="Color to use when the player drops below the rage threshold for the queued ability.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+        },
+    }
+    return opts_group
 end
 
 
-
+--=========================================================================================
+-- Per-hand opts table entries.
+--=========================================================================================
 function ST:generate_hand_options_table(hand)
     -- Function to generate an options table for a hand object.
     local settings = ST.opts_case_dict[hand]
@@ -388,18 +513,6 @@ function ST:generate_hand_options_table(hand)
     -- This will be the options table for the hand.
     -- All standard widgets are configured here.
     local opts = {
-
-        -- Top level settings
-        -- top_header = {
-        --     order=1.001,
-        --     type="header",
-        --     name=settings.panel_title,
-        -- },
-        -- top_desc = {
-        --     type = "description",
-        --     order = 1.01,
-        --     name = settings.desc,
-        -- },
         enabled = {
             type = "toggle",
             order = 1.04,
@@ -587,16 +700,39 @@ function ST:generate_hand_options_table(hand)
 
     -- Assign it to the opts table.
     if hand == "mainhand" or hand == "offhand" or hand == "ranged" then
+        -- if not self.opts_table.args.single_control then
+        --     local sp_desc = string.format(
+        --         "This panel allows the user to control individual swing timer bars for %ss.",
+        --         self.player_class_pretty
+        --     )
+        --     self.opts_table.args.single_control = {
+        --         name = string.format("%s Bar Controls", self.player_class_pretty),
+        --         type = "group",
+        --         desc = sp_desc,
+        --         args = {},
+        --     }
+        --     -- self.opts_table.args.multi_control.args.multi_header = {
+        --     --     name = "",
+        --     --     order = 0.1,
+        --     --     type = "header",
+        --     -- }
+        --     self.opts_table.args.single_control.args.single_desc = {
+        --         name = sp_desc,
+        --         order = 0.2,
+        --         type = "description",
+        --     }
+        -- end
         self.opts_table.args[hand] = opts_group
     else
         -- If we need to, construct the multi-bar control panel and group.
         if not self.opts_table.args.multi_control then
-            local mp_desc = "This panel allows the user to control multiple groups of bars at once."
+            local mp_desc = "This panel allows the user to control multiple groups of bars at once for this class."
             self.opts_table.args.multi_control = {
                 name = "Multi-bar Controls",
                 type = "group",
                 desc = mp_desc,
                 args = {},
+                order = 8.0,
             }
             self.opts_table.args.multi_control.args.multi_header = {
                 name = "Control Multiple Bars at Once",

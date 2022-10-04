@@ -75,117 +75,53 @@ function ST:convert_color_up(t, new_alpha)
 	return r, g, b, a
 end
 
-local contextual_visibility_values = {
-	in_combat = "In Combat",
-	has_attackable_target = "Has Attackable Target",
-	in_range = "In Range of Target",
-}
+-- local contextual_visibility_values = {
+-- 	in_combat = "In Combat",
+-- 	has_attackable_target = "Has Attackable Target",
+-- 	in_range = "In Range of Target",
+-- }
 
-local outline_map = {
-	_none="",
-	outline="OUTLINE",
-	thick_outline="THICKOUTLINE",
-}
-ST.outline_map = outline_map
+-- local outline_map = {
+-- 	_none="",
+-- 	outline="OUTLINE",
+-- 	thick_outline="THICKOUTLINE",
+-- }
+-- ST.outline_map = outline_map
 
-local bar_border_modes = {
-	Solid="Solid",
-	Texture="Texture",
-	None="None",
-}
+-- local bar_border_modes = {
+-- 	Solid="Solid",
+-- 	Texture="Texture",
+-- 	None="None",
+-- }
 
-ST.outlines = {
-	_none="None",
-	outline="Outline",
-	thick_outline="Thick Outline",
-}
+-- ST.outlines = {
+-- 	_none="None",
+-- 	outline="Outline",
+-- 	thick_outline="Thick Outline",
+-- }
 
-ST.texts = {
-	attack_speed="Attack speed",
-	swing_timer="Swing timer",
-}
+-- ST.texts = {
+-- 	attack_speed="Attack speed",
+-- 	swing_timer="Swing timer",
+-- }
 
-local gcd_padding_modes = {
-	Dynamic="Dynamic",
-	Fixed="Fixed",
-	None="None",
-}
+-- local gcd_padding_modes = {
+-- 	Dynamic="Dynamic",
+-- 	Fixed="Fixed",
+-- 	None="None",
+-- }
 
-local valid_anchor_points = {
-	TOPLEFT="TOPLEFT",
-    TOPRIGHT="TOPRIGHT",
-    BOTTOMLEFT="BOTTOMLEFT",
-    BOTTOMRIGHT="BOTTOMRIGHT",
-    TOP="TOP",
-    BOTTOM="BOTTOM",
-    LEFT="LEFT",
-    RIGHT="RIGHT",
-    CENTER="CENTER",
-}
-
---=========================================================================================
--- The top-level opts that apply across classes.
---=========================================================================================
-local top_level_opts = {
-	-- top-top level opts? silly name
-	top_header = {
-		type = "header",
-		order = 0.1,
-		name = "Top Level Options"
-	},
-	bar_enabled = {
-		type = "toggle",
-		order = 1,
-		name = "Enabled",
-		desc = "Enables or disables SwedgeTimer.",
-		get = "GetValue",
-		set = "SetValue",
-	},
-	welcome_message = {
-		type = "toggle",
-		order = 1.1,
-		name = "Welcome message",
-		desc = "Displays a login message showing the addon version on player login or reload.",
-		get = "GetValue",
-		set = "SetValue",
-	},
-	bar_full_delay = {
-		type = "range",
-		order = 1.2,
-		name = "Bar Full Visual Delay (s)",
-		desc = "SwedgeTimer allows for different bar configurations when the swing timer bar is " ..
-			"full or filling. A delay can be set to prevent these states rapidaly changing during normal " ..
-			"combat.",
-		get = "GetValue",
-		set = "SetValue",
-		min = 0, max = 1.0, step = 0.01,
-	},
-
-	-- Latency opts
-	top_latency_header = {
-		type = "header",
-		order = 2.0,
-		name = "Latency Options"
-	},
-	top_latency_desc = {
-		type = "description",
-		order = 2.1,
-		name = "These options control latency adjustments in SwedgeTimer's time-sensitive elements.",
-	},
-	gcd_padding_mode = {
-		order=8,
-		type="select",
-		values=gcd_padding_modes,
-		style="dropdown",
-		desc="The type of GCD offset, if any, to use.",
-		name="GCD offset mode",
-		get = "GetValue",
-		set = function(self, key)
-			ST.db.profile.gcd_padding_mode=key
-			st.bar.set_gcd_marker_offsets()
-		end,
-	},
-}
+-- local valid_anchor_points = {
+-- 	TOPLEFT="TOPLEFT",
+--     TOPRIGHT="TOPRIGHT",
+--     BOTTOMLEFT="BOTTOMLEFT",
+--     BOTTOMRIGHT="BOTTOMRIGHT",
+--     TOP="TOP",
+--     BOTTOM="BOTTOM",
+--     LEFT="LEFT",
+--     RIGHT="RIGHT",
+--     CENTER="CENTER",
+-- }
 
 local old_opts = {
 	type = "group",
@@ -276,14 +212,6 @@ local old_opts = {
 
 	}
 }
-
-function ST:GetValue(info)
-	return self.db.profile[info[#info]]
-end
-
-function ST:SetValue(info, value)
-	self.db.profile[info[#info]] = value
-end
 
 --=========================================================================================
 -- End, if debug verify module was read.

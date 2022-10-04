@@ -163,7 +163,7 @@ function ST:configure_texts(hand)
     local db = self:get_hand_table(hand)
 	local frame = self:get_frame(hand)
 	local font_path = LSM:Fetch('font', db.text_font)
-	local opt_string = self.outline_map[db.text_outline_key]
+	local opt_string = self.outlines[db.text_outline_key]
 
     frame.left_text:SetFont(font_path, db.text_size, opt_string)
     frame.left_text:SetPoint("TOPLEFT", 3, -(db.bar_height / 2) + (db.text_size / 2))
