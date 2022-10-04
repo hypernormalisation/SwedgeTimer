@@ -17,13 +17,14 @@ ST.bar_defaults = {
     
     -- Visibility behaviour
     enabled = true,
-    force_show_in_combat = true,
-    hide_ooc = false, -- always overrides the other behaviours
+    force_show_in_combat = true, -- always overrides the other behaviours
+    hide_ooc = false,
     require_has_valid_target = true,
     require_in_range = false,
 
     -- Out of range behaviour
-    oor_effect = "dim",
+    -- oor_effect = "dim",
+    dim_oor = true,
     dim_alpha = 0.6,
 
     -- Bar dimensions/positioning

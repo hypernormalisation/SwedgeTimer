@@ -488,7 +488,7 @@ function ST:generate_hand_options_table(hand)
             vis_header = {
                 type = "header",
                 order = 20.0,
-                name = "Bar visibility",
+                name = "Bar Visibility",
             },
             force_show_in_combat = {
                 type = "toggle",
@@ -501,7 +501,7 @@ function ST:generate_hand_options_table(hand)
             hide_ooc = {
                 type = "toggle",
                 order = 20.2,
-                name = "Hide out-of-combat.",
+                name = "Hide out-of-combat",
                 desc = "Hides the bar when the player is out-of-combat.",
                 get = "getter",
                 set = "setter",
@@ -509,7 +509,7 @@ function ST:generate_hand_options_table(hand)
             require_has_valid_target = {
                 type = "toggle",
                 order = 20.2,
-                name = "Show if valid target.",
+                name = "Show if valid target",
                 desc = "If Hide out-of-combat, will show the bar when the player has an attackable target.",
                 get = "getter",
                 set = "setter",
@@ -521,7 +521,7 @@ function ST:generate_hand_options_table(hand)
             require_in_range = {
                 type = "toggle",
                 order = 20.2,
-                name = "Require target in-range.",
+                name = "Require target in-range",
                 desc = "If requiring a valid target, will show the bar when the player is in range with this hand.",
                 get = "getter",
                 set = "setter",
@@ -530,6 +530,32 @@ function ST:generate_hand_options_table(hand)
                     return (not db.hide_ooc) or (not db.require_has_valid_target)
                 end
             },
+            range_header = {
+                type = "header",
+                order = 21.0,
+                name = "Out-of-range Behaviour",
+            },
+            dim_oor = {
+                type = "toggle",
+                order = 21.1,
+                name = "Dim out of range",
+                desc = "Dims the bar when the player is out of range with this hand.",
+                get = "getter",
+                set = "setter",
+            },
+            dim_alpha = {
+                type = "range",
+                order = 21.2,
+                name = "Alpha",
+                desc = "The bar alpha when out of range.",
+                min = 0, max = 1, step = 0.01,
+                get = "getter",
+                set = "setter",
+                disabled = function()
+                    local db = ST:get_profile_table()
+                    return not db.dim_oor
+                end,
+            }
         }
         for k, v in pairs(vis_opts) do
             opts_group.args[k] = v

@@ -194,41 +194,6 @@ local old_opts = {
 	args = {
 
 		------------------------------------------------------------------------------------
-		-- addon feature behaviour
-		bar_behaviour = {
-			type = "group",
-			name = "Behaviour",
-			handler = ST,
-			order = 1,
-			args = {
-				
-				------------------------------------------------------------------------------------
-				-- Visibility options, when to show the bar.
-				autohide_header = {
-					type="header",
-					order=5.0,
-					name="Bar visibility",
-				},
-				autohide_desc = {
-					type="description",
-					order=5.01,
-					name="Determines under what conditions the bar should be shown.",
-				},
-				visibility_key = {
-					type="select",
-					order=5.1,
-					name="Visibility",
-					desc="The visibility setting to use.",
-					values=bar_visibility_values,
-					sorting=bar_vis_ordering,
-					get = "GetValue",
-					set = "SetValue",
-				},
-
-			},
-		},
-
-		------------------------------------------------------------------------------------
 		-- Size/position options
 		positioning = {
 			type = "group",

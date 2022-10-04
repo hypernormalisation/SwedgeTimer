@@ -714,7 +714,7 @@ end
 function ST:handle_oor_hand(hand)
 	local db = self:get_hand_table(hand)
 	local frame = self:get_frame(hand)
-	if db.oor_effect == "dim" then
+	if db.dim_oor then
 		if not self:get_in_range(hand) then
 			frame:SetAlpha(db.dim_alpha)
 		else
