@@ -190,9 +190,7 @@ function ST:OnInitialize()
 	self.stl_ready = false
 	self.llm_ready = false
 	LRC.RegisterCallback(self, LRC.CHECKERS_CHANGED, function()
-			-- This can fire twice on initial addon load. Deal with it here.
 			print("Picked up CHECKERS_CHANGED")
-			if self.lrc_ready then return end
 			self.lrc_ready = true
 			self:init_libs()
 		end
@@ -711,6 +709,7 @@ end
 function ST:init_range_finders()
 	self.rangefinder_interval = 0.05
 	self.melee_range_checker_func = LRC:GetHarmMaxChecker(LRC.MeleeRange)
+
 	local r = 30
 	if self.player_class == "HUNTER" then
 		r = 35
@@ -724,8 +723,24 @@ function ST:init_range_finders()
 end
 
 function ST:rf_update()
-	-- print(self.mainhand.is_full)
-	self.in_melee_range = self:melee_range_checker_func("target")
+	-- On the very first load of the game, CHECKERS_CHANGED can get a callback
+	-- before the checker funcs are ready. If that happens, loop a C_Timer
+	-- regardless and re-assign the functions until we get valid checkers,
+	-- then resume normal function.
+	if self.melee_range_checker_func == nil then
+		C_Timer.After(self.rangefinder_interval, function()
+				self.melee_range_checker_func = LRC:GetHarmMaxChecker(LRC.MeleeRange)
+				local r = 30
+				if self.player_class == "HUNTER" then
+					r = 35
+				end
+				self.ranged_range_checker_func = LRC:GetHarmMaxChecker(r)
+				self:rf_update()
+			end
+		)
+		return
+	end
+	self.in_melee_range = self.melee_range_checker_func("target")
 	-- print(self.melee_result)
 	self.in_ranged_range = self.ranged_range_checker_func("target") and not self.in_melee_range
 	self.target_min_range, self.target_max_range = LRC:GetRange("target")
