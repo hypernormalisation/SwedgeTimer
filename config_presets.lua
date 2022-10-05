@@ -71,19 +71,19 @@ ST.bar_defaults = {
     -- GCD markers
     gcd1a_marker_enabled = true,
     gcd1a_marker_anchor = "endofswing",
-    gcd1a_marker_hide_inactive = false,
+    gcd1a_marker_hide_inactive = true,
     gcd1a_marker_mode = "phys",
     gcd1a_marker_color = {230, 230, 230, 1.0},
-    gcd1a_marker_width = 2,
+    gcd1a_marker_width = 3,
     gcd1a_marker_fractional_height = 0.25,
     gcd1a_swing_anchor_wrap = true,
 
     gcd1b_marker_enabled = true,
     gcd1b_marker_anchor = "endofswing",
-    gcd1b_marker_hide_inactive = false,
+    gcd1b_marker_hide_inactive = true,
     gcd1b_marker_mode = "phys",
     gcd1b_marker_color = {230, 230, 230, 1.0},
-    gcd1b_marker_width = 2,
+    gcd1b_marker_width = 3,
     gcd1b_marker_fractional_height = 0.25,
     gcd1b_swing_anchor_wrap = true,
 
@@ -210,6 +210,7 @@ ST.PALADIN.defaults = {
     sor_color = {102, 96, 209, 1.0},
 
     use_aow_glow = true,
+    require_exo_ready = true,
     aow_glow_color = {209, 198, 115, 1.0},
     aow_glow_nlines = 12,
     aow_glow_freq = 0.03,
@@ -353,7 +354,6 @@ ST.WARRIOR.defaults = {
 	},
 	ranged = {
         require_in_range = true,
-        force_show_in_combat = false,
 		bar_height = 13,
 		bar_width = 200,
         y = 60,

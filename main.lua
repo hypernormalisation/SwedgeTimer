@@ -150,11 +150,10 @@ end
 --=========================================================================================
 function ST:OnInitialize()
 
-	-- self.player_class = select(2, UnitClass("player"))
+	-- Get player class first
 	self.player_class_pretty, self.player_class = UnitClass("player")
-	print(self.player_class_pretty)
+
 	-- Addon database
-	-- print('initing acedb')
 	local SwedgeTimerDB = LibStub("AceDB-3.0"):New(addon_name.."DB", self.defaults, true)
 	self.db = SwedgeTimerDB
 	-- print('self.db says:')
@@ -190,7 +189,6 @@ function ST:OnInitialize()
 	self.stl_ready = false
 	self.llm_ready = false
 	LRC.RegisterCallback(self, LRC.CHECKERS_CHANGED, function()
-			print("Picked up CHECKERS_CHANGED")
 			self.lrc_ready = true
 			self:init_libs()
 		end
@@ -422,15 +420,15 @@ end
 --=========================================================================================
 function ST.callback_event_handler(event, ...)
 	-- Func to pass all callbacks to their relevant handler
-	if string.find(event, "GCD") then
-		print('<===============')
-		print(event)
-		local args = table.pack(...)
-		for i=1, args.n do
-			print(tostring(args[i]))
-		end
-		print('--------------->')
-	end
+	-- if string.find(event, "GCD") then
+	-- 	print('<===============')
+	-- 	print(event)
+	-- 	local args = table.pack(...)
+	-- 	for i=1, args.n do
+	-- 		print(tostring(args[i]))
+	-- 	end
+	-- 	print('--------------->')
+	-- end
 	ST[event](ST, event, ...)
 end
 

@@ -17,9 +17,28 @@ local sor_id = 21084
 -- Art of War
 local aow_id = 59578
 
+local exorcism_ids = {
+    879, 5614, 5615, 10312, 10313, 10314, 27138, 48800, 48801
+}
+
 function ST.PALADIN.post_init(self)
+    self.exo_on_cooldown = false
+    self.exo_cooldown_time = GetSpellBaseCooldown(879) / 1000
     self.PALADIN.on_aura_change(self)
 end
+
+function ST.PALADIN.on_spellcast_succeeded(self, unit_target, cast_guid, spell_id)
+    -- Track exo casts
+    if self:is_value_in_array(spell_id, exorcism_ids) then
+        self.exo_on_cooldown = true
+        self.PALADIN.process_aow(self)
+        C_Timer.After(self.exo_cooldown_time, function()
+            self.exo_on_cooldown = false
+            self.PALADIN.process_aow(self)
+        end)
+    end
+end
+
 
 function ST.PALADIN.on_aura_change(self)
     -- Parse seals and art of war
@@ -64,6 +83,47 @@ function ST.PALADIN.on_aura_change(self)
 
     -- Finally set the bar color
     self:set_bar_color("mainhand")
+end
+
+function ST.PALADIN.glow_start(self)
+    local db_class = self:get_class_table()
+    local frame = self:get_frame("mainhand")
+    LCG.PixelGlow_Start(frame,
+        {self:convert_color(db_class.aow_glow_color)},
+        db_class.aow_glow_nlines,
+        db_class.aow_glow_freq,
+        db_class.aow_glow_line_length,
+        db_class.aow_glow_line_thickness,
+        db_class.aow_glow_offset,
+        db_class.aow_glow_offset,
+        true
+    )
+end
+
+function ST.PALADIN.glow_stop(self)
+    local frame = self:get_frame("mainhand")
+    LCG.PixelGlow_Stop(frame)
+end
+
+function ST.PALADIN.process_aow(self)
+    local db = self:get_class_table()
+    if not self.has_aow then
+        self.PALADIN.glow_stop(self)
+        return
+    end
+
+    if not db.use_aow_glow then
+        self.PALADIN.glow_stop(self)
+        return
+    end
+
+    if db.require_exo_ready then
+        if self.exo_on_cooldown then
+            self.PALADIN.glow_stop(self)
+            return
+        end
+    end
+    self.PALADIN.glow_start(self)
 
 end
 
@@ -74,30 +134,8 @@ function ST.PALADIN.set_bar_color(self, hand)
     local db_class = self:get_class_table()
     local frame = self:get_frame(hand)
 
-    -- -- If enabled, Art of War color takes precedence.
-    -- if db_class.use_aow_color and self.has_aow then
-    --     frame.bar:SetVertexColor(
-    --         self:convert_color(db_class.aow_color)
-    --     )
-    --     return true
-    -- end
-
     -- Art of War glow
-    if self.has_aow and db_class.use_aow_glow then
-        LCG.PixelGlow_Start(frame,
-            -- {0.75, 0.75, 0.27, 1.0},
-            {self:convert_color(db_class.aow_glow_color)},
-            db_class.aow_glow_nlines,
-            db_class.aow_glow_freq,
-            db_class.aow_glow_line_length,
-            db_class.aow_glow_line_thickness,
-            db_class.aow_glow_offset,
-            db_class.aow_glow_offset,
-            true
-        )
-    else
-        LCG.PixelGlow_Stop(frame)
-    end
+    self.PALADIN.process_aow(self)
 
     -- Seal colors    
     if db_class.use_seal_colors then

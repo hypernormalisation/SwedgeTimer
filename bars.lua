@@ -19,7 +19,7 @@ local LWIN = LibStub("LibWindow-1.1")
 -- Intialisation func (called once relevant libs are loaded once per hand)
 --=========================================================================================
 function ST:init_visuals_template(hand)
-    print("initing visuals for hand: "..tostring(hand))
+    -- print("initing visuals for hand: "..tostring(hand))
     local frame = self[hand].frame
     local db_profile = self.db.profile
     local db = self:get_hand_table(hand)

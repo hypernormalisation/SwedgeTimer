@@ -826,8 +826,9 @@ function ST:construct_info_panel()
             type = "description",
             order = 1.7,
             name = "SwedgeTimer includes a number of features as standard, including a GCD underlay, adjustable GCD bar"..
-                " markers, and a Deadzone indicating the player's latency. The bar appearances are also fully "..
-                "customisable in their dropdown menus on the left."
+                " markers, and a Deadzone indicating the player's latency."..
+                " All of these features can be configured in each bar's submenu on the left panel."..
+                " The bar appearances can also be fully customised there."
         },
         header5 = {
             type = "header",

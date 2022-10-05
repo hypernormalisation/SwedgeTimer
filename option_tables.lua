@@ -553,6 +553,14 @@ function ST.class_opts_funcs.PALADIN(self)
             get = "getter",
             set = "setter",
         },
+        require_exo_ready = {
+            type = "toggle",
+            order = 2.21,
+            name = "Require Exorcism Ready",
+            desc = "If set, the glow effect will only happen when Exorcism is off cooldown.",
+            get = "getter",
+            set = "setter",
+        },
         aow_glow_color = {
             order=2.3,
             type="color",
