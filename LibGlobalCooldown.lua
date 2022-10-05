@@ -186,7 +186,10 @@ end
 
 function lib:UNIT_SPELLCAST_INTERRUPTED()
     if self.gcd_duration then
-        self:release_gcd_lock()
+        local time_started, duration_reported = GetSpellCooldown(29515)
+        if duration_reported == 0 then
+            self:release_gcd_lock()
+        end
     end
 end
 
