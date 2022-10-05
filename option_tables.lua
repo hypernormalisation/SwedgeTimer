@@ -1051,3 +1051,35 @@ function ST:generate_hand_options_table(hand)
     end
 end
 
+function ST:set_opts()
+    -- Finally, a function to be run on init that will dynamically generate
+    -- all the requested panel tables on a per-hand/per-class basis.
+    
+    -- Sets a dict for hand/collection-based case switching. 
+    self:set_opts_case_dict()
+    
+    -- Generates some handler setters/getters/disablers for hands/collections.
+	self:set_opts_funcs()
+
+    -- Generate the top level, position, and class opts if they exist.
+	self:generate_top_level_options_table()
+	self:generate_bar_position_options_table()
+	self:generate_class_options_table()
+
+    -- Generate all basic hand panels
+	for hand in self:iter_hands() do
+		self:generate_hand_options_table(hand)
+	end
+
+    -- Generate an "All hands" collection control panel if multiple hands exist
+	local hands = self.class_hands[self.player_class]
+	if #hands ~= 1 then
+		self:generate_hand_options_table("all_hands")
+	end
+
+	-- Only generate "melee hands" collection control panel if class can use all three
+    -- basic hands.
+	if #hands == 3 then
+		self:generate_hand_options_table("melee_hands")
+	end
+end

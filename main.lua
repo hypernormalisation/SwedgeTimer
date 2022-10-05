@@ -141,7 +141,6 @@ function ST:unlock_frames()
 				ACR:NotifyChange(ST.options_table_name)
 			end
 		)
-		-- LWIN.EnableMouseWheelScaling(f)
 	end
 end
 
@@ -169,28 +168,7 @@ function ST:OnInitialize()
 	-----------------------------------------------------------
 	-- Dynamically construct the options tables
 	-----------------------------------------------------------
-	self:set_opts_case_dict()
-	self:set_opts_funcs()
-	self:generate_top_level_options_table()
-	self:generate_bar_position_options_table()
-	self:generate_class_options_table()
-	for hand in self:iter_hands() do
-		self:generate_hand_options_table(hand)
-	end
-	local hands = self.class_hands[self.player_class]
-	if #hands ~= 1 then
-		self:generate_hand_options_table("all_hands")
-	end
-	-- Only generate melee hands if class can use all three.
-	if #hands == 3 then
-		self:generate_hand_options_table("melee_hands")
-	end
-
-	-- print(self.opts_table)
-	-- print(self.opts_table.args.mainhand)
-	for k, v in pairs(self.opts_funcs.mainhand) do
-		print(k)
-	end
+	self:set_opts()
 
 	self.options_table_name = addon_name.."_Options"
 	AC:RegisterOptionsTable(self.options_table_name, self.opts_table)
@@ -212,6 +190,9 @@ function ST:OnInitialize()
 	self.stl_ready = false
 	self.llm_ready = false
 	LRC.RegisterCallback(self, LRC.CHECKERS_CHANGED, function()
+			-- This can fire twice on initial addon load. Deal with it here.
+			print("Picked up CHECKERS_CHANGED")
+			if self.lrc_ready then return end
 			self.lrc_ready = true
 			self:init_libs()
 		end
@@ -360,9 +341,9 @@ function ST:init_libs()
 	if not self.lrc_ready and self.stl_ready then
 		return
 	end
+	self.interfaces_are_initialised = true
 	self:init_timers()
 	self:init_range_finders()
-	self.interfaces_are_initialised = true
 	self:post_init()
 
 	-- If requested, print a welcome message once everything is
