@@ -29,8 +29,8 @@ ST.bar_defaults = {
     dim_alpha = 0.6,
 
     -- Bar dimensions
-    bar_height = 16,
-    bar_width = 285,
+    bar_height = 19,
+    bar_width = 275,
 
     -- Bar positions (handled by LibWindow-1.1)
     x = 0,
@@ -357,7 +357,7 @@ ST.WARRIOR.defaults = {
 		bar_height = 13,
 		bar_width = 200,
         y = 60,
-		bar_color_default = {115, 17, 42, 0.8},
+		bar_color_default = {191, 88, 29, 0.8},
 		font_size = 11,
         show_gcd_underlay = false,
         show_gcd_markers = false,

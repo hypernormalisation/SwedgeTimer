@@ -249,6 +249,7 @@ function ST:set_opts_funcs()
                 local color_table = {ST:convert_color_up({r, g, b, a})}
                 db[info[#info]] = color_table
                 ST:configure_texts(h)
+                ST:configure_bar_appearances(h)
                 ST:configure_gcd_markers(h)
                 ST:configure_deadzone(h)
                 ST:configure_bar_outline(h)
@@ -715,7 +716,15 @@ function ST:generate_bar_position_options_table()
 		type = "group",
         desc = "This panel controls the positioning and scales of the bars in SwedgeTimer.",
         order = 0.6,
-        args = {},
+        args = {
+            section_desc = {
+                order = 0.1,
+                type = "description",
+                name = "This panel allows the user to control each bar's position. It is recommended "..
+                    "to move the bars into position with the mouse with the bars unlocked in the global "..
+                    "settings, and carry out any fine tuning here.",
+            }
+        },
     }
 
     local hand_offsets = {
@@ -827,7 +836,7 @@ function ST:generate_hand_options_table(hand)
             set = "setter",
         },
 
-        -- Bar size options here
+        -- Bar size options
         size_header = {
             order = 1.1,
             name = "Bar Size",
@@ -842,7 +851,6 @@ function ST:generate_hand_options_table(hand)
             get = "getter",
             set = "bar_setter",
         },
-
         bar_height = {
             type = "range",
             order = 3,
@@ -853,12 +861,57 @@ function ST:generate_hand_options_table(hand)
             set = "bar_setter",
         },
 
-        -- Bar appearance options go here.
-        bar_appearance_group = {
-            type = "group",
-            order = 1.50,
-            name = "Textures/Colors",
-            args = ST.bar_appearance_preset,
+        -- Bar textures
+        header_textures = {
+            order=4,
+            type="header",
+            name="Textures",
+        },
+        bar_texture_key = {
+            order = 4.1,
+            type = "select",
+            name = "Bar",
+            desc = "The texture of the swing bar.",
+            dialogControl = "LSM30_Statusbar",
+            values = LSM:HashTable("statusbar"),
+            get = "getter",
+            set = "bar_setter",
+        },
+        backplane_texture_key = {
+            order = 4.2,
+            type = "select",
+            name = "Backplane",
+            desc = "The texture of the bar's backplane.",
+            dialogControl = "LSM30_Statusbar",
+            values = LSM:HashTable("statusbar"),
+            get = "getter",
+            set = "bar_setter",
+        },
+
+        -- Colors
+        header_colors = {
+            order=5,
+            type="header",
+            name="Default colors",
+        },
+        bar_color_default = {
+            order=5.1,
+            type="color",
+            name="Bar color",
+            desc="The default color of the swing timer bar.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+        },
+        backplane_alpha = {
+            type = "range",
+            order = 5.3,
+            name = "Backplane alpha",
+            desc = "The opacity of the swing bar's backplane.",
+            min = 0.0, max = 1.0,
+            step = 0.05,
+            get = "getter",
+            set = "bar_setter",
         },
 
         -- Border options go here.
@@ -883,20 +936,35 @@ function ST:generate_hand_options_table(hand)
             order = 2.1,
             name = "Deadzone",
             args = ST.deadzone_settings_table,
-        }
+        },
 
+        -- GCD underlay group
+        underlay_group = {
+            type = "group",
+            order = 2.2,
+            name = "GCD Underlay",
+            args = ST.gcd_underlay_preset,
+        },
+
+        -- GCD marker group
+        gcd_markers_group = {
+            type = "group",
+            order = 3.0,
+            name = "GCD Markers",
+            args = ST.gcd_markers_preset
+        }
     }
 
     opts_group.args = opts
 
     -- Any optional groups should go here.
     if hand == "mainhand" or hand == "ranged" then
-        opts_group.args.gcd_markers_group = {
-            type = "group",
-            order = 3.0,
-            name = "GCD Markers",
-            args = ST.gcd_markers_preset
-        }
+        -- opts_group.args.gcd_markers_group = {
+        --     type = "group",
+        --     order = 3.0,
+        --     name = "GCD Markers",
+        --     args = ST.gcd_markers_preset
+        -- }
         -- Add in the GCD mode options, which are class-dependent.
         if self.player_class == "DRUID" then
             opts_group.args.gcd_markers_group.args.gcd1a_marker_mode = {

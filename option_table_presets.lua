@@ -482,6 +482,61 @@ function ST:construct_border_settings_table()
     }
 end
 
+function ST:construct_gcd_underlay_settings_table()
+    ST.gcd_underlay_preset = {
+        header = {
+            type = "header",
+            name = "GCD Underlay Settings",
+            order = 1.0,
+        },
+        desc = {
+            type = "description",
+            order = 1.1,
+            name = "A texture can be placed under the bar to show the user"..
+                " the ongoing duration of any active Global Cooldown relative "..
+                "to the progress of the swing timer."
+        },
+        lb1 = {
+            type = "header",
+            order = 1.2,
+            name = ""
+        },
+        show_gcd_underlay = {
+            type = "toggle",
+            order = 1.3,
+            name = "Enable",
+            desc = "Enables or disables the GCD underlay for this hand.",
+            get = "getter",
+            set = "setter",
+        },
+        lb2 = {
+            type = "description",
+            order = 1.31,
+            name = "",
+        },
+        gcd_texture_key = {
+            order = 1.4,
+            type = "select",
+            name = "Texture",
+            desc = "The texture of the GCD underlay bar.",
+            dialogControl = "LSM30_Statusbar",
+            values = LSM:HashTable("statusbar"),
+            get = "getter",
+            set = "bar_setter",
+        },
+        bar_color_gcd = {
+            order=1.5,
+            type="color",
+            name="Color",
+            desc="The color of the GCD underlay bar.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+        },
+    }
+end
+
+
 function ST:construct_gcd_marker_settings_table()
     ST.gcd_markers_preset = {
         header = {
@@ -727,6 +782,7 @@ function ST:build_preset_options_tables()
     self:construct_text_settings_table()
     self:construct_bar_appearance_settings_table()
     self:construct_border_settings_table()
+    self:construct_gcd_underlay_settings_table()
     self:construct_gcd_marker_settings_table()
     self:construct_deadzone_settings_table()
 end
