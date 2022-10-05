@@ -773,6 +773,77 @@ function ST:construct_deadzone_settings_table()
     }
 end
 
+function ST:construct_info_panel()
+    ST.info_panel = {
+        header = {
+            type = "header",
+            name = "Welcome to SwedgeTimer!",
+            order = 1.0,
+        },
+        desc1 = {
+            type = "description",
+            order = 1.1,
+            name = "SwedgeTimer is a general-purpose Swing Timer addon for Wrath of the Lich King Classic. "..
+                "It aims to be a one-stop-shop for swing timers, supporting independent and feature-rich "..
+                "swing timer configurations and modules for each class in the game.",
+        },
+        header2 = {
+            type = "header",
+            name = "Bar Visibility",
+            order = 1.2,
+        },
+        desc2 = {
+            type = "description",
+            order = 1.3,
+            name = "By default, the addon only shows bars relevant to each class, and disables all bars"..
+                " for caster classes.\n\n"..
+                "Also by default, the swing timer bars will only show under certain contexts, usually requiring that "..
+                "the player is either in-combat or has an attackable target. By default, range finders "..
+                "are also enabled that will partially fade the bar when the target is out-of-range.\n\n"..
+                "The bar visibility conditions can be set in each bar's menu on the right panel, including"..
+                " to always show the bar.",
+        },
+        header3 = {
+            type = "header",
+            name = "Bar Position and Scale",
+            order = 1.4,
+        },
+        desc3 = {
+            type = "description",
+            order = 1.5,
+            name = "When the bars are unlocked (Bars Locked setting at top), the timer bars can be "..
+                "dragged to new positions. When unlocked, the mousewheel can also be used to increase "..
+                "or decrease the bar scale.\n\n"..
+                "The Bar Positioning/Scale menu on the left can be used to finely control the bar "..
+                "position and scale."
+        },
+        header4 = {
+            type = "header",
+            name = "Features",
+            order = 1.6,
+        },
+        desc4 = {
+            type = "description",
+            order = 1.7,
+            name = "SwedgeTimer includes a number of features as standard, including a GCD underlay, adjustable GCD bar"..
+                " markers, and a Deadzone indicating the player's latency. The bar appearances are also fully "..
+                "customisable in their dropdown menus on the left."
+        },
+        header5 = {
+            type = "header",
+            name = "Class Specific Features",
+            order = 1.8,
+        },
+        desc5 = {
+            type = "description",
+            order = 1.9,
+            name = "SwedgeTimer includes modules that display specialised information for certain classes."..
+                " For instance, Paladins have access to seal-dependent bar colors and proc alert glows."..
+                " If a class has such configuration, it will be visible in the left panel of the settings menu.",
+        }
+    }
+end
+
 -- Finally, a function to build all of the above
 function ST:build_preset_options_tables()
     self:construct_latency_settings_table()
@@ -785,4 +856,5 @@ function ST:build_preset_options_tables()
     self:construct_gcd_underlay_settings_table()
     self:construct_gcd_marker_settings_table()
     self:construct_deadzone_settings_table()
+    self:construct_info_panel()
 end

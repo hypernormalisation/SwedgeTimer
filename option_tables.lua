@@ -116,6 +116,15 @@ function ST:generate_top_level_options_table()
 
 end
 
+function ST:generate_info_panel()
+    self.opts_table.args.info = {
+        type = "group",
+        order = 0.1,
+        name = "Information",
+        args = ST.info_panel,
+    }
+end
+
 --=========================================================================================
 -- This section sets the widget set/get functions using handlers.
 --=========================================================================================
@@ -456,7 +465,7 @@ function ST.class_opts_funcs.PALADIN(self)
         use_seal_colors = {
             type = "toggle",
             order = 1.11,
-            name = "Use seal colors",
+            name = "Enable",
             desc = "Enables custom colors for the mainhand bar based on active seal.",
             get = "getter",
             set = "setter",
@@ -539,7 +548,7 @@ function ST.class_opts_funcs.PALADIN(self)
         use_aow_glow = {
             type = "toggle",
             order = 2.2,
-            name = "Art of War glow",
+            name = "Enable",
             desc = "Enables a glow color when the Paladin has Art of War",
             get = "getter",
             set = "setter",
@@ -615,7 +624,7 @@ function ST.class_opts_funcs.PALADIN(self)
             order = 2.8,
             name = "Glow line offset",
             desc = "The glow line offset from the bar.",
-            min = 1, max = 8, step = 1,
+            min = 0, max = 8, step = 1,
             get = "getter",
             set = "setter",
             disabled = function()
@@ -632,17 +641,22 @@ function ST.class_opts_funcs.WARRIOR(self)
         class_header = {
             type = "header",
             order = 1.0,
-            name = "Warrior Configuration",
+            name = "On-next-attack Configuration",
         },
         queue_desc = {
             order = 1.02,
             type = "description",
             name = "The bar can be configured to turn a custom color when an on-next-attack ability is queued."
         },
+        lb0 = {
+            type = "header",
+            order = 1.03,
+            name = "",
+        },
         enable_hs_color = {
             type = "toggle",
             order = 1.1,
-            name = "Heroic Strike color",
+            name = "Enable Heroic Strike",
             desc = "Enables a custom color for the mainhand bar when Heroic Strike is queued.",
             get = "getter",
             set = "setter",
@@ -650,7 +664,7 @@ function ST.class_opts_funcs.WARRIOR(self)
         hs_color = {
             order=1.2,
             type="color",
-            name="",
+            name="Color",
             desc="Color to use when Heroic Strike is queued.",
             hasAlpha=true,
             get = "color_getter",
@@ -663,7 +677,7 @@ function ST.class_opts_funcs.WARRIOR(self)
         enable_cleave_color = {
             type = "toggle",
             order = 1.3,
-            name = "Cleave color",
+            name = "Enable Cleave",
             desc = "Enables a custom color for the mainhand bar when Cleave is queued.",
             get = "getter",
             set = "setter",
@@ -671,7 +685,7 @@ function ST.class_opts_funcs.WARRIOR(self)
         cleave_color = {
             order=1.4,
             type="color",
-            name="",
+            name="Color",
             desc="Color to use when Cleave is queued.",
             hasAlpha=true,
             get = "color_getter",
@@ -693,6 +707,11 @@ function ST.class_opts_funcs.WARRIOR(self)
                 "has queued an on-next-attack ability, but has since dropped below the rage threshold necessary "..
                 "to use the ability."
         },
+        lb2 = {
+            type = "header",
+            order = 1.55,
+            name = "",
+        },
         insufficient_rage_color = {
             order=1.6,
             type="color",
@@ -704,6 +723,144 @@ function ST.class_opts_funcs.WARRIOR(self)
         },
     }
     return opts_group
+end
+
+function ST.class_opts_funcs.DRUID(self)
+    local opts_group = {
+
+        -- Form-dependent colors
+        form_color_header = {
+            type = "header",
+            order = 4,
+            name = "Form-dependent Colors",
+        },
+        form_color_desc = {
+            order = 4.1,
+            type = "description",
+            name = "Enables the bar color changing depending on the druid's form."
+        },
+        lb01 = {
+            type = "header",
+            order = 4.2,
+            name = "",
+        },
+        use_form_colors = {
+            type = "toggle",
+            order = 4.3,
+            name = "Enable",
+            desc = "Enables form-dependent colors.",
+            get = "getter",
+            set = "setter",
+        },
+        lb02 = {
+            type = "description",
+            order = 4.4,
+            name = "",
+        },
+        form_color_bear = {
+            order=5.0,
+            type="color",
+            name="Bear/Dire Bear",
+            desc="Color to use when in Bear/Dire Bear form.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+        },
+        form_color_cat = {
+            order=5.1,
+            type="color",
+            name="Cat",
+            desc="Color to use when in Cat form.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+        },
+        form_color_moonkin = {
+            order=5.2,
+            type="color",
+            name="Moonkin",
+            desc="Color to use when in Moonkin form.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+        },
+        form_color_tree = {
+            order=5.3,
+            type="color",
+            name="Tree of Life",
+            desc="Color to use when in Tree of Life form.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+        },
+
+        -- Maul color
+        class_header = {
+            type = "header",
+            order = 11.0,
+            name = "Maul",
+        },
+        queue_desc = {
+            order = 11.02,
+            type = "description",
+            name = "The bar can be configured to turn a custom color when maul is queued."
+        },
+        -- lb0 = {
+        --     type = "header",
+        --     order = 11.03,
+        --     name = "",
+        -- },
+        enable_maul_color = {
+            type = "toggle",
+            order = 11.1,
+            name = "Enable Maul Color",
+            desc = "Enables a custom color for the mainhand bar when Maul is queued.",
+            get = "getter",
+            set = "setter",
+        },
+        maul_color = {
+            order=11.2,
+            type="color",
+            name="Color",
+            desc="Color to use when Heroic Strike is queued.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+            disabled = function()
+                local db = ST:get_class_table()
+                return not db.enable_maul_color
+            end,
+        },
+        -- Insufficient rage
+        lb1 = {
+            type = "header",
+            order = 12,
+            name = "",
+        },
+        rage_desc = {
+            order = 12.1,
+            type = "description",
+            name = "If the above is enabled, the mainhand bar will turn a certain color when the player "..
+                "has queued Maul, but has since dropped below the rage threshold necessary "..
+                "to use the ability."
+        },
+        -- lb2 = {
+        --     type = "header",
+        --     order = 12.2,
+        --     name = "",
+        -- },
+        insufficient_rage_color = {
+            order=12.3,
+            type="color",
+            name="Insufficient Rage color",
+            desc="Color to use when the player drops below the rage threshold for the queued ability.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+        },
+    }
+    return opts_group
+
 end
 
 --=========================================================================================
@@ -1018,12 +1175,12 @@ function ST:generate_hand_options_table(hand)
         local vis_opts = {
             vis_header = {
                 type = "header",
-                order = 20.0,
+                order = 0.1,
                 name = "Bar Visibility",
             },
             show_behaviour = {
                 type = "select",
-                order = 20.1,
+                order = 0.2,
                 name = "Show...",
                 values = ST.show_bar_opts,
                 desc = "Choose to always show the bar, or to require some conditions.",
@@ -1032,7 +1189,7 @@ function ST:generate_hand_options_table(hand)
             },
             show_condition = {
                 type = "select",
-                order = 20.2,
+                order = 0.3,
                 name = "Conditions to show",
                 values = ST.show_bar_conditions,
                 desc = "Choose to always show the bar, or to require some conditions.",
@@ -1043,7 +1200,7 @@ function ST:generate_hand_options_table(hand)
             },
             require_in_range = {
                 type = "toggle",
-                order = 20.3,
+                order = 0.4,
                 name = "Require target in-range",
                 desc = "If requiring a valid target, will only show the bar when the player is in range with this hand.",
                 get = "getter",
@@ -1122,7 +1279,8 @@ function ST:set_opts()
 	self:set_opts_funcs()
 
     -- Generate the top level, position, and class opts if they exist.
-	self:generate_top_level_options_table()
+	self:generate_info_panel()
+    self:generate_top_level_options_table()
 	self:generate_bar_position_options_table()
 	self:generate_class_options_table()
 
