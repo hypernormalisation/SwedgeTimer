@@ -5,6 +5,7 @@ local addon_name, st = ...
 local LSM = LibStub("LibSharedMedia-3.0")
 local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
 -- local print = st.utils.print_msg
+local LWIN = LibStub("LibWindow-1.1")
 
 ------------------------------------------------------------------------------------
 -- Default settings for the addon.
@@ -75,41 +76,29 @@ function ST:convert_color_up(t, new_alpha)
 	return r, g, b, a
 end
 
--- local contextual_visibility_values = {
--- 	in_combat = "In Combat",
--- 	has_attackable_target = "Has Attackable Target",
--- 	in_range = "In Range of Target",
--- }
+function ST:handle_bar_positioning()
+	local db_class = self:get_class_table()
+end
 
--- local outline_map = {
--- 	_none="",
--- 	outline="OUTLINE",
--- 	thick_outline="THICKOUTLINE",
--- }
--- ST.outline_map = outline_map
+function ST:move_together_dragstart()
+	for h in self:iter_hands() do
+		print(h)
+		local f = self:get_frame(h)
+		LWIN.OnDragStart(f)
+		-- LWIN.windowData[f].isDragging = true
+		-- f:StartMoving()
+	end
+end
 
--- local bar_border_modes = {
--- 	Solid="Solid",
--- 	Texture="Texture",
--- 	None="None",
--- }
-
--- ST.outlines = {
--- 	_none="None",
--- 	outline="Outline",
--- 	thick_outline="Thick Outline",
--- }
-
--- ST.texts = {
--- 	attack_speed="Attack speed",
--- 	swing_timer="Swing timer",
--- }
-
--- local gcd_padding_modes = {
--- 	Dynamic="Dynamic",
--- 	Fixed="Fixed",
--- 	None="None",
--- }
+function ST:move_together_dragstop()
+	for h in self:iter_hands() do
+		local f = self:get_frame(h)
+		-- LWIN.windowData[f].isDragging = false
+		-- f:StopMovingOrSizing()
+		LWIN.OnDragStop(f)
+		-- LWIN.SavePosition(f)
+	end
+end
 
 -- local valid_anchor_points = {
 -- 	TOPLEFT="TOPLEFT",

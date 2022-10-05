@@ -6,6 +6,18 @@ local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
 local LSM = LibStub("LibSharedMedia-3.0")
 
 -- Selections for dropdowns
+ST.valid_anchor_points = {
+	TOPLEFT="TOPLEFT",
+    TOPRIGHT="TOPRIGHT",
+    BOTTOMLEFT="BOTTOMLEFT",
+    BOTTOMRIGHT="BOTTOMRIGHT",
+    TOP="TOP",
+    BOTTOM="BOTTOM",
+    LEFT="LEFT",
+    RIGHT="RIGHT",
+    CENTER="CENTER",
+}
+
 ST.outlines = {
 	_none="None",
 	outline="Outline",

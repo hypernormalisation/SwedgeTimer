@@ -9,7 +9,9 @@ local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
 
 -- This table is used for any per-class settings that should apply globally.
 ST.class_defaults = {
-    class_enabled = true
+    class_enabled = true,
+    bars_locked = true,
+    bar_movement_mode = "all",
 }
 
 -- This table is used by AceDB's smart defaults feature
@@ -26,14 +28,15 @@ ST.bar_defaults = {
     dim_oor = true,
     dim_alpha = 0.6,
 
-    -- Bar dimensions/positioning
+    -- Bar dimensions
     bar_height = 16,
     bar_width = 285,
-    bar_locked = true,
-    bar_x_offset = 0,
-    bar_y_offset = -124,
-    bar_point = "CENTER",
-    bar_rel_point = "CENTER",
+
+    -- Bar positions (handled by LibWindow-1.1)
+    x = 0,
+    y = -120,
+    point = "CENTER",
+    scale = 1,
 
     -- Bar appearance
     bar_texture_key = "Solid",
@@ -332,7 +335,7 @@ ST.WARRIOR.defaults = {
     has_class_options = true,
     -- Class-level options
     enable_hs_color = true,
-    hs_color = {224, 76, 116, 1.0},
+    hs_color = {224, 96, 116, 1.0},
     enable_cleave_color = true,
     cleave_color = {154, 219, 68, 1.0},
     insufficient_rage_color = {140, 140, 140, 1.0},
@@ -342,8 +345,7 @@ ST.WARRIOR.defaults = {
         enable_deadzone = true,
     },
 	offhand = {
-		bar_x_offset = 0,
-		bar_y_offset = -154,
+        y = -160,
 		bar_color_default = {1, 66, 69, 0.8},
         show_gcd_underlay = false,
         gcd1a_marker_enabled = false,
@@ -354,8 +356,7 @@ ST.WARRIOR.defaults = {
         force_show_in_combat = false,
 		bar_height = 13,
 		bar_width = 200,
-		bar_x_offset = 0,
-		bar_y_offset = -120,
+        y = 60,
 		bar_color_default = {115, 17, 42, 0.8},
 		font_size = 11,
         show_gcd_underlay = false,

@@ -10,6 +10,7 @@ local STL = LibStub("LibClassicSwingTimerAPI", true)
 local LRC = LibStub("LibRangeCheck-2.0")
 local LLM = LibStub("LibLatencyMonitor")
 local LGC = LibStub("LibGlobalCooldown")
+local LWIN = LibStub("LibWindow-1.1")
 
 local print = st.utils.print_msg
 
@@ -90,8 +91,6 @@ function ST:is_value_in_array(value, array)
 end
 
 function ST:get_frame(hand)
-	-- Gets the frame associated with that hand's bar
-	-- print("hand says: " .. tostring(hand))
 	return self[hand].frame
 end
 
@@ -122,6 +121,30 @@ function ST:show_bar(hand)
 	end
 end
 
+function ST:lock_frames()
+	for hand in self:iter_hands() do
+		local f = self:get_frame(hand)
+		f:SetMovable(false)
+		f:EnableMouse(false)
+		f:SetScript("OnMouseWheel", nil)
+	end
+end
+
+function ST:unlock_frames()
+	for hand in self:iter_hands() do
+		local f = self:get_frame(hand)
+		f:SetMovable(true)
+		f:EnableMouse(true)
+		f:SetScript("OnMouseWheel", function(_, dir)
+				LWIN.OnMouseWheel(f, dir)
+				local ACR = LibStub("AceConfigRegistry-3.0")
+				ACR:NotifyChange(ST.options_table_name)
+			end
+		)
+		-- LWIN.EnableMouseWheelScaling(f)
+	end
+end
+
 
 --=========================================================================================
 -- Funcs to initialise the addon
@@ -149,6 +172,7 @@ function ST:OnInitialize()
 	self:set_opts_case_dict()
 	self:set_opts_funcs()
 	self:generate_top_level_options_table()
+	self:generate_bar_position_options_table()
 	self:generate_class_options_table()
 	for hand in self:iter_hands() do
 		self:generate_hand_options_table(hand)
@@ -168,8 +192,9 @@ function ST:OnInitialize()
 		print(k)
 	end
 
-	AC:RegisterOptionsTable(addon_name.."_Options", self.opts_table)
-	self.optionsFrame = ACD:AddToBlizOptions(addon_name.."_Options", addon_name)
+	self.options_table_name = addon_name.."_Options"
+	AC:RegisterOptionsTable(self.options_table_name, self.opts_table)
+	self.optionsFrame = ACD:AddToBlizOptions(self.options_table_name, addon_name)
 
 	-- Profile options
 	local profiles = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
@@ -207,6 +232,16 @@ function ST:OnInitialize()
 	LGC.RegisterCallback(self, LGC.GCD_STARTED, self.callback_event_handler)
 	LGC.RegisterCallback(self, LGC.GCD_OVER, self.callback_event_handler)
 	LGC.RegisterCallback(self, LGC.GCD_DURATIONS_UPDATED, self.callback_event_handler)
+
+	-----------------------------------------------------------
+	-- A frame to which all SwedgeTimer frames will anchor.
+	-----------------------------------------------------------
+	self.anchor_frame = CreateFrame(
+		"Frame",
+		addon_name .. "_anchorframe"
+	)
+	self.anchor_frame:SetAllPoints()
+	self.anchor_frame:SetParent(UIParent)
 
 	-----------------------------------------------------------
 	-- The set of containers and frames used in the addon.
@@ -394,6 +429,13 @@ function ST:post_init()
 		self[self.player_class].post_init(self)
 	end
 
+	-- Set frames to locked or unlocked based on settings.
+	local db_class = self:get_class_table()
+	if db_class.bars_locked then
+		self:lock_frames()
+	else
+		self:unlock_frames()
+	end
 end
 
 --=========================================================================================
@@ -858,9 +900,16 @@ function ST:register_slashcommands()
 end
 
 function ST:test1()
-	for hand in self:iter_hands() do
-		print(hand)
-	end
+	-- local db = self:get_class_table()
+	-- if db.bars_locked then
+	-- 	self:Print("Unlocking bar frames")
+	-- 	db.bars_locked = false
+	-- 	self:unlock_frames()
+	-- else
+	-- 	self:Print("Locking bar frames")
+	-- 	db.bars_locked = true
+	-- 	self:lock_frames()
+	-- end
 end
 
 function ST:open_menu()

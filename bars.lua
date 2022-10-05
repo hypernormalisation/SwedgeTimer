@@ -13,6 +13,7 @@ local addon_name, st = ...
 local print = st.utils.print_msg
 local LSM = LibStub("LibSharedMedia-3.0")
 local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
+local LWIN = LibStub("LibWindow-1.1")
 
 --=========================================================================================
 -- Intialisation func (called once relevant libs are loaded once per hand)
@@ -25,16 +26,24 @@ function ST:init_visuals_template(hand)
 
     -- Set initial frame properties
     frame:SetPoint("CENTER")
-    frame:SetMovable(not db_profile.bars_locked)
-    frame:EnableMouse(not db_profile.bars_locked)
-    frame:RegisterForDrag("LeftButton")
-    frame:SetScript("OnDragStart", self[hand].on_drag_start)
-    frame:SetScript("OnDragStop", self[hand].on_drag_stop)
     frame:SetHeight(db.bar_height)
     frame:SetWidth(db.bar_width)
-    -- self:configure_bar_size(hand)
-    frame:ClearAllPoints()
-    frame:SetPoint(db.bar_point, UIParent, db.bar_rel_point, db.bar_x_offset, db.bar_y_offset)
+
+    -- Configure drag and drop handlers with LibWindow, adding a callback
+    -- to the config menu to let the panel know the coords have changed.
+    LWIN.RegisterConfig(frame, self:get_hand_table(hand))
+    LWIN.RestorePosition(frame)
+    frame:RegisterForDrag("LeftButton")
+    frame:SetScript("OnDragStart", function()
+            LWIN.OnDragStart(frame)
+        end
+    )
+    frame:SetScript("OnDragStop", function()
+            LWIN.OnDragStop(frame)
+            local ACR = LibStub("AceConfigRegistry-3.0")
+            ACR:NotifyChange(self.options_table_name)
+        end
+    )
 
     -- Create the backplane
     frame.backplane = CreateFrame("Frame", addon_name .. "MHBarBackdropFrame", frame, "BackdropTemplate")
@@ -64,7 +73,6 @@ function ST:init_visuals_template(hand)
     frame.deadzone:SetDrawLayer("ARTWORK", -1)
     self:configure_deadzone(hand)
     self:set_deadzone_width(hand)
-
 
     -- Create the attack speed/swing timer texts and init them
     frame.left_text = frame:CreateFontString(nil, "OVERLAY")
@@ -217,20 +225,6 @@ function ST:configure_bar_outline(hand)
 	frame.backplane:SetBackdropColor(0,0,0, db.backplane_alpha)
 end
 
-function ST:configure_bar_position(hand)
-    local db = self:get_hand_table(hand)
-	local frame = self[hand].frame
-	frame:ClearAllPoints()
-	frame:SetPoint(db.bar_point, UIParent, db.bar_rel_point, db.bar_x_offset, db.bar_y_offset)
-	frame.bar:SetPoint("TOPLEFT", 0, 0)
-	frame.bar:SetPoint("TOPLEFT", 0, 0)
-	frame.gcd_bar:SetPoint("TOPLEFT", 0, 0)
-	frame.deadzone:SetPoint("TOPRIGHT", 0, 0)
-	frame.left_text:SetPoint("TOPLEFT", 3, -(db.bar_height / 2) + (db.text_size / 2))
-	frame.right_text:SetPoint("TOPRIGHT", -3, -(db.bar_height / 2) + (db.text_size / 2))
-	self:configure_bar_outline(hand)
-end
-
 function ST:configure_gcd_underlay(hand)
     local db = self:get_hand_table(hand)
 	local frame = self:get_frame(hand)
@@ -239,53 +233,6 @@ function ST:configure_gcd_underlay(hand)
         self:convert_color(db.bar_color_gcd)
     )
     frame.gcd_bar:SetDrawLayer("ARTWORK", -2)
-end
-
---=========================================================================================
--- UIHANDLERs
---=========================================================================================
-function ST:drag_stop_template(hand)
-    local frame = self[hand].frame
-    local db = self:get_hand_table(hand)
-    frame:StopMovingOrSizing()
-    local point, _, rel_point, x_offset, y_offset = frame:GetPoint()
-    db.bar_x_offset = st.utils.simple_round(x_offset, 0.1)
-    db.bar_y_offset = st.utils.simple_round(y_offset, 0.1)
-    db.bar_point = point
-    db.bar_rel_point = rel_point
-    self:configure_bar_position(hand)
-    -- self:set_bar_color(hand)
-end
-
-function ST:drag_start_template(hand)
-    local db = self:get_profile_table(hand)
-    if not db.bar_locked then
-        ST[hand].frame:StartMoving()
-    end
-end
-
-function ST.mainhand.on_drag_start()
-    ST:drag_start_template('mainhand')
-end
-
-function ST.mainhand.on_drag_stop()
-    ST:drag_stop_template('mainhand')
-end
-
-function ST.offhand.on_drag_start()
-    ST:drag_start_template('offhand')
-end
-
-function ST.offhand.on_drag_stop()
-    ST:drag_stop_template('offhand')
-end
-
-function ST.ranged.on_drag_start()
-    ST:drag_start_template('ranged')
-end
-
-function ST.ranged.on_drag_stop()
-    ST:drag_stop_template('ranged')
 end
 
 --=========================================================================================

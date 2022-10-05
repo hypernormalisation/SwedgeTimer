@@ -9,6 +9,7 @@
 local addon_name, st = ...
 local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
 local LSM = LibStub("LibSharedMedia-3.0")
+local LWIN = LibStub("LibWindow-1.1")
 local print = st.utils.print_msg
 
 -- This object will eventually be passed to AceConfig as the options
@@ -86,15 +87,18 @@ function ST:generate_top_level_options_table()
         type = "toggle",
         order = 1.2,
         name = "Bars locked",
-        desc = "Prevents all swing timer bars from being dragged with the mouse.",
-        get = "getter",
+        desc = "Prevents all swing timer bars from being dragged or scaled with the mouse.",
+        get = function()
+            local db = ST:get_class_table()
+            return db.bars_locked
+        end,
         set = function(_, input)
-            local db = ST:get_profile_table()
+            local db = ST:get_class_table()
             db.bars_locked = input
-            for hand in ST:iter_hands() do
-                local frame = self:get_frame(hand)
-                frame:SetMovable(not input)
-                frame:EnableMouse(not input)
+            if db.bars_locked then
+                ST:lock_frames()
+            else
+                ST:unlock_frames()
             end
         end,
     }
@@ -119,6 +123,7 @@ function ST:set_opts_case_dict()
     -- This function sets a case dict for setting the bar sub-menus.
     self.opts_case_dict = {
         mainhand = {
+            pretty_name = "Mainhand",
             title = "Mainhand Controls",
             panel_title = string.format("Mainhand", self.player_class_pretty),
             desc = "This panel and its subpanels configure the settings for the mainhand bar.\n",
@@ -126,6 +131,7 @@ function ST:set_opts_case_dict()
             order_offset = 1,
         },
         offhand = {
+            pretty_name = "Offhand",
             title = "Offhand Controls",
             panel_title = string.format("Offhand", self.player_class_pretty),
             desc = "This panel and its subpanels configure the settings for the offhand bar.\n",
@@ -133,6 +139,7 @@ function ST:set_opts_case_dict()
             order_offset = 2,
         },
         ranged = {
+            pretty_name = "Ranged",
             title = "Ranged Controls",
             panel_title = string.format("Ranged", self.player_class_pretty),
             desc = "This panel and its subpanels configure the settings for the ranged bar.\n",
@@ -693,6 +700,97 @@ function ST.class_opts_funcs.WARRIOR(self)
         },
     }
     return opts_group
+end
+
+--=========================================================================================
+-- Bar Positioning group
+--=========================================================================================
+function ST:generate_bar_position_options_table()
+
+    local opts_group = {
+		name = "Bar Positioning/Scale",
+		type = "group",
+        desc = "This panel controls the positioning and scales of the bars in SwedgeTimer.",
+        order = 0.6,
+        args = {},
+    }
+
+    local hand_offsets = {
+        mainhand = 1.0,
+        offhand = 2.0,
+        ranged = 3.0,
+    }
+
+    for hand in self:iter_hands() do
+        local offset = hand_offsets[hand]
+        local name_pretty = self.opts_case_dict[hand].pretty_name
+        local g = {
+            [hand .. "_header"] = {
+                type = "header",
+                order = 1.0 + offset,
+                name = name_pretty,
+            },
+            [hand .. "_x"] = {
+                type = "range",
+                order = 1.1 + offset,
+                name = "x coord",
+                min = -2000, max = 2000, step = 1,
+                softMin = -1000, softMax = 1000,
+                get = function()
+                    return ST:get_hand_table(hand).x
+                end,
+                set = function(_, value)
+                    ST:get_hand_table(hand).x = value
+                    LWIN.RestorePosition(ST:get_frame(hand))
+                end,
+            },
+            [hand .. "_y"] = {
+                type = "range",
+                order = 1.2 + offset,
+                name = "y coord",
+                min = -2000, max = 2000, step = 1,
+                softMin = -800, softMax = 800,
+                get = function()
+                    return ST:get_hand_table(hand).y
+                end,
+                set = function(_, value)
+                    ST:get_hand_table(hand).y = value
+                    LWIN.RestorePosition(ST:get_frame(hand))
+                end,
+            },
+            [hand .. "_point"] = {
+                type = "select",
+                order = 1.3 + offset,
+                name = "Anchor Point",
+                desc = "The anchor point to the Parent UI.",
+                values = ST.valid_anchor_points,
+                get = function()
+                    return ST:get_hand_table(hand).point
+                end,
+                set = function(_, value)
+                    ST:get_hand_table(hand).point = value
+                    LWIN.RestorePosition(ST:get_frame(hand))
+                end,
+            },
+            [hand .. "_scale"] = {
+                type = "range",
+                order = 1.4 + offset,
+                name = "Scale",
+                min = 0.1, max = 2.0, step = 0.01,
+                get = function()
+                    return ST:get_hand_table(hand).scale
+                end,
+                set = function(_, value)
+                    ST:get_hand_table(hand).scale = value
+                    LWIN.RestorePosition(ST:get_frame(hand))
+                end,
+            },
+        }
+        for k, v in pairs(g) do
+            opts_group.args[k] = v
+        end
+    end
+    self.opts_table.args.positions = opts_group
 end
 
 
