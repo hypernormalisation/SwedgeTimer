@@ -368,11 +368,7 @@ function ST:on_bar_active(hand)
     local frame = self:get_frame(hand)
     if db.gcd1a_marker_enabled or db.gcd1b_marker_enabled then
         self:set_gcd_marker_positions(hand)
-        -- frame.gcd1a_marker:Show()
     end
-    -- if db.gcd1b_marker_enabled then
-    --     frame.gcd1b_marker:Show()
-    -- end
     if db.enable_deadzone then
         frame.deadzone:Show()
     end
@@ -563,12 +559,20 @@ function ST:set_deadzone_width(hand)
     local db = self:get_hand_table(hand)
     local frame = self:get_frame(hand).deadzone
     local db_shared = self.db.profile
-    if not db.enable_deadzone then
-        return
-    end
     local frac = (self.latency.world_ms / 1000) / self[hand].speed
     frac = frac * db_shared.deadzone_scale_factor
     frame:SetWidth(max(1, frac * db.bar_width))
+
+    -- Determine if to show or hide.
+    if not db.enable_deadzone then
+        frame:Hide()
+        return
+    end
+    if db.deadzone_hide_inactive and self[hand].is_full then
+        frame:Hide()
+        return
+    end
+    frame:Show()
 end
 
 function ST:set_bar_color(hand, color_table)

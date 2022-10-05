@@ -217,6 +217,8 @@ function ST:set_opts_funcs()
                 ST:configure_bar_outline(h)
                 ST:configure_gcd_markers(h)
                 ST:set_gcd_marker_positions(h)
+                ST:configure_deadzone(h)
+                ST:set_deadzone_width(h)
             end
         end
 
@@ -251,6 +253,7 @@ function ST:set_opts_funcs()
                 ST:configure_deadzone(h)
                 ST:configure_bar_outline(h)
                 ST:set_bar_color(h)
+                ST:set_deadzone_width(h)
             end
         end
 
@@ -874,6 +877,14 @@ function ST:generate_hand_options_table(hand)
             args = ST.fonts_table_preset,
         },
 
+        -- Deadzone group
+        deadzone_group = {
+            type = "group",
+            order = 2.1,
+            name = "Deadzone",
+            args = ST.deadzone_settings_table,
+        }
+
     }
 
     opts_group.args = opts
@@ -1002,28 +1013,6 @@ function ST:generate_hand_options_table(hand)
 
     -- Assign it to the opts table.
     if hand == "mainhand" or hand == "offhand" or hand == "ranged" then
-        -- if not self.opts_table.args.single_control then
-        --     local sp_desc = string.format(
-        --         "This panel allows the user to control individual swing timer bars for %ss.",
-        --         self.player_class_pretty
-        --     )
-        --     self.opts_table.args.single_control = {
-        --         name = string.format("%s Bar Controls", self.player_class_pretty),
-        --         type = "group",
-        --         desc = sp_desc,
-        --         args = {},
-        --     }
-        --     -- self.opts_table.args.multi_control.args.multi_header = {
-        --     --     name = "",
-        --     --     order = 0.1,
-        --     --     type = "header",
-        --     -- }
-        --     self.opts_table.args.single_control.args.single_desc = {
-        --         name = sp_desc,
-        --         order = 0.2,
-        --         type = "description",
-        --     }
-        -- end
         self.opts_table.args[hand] = opts_group
     else
         -- If we need to, construct the multi-bar control panel and group.
@@ -1058,6 +1047,9 @@ function ST:set_opts()
     -- Sets a dict for hand/collection-based case switching. 
     self:set_opts_case_dict()
     
+    -- Generate the preset options tables that don't require special case switching.
+    self:build_preset_options_tables()
+
     -- Generates some handler setters/getters/disablers for hands/collections.
 	self:set_opts_funcs()
 

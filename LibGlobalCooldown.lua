@@ -84,7 +84,7 @@ function lib:calculate_expected_spell_gcd()
     -- print(current, cast_time_test)
 	current = math.min(current, cast_time_test)
 
-    -- The minimum GCD for all classes is 1s.
+    -- The minimum GCD for all classes is 1 second.
     if current < 1 then
         current = 1.0
     end
