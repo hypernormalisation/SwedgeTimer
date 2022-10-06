@@ -90,9 +90,34 @@ function ST:is_value_in_array(value, array)
 	return false
 end
 
+function ST:convert_color(t, new_alpha)
+	-- Convert standard 0-255 colors down to WoW 0-1 ranges.
+	local r,g,b,a = unpack(t)
+	a = new_alpha or a
+	r = r/255
+	g = g/255
+	b = b/255
+	return r, g, b, a
+end
+
+function ST:convert_color_up(t, new_alpha)
+	-- Convert WoW 0-1 ranges up to standard 0-255 ranges.
+	local r,g,b,a = unpack(t)
+	a = new_alpha or a
+	r = r * 255
+	g = g * 255
+	b = b * 255
+	return r, g, b, a
+end
+
 function ST:get_anchor_frame(hand)
 	-- Gets the main anchor frame for the hand.
 	return self[hand].anchor_frame
+end
+
+function ST:get_hiding_anchor_frame(hand)
+	-- Get the hiding anchor frame, which also gets calls to show/hide.
+	return self:get_anchor_frame(hand).hiding_anchor_frame
 end
 
 function ST:get_bar_frame(hand)
@@ -123,13 +148,15 @@ function ST:get_in_range(hand)
 end
 
 function ST:hide_bar(hand)
-	-- self:get_bar_frame(hand):Hide()
+	self:get_bar_frame(hand):Hide()
+	self:get_hiding_anchor_frame(hand):Hide()
 end
 
 function ST:show_bar(hand)
 	local db_class = self:get_class_table()
 	if db_class.class_enabled then
 		self:get_bar_frame(hand):Show()
+		self:get_hiding_anchor_frame(hand):Show()
 	end
 end
 

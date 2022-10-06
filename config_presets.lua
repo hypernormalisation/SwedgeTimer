@@ -46,7 +46,7 @@ ST.bar_defaults = {
     background_color = {0.0, 0.0, 0.0, 0.85},
     background_texture_key = "Solid",
 
-    border_color = {0.0, 0.0, 0.01, 0.95},
+    border_color = {40, 40, 40, 0.95},
     border_texture_key = "Square Full White",
     border_width = 2,
 
@@ -211,7 +211,7 @@ ST.PALADIN.defaults = {
     use_seal_colors = true,
     soc_color = {47, 128, 10, 1.0},
     sov_color = {120, 81, 12, 1.0},
-    sol_color = {17, 133, 119, 1.0},
+    sol_color = {6, 140, 104, 1.0},
     sow_color = {22, 100, 117, 1.0},
     sor_color = {95, 47, 112, 1.0},
 
@@ -221,8 +221,8 @@ ST.PALADIN.defaults = {
     aow_glow_nlines = 10,
     aow_glow_freq = 0.04,
     aow_glow_line_length = 22,
-    aow_glow_line_thickness = 1,
-    aow_glow_offset = 2,
+    -- aow_glow_line_thickness = 1,
+    -- aow_glow_offset = 2,
 
     -- Bar options
     ['**'] = ST.bar_defaults,
@@ -335,8 +335,6 @@ ST.WARLOCK.defaults = {
 -- WARRIOR
 ------------------------------------------------------------------------------------
 ST.WARRIOR.defaults = {
-    tag = "WARRIOR",
-    has_class_options = true,
     -- Class-level options
     enable_hs_color = true,
     hs_color = {224, 96, 116, 1.0},
@@ -356,10 +354,12 @@ ST.WARRIOR.defaults = {
         gcd1b_marker_enabled = false,
 	},
 	ranged = {
+        show_behaviour = "conditional",
+        show_condition = "both",
         require_in_range = true,
 		bar_height = 13,
 		bar_width = 200,
-        y = 60,
+        y = -60,
 		bar_color_default = {191, 88, 29, 0.8},
 		font_size = 11,
         show_gcd_underlay = false,
