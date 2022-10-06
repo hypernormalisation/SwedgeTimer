@@ -255,7 +255,9 @@ function ST:OnInitialize()
 	self.mainhand.is_full_timer = nil
 	self.mainhand.is_paused = false
 	self.mainhand.current_progress = false
-	self.mainhand.frame = CreateFrame("Frame", addon_name .. "MHBarFrame", UIParent)
+	self.mainhand.frame = CreateFrame(
+		"Frame", addon_name .. "MHBarFrame", UIParent, "BackdropTemplate"
+	)
 
 	-- OH containers
 	self.offhand.start = nil
@@ -266,7 +268,9 @@ function ST:OnInitialize()
 	self.offhand.is_full = false
 	self.offhand.is_full_timer = nil
 	self.offhand.is_paused = false
-	self.offhand.frame = CreateFrame("Frame", addon_name .. "OHBarFrame", UIParent)
+	self.offhand.frame = CreateFrame(
+		"Frame", addon_name .. "OHBarFrame", UIParent, "BackdropTemplate"
+	)
 
 	-- ranged containers
 	self.ranged.start = nil
@@ -275,7 +279,9 @@ function ST:OnInitialize()
 	self.ranged.inactive_timer = nil
 	self.ranged.has_weapon = nil
 	self.ranged.is_full = false
-	self.ranged.frame = CreateFrame("Frame", addon_name .. "OHBarFrame", UIParent)
+	self.ranged.frame = CreateFrame(
+		"Frame", addon_name .. "OHBarFrame", UIParent, "BackdropTemplate"
+	)
 
 	-- GCD info containers
 	self.gcd = {}

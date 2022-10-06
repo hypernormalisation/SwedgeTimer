@@ -46,7 +46,7 @@ function ST:init_visuals_template(hand)
     )
 
     -- Create the backplane
-    frame.backplane = CreateFrame("Frame", addon_name .. "MHBarBackdropFrame", frame, "BackdropTemplate")
+    -- frame.backplane = CreateFrame("Frame", addon_name .. "MHBarBackdropFrame", frame, "BackdropTemplate")
     
     -- Configure frame strata/draw levels
     self:configure_frame_strata(hand)
@@ -114,6 +114,7 @@ function ST:configure_bar_size(hand)
     frame.deadzone:SetHeight(db.bar_height)
     self:configure_texts(hand)
     self:configure_gcd_markers(hand)
+    self:configure_bar_outline(hand)
 end
 
 function ST:configure_frame_strata(hand)
@@ -121,10 +122,10 @@ function ST:configure_frame_strata(hand)
     local db = self:get_profile_table()
     -- Adjust the frame draw levels so the backplane is below the frame
     frame:SetFrameLevel(db.draw_level+1)
-    frame.backplane:SetFrameLevel(db.draw_level)
+    -- frame.backplane:SetFrameLevel(db.draw_level)
     -- Set to the requested frame strata
     frame:SetFrameStrata(db.frame_strata)
-    frame.backplane:SetFrameStrata(db.frame_strata)
+    -- frame.backplane:SetFrameStrata(db.frame_strata)
 end
 
 function ST:configure_bar_appearances(hand)
@@ -226,17 +227,20 @@ function ST:configure_bar_outline(hand)
 	elseif mode == "Solid" then
 		texture_key = "None"
 	end
-    frame.backplane.backdropInfo = {
+    frame.backdropInfo = {
+        -- bgFile="Interface\\ChatFrame\\ChatFrameBackground",
+        -- edgeFile="Interface\\ChatFrame\\ChatFrameBackground",
         bgFile = LSM:Fetch('statusbar', db.backplane_texture_key),
 		edgeFile = LSM:Fetch('border', texture_key),
-        tile = true, tileSize = 16, edgeSize = 16,
-        insets = { left = 6, right = 6, top = 6, bottom = 6}
+        tile = true, tileSize = 16, edgeSize = 4,
+        -- insets = { left = 8, right = 8, top = 8, bottom = 8}
     }
-    frame.backplane:ApplyBackdrop()
-	tv = tv - 2
-    frame.backplane:SetPoint('TOPLEFT', -1*tv, tv)
-    frame.backplane:SetPoint('BOTTOMRIGHT', tv, -1*tv)
-	frame.backplane:SetBackdropColor(0,0,0, db.backplane_alpha)
+    frame:ApplyBackdrop()
+    -- frame:SetBackdropBorderColor(1.0,0,0, 1.0)
+	-- tv = tv - 2
+    -- frame:SetPoint('TOPLEFT', -1*tv, tv)
+    -- frame:SetPoint('BOTTOMRIGHT', tv, -1*tv)
+	frame:SetBackdropColor(0,0,0, db.backplane_alpha)
 end
 
 function ST:configure_gcd_underlay(hand)

@@ -21,7 +21,7 @@ ST.bar_defaults = {
     -- Visibility behaviour
     enabled = true,
     show_behaviour = "conditional",  -- can be conditional or always
-    show_condition = "has_target",
+    show_condition = "either",
     require_in_range = false,
 
     -- Out of range behaviour
@@ -208,29 +208,26 @@ ST.PALADIN.defaults = {
     has_class_options = true,
 
     use_seal_colors = true,
-    soc_color = {70, 150, 36, 1.0},
-    sov_color = {199, 157, 18, 1.0},
-    sol_color = {42, 189, 125, 1.0},
-    sow_color = {36, 171, 201, 1.0},
-    sor_color = {102, 96, 209, 1.0},
+    soc_color = {47, 128, 10, 1.0},
+    sov_color = {120, 81, 12, 1.0},
+    sol_color = {17, 133, 119, 1.0},
+    sow_color = {22, 100, 117, 1.0},
+    sor_color = {95, 47, 112, 1.0},
 
     use_aow_glow = true,
     require_exo_ready = true,
     aow_glow_color = {209, 198, 115, 1.0},
-    aow_glow_nlines = 12,
-    aow_glow_freq = 0.03,
-    aow_glow_line_length = 24,
+    aow_glow_nlines = 10,
+    aow_glow_freq = 0.04,
+    aow_glow_line_length = 22,
     aow_glow_line_thickness = 1,
-    aow_glow_offset = 1,
+    aow_glow_offset = 2,
 
     -- Bar options
     ['**'] = ST.bar_defaults,
 	mainhand = {
         enable_deadzone = true,
-        bar_height = 22,
-        bar_width = 280,
-        text_size = 14,
-        bar_color_default = {120, 120, 120, 0.95},
+        bar_color_default = {40, 60, 92, 0.95},
         gcd1a_marker_mode = "phys",
         gcd1b_marker_mode = "spell",
         -- gcd1a_marker_anchor = "swing",
