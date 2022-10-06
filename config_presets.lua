@@ -29,7 +29,7 @@ ST.bar_defaults = {
     dim_alpha = 0.6,
 
     -- Bar dimensions
-    bar_height = 19,
+    bar_height = 20,
     bar_width = 275,
 
     -- Bar positions (handled by LibWindow-1.1)
@@ -50,7 +50,7 @@ ST.bar_defaults = {
     backplane_outline_width = 2.0,
 
     -- Bar Texts
-    text_size = 12,
+    text_size = 14,
     text_color = {255, 255, 255, 1.0},
     text_font = "PT Sans Narrow",
     text_outline_key = "outline",
@@ -58,10 +58,15 @@ ST.bar_defaults = {
     left_text_key  = "attack_speed",
     left_text_enabled = true,
     left_text_hide_inactive = false,
+    left_text_x_percent_offset = 0,
+    left_text_y_percent_offset = 0,
+
 
     right_text_key = "swing_timer",
     right_text_enabled = true,
     right_text_hide_inactive = true,
+    right_text_x_percent_offset = 0,
+    right_text_y_percent_offset = 0,
 
     -- GCD underlay
     show_gcd_underlay = true,
@@ -223,8 +228,8 @@ ST.PALADIN.defaults = {
 	mainhand = {
         enable_deadzone = true,
         bar_height = 22,
-        bar_width = 285,
-        text_size = 13,
+        bar_width = 280,
+        text_size = 14,
         bar_color_default = {120, 120, 120, 0.95},
         gcd1a_marker_mode = "phys",
         gcd1b_marker_mode = "spell",

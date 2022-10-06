@@ -225,13 +225,13 @@ function ST:construct_text_settings_table()
             order = 4.03,
             name = "Text size",
             desc = "The size of the bar texts.",
-            min = 10, max = 40, softMin = 8, softMax = 24,
+            min = 10, max = 40, softMin = 8, softMax = 34,
             step = 1,
             get = "getter",
             set = "text_setter",
         },
         text_color = {
-            order=4.01,
+            order=4.035,
             type="color",
             name="Text color",
             desc="The color of the addon texts.",
@@ -269,17 +269,22 @@ function ST:construct_text_settings_table()
             order = 4.05,
             name = "Controls what text to show on the left of the bar, and when to show it.",
         },
+        -- lb01 = {
+        --     order=4.051,
+        --     type="header",
+        --     name="",
+        -- },
         left_text_enabled = {
             type = "toggle",
             order = 4.06,
-            name = "Left Text Enabled",
+            name = "Enabled",
             desc = "Enables or disables the left text.",
             get = "getter",
             set = "setter",
         },
         left_text_key = {
             type="select",
-            order = 4.07,
+            order = 4.08,
             values=ST.texts,
             style="dropdown",
             name = "",
@@ -290,13 +295,44 @@ function ST:construct_text_settings_table()
         },
         left_text_hide_inactive = {
             type = "toggle",
-            order = 4.08,
+            order = 4.07,
             name = "Hide when bar full",
             desc = "Hides the text when the timer bar is full.",
             get = "getter",
             set = "setter",
             disabled = "left_text_disable",
         },
+        -- left_text_position_header = {
+        --     type = "header",
+        --     order = 4.081,
+        --     name = "Left Text Position",
+        -- },
+        left_text_position_desc = {
+            type = "description",
+            order = 4.0811,
+            name = "Controls the left text's positional offsets as a percent of the bar size.",
+        },
+        left_text_x_percent_offset = {
+            type = "range",
+            order = 4.082,
+            name = "x offset %",
+            desc = "The text's horizontal offset as a percentage of the bar width.",
+            min = -100 , max = 100, softMin = -30, softMax = 30,
+            step = 0.1,
+            get = "getter",
+            set = "text_setter",
+        },
+        left_text_y_percent_offset = {
+            type = "range",
+            order = 4.083,
+            name = "y offset %",
+            desc = "The text's vertical offset as a percentage of the bar height.",
+            min = -250 , max = 250, softMin = -150, softMax = 150,
+            step = 0.1,
+            get = "getter",
+            set = "text_setter",
+        },
+
         texts_right_header = {
             order=4.095,
             type="header",
@@ -317,7 +353,7 @@ function ST:construct_text_settings_table()
         },
         right_text_key = {
             type="select",
-            order = 4.11,
+            order = 4.12,
             values=ST.texts,
             style="dropdown",
             name = "",
@@ -328,12 +364,37 @@ function ST:construct_text_settings_table()
         },
         right_text_hide_inactive = {
             type = "toggle",
-            order = 4.12,
+            order = 4.11,
             name = "Hide when bar full",
             desc = "Hides the text when the timer bar is full.",
             get = "getter",
             set = "setter",
             disabled = "right_text_disable",
+        },
+        right_text_position_desc = {
+            type = "description",
+            order = 4.1205,
+            name = "Controls the right text's positional offsets as a percent of the bar size.",
+        },
+        right_text_x_percent_offset = {
+            type = "range",
+            order = 4.121,
+            name = "x offset %",
+            desc = "The text's horizontal offset as a percentage of the bar width.",
+            min = -100 , max = 100, softMin = -30, softMax = 30,
+            step = 0.1,
+            get = "getter",
+            set = "text_setter",
+        },
+        right_text_y_percent_offset = {
+            type = "range",
+            order = 4.122,
+            name = "y offset %",
+            desc = "The text's vertical offset as a percentage of the bar height.",
+            min = -250 , max = 250, softMin = -150, softMax = 150,
+            step = 0.1,
+            get = "getter",
+            set = "text_setter",
         },
     }
 end
@@ -929,8 +990,8 @@ function ST:construct_class_info_panel()
                 "The GCD markers are split between showing the expected Spell GCD (top) and Physical "..
                 "GCD (bottom). Spell GCD duration is affected by haste rating and buffs, while the"..
                 " Physical GCD duration is not."..
-                "The markers are anchored to the swing timer's progress, and will hide when the bar is inactive."..
-                " The markers can also be anchored to the end of the swing instead."
+                "The markers are anchored to the swing timer's end, and will hide when the bar is inactive."..
+                " The markers can also be anchored to the swing progress instead."
             },
             h1 = {
                 type = "header",

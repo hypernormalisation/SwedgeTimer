@@ -173,9 +173,17 @@ function ST:configure_texts(hand)
 	local font_path = LSM:Fetch('font', db.text_font)
 	local opt_string = self.outlines[db.text_outline_key]
 
+    -- The best center point for the x offset seems to be about 1% above normal.
+    local left_text_x_offset = ((db.left_text_x_percent_offset + 1)/ 100) * db.bar_width
+    -- The best center point for the y offset seems to be about 5% below normal.
+    local left_text_y_offset = ((db.left_text_y_percent_offset - 5)/ 100) * db.bar_height
+    frame.left_text:SetPoint(
+        "LEFT",
+        left_text_x_offset,
+        left_text_y_offset
+    )
     frame.left_text:SetFont(font_path, db.text_size, opt_string)
-    frame.left_text:SetPoint("TOPLEFT", 3, -(db.bar_height / 2) + (db.text_size / 2))
-	frame.left_text:SetTextColor(
+    frame.left_text:SetTextColor(
         self:convert_color(db.text_color)
     )
     if db.left_text_enabled then
@@ -184,8 +192,14 @@ function ST:configure_texts(hand)
         frame.left_text:Hide()
     end
 
+    local right_text_x_offset = ((db.right_text_x_percent_offset -1)/ 100) * db.bar_width
+    local right_text_y_offset = ((db.right_text_y_percent_offset - 5)/ 100) * db.bar_height
+	frame.right_text:SetPoint(
+        "RIGHT",
+        right_text_x_offset,
+        right_text_y_offset
+    )
     frame.right_text:SetFont(font_path, db.text_size, opt_string)
-	frame.right_text:SetPoint("TOPRIGHT", -3, -(db.bar_height / 2) + (db.text_size / 2))
 	frame.right_text:SetTextColor(
         self:convert_color(db.text_color)
     )
