@@ -782,8 +782,7 @@ function ST:construct_info_panel()
             name = "When the bars are unlocked (Bars Locked setting at top), the timer bars can be "..
                 "dragged to new positions. When unlocked, the mousewheel can also be used to increase "..
                 "or decrease the bar scale.\n\n"..
-                "The Bar Positioning/Scale menu on the left can be used to finely control the bar "..
-                "position and scale."
+                "The Bar Positioning/Scale menu on the left can also be used for fine control.",
         },
         header4 = {
             type = "header",

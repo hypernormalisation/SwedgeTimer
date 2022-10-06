@@ -225,7 +225,7 @@ function ST:configure_texts(hand)
 	local frame = self:get_visuals_frame(hand)
 	local font_path = LSM:Fetch('font', db.text_font)
 	local opt_string = self.outlines[db.text_outline_key]
-    local w, h = self:get_bar_width_and_height(hand)
+    local w, h = self:get_bar_visuals_width_and_height(hand)
 
     -- The best center point for the x offset seems to be about 1% above normal.
     local left_text_x_offset = ((db.left_text_x_percent_offset + 1)/ 100) * w
@@ -300,7 +300,7 @@ end
 --=========================================================================================
 -- Property funcs
 --=========================================================================================
-function ST:get_bar_width_and_height(hand)
+function ST:get_bar_visuals_width_and_height(hand)
     return self[hand].vf_width, self[hand].vf_height
 end
 
@@ -324,7 +324,7 @@ function ST:onupdate_common(hand, elapsed)
     -- frame.bar:SetWidth(max(1, timer_width))
     -- frame.bar:SetTexCoord(0, d.current_progress, 0, 1)
     local progress = d.current_progress
-    local w, h = self:get_bar_width_and_height(hand)
+    local w, h = self:get_bar_visuals_width_and_height(hand)
     -- Update the main bar's width
     local timer_width = w * progress
     frame.bar:SetWidth(max(1, timer_width))
@@ -484,7 +484,7 @@ function ST:set_gcd_width(hand, timer_width, progress)
     local gcd_progress = (self.gcd.expires - tab.start) / (tab.ends_at - tab.start)
     -- if gcd would go over the end of the bar, instead use the swing timer
     -- bar progress to evalute texture coords and gcd bar width
-    local w = self:get_bar_width_and_height(hand)
+    local w = self:get_bar_visuals_width_and_height(hand)
     if gcd_progress > 1 then
         local gcd_width = w - timer_width
         frame.gcd_bar:SetWidth(max(1, gcd_width))
@@ -542,7 +542,7 @@ function ST:set_gcd_marker_positions(hand)
 
     local hand_is_full = GetTime() >= self[hand].ends_at
     -- print('hand_is_full says: '..tostring(hand_is_full))
-    local w, h = self:get_bar_width_and_height(hand)
+    local w, h = self:get_bar_visuals_width_and_height(hand)
 
     -- Only process if enabled
     if db_hand.gcd1a_marker_enabled then
@@ -632,7 +632,7 @@ function ST:set_deadzone_width(hand)
     local db_shared = self.db.profile
     local frac = (self.latency.world_ms / 1000) / self[hand].speed
     frac = frac * db_shared.deadzone_scale_factor
-    local w = self:get_bar_width_and_height(hand)
+    local w = self:get_bar_visuals_width_and_height(hand)
     frame:SetWidth(max(1, frac * w))
 
     -- Determine if to show or hide.

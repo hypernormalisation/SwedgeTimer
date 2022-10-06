@@ -40,7 +40,7 @@ ST.bar_defaults = {
 
     -- Timer bar appearance
     bar_texture_key = "Solid",
-    bar_color_default = {137, 56, 27, 0.6},
+    bar_color_default = {5, 71, 176, 0.6},
 
     -- Background and border appearance
     background_color = {0.0, 0.0, 0.0, 0.85},
@@ -48,6 +48,7 @@ ST.bar_defaults = {
 
     border_color = {40, 40, 40, 0.95},
     border_texture_key = "Square Full White",
+    -- border_texture_key = "KT - Border",
     border_width = 2,
 
     -- Bar Texts
@@ -61,7 +62,6 @@ ST.bar_defaults = {
     left_text_hide_inactive = false,
     left_text_x_percent_offset = 0,
     left_text_y_percent_offset = 0,
-
 
     right_text_key = "swing_timer",
     right_text_enabled = true,
@@ -228,7 +228,6 @@ ST.PALADIN.defaults = {
     ['**'] = ST.bar_defaults,
 	mainhand = {
         enable_deadzone = true,
-        bar_color_default = {40, 60, 92, 0.95},
         gcd1a_marker_mode = "phys",
         gcd1b_marker_mode = "spell",
         -- gcd1a_marker_anchor = "swing",
@@ -347,7 +346,7 @@ ST.WARRIOR.defaults = {
         enable_deadzone = true,
     },
 	offhand = {
-        y = -160,
+        y = -142,
 		bar_color_default = {1, 66, 69, 0.8},
         show_gcd_underlay = false,
         gcd1a_marker_enabled = false,
