@@ -399,147 +399,52 @@ function ST:construct_text_settings_table()
     }
 end
 
-function ST:construct_bar_appearance_settings_table()
-    ST.bar_appearance_preset = {
-        -- Textures
-        header_textures = {
-            order=1.0,
-            type="header",
-            name="Textures",
-        },
-        bar_texture_key = {
-            order = 2,
-            type = "select",
-            name = "Bar",
-            desc = "The texture of the swing bar.",
-            dialogControl = "LSM30_Statusbar",
-            values = LSM:HashTable("statusbar"),
-            get = "getter",
-            set = "bar_setter",
-        },
-        gcd_texture_key = {
-            order = 2.1,
-            type = "select",
-            name = "GCD underlay",
-            desc = "The texture of the GCD underlay bar.",
-            dialogControl = "LSM30_Statusbar",
-            values = LSM:HashTable("statusbar"),
-            get = "getter",
-            set = "bar_setter",
-        },
-        backplane_texture_key = {
-            order = 2.2,
-            type = "select",
-            name = "Backplane",
-            desc = "The texture of the bar's backplane.",
-            dialogControl = "LSM30_Statusbar",
-            values = LSM:HashTable("statusbar"),
-            get = "getter",
-            set = "bar_setter",
-        },
-
-        -- Colors
-        header_colors = {
-            order=3.0,
-            type="header",
-            name="Default colors",
-        },
-        bar_color_default = {
-            order=3.1,
-            type="color",
-            name="Bar color",
-            desc="The default color of the swing timer bar.",
-            hasAlpha=true,
-            get = "color_getter",
-            set = "color_setter",
-        },
-        bar_color_gcd = {
-            order=3.21,
-            type="color",
-            name="GCD underlay color",
-            desc="The color of the GCD underlay bar.",
-            hasAlpha=true,
-            get = "color_getter",
-            set = "color_setter",
-        },
-        backplane_alpha = {
-            type = "range",
-            order = 3.3,
-            name = "Backplane alpha",
-            desc = "The opacity of the swing bar's backplane.",
-            min = 0.0, max = 1.0,
-            step = 0.05,
-            get = "getter",
-            set = "bar_setter",
-        },
-    }
-end
-
 function ST:construct_border_settings_table()
     ST.borders_preset = {
         -- Border settings
         header_borders = {
             order=4.0,
             type="header",
-            name="Border Mode",
+            name="Border Appearance",
         },
-        bar_border_description = {
-            order=4.1,
-            type="description",
-            name="The bar border can either be set to a solid color, a texture, or disabled.",
-        },
-        border_mode_key = {
-            order=4.2,
-            type="select",
-            values=ST.bar_border_modes,
-            style="dropdown",
-            desc="The outline mode to use for the bar border, if any.",
-            name="Border mode",
-            get = "getter",
-            set = "bar_setter",
-        },
-        header_borders2 = {
-            order=4.25,
-            type="header",
-            name="Solid Border width",
-        },
-        linebreak_1 = {
-            type="description",
-            order = 4.3,
-            name = "If border mode is set to Solid, this controls the border width.",
-        },
-        backplane_outline_width = {
+        -- bar_border_description = {
+        --     order=4.1,
+        --     type="description",
+        --     name="The bar border can either be set to a solid color, a texture, or disabled.",
+        -- },
+        -- header_borders2 = {
+        --     order=4.25,
+        --     type="header",
+        --     name="Solid Border width",
+        -- },
+        border_width = {
             type = "range",
             order = 4.4,
-            name = "Solid outline thickness",
-            desc = "The thickness of the outline around the swing timer bar, if in Solid border mode.",
-            min = 0, max = 5,
-            step = 0.2,
+            name = "Border thickness",
+            desc = "The thickness of the bar border.",
+            min = 0.1, max = 8,
+            step = 0.1,
             get = "getter",
             set = "bar_setter",
-            disabled = "solid_border_disable",
-        },
-        header_borders3 = {
-            order=4.41,
-            type="header",
-            name="Texture Border",
-        },
-        linebreak_2 = {
-            type="description",
-            order = 4.45,
-            name = "If border mode is set to Texture, this controls the texture.",
         },
         border_texture_key = {
             order = 4.5,
             type = "select",
-            name = "Border",
+            name = "Texture",
             desc = "The border texture of the swing bar.",
             dialogControl = "LSM30_Border",
             values = LSM:HashTable("border"),
             get = "getter",
             set = "bar_setter",
-            disabled = "texture_border_disable",
         },
+        border_color = {
+            order = 4.6,
+            type = "color",
+            name = "Color",
+            desc = "The color of the border texture.",
+            get = "color_getter",
+            set = "color_setter"
+        }
     }
 end
 
@@ -1044,7 +949,7 @@ function ST:build_preset_options_tables()
     self:construct_delay_settings_table()
     self:construct_advanced_settings_table()
     self:construct_text_settings_table()
-    self:construct_bar_appearance_settings_table()
+    -- self:construct_bar_appearance_settings_table()
     self:construct_border_settings_table()
     self:construct_gcd_underlay_settings_table()
     self:construct_gcd_marker_settings_table()

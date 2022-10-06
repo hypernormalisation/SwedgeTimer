@@ -38,16 +38,17 @@ ST.bar_defaults = {
     point = "CENTER",
     scale = 1,
 
-    -- Bar appearance
+    -- Timer bar appearance
     bar_texture_key = "Solid",
-    border_texture_key = "None",
     bar_color_default = {137, 56, 27, 0.6},
 
-    -- Backplane and border
-    backplane_alpha = 0.85,
-    backplane_texture_key = "Solid",
-    border_mode_key = "Solid",
-    backplane_outline_width = 2.0,
+    -- Background and border appearance
+    background_color = {0.0, 0.0, 0.0, 0.85},
+    background_texture_key = "Solid",
+
+    border_color = {0.0, 0.0, 0.01, 0.95},
+    border_texture_key = "Square Full White",
+    border_width = 2,
 
     -- Bar Texts
     text_size = 14,

@@ -227,7 +227,7 @@ function ST:set_opts_funcs()
             for h in ST:generic_iter(settings.hands) do
                 local db = ST:get_hand_table(h)
                 db[info[#info]] = value
-                ST:configure_bar_size(h)
+                ST:configure_bar_size_and_positions(h)
                 ST:configure_bar_appearances(h)
                 ST:configure_bar_outline(h)
                 ST:configure_gcd_markers(h)
@@ -405,7 +405,7 @@ function ST:generate_class_getters_setters()
         db[info[#info]] = value
         for h in ST:iter_hands() do
             ST:configure_texts(h)
-            ST:configure_bar_size(h)
+            ST:configure_bar_size_and_positions(h)
             ST:configure_bar_appearances(h)
             ST:configure_bar_outline(h)
             ST:configure_gcd_markers(h)
@@ -620,32 +620,32 @@ function ST.class_opts_funcs.PALADIN(self)
                 return not db.use_aow_glow
             end,
         },
-        aow_glow_line_thickness = {
-            type = "range",
-            order = 2.7,
-            name = "Glow line thickness",
-            desc = "The glow line thickness.",
-            min = 1, max = 10, step = 1,
-            get = "getter",
-            set = "setter",
-            disabled = function()
-                local db = ST:get_class_table()
-                return not db.use_aow_glow
-            end,
-        },
-        aow_glow_offset = {
-            type = "range",
-            order = 2.8,
-            name = "Glow line offset",
-            desc = "The glow line offset from the bar.",
-            min = 0, max = 8, step = 1,
-            get = "getter",
-            set = "setter",
-            disabled = function()
-                local db = ST:get_class_table()
-                return not db.use_aow_glow
-            end,
-        }
+        -- aow_glow_line_thickness = {
+        --     type = "range",
+        --     order = 2.7,
+        --     name = "Glow line thickness",
+        --     desc = "The glow line thickness.",
+        --     min = 1, max = 10, step = 1,
+        --     get = "getter",
+        --     set = "setter",
+        --     disabled = function()
+        --         local db = ST:get_class_table()
+        --         return not db.use_aow_glow
+        --     end,
+        -- },
+        -- aow_glow_offset = {
+        --     type = "range",
+        --     order = 2.8,
+        --     name = "Glow line offset",
+        --     desc = "The glow line offset from the bar.",
+        --     min = 0, max = 8, step = 1,
+        --     get = "getter",
+        --     set = "setter",
+        --     disabled = function()
+        --         local db = ST:get_class_table()
+        --         return not db.use_aow_glow
+        --     end,
+        -- }
     }
     return opts_group
 end
@@ -924,7 +924,7 @@ function ST:generate_bar_position_options_table()
                 end,
                 set = function(_, value)
                     ST:get_hand_table(hand).x = value
-                    LWIN.RestorePosition(ST:get_frame(hand))
+                    LWIN.RestorePosition(ST:get_anchor_frame(hand))
                 end,
             },
             [hand .. "_y"] = {
@@ -938,7 +938,7 @@ function ST:generate_bar_position_options_table()
                 end,
                 set = function(_, value)
                     ST:get_hand_table(hand).y = value
-                    LWIN.RestorePosition(ST:get_frame(hand))
+                    LWIN.RestorePosition(ST:get_anchor_frame(hand))
                 end,
             },
             [hand .. "_point"] = {
@@ -952,7 +952,7 @@ function ST:generate_bar_position_options_table()
                 end,
                 set = function(_, value)
                     ST:get_hand_table(hand).point = value
-                    LWIN.RestorePosition(ST:get_frame(hand))
+                    LWIN.RestorePosition(ST:get_anchor_frame(hand))
                 end,
             },
             [hand .. "_scale"] = {
@@ -965,7 +965,7 @@ function ST:generate_bar_position_options_table()
                 end,
                 set = function(_, value)
                     ST:get_hand_table(hand).scale = value
-                    LWIN.RestorePosition(ST:get_frame(hand))
+                    LWIN.RestorePosition(ST:get_anchor_frame(hand))
                 end,
             },
         }
@@ -1048,11 +1048,11 @@ function ST:generate_hand_options_table(hand)
             get = "getter",
             set = "bar_setter",
         },
-        backplane_texture_key = {
+        background_texture_key = {
             order = 4.2,
             type = "select",
-            name = "Backplane",
-            desc = "The texture of the bar's backplane.",
+            name = "Background",
+            desc = "The texture of the bar's background.",
             dialogControl = "LSM30_Statusbar",
             values = LSM:HashTable("statusbar"),
             get = "getter",
@@ -1074,22 +1074,21 @@ function ST:generate_hand_options_table(hand)
             get = "color_getter",
             set = "color_setter",
         },
-        backplane_alpha = {
-            type = "range",
-            order = 5.3,
-            name = "Backplane alpha",
-            desc = "The opacity of the swing bar's backplane.",
-            min = 0.0, max = 1.0,
-            step = 0.05,
-            get = "getter",
-            set = "bar_setter",
+        background_color = {
+            order=5.3,
+            type="color",
+            name="Background color",
+            desc="The color of the background.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
         },
 
         -- Border options go here.
         bar_borders_group = {
             type = "group",
             order = 1.7,
-            name = "Borders/Outlines",
+            name = "Border",
             args = ST.borders_preset,
         },
 

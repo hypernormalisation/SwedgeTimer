@@ -87,21 +87,28 @@ end
 
 function ST.PALADIN.glow_start(self)
     local db_class = self:get_class_table()
-    local frame = self:get_frame("mainhand")
+    local frame = self:get_bar_frame("mainhand")
+    local db_hand = self:get_hand_table("mainhand")
+    local thickness = db_hand.border_width
+    if thickness == 0 then
+        thickness = 1
+    end
     LCG.PixelGlow_Start(frame,
         {self:convert_color(db_class.aow_glow_color)},
         db_class.aow_glow_nlines,
         db_class.aow_glow_freq,
         db_class.aow_glow_line_length,
-        db_class.aow_glow_line_thickness,
-        db_class.aow_glow_offset,
-        db_class.aow_glow_offset,
-        true
+        thickness,
+        0,
+        0,
+        -- db_class.aow_glow_offset,
+        -- db_class.aow_glow_offset,
+        false
     )
 end
 
 function ST.PALADIN.glow_stop(self)
-    local frame = self:get_frame("mainhand")
+    local frame = self:get_bar_frame("mainhand")
     LCG.PixelGlow_Stop(frame)
 end
 
@@ -132,7 +139,7 @@ function ST.PALADIN.set_bar_color(self, hand)
     -- to revert to default behaviour.
     -- Will set appropriate colors for seals and AoW procs if requested.
     local db_class = self:get_class_table()
-    local frame = self:get_frame(hand)
+    local frame = self:get_visuals_frame(hand)
 
     -- Art of War glow
     self.PALADIN.process_aow(self)

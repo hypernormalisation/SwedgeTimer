@@ -71,7 +71,7 @@ function ST.DRUID.set_bar_color(self, hand)
     -- and will set a special color when the player has one of those queued up but has
     -- insufficient rage to cast them.
     local db_class = self:get_class_table()
-    local frame = self:get_frame(hand)
+    local frame = self:get_visuals_frame(hand)
     
     if hand ~= "mainhand" then
         return false

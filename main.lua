@@ -90,8 +90,20 @@ function ST:is_value_in_array(value, array)
 	return false
 end
 
-function ST:get_frame(hand)
-	return self[hand].frame
+function ST:get_anchor_frame(hand)
+	-- Gets the main anchor frame for the hand.
+	return self[hand].anchor_frame
+end
+
+function ST:get_bar_frame(hand)
+	-- Gets the bar frame for the hand.
+	-- This is the frame with the backdrop, but *not* the frame
+	-- with the bar visuals - that's a child of this one.
+	return self:get_anchor_frame(hand).bar_frame
+end
+
+function ST:get_visuals_frame(hand)
+	return self:get_bar_frame(hand).visuals_frame
 end
 
 function ST:get_profile_table()
@@ -111,19 +123,19 @@ function ST:get_in_range(hand)
 end
 
 function ST:hide_bar(hand)
-	self:get_frame(hand):Hide()
+	-- self:get_bar_frame(hand):Hide()
 end
 
 function ST:show_bar(hand)
 	local db_class = self:get_class_table()
 	if db_class.class_enabled then
-		self:get_frame(hand):Show()
+		self:get_bar_frame(hand):Show()
 	end
 end
 
 function ST:lock_frames()
 	for hand in self:iter_hands() do
-		local f = self:get_frame(hand)
+		local f = self:get_anchor_frame(hand)
 		f:SetMovable(false)
 		f:EnableMouse(false)
 		f:SetScript("OnMouseWheel", nil)
@@ -132,7 +144,7 @@ end
 
 function ST:unlock_frames()
 	for hand in self:iter_hands() do
-		local f = self:get_frame(hand)
+		local f = self:get_anchor_frame(hand)
 		f:SetMovable(true)
 		f:EnableMouse(true)
 		f:SetScript("OnMouseWheel", function(_, dir)
@@ -211,17 +223,10 @@ function ST:OnInitialize()
 	LGC.RegisterCallback(self, LGC.GCD_DURATIONS_UPDATED, self.callback_event_handler)
 
 	-----------------------------------------------------------
-	-- A frame to which all SwedgeTimer frames will anchor.
-	-----------------------------------------------------------
-	self.anchor_frame = CreateFrame(
-		"Frame",
-		addon_name .. "_anchorframe"
-	)
-	self.anchor_frame:SetAllPoints()
-	self.anchor_frame:SetParent(UIParent)
-
-	-----------------------------------------------------------
 	-- The set of containers and frames used in the addon.
+	-- Even though many are nilled, this collates them so
+	-- we have a reference to each container visually 
+	-- in the code.
 	-----------------------------------------------------------
 	-- Character info containers
 	self.player_guid = UnitGUID("player")
@@ -255,9 +260,6 @@ function ST:OnInitialize()
 	self.mainhand.is_full_timer = nil
 	self.mainhand.is_paused = false
 	self.mainhand.current_progress = false
-	self.mainhand.frame = CreateFrame(
-		"Frame", addon_name .. "MHBarFrame", UIParent, "BackdropTemplate"
-	)
 
 	-- OH containers
 	self.offhand.start = nil
@@ -268,9 +270,6 @@ function ST:OnInitialize()
 	self.offhand.is_full = false
 	self.offhand.is_full_timer = nil
 	self.offhand.is_paused = false
-	self.offhand.frame = CreateFrame(
-		"Frame", addon_name .. "OHBarFrame", UIParent, "BackdropTemplate"
-	)
 
 	-- ranged containers
 	self.ranged.start = nil
@@ -279,9 +278,6 @@ function ST:OnInitialize()
 	self.ranged.inactive_timer = nil
 	self.ranged.has_weapon = nil
 	self.ranged.is_full = false
-	self.ranged.frame = CreateFrame(
-		"Frame", addon_name .. "OHBarFrame", UIParent, "BackdropTemplate"
-	)
 
 	-- GCD info containers
 	self.gcd = {}
@@ -369,7 +365,7 @@ function ST:init_timers()
 		ST:init_visuals_template(hand)
 		ST:set_bar_texts(hand)
 		-- hook the onupdate
-		self[hand].frame:SetScript("OnUpdate", self[hand].onupdate)
+		self:get_bar_frame(hand):SetScript("OnUpdate", self[hand].onupdate)
 	end
 end
 
@@ -450,14 +446,13 @@ end
 function ST:GCD_OVER()
 	self.gcd.expires = nil
 	for hand in self:iter_hands() do
-		self:get_frame(hand).gcd_bar:Hide()
+		self:get_visuals_frame(hand).gcd_bar:Hide()
 	end
 end
 
 function ST:GCD_DURATIONS_UPDATED(_, phys_length, spell_length)
 	self.gcd.spell_length = spell_length
 	self.gcd.phys_length = phys_length
-	-- print(self.gcd.phys_length)
 	self:set_gcd_times_before_swing_seconds()
 	if self.interfaces_are_initialised then
 		self:on_gcd_length_change()
@@ -768,7 +763,7 @@ end
 
 function ST:handle_oor_hand(hand)
 	local db = self:get_hand_table(hand)
-	local frame = self:get_frame(hand)
+	local frame = self:get_bar_frame(hand)
 	if db.dim_oor then
 		if not self:get_in_range(hand) then
 			frame:SetAlpha(db.dim_alpha)
