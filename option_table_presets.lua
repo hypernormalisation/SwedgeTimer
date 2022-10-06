@@ -177,8 +177,8 @@ function ST:construct_delay_settings_table()
             order = 9.1,
             name = "SwedgeTimer allows for the bar's visual state to change when filling (active) and full "..
                 "(inactive). This setting allows the user to specify a delay once the bar fills up before "..
-                "the bar changes to the inactive state, to prevent discontinuities from latency and small "..
-                "swing timer calculation errors."
+                "the bar changes to the inactive state, to prevent the bar state rapidly shifting between "..
+                "active/inactive due to latency effects."
         },
         bar_full_delay = {
             type = "range",
@@ -785,7 +785,9 @@ function ST:construct_info_panel()
             order = 1.1,
             name = "SwedgeTimer is a general-purpose Swing Timer addon for Wrath of the Lich King Classic. "..
                 "It aims to be a one-stop-shop for swing timers, supporting independent and feature-rich "..
-                "swing timer configurations and modules for each class in the game.",
+                "swing timer configurations and modules for each class in the game.\n\n"..
+                "SwedgeTimer is powered by LibClassicSwingTimerAPI and accounts for the many "..
+                "edge cases in WoW's often confusing swing timer implementation.",
         },
         header2 = {
             type = "header",
@@ -832,7 +834,7 @@ function ST:construct_info_panel()
         },
         header5 = {
             type = "header",
-            name = "Class Specific Features",
+            name = "Class-specific Features",
             order = 1.8,
         },
         desc5 = {
@@ -843,6 +845,135 @@ function ST:construct_info_panel()
                 " If a class has such configuration, it will be visible in the left panel of the settings menu.",
         }
     }
+end
+
+function ST:construct_class_info_panel()
+    ST.class_info_panel = {
+        header = {
+            type = "header",
+            name = string.format("Default Settings", self.player_class_pretty),
+            order = 1.0,
+        },
+    }
+
+    -- Generate the per-class settings.
+    local per_class = {}
+    if self.player_class == "DEATHKNIGHT" then
+        per_class = {
+            d1 = {
+                type = "description",
+                order = 1.1,
+                name = "Death Knights can use a mainhand and offhand, and by default these bars are both"..
+                "enabled. The offhand bar only displays if the player has an offhand weapon equipped."..
+                "\n\nBy default, the bars will only show when the player is in-combat or has an attackable "..
+                "target. By default, the bars will be dimmed when the player is outside of melee range"..
+                " of their target, or has no target."
+            }
+        }
+    elseif self.player_class == "DRUID" then
+       per_class = {
+        d1 = {
+            type = "description",
+            order = 1.1,
+            name = "Druids are only capable of using mainhand weapons, and so the class only has "..
+            "a single swing timer bar."..
+            "\n\nBy default, the bar will only show when the player is in-combat or has an attackable "..
+            "target. By default, the bar will be dimmed when the player is outside of melee range."..
+            "\n\nThe GCD underlay is enabled for the mainhand. "..
+            "The GCD markers show the Spell GCD duration while in normal, Moonkin, and Tree form, "..
+            "and show the Physical GCD duration while in cat, bear, and dire bear form."..
+            ". Spell GCD duration is affected by haste rating and buffs, while the"..
+            " physical GCD duration is not."..
+            "The markers are anchored to the end of the swing timer bar, and will hide when the bar is inactive."..
+            " The markers can also be anchored to the swing's progress instead."
+        },
+        h2 = {
+            type = "header",
+            order = 1.2,
+            name = "Form Colors",
+        },
+        d2 = {
+            type = "description",
+            order = 1.3,
+            name = "The bar is by default configured to change color based on the druid's form. These colors "..
+            "can be specified in Druid Configuration."
+        },
+        h3 = {
+            type = "header",
+            order = 1.4,
+            name = "Maul Queueing",
+        },
+        d3 = {
+            type = "description",
+            order = 1.5,
+            name = "The bar is configured to change color when the druid has Maul queued for their next attack. "..
+            "The bar will also turn a special color when the druid has Maul queued but rage decay or spending "..
+            "takes them below the rage threshold to cast Maul."
+        },
+       }
+        
+    elseif self.player_class == "HUNTER" then
+
+    elseif self.player_class == "MAGE" then
+
+    elseif self.player_class == "PALADIN" then
+        per_class = {
+            d1 = {
+                type = "description",
+                order = 1.1,
+                name = "Paladins are only capable of using mainhand weapons, and so the class only has "..
+                "a single swing timer bar."..
+                "\n\nBy default, the bar will only show when the player is in-combat or has an attackable "..
+                "target. By default, the bar will be dimmed when the player is outside of melee range."..
+                "\n\nThe GCD underlay is enabled for the mainhand. "..
+                "The GCD markers are split between showing the expected Spell GCD (top) and Physical "..
+                "GCD (bottom). Spell GCD duration is affected by haste rating and buffs, while the"..
+                " Physical GCD duration is not."..
+                "The markers are anchored to the swing timer's progress, and will hide when the bar is inactive."..
+                " The markers can also be anchored to the end of the swing instead."
+            },
+            h1 = {
+                type = "header",
+                order = 1.2,
+                name = "Seal Colors",
+            },
+            d2 = {
+                type = "description",
+                order = 1.3,
+                name = "Paladins by default have their swing timer bar set to a grey color with no seal, "..
+                "and when a seal is active on the paladin the bar turns a color corresponding to the seal. "..
+                "This can be changed in Paladin Configuration."
+            },
+            h3 = {
+                type = "header",
+                order = 1.4,
+                name = "Art of War",
+            },
+            d3 = {
+                type = "description",
+                order = 1.5,
+                name = "The bar is configured to glow when the player both has Art of War and has Exorcism "..
+                "off cooldown. The glow can be disabled or tweaked in Paladin Configuration."..
+                " The glow effect can also be set to not require Exorcism off cooldown, which can be handy "..
+                "for Rets who want to optimise their Flash of Light casts.",
+        }
+    }
+    elseif self.player_class == "PRIEST" then
+
+    elseif self.player_class == "ROGUE" then
+
+    elseif self.player_class == "SHAMAN" then
+
+    elseif self.player_class == "WARLOCK" then
+
+    elseif self.player_class == "WARRIOR" then
+
+    end
+
+    -- Add the per-class
+    for k, v in pairs(per_class) do
+        ST.class_info_panel[k] = v
+    end
 end
 
 -- Finally, a function to build all of the above
@@ -858,4 +989,5 @@ function ST:build_preset_options_tables()
     self:construct_gcd_marker_settings_table()
     self:construct_deadzone_settings_table()
     self:construct_info_panel()
+    self:construct_class_info_panel()
 end

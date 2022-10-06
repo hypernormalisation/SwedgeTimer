@@ -123,6 +123,12 @@ function ST:generate_info_panel()
         name = "Information",
         args = ST.info_panel,
     }
+    self.opts_table.args.class_info = {
+        type = "group",
+        order = 0.2,
+        name = string.format("%s Information", self.player_class_pretty),
+        args = ST.class_info_panel,
+    }
 end
 
 --=========================================================================================
