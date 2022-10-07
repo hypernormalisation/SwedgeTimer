@@ -1,11 +1,8 @@
-# swedgetimer
-A general purpose Swing Timer addon for Wrath of the Lich King Classic.
+# SwedgeTimer
+A Swing Timer addon for Wrath of the Lich King Classic, with custom implementations and behaviours for every class in the game.
 
 ![war1](https://user-images.githubusercontent.com/52763122/194573045-59d09227-fbf3-4c0e-bc20-eba591f33393.gif)
-
-## What is SwedgeTimer?
-
-SwedgeTimer is a standalone addon that provides swing timer implementations for every class in the game.
+![hunter1](https://user-images.githubusercontent.com/52763122/194581394-81760922-b8ba-4459-bf57-d504ed04b17d.gif)
 
 ## Install Instructions
 
