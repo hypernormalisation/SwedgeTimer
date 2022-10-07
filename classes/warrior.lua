@@ -3,6 +3,8 @@
 --=========================================================================================
 local addon_name, st = ...
 local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
+local LCG = LibStub("LibCustomGlow-1.0")
+
 
 local hs_ids = {
     47450, 47449, 30324, 29707, 25286, 11567, 11566,
@@ -12,6 +14,8 @@ local hs_ids = {
 local cleave_ids = {
     47520, 47519, 25231, 20569, 11609, 11608, 7369, 845
 }
+
+local bloodsurge_id = 46916
 
 
 function ST.WARRIOR.on_rage_update(self)
@@ -112,6 +116,57 @@ function ST.WARRIOR.on_current_spell_cast_changed(self, is_cancelled)
     self.cleave_queued = false
 end
 
+function ST.WARRIOR.on_aura_change(self)
+    self.has_bloodsurge = false
+    -- Iterate all player auras
+    local i = 1
+    while true do
+        local name, _, _, _, _, _, _, _, _, spell_id = UnitAura("player", i)
+        if name == nil then
+            break
+        end
+        if spell_id == bloodsurge_id then
+            self.has_bloodsurge = true
+        end
+        i = i + 1
+    end
+    self.WARRIOR.process_bloodsurge(self)
+end
+
+function ST.WARRIOR.glow_start(self)
+    local db_class = self:get_class_table()
+    local frame = self:get_bar_frame("mainhand")
+    local db_hand = self:get_hand_table("mainhand")
+    local thickness = db_hand.border_width or 1
+    -- if thickness == 0 then
+    --     thickness = 1
+    -- end
+    LCG.PixelGlow_Start(frame,
+        {self:convert_color(db_class.bloodsurge_glow_color)},
+        db_class.bloodsurge_glow_nlines,
+        db_class.bloodsurge_glow_freq,
+        db_class.bloodsurge_glow_line_length,
+        thickness,
+        0,
+        0,
+        false
+    )
+end
+
+function ST.WARRIOR.process_bloodsurge(self)
+    local db = self:get_class_table()
+    if not self.has_bloodsurge and db.use_bloodsurge_glow then
+        self.WARRIOR.glow_stop(self)
+        return
+    end
+    self.WARRIOR.glow_start(self)
+end
+
+function ST.WARRIOR.glow_stop(self)
+    local frame = self:get_bar_frame("mainhand")
+    LCG.PixelGlow_Stop(frame)
+end
+
 function ST.WARRIOR.set_bar_color(self, hand)
     -- Returns true if any special setting was applied to let the parent func know 
     -- to revert to default behaviour.
@@ -120,7 +175,9 @@ function ST.WARRIOR.set_bar_color(self, hand)
     -- insufficient rage to cast them.
     local db_class = self:get_class_table()
     local frame = self:get_visuals_frame(hand)
-    
+
+    self.WARRIOR.process_bloodsurge(self)
+
     if hand ~= "mainhand" then
         return false
     end

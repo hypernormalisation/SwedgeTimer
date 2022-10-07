@@ -589,8 +589,6 @@ function ST:PLAYER_EQUIPMENT_CHANGED(event, slot, has_current)
 	-- print('slot says: '..tostring(slot))
 	if slot == 16 or slot == 17 or slot == 18 then
 		self:check_weapons()
-		print('has_oh: '.. tostring(self.offhand.has_weapon))
-		print('has ranged: '..tostring(self.ranged.has_weapon))
 	end
 end
 

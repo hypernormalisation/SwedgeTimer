@@ -40,7 +40,7 @@ ST.bar_defaults = {
 
     -- Timer bar appearance
     bar_texture_key = "Minimalist",
-    bar_color_default = {5, 71, 176, 0.6},
+    bar_color_default = {93, 58, 207, 0.6},
 
     -- Background and border appearance
     background_color = {0.0, 0.0, 0.0, 0.85},
@@ -373,6 +373,12 @@ ST.WARRIOR.defaults = {
     enable_cleave_color = true,
     cleave_color = {64, 130, 7, 1.0},
     insufficient_rage_color = {140, 140, 140, 1.0},
+
+    use_bloodsurge_glow = true,
+    bloodsurge_glow_color = {227, 57, 74, 1.0},
+    bloodsurge_glow_nlines = 12,
+    bloodsurge_glow_freq = 0.1,
+    bloodsurge_glow_line_length = 12,
     -- Bar options
     ['**'] = ST.bar_defaults,
 	mainhand = {
