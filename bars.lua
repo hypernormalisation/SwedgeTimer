@@ -88,6 +88,7 @@ function ST:init_visuals_template(hand)
 
     -- Create the attack speed/swing timer texts and init them
     visuals_frame.left_text = visuals_frame:CreateFontString(nil, "OVERLAY")
+    visuals_frame.center_text = visuals_frame:CreateFontString(nil, "OVERLAY")
     visuals_frame.right_text = visuals_frame:CreateFontString(nil, "OVERLAY")
 
     -- Create the line markers
@@ -229,10 +230,13 @@ function ST:configure_texts(hand)
 	local opt_string = self.outlines[db.text_outline_key]
     local w, h = self:get_bar_visuals_width_and_height(hand)
 
+    -------------------------------------
+    -- Left text
+    -------------------------------------
     -- The best center point for the x offset seems to be about 1% above normal.
     local left_text_x_offset = ((db.left_text_x_percent_offset + 1)/ 100) * w
     -- The best center point for the y offset seems to be about 5% below normal.
-    local left_text_y_offset = ((db.left_text_y_percent_offset - 5)/ 100) * h
+    local left_text_y_offset = ((db.left_text_y_percent_offset - 1)/ 100) * h
     frame.left_text:SetPoint(
         "LEFT",
         left_text_x_offset,
@@ -248,8 +252,31 @@ function ST:configure_texts(hand)
         frame.left_text:Hide()
     end
 
+    -------------------------------------
+    -- Center text
+    -------------------------------------
+    local center_text_x_offset = ((db.center_text_x_percent_offset + 1)/ 100) * w
+    local center_text_y_offset = ((db.center_text_y_percent_offset - 1)/ 100) * h
+    frame.center_text:SetPoint(
+        "CENTER",
+        center_text_x_offset,
+        center_text_y_offset
+    )
+    frame.center_text:SetFont(font_path, db.text_size, opt_string)
+    frame.center_text:SetTextColor(
+        self:convert_color(db.text_color)
+    )
+    if db.center_text_enabled then
+        frame.center_text:Show()
+    else
+        frame.center_text:Hide()
+    end
+
+    -------------------------------------
+    -- Right text
+    -------------------------------------
     local right_text_x_offset = ((db.right_text_x_percent_offset -1)/ 100) * w
-    local right_text_y_offset = ((db.right_text_y_percent_offset - 5)/ 100) * h
+    local right_text_y_offset = ((db.right_text_y_percent_offset - 1)/ 100) * h
 	frame.right_text:SetPoint(
         "RIGHT",
         right_text_x_offset,
@@ -587,6 +614,18 @@ function ST:set_gcd_marker_positions(hand)
     end
 end
 
+function ST:needs_range_string(hand)
+    local db = self:get_hand_table(hand)
+    if db.left_text_enabled and db.left_text_key == "range_finder" then
+        return true
+    elseif db.center_text_enabled and db.center_text_key == "range_finder" then
+        return true
+    elseif db.right_text_enabled and db.right_text_key == "range_finder" then
+        return true
+    end
+    return false
+end
+
 function ST:set_bar_texts(hand)
     -- Function to set the requisite texts on the bar.
     if self[hand].is_paused then return end
@@ -596,9 +635,27 @@ function ST:set_bar_texts(hand)
     local speed = self[hand].speed
     local timer = max(0, self[hand].ends_at - t)
     local lookup = {
-        attack_speed=format("%.1f", st.utils.simple_round(speed, 0.1)),
-        swing_timer=format("%.1f", st.utils.simple_round(timer, 0.1)),
+        attack_speed = format("%.1f", st.utils.simple_round(speed, 0.1)),
+        swing_timer = format("%.1f", st.utils.simple_round(timer, 0.1)),
     }
+
+    if self:needs_range_string(hand) then
+        local min_range = self.target_min_range or ""
+        min_range = tostring(min_range)
+        local max_range = self.target_max_range or ""
+        max_range = tostring(max_range)
+
+        if self.target_min_range == nil and self.target_max_range == nil then
+            lookup.range_finder = ""
+        elseif self.target_min_range == nil then
+            lookup.range_finder = format("N/A - %s", max_range)
+        elseif self.target_max_range == nil then
+            lookup.range_finder = format("%s - N/A", min_range)
+        else
+            lookup.range_finder = format("%s - %s", min_range, max_range)
+        end
+    end
+
     if db.left_text_enabled then
         if db.left_text_hide_inactive and self[hand].is_full then
             frame.left_text:Hide()
@@ -610,6 +667,19 @@ function ST:set_bar_texts(hand)
     else
         frame.left_text:Hide()
     end
+
+    if db.center_text_enabled then
+        if db.center_text_hide_inactive and self[hand].is_full then
+            frame.center_text:Hide()
+        else
+            local text = lookup[db.center_text_key]
+            frame.center_text:SetText(text)
+            frame.center_text:Show()
+        end
+    else
+        frame.center_text:Hide()
+    end
+
     if db.right_text_enabled then
         if db.right_text_hide_inactive and self[hand].is_full then
             frame.right_text:Hide()

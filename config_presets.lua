@@ -62,6 +62,12 @@ ST.bar_defaults = {
     left_text_x_percent_offset = 0,
     left_text_y_percent_offset = 0,
 
+    center_text_key = "range_finder",
+    center_text_enabled = false,
+    center_text_hide_inactive = false,
+    center_text_x_percent_offset = 0,
+    center_text_y_percent_offset = 0,
+
     right_text_key = "swing_timer",
     right_text_enabled = true,
     right_text_hide_inactive = true,
@@ -71,7 +77,7 @@ ST.bar_defaults = {
     -- GCD underlay
     show_gcd_underlay = true,
     bar_color_gcd = {140, 140, 140, 0.85},
-    gcd_texture_key = "Solid",
+    gcd_texture_key = "Minimalist",
 
     -- GCD markers
     gcd1a_marker_enabled = true,
@@ -186,12 +192,14 @@ ST.HUNTER.defaults = {
         y = -158,
 	},
 	ranged = {
+        enable_deadzone = true,
         require_in_range = false,
         force_show_in_combat = false,
 		bar_color_default = {6, 143, 47, 0.8},
-        show_gcd_underlay = false,
-        show_gcd_markers = false,
-        show_range_finder = true,
+        gcd1a_marker_enabled = false,
+        gcd1b_marker_enabled = false,
+        show_gcd_underlay = true,
+        center_text_enabled = true,
 	},
 }
 
