@@ -83,19 +83,19 @@ function ST:generate_top_level_options_table()
             db.class_enabled = value
         end,
     }
-    self.opts_table.args.bars_locked = {
+    self.opts_table.args.timers_locked = {
         type = "toggle",
         order = 1.2,
         name = "Timers locked",
         desc = "Prevents all swing timers from being dragged or scaled with the mouse.",
         get = function()
             local db = ST:get_class_table()
-            return db.bars_locked
+            return db.timers_locked
         end,
         set = function(_, input)
             local db = ST:get_class_table()
-            db.bars_locked = input
-            if db.bars_locked then
+            db.timers_locked = input
+            if db.timers_locked then
                 ST:lock_frames()
             else
                 ST:unlock_frames()
@@ -1192,14 +1192,14 @@ function ST:generate_hand_options_table(hand)
         if not self.opts_table.args.multi_control then
             local mp_desc = "This panel allows the user to control multiple groups of bars at once for this class."
             self.opts_table.args.multi_control = {
-                name = "Multi-bar Controls",
+                name = "Multi-timer Controls",
                 type = "group",
                 desc = mp_desc,
                 args = {},
                 order = 8.0,
             }
             self.opts_table.args.multi_control.args.multi_header = {
-                name = "Control Multiple Bars at Once",
+                name = "Control Multiple Timers at Once",
                 order = 0.1,
                 type = "header",
             }

@@ -1000,8 +1000,8 @@ function ST:construct_class_info_panel()
         d3 = {
             type = "description",
             order = 1.5,
-            name = "The timer bar is configured to change color when the druid has Maul queued for their next attack. "..
-            "The bar will also turn a special color when the druid has Maul queued but rage decay or spending "..
+            name = "The progress bar is configured to change color when the druid has Maul queued for their next attack. "..
+            "The bar will also turn a special color when the druid has Maul queued but rage decay or rage spending "..
             "takes them below the rage threshold to cast Maul."
         },
        }
@@ -1055,13 +1055,77 @@ function ST:construct_class_info_panel()
     elseif self.player_class == "PRIEST" then
 
     elseif self.player_class == "ROGUE" then
-
+        per_class = {
+            d1 = {
+                type = "description",
+                order = 1.1,
+                name = "Rogues have access to mainhand, offhand, and ranged weapons. "..
+                "The mainhand and offhand timers are enabled by default, while the ranged timer is disabled."..
+                "If the ranged timer is enabled, it will be a smaller bar below the offhand, which will only "..
+                "show when the rogue is both in-combat, and in range with the equipped ranged weapon.\n\n"..
+                "The main/offhand timers will by default only show when the player has a valid target, or "..
+                "is in combat."..
+                "\n\nThe GCD underlay is enabled for the mainhand. "..
+                "The GCD markers show the physical GCD duration anchored to the end of the swing."
+            },
+            h2 = {
+                type = "header",
+                order = 1.2,
+                name = "Multi-timer controls",
+            },
+            d2 = {
+                type = "description",
+                order = 1.3,
+                name = "As Rogue is a class that can use all three weapon types, two Multi-timer controls are included."..
+                " These can be used to alter all three timer properties together, or to alter just the mainhand and offhand"..
+                " together."
+            },
+        }
     elseif self.player_class == "SHAMAN" then
 
     elseif self.player_class == "WARLOCK" then
 
     elseif self.player_class == "WARRIOR" then
-
+        per_class = {
+            d1 = {
+                type = "description",
+                order = 1.1,
+                name = "Warriors have access to mainhand, offhand, and ranged weapons. "..
+                "The mainhand and offhand timers are enabled by default, while the ranged timer is disabled."..
+                "If the ranged timer is enabled, it will be a smaller bar below the offhand, which will only "..
+                "show when the warrior is both in-combat, and in range with the equipped ranged weapon.\n\n"..
+                "The main/offhand timers will by default only show when the player has a valid target, or "..
+                "is in combat."..
+                "\n\nThe GCD underlay is enabled for the mainhand. "..
+                "The GCD markers show the physical GCD duration anchored to the end of the swing."
+            },
+            h2 = {
+                type = "header",
+                order = 1.2,
+                name = "Multi-timer controls",
+            },
+            d2 = {
+                type = "description",
+                order = 1.3,
+                name = "As Warrior is a class that can use all three weapon types, two Multi-timer controls are included."..
+                " These can be used to alter all three timer properties together, or to alter just the mainhand and offhand"..
+                " together."
+            },
+            h3 = {
+                type = "header",
+                order = 1.4,
+                name = "HS/Cleave Queueing",
+            },
+            d3 = {
+                type = "description",
+                order = 1.5,
+                name = "The mainhand progress bar is configured to change color when the Warrior has an on-next-attack"..
+                " queued, with different colors enabled for Heroic Strike and Cleave."..
+                "The bar will also turn a special color when the player has an on-next-attack ability "..
+                "queued but rage decay or rage spending "..
+                "takes them below the rage threshold to cast it."
+            },
+        }
     end
 
     -- Add the per-class

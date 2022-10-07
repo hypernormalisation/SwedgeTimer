@@ -264,33 +264,33 @@ ST.PRIEST.defaults = {
 -- ROGUE
 ------------------------------------------------------------------------------------
 ST.ROGUE.defaults = {
-    tag = "ROGUE",
-    has_class_options = false,
     -- Bar options
     ['**'] = ST.bar_defaults,
 	mainhand = {
         enable_deadzone = true,
     },
 	offhand = {
-		bar_x_offset = 0,
-		bar_y_offset = -144,
-		bar_color_default = {1, 66, 69, 1.0},
+        y = -142,
+		bar_color_default = {13, 79, 115, 0.8},
         show_gcd_underlay = false,
-        gcd1_marker_enabled = false,
-
+        gcd1a_marker_enabled = false,
+        gcd1b_marker_enabled = false,
 	},
 	ranged = {
+        enabled = false,
+        show_behaviour = "conditional",
+        show_condition = "either",
         require_in_range = true,
-        force_show_in_combat = false,
-		bar_height = 13,
+		bar_height = 15,
 		bar_width = 200,
-		bar_x_offset = 0,
-		bar_y_offset = -102,
-		bar_color_default = {115, 17, 42, 1.0},
-		font_size = 11,
+        y = -166,
+		bar_color_default = {112, 8, 11, 0.8},
+		font_size = 10,
         show_gcd_underlay = false,
         show_gcd_markers = false,
         show_range_finder = true,
+        gcd1a_marker_enabled = false,
+        gcd1b_marker_enabled = false,
 	},
 }
 
@@ -357,6 +357,7 @@ ST.WARRIOR.defaults = {
         gcd1b_marker_enabled = false,
 	},
 	ranged = {
+        enabled = false,
         show_behaviour = "conditional",
         show_condition = "either",
         require_in_range = true,
