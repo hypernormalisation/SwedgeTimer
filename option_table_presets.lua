@@ -957,12 +957,26 @@ function ST:construct_class_info_panel()
             d1 = {
                 type = "description",
                 order = 1.1,
-                name = "Death Knights can use a mainhand and offhand weapon, and by default these timers are both"..
+                name = "Death Knights can use a mainhand and offhand weapon, and by default these timers are both "..
                 "enabled. The offhand timer only displays if the player has an offhand weapon equipped."..
                 "\n\nBy default, the timers will only show when the player is in-combat or has an attackable "..
-                "target. By default, the timers will be dimmed when the player is outside of melee range"..
-                " of their target, or has no target."
-            }
+                "target, and the timers will be dimmed when the player is outside of melee range"..
+                " of their target, or has no target.\n\n"..
+                "The GCD underlay is enabled on the mainhand timer. The GCD markers show the expected "..
+                "Spell GCD duration, and are anchored to the end of the timer."..
+                " The markers can also be anchored to the timer's progress instead."
+            },
+            h2 = {
+                type = "header",
+                order = 1.2,
+                name = "Multi-timer controls",
+            },
+            d2 = {
+                type = "description",
+                order = 1.3,
+                name = "A Multi-timer control is included to let the player alter properties of both the mainhand "..
+                "and offhand timers together, accessible from the relevant panel on the left."
+            },
         }
     elseif self.player_class == "DRUID" then
        per_class = {

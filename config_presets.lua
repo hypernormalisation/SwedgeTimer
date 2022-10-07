@@ -112,9 +112,16 @@ ST.DEATHKNIGHT.defaults = {
     has_class_options = false,
     -- Bar options
     ['**'] = ST.bar_defaults,
-    offhand = {
-        y = -150,
-    }
+	mainhand = {
+        enable_deadzone = true,
+    },
+	offhand = {
+        y = -142,
+		bar_color_default = {13, 79, 115, 0.8},
+        show_gcd_underlay = false,
+        gcd1a_marker_enabled = false,
+        gcd1b_marker_enabled = false,
+	},
 }
 
 ------------------------------------------------------------------------------------
