@@ -40,7 +40,7 @@ end
 
 -- Detect if two numbers are within a given tolerance of each other
 st.utils.test_tolerance = function(n1, n2, tolerance)
-	diff = math.abs(n1 - n2)
+	local diff = math.abs(n1 - n2)
 	if diff < tolerance then
 		return true
 	else 
