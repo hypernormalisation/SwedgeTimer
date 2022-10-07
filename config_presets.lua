@@ -10,7 +10,7 @@ local ST = LibStub("AceAddon-3.0"):GetAddon(addon_name)
 -- This table is used for any per-class settings that should apply globally.
 ST.class_defaults = {
     class_enabled = true,
-    bars_locked = true,
+    timers_locked = true,
     bar_movement_mode = "all",
 }
 

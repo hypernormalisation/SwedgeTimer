@@ -203,17 +203,12 @@ function ST:OnInitialize()
 	-- Addon database
 	local SwedgeTimerDB = LibStub("AceDB-3.0"):New(addon_name.."DB", self.defaults, true)
 	self.db = SwedgeTimerDB
-	-- print('self.db says:')
-	-- self:Print(self.db)
-	-- print("unit class says: "..tostring(select(2, UnitClass("player"))))
-	-- Options table
-	local AC = LibStub("AceConfig-3.0")
-	local ACD = LibStub("AceConfigDialog-3.0")
-	
-	
+
 	-----------------------------------------------------------
 	-- Dynamically construct the options tables
 	-----------------------------------------------------------
+	local AC = LibStub("AceConfig-3.0")
+	local ACD = LibStub("AceConfigDialog-3.0")
 	self:set_opts()
 
 	self.options_table_name = addon_name.."_Options"

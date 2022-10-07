@@ -18,16 +18,16 @@ ST.opts_table = {
     name = "SwedgeTimer",
     type = "group",
     args = {
-        global_header = {
-            order = 0.01,
-            type = "header",
-            name = "Global and Class Configuration",
-        },
+        -- global_header = {
+        --     order = 0.01,
+        --     type = "header",
+        --     name = "Global and Class Configuration",
+        -- },
         -- This title breaks the bar submenus from the global one.
         bar_header = {
             order = 10,
             type = "header",
-            name = "Bar Configuration",
+            name = "Timer Configuration",
         },
     },
 }
@@ -86,8 +86,8 @@ function ST:generate_top_level_options_table()
     self.opts_table.args.bars_locked = {
         type = "toggle",
         order = 1.2,
-        name = "Bars locked",
-        desc = "Prevents all swing timer bars from being dragged or scaled with the mouse.",
+        name = "Timers locked",
+        desc = "Prevents all swing timers from being dragged or scaled with the mouse.",
         get = function()
             local db = ST:get_class_table()
             return db.bars_locked
@@ -141,7 +141,7 @@ function ST:set_opts_case_dict()
             pretty_name = "Mainhand",
             title = "Mainhand Controls",
             panel_title = string.format("Mainhand", self.player_class_pretty),
-            desc = "This panel and its subpanels configure the settings for the mainhand bar.\n",
+            desc = "This panel and its subpanels configure the settings for the mainhand timer.\n",
             hands = {"mainhand"},
             order_offset = 1,
         },
@@ -149,7 +149,7 @@ function ST:set_opts_case_dict()
             pretty_name = "Offhand",
             title = "Offhand Controls",
             panel_title = string.format("Offhand", self.player_class_pretty),
-            desc = "This panel and its subpanels configure the settings for the offhand bar.\n",
+            desc = "This panel and its subpanels configure the settings for the offhand timer.\n",
             hands = {"offhand"},
             order_offset = 2,
         },
@@ -157,25 +157,25 @@ function ST:set_opts_case_dict()
             pretty_name = "Ranged",
             title = "Ranged Controls",
             panel_title = string.format("Ranged", self.player_class_pretty),
-            desc = "This panel and its subpanels configure the settings for the ranged bar.\n",
+            desc = "This panel and its subpanels configure the settings for the ranged timer.\n",
             hands = {"ranged"},
             order_offset = 3,
         },
         all_hands = {
             title = "All Bar Controls",
             panel_title = string.format("All %s hands", self.player_class_pretty),
-            desc = "This panel and its subpanels configure the settings for all bars. It is only visible "..
+            desc = "This panel and its subpanels configure the settings for all timers. It is only visible "..
             "to classes that can use multiple types of weapons (mainhand/offhand/ranged)."..
-            "\n\nAny changes made here will apply to *all bars*, use caution!\n",
+            "\n\nAny changes made here will apply to *all timers*, use caution!\n",
             hands = {"mainhand", "offhand", "ranged"},
             order_offset = 4,
         },
         melee_hands = {
             title = "Melee Bar Controls",
             panel_title = string.format("%s Melee hands", self.player_class_pretty),
-            desc = "This panel and its subpanels configure the settings for both melee bars. It is only visible "..
+            desc = "This panel and its subpanels configure the settings for both melee timers. It is only visible "..
             "to classes that can use mainhand, offhand, and ranged weapons."..
-            "\n\nAny changes made here will apply to *both the mainhand and offhand bars*, use caution!\n",
+            "\n\nAny changes made here will apply to *both the mainhand and offhand timers*, use caution!\n",
             hands = {"mainhand", "offhand"},
             order_offset = 5,
         },
@@ -466,7 +466,7 @@ function ST.class_opts_funcs.PALADIN(self)
         seal_desc = {
             type = "description",
             order = 1.1,
-            name = "The bar can be configured to turn a custom color depending on the paladin's active seal.",
+            name = "The timer bar can be configured to turn a custom color depending on the paladin's active seal.",
         },
         use_seal_colors = {
             type = "toggle",
@@ -549,7 +549,7 @@ function ST.class_opts_funcs.PALADIN(self)
         aow_desc = {
             type = "description",
             order = 2.1,
-            name = "The bar can be configured to glow when the Paladin has Art of War.",
+            name = "The timer bar can be configured to glow when the Paladin has Art of War.",
         },
         use_aow_glow = {
             type = "toggle",
@@ -620,32 +620,6 @@ function ST.class_opts_funcs.PALADIN(self)
                 return not db.use_aow_glow
             end,
         },
-        -- aow_glow_line_thickness = {
-        --     type = "range",
-        --     order = 2.7,
-        --     name = "Glow line thickness",
-        --     desc = "The glow line thickness.",
-        --     min = 1, max = 10, step = 1,
-        --     get = "getter",
-        --     set = "setter",
-        --     disabled = function()
-        --         local db = ST:get_class_table()
-        --         return not db.use_aow_glow
-        --     end,
-        -- },
-        -- aow_glow_offset = {
-        --     type = "range",
-        --     order = 2.8,
-        --     name = "Glow line offset",
-        --     desc = "The glow line offset from the bar.",
-        --     min = 0, max = 8, step = 1,
-        --     get = "getter",
-        --     set = "setter",
-        --     disabled = function()
-        --         local db = ST:get_class_table()
-        --         return not db.use_aow_glow
-        --     end,
-        -- }
     }
     return opts_group
 end
@@ -660,7 +634,7 @@ function ST.class_opts_funcs.WARRIOR(self)
         queue_desc = {
             order = 1.02,
             type = "description",
-            name = "The bar can be configured to turn a custom color when an on-next-attack ability is queued."
+            name = "The mainhand timer bar can be configured to turn a custom color when an on-next-attack ability is queued."
         },
         lb0 = {
             type = "header",
@@ -717,7 +691,7 @@ function ST.class_opts_funcs.WARRIOR(self)
         rage_desc = {
             order = 1.5,
             type = "description",
-            name = "If either of the above are enabled, the mainhand bar will turn a certain color when the player "..
+            name = "If either of the above are enabled, the mainhand timer bar will turn a certain color when the player "..
                 "has queued an on-next-attack ability, but has since dropped below the rage threshold necessary "..
                 "to use the ability."
         },
@@ -751,7 +725,7 @@ function ST.class_opts_funcs.DRUID(self)
         form_color_desc = {
             order = 4.1,
             type = "description",
-            name = "Enables the bar color changing depending on the druid's form."
+            name = "Enables the timer bar color changing depending on the druid's form."
         },
         lb01 = {
             type = "header",
@@ -817,7 +791,7 @@ function ST.class_opts_funcs.DRUID(self)
         queue_desc = {
             order = 11.02,
             type = "description",
-            name = "The bar can be configured to turn a custom color when maul is queued."
+            name = "The timer bar can be configured to turn a custom color when maul is queued."
         },
         -- lb0 = {
         --     type = "header",
@@ -854,7 +828,7 @@ function ST.class_opts_funcs.DRUID(self)
         rage_desc = {
             order = 12.1,
             type = "description",
-            name = "If the above is enabled, the mainhand bar will turn a certain color when the player "..
+            name = "If the above is enabled, the mainhand timer bar will turn a certain color when the player "..
                 "has queued Maul, but has since dropped below the rage threshold necessary "..
                 "to use the ability."
         },
@@ -867,7 +841,7 @@ function ST.class_opts_funcs.DRUID(self)
             order=12.3,
             type="color",
             name="Insufficient Rage color",
-            desc="Color to use when the player drops below the rage threshold for the queued ability.",
+            desc="Color to use for the timer bar when the player drops below the rage threshold for the queued ability.",
             hasAlpha=true,
             get = "color_getter",
             set = "color_setter",
@@ -883,7 +857,7 @@ end
 function ST:generate_bar_position_options_table()
 
     local opts_group = {
-		name = "Bar Positioning/Scale",
+		name = "Timer Positioning/Scale",
 		type = "group",
         desc = "This panel controls the positioning and scales of the bars in SwedgeTimer.",
         order = 0.6,
@@ -891,8 +865,8 @@ function ST:generate_bar_position_options_table()
             section_desc = {
                 order = 0.1,
                 type = "description",
-                name = "This panel allows the user to control each bar's position. It is recommended "..
-                    "to move the bars into position with the mouse with the bars unlocked in the global "..
+                name = "This panel allows the user to control each timer's position. It is recommended "..
+                    "to move the timers into position with the mouse with the timers unlocked in the global "..
                     "settings, and carry out any fine tuning here.",
             }
         },
@@ -998,99 +972,60 @@ function ST:generate_hand_options_table(hand)
     -- This will be the options table for the hand.
     -- All standard widgets are configured here.
     local opts = {
+
+        enabled_header = {
+            order = 0.001,
+            name = "Timer Enabled",
+            type = "header",
+        },
         enabled = {
             type = "toggle",
-            order = 1.04,
-            name = "Bar enabled",
-            desc = "Enables or disables the swing timer bar.",
+            order = 0.01,
+            name = "Enabled",
+            desc = "Enables or disables the swing timer.",
             get = "getter",
             set = "setter",
         },
 
-        -- Bar size options
-        size_header = {
-            order = 1.1,
-            name = "Bar Size",
-            type = "header",
-        },
-        bar_width = {
-            type = "range",
-            order = 2,
-            name = "Width",
-            desc = "The width of the swing timer bar.",
-            min = 100, max = 600, step = 1,
-            get = "getter",
-            set = "bar_setter",
-        },
-        bar_height = {
-            type = "range",
-            order = 3,
-            name = "Height",
-            desc = "The height of the swing timer bar.",
-            min = 6, max = 60, step = 1,
-            get = "getter",
-            set = "bar_setter",
-        },
+        -- -- Bar size options
+        -- size_header = {
+        --     order = 1.1,
+        --     name = "Bar Size",
+        --     type = "header",
+        -- },
+        -- bar_width = {
+        --     type = "range",
+        --     order = 2,
+        --     name = "Width",
+        --     desc = "The width of the swing timer.",
+        --     min = 100, max = 600, step = 1,
+        --     get = "getter",
+        --     set = "bar_setter",
+        -- },
+        -- bar_height = {
+        --     type = "range",
+        --     order = 3,
+        --     name = "Height",
+        --     desc = "The height of the swing timer.",
+        --     min = 6, max = 60, step = 1,
+        --     get = "getter",
+        --     set = "bar_setter",
+        -- },
 
-        -- Bar textures
-        header_textures = {
-            order=4,
-            type="header",
-            name="Textures",
-        },
-        bar_texture_key = {
-            order = 4.1,
-            type = "select",
-            name = "Bar",
-            desc = "The texture of the swing bar.",
-            dialogControl = "LSM30_Statusbar",
-            values = LSM:HashTable("statusbar"),
-            get = "getter",
-            set = "bar_setter",
-        },
-        background_texture_key = {
-            order = 4.2,
-            type = "select",
-            name = "Background",
-            desc = "The texture of the bar's background.",
-            dialogControl = "LSM30_Statusbar",
-            values = LSM:HashTable("statusbar"),
-            get = "getter",
-            set = "bar_setter",
-        },
-
-        -- Colors
-        header_colors = {
-            order=5,
-            type="header",
-            name="Default colors",
-        },
-        bar_color_default = {
-            order=5.1,
-            type="color",
-            name="Bar color",
-            desc="The default color of the swing timer bar.",
-            hasAlpha=true,
-            get = "color_getter",
-            set = "color_setter",
-        },
-        background_color = {
-            order=5.3,
-            type="color",
-            name="Background color",
-            desc="The color of the background.",
-            hasAlpha=true,
-            get = "color_getter",
-            set = "color_setter",
-        },
-
-        -- Border options go here.
-        bar_borders_group = {
+        bar_appearance_group = {
             type = "group",
-            order = 1.7,
-            name = "Border",
-            args = ST.borders_preset,
+            order = 1.5,
+            name = "Appearance",
+            args = ST.bar_appearance_preset,
         },
+
+        -- -- Border options go here.
+        -- bar_borders_group = {
+        --     type = "group",
+        --     order = 1.7,
+        --     name = "Border",
+        --     args = ST.borders_preset,
+        -- },
 
         -- Font options all go here.
         texts_group = {
