@@ -135,7 +135,7 @@ ST.DEATHKNIGHT.defaults = {
 ST.DRUID.defaults = {
     -- Class-level options
     enable_maul_color = true,
-    maul_color = {224, 76, 116, 1.0},
+    maul_color = {112, 19, 189, 1.0},
     insufficient_rage_color = {140, 140, 140, 1.0},
 
     use_form_colors = true,
@@ -242,7 +242,7 @@ ST.PALADIN.defaults = {
     sov_color = {192, 60, 38, 1.0},
     sol_color = {6, 140, 104, 1.0},
     sow_color = {22, 100, 117, 1.0},
-    sor_color = {95, 47, 112, 1.0},
+    sor_color = {207, 58, 165, 1.0},
 
     use_aow_glow = true,
     require_exo_ready = true,
