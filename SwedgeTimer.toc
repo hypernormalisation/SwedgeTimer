@@ -12,7 +12,7 @@
 
 Libs\LibStub\LibStub.lua
 Libs\CallbackHandler-1.0\CallbackHandler-1.0.xml
-Libs\LibWindow-1.1\LibWindow-1.1.lua
+Libs\LibWindow-1.1\LibWindow-1.1\LibWindow-1.1.lua
 Libs\LibSharedMedia-3.0\lib.xml
 LibClassicSwingTimerAPI.lua
 Libs\LibRangeCheck-2.0\LibRangeCheck-2.0\LibRangeCheck-2.0.lua

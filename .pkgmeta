@@ -10,12 +10,15 @@ externals:
   Libs/AceGUI-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceGUI-3.0
   Libs/AceGUI-3.0-SharedMediaWidgets: https://repos.wowace.com/wow/ace-gui-3-0-shared-media-widgets/trunk/AceGUI-3.0-SharedMediaWidgets
   Libs/LibSharedMedia-3.0: https://repos.curseforge.com/wow/libsharedmedia-3-0/trunk/LibSharedMedia-3.0
+  Libs/LibRangeCheck-2.0: https://repos.wowace.com/wow/librangecheck-2-0/trunk
+  Libs/LibWindow-1.1: https://repos.curseforge.com/wow/libwindow-1-1/trunk
+
   Libs/LibClassicSwingTimerAPI:
     url: https://github.com/Ralgathor/LibClassicSwingTimerAPI
-    tag: main
+    tag: v1.4.0
   Libs/LibCustomGlow-1.0:
     url: https://github.com/Stanzilla/LibCustomGlow
-    tag: master
+    tag: 1.0.3
 
 ignore:
   - README.md

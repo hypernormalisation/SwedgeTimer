@@ -285,6 +285,15 @@ function ST:set_opts_funcs()
             end
         end
 
+        -- Center text disabler
+        ST.opts_funcs[hand].center_text_disable = function()
+            if hand == "mainhand" or hand == "offhand" or hand == "ranged" then
+                return not ST:get_hand_table(hand).center_text_enabled
+            else
+                return not ST:get_hand_table("mainhand").center_text_enabled
+            end
+        end
+
         -- Right text disabler
         ST.opts_funcs[hand].right_text_disable = function()
             if hand == "mainhand" or hand == "offhand" or hand == "ranged" then

@@ -29,6 +29,7 @@ ST.outlines = {
 ST.texts = {
 	attack_speed="Attack speed",
 	swing_timer="Swing timer",
+    range_finder="Range Finder",
 }
 
 ST.bar_border_modes = {
@@ -400,11 +401,6 @@ function ST:construct_text_settings_table()
             order = 4.05,
             name = "Controls what text to show on the left of the timer, and when to show it.",
         },
-        -- lb01 = {
-        --     order=4.051,
-        --     type="header",
-        --     name="",
-        -- },
         left_text_enabled = {
             type = "toggle",
             order = 4.06,
@@ -433,11 +429,6 @@ function ST:construct_text_settings_table()
             set = "setter",
             disabled = "left_text_disable",
         },
-        -- left_text_position_header = {
-        --     type = "header",
-        --     order = 4.081,
-        --     name = "Left Text Position",
-        -- },
         left_text_position_desc = {
             type = "description",
             order = 4.0811,
@@ -456,6 +447,70 @@ function ST:construct_text_settings_table()
         left_text_y_percent_offset = {
             type = "range",
             order = 4.083,
+            name = "y offset %",
+            desc = "The text's vertical offset as a percentage of the timer height.",
+            min = -250 , max = 250, softMin = -150, softMax = 150,
+            step = 0.1,
+            get = "getter",
+            set = "text_setter",
+        },
+
+        texts_center_header = {
+            order=4.0831,
+            type="header",
+            name="Center Text Control",
+        },
+        texts_center_desc = {
+            type = "description",
+            order = 4.0832,
+            name = "Controls what text to show on the center of the timer, and when to show it.",
+        },
+        center_text_enabled = {
+            type = "toggle",
+            order = 4.0833,
+            name = "Enabled",
+            desc = "Enables or disables the center timer text.",
+            get = "getter",
+            set = "setter",
+        },
+        center_text_key = {
+            type="select",
+            order = 4.0834,
+            values=ST.texts,
+            style="dropdown",
+            name = "",
+            desc = "What to show on the center of the timer.",
+            get = "getter",
+            set = "text_setter",
+            disabled = "center_text_disable",
+        },
+        center_text_hide_inactive = {
+            type = "toggle",
+            order = 4.0835,
+            name = "Hide when bar full",
+            desc = "Hides the text when the timer is full.",
+            get = "getter",
+            set = "setter",
+            disabled = "center_text_disable",
+        },
+        center_text_position_desc = {
+            type = "description",
+            order = 4.0836,
+            name = "Controls the center text's positional offsets as a percent of the timer size.",
+        },
+        center_text_x_percent_offset = {
+            type = "range",
+            order = 4.0837,
+            name = "x offset %",
+            desc = "The text's horizontal offset as a percentage of the timer width.",
+            min = -100 , max = 100, softMin = -30, softMax = 30,
+            step = 0.1,
+            get = "getter",
+            set = "text_setter",
+        },
+        center_text_y_percent_offset = {
+            type = "range",
+            order = 4.0838,
             name = "y offset %",
             desc = "The text's vertical offset as a percentage of the timer height.",
             min = -250 , max = 250, softMin = -150, softMax = 150,
