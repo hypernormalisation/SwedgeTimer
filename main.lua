@@ -238,7 +238,7 @@ function ST:OnInitialize()
 			self:init_libs()
 		end
 	)
-	STL.RegisterCallback(self, STL.SWING_TIMER_READY, function()
+	STL.RegisterCallback(self, "SWING_TIMER_INFO_INITIALIZED", function()
 			self.stl_ready = true
 			self:init_libs()
 		end
