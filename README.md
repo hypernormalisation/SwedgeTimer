@@ -1,7 +1,10 @@
 # swedgetimer
 A seal twisting swing timer addon for Retribution Paladins in WoW Classic TBC.
 
-![image](https://user-images.githubusercontent.com/52763122/169720056-0098d0d7-e283-40e1-bbb2-d96c7990bb3d.png)
+
+
+https://user-images.githubusercontent.com/52763122/194570575-1f9e4b8d-a069-48ca-8429-c9bc3a0baef5.mp4
+
 
 ## What is SwedgeTimer?
 
