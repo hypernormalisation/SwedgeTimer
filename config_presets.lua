@@ -197,11 +197,16 @@ ST.MAGE.defaults = {
     ['**'] = ST.bar_defaults,
     mainhand = {
         enabled = false,
+        gcd1a_marker_mode = "spell",
+        gcd1b_marker_mode = "spell",
+
     },
     ranged = {
         bar_x_offset = 0,
 		bar_y_offset = -102,
-        bar_color_default = {10, 160, 201, 1.0},
+        bar_color_default = {125, 10, 201, 1.0},
+        gcd1a_marker_mode = "spell",
+        gcd1b_marker_mode = "spell",
     }
 }
 
@@ -251,11 +256,16 @@ ST.PRIEST.defaults = {
     ['**'] = ST.bar_defaults,
     mainhand = {
         enabled = false,
+        gcd1a_marker_mode = "spell",
+        gcd1b_marker_mode = "spell",
+
     },
     ranged = {
         bar_x_offset = 0,
 		bar_y_offset = -102,
-        bar_color_default = {159, 194, 204, 1.0},
+        bar_color_default = {125, 10, 201, 1.0},
+        gcd1a_marker_mode = "spell",
+        gcd1b_marker_mode = "spell",
     }
 }
 
@@ -322,11 +332,16 @@ ST.WARLOCK.defaults = {
     ['**'] = ST.bar_defaults,
     mainhand = {
         enabled = false,
+        gcd1a_marker_mode = "spell",
+        gcd1b_marker_mode = "spell",
+
     },
     ranged = {
         bar_x_offset = 0,
 		bar_y_offset = -102,
         bar_color_default = {125, 10, 201, 1.0},
+        gcd1a_marker_mode = "spell",
+        gcd1b_marker_mode = "spell",
     }
 }
 

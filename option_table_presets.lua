@@ -1025,7 +1025,16 @@ function ST:construct_class_info_panel()
     elseif self.player_class == "HUNTER" then
 
     elseif self.player_class == "MAGE" then
-
+        per_class = {
+            d1 = {
+                type = "description",
+                order = 1.1,
+                name = "Mages, like all other casters, have less of a need for a swing timer in WotLK, "..
+                "and so Swedgetimer is globally disabled for the class by default.\n\n"..
+                "If the player enables the addon for Mages, then the ranged timer will be used for wand shooting progress"..
+                " and the mainhand timer will be disabled by default."
+           }
+        }
     elseif self.player_class == "PALADIN" then
         per_class = {
             d1 = {
@@ -1069,7 +1078,16 @@ function ST:construct_class_info_panel()
         }
     }
     elseif self.player_class == "PRIEST" then
-
+        per_class = {
+            d1 = {
+                type = "description",
+                order = 1.1,
+                name = "Priests, like all other casters, have less of a need for a swing timer in WotLK, "..
+                "and so Swedgetimer is globally disabled for the class by default.\n\n"..
+                "If the player enables the addon for Priests, then the ranged timer will be used for wand shooting progress"..
+                " and the mainhand timer will be disabled by default."
+           }
+        }
     elseif self.player_class == "ROGUE" then
         per_class = {
             d1 = {
@@ -1126,7 +1144,16 @@ function ST:construct_class_info_panel()
             },
         }
     elseif self.player_class == "WARLOCK" then
-
+        per_class = {
+            d1 = {
+                type = "description",
+                order = 1.1,
+                name = "Warlocks, like all other casters, have less of a need for a swing timer in WotLK, "..
+                "and so Swedgetimer is globally disabled for the class by default.\n\n"..
+                "If the player enables the addon for Warlocks, then the ranged timer will be used for wand shooting progress"..
+                " and the mainhand timer will be disabled by default."
+           }
+        }
     elseif self.player_class == "WARRIOR" then
         per_class = {
             d1 = {

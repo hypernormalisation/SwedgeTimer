@@ -49,10 +49,10 @@ ST.class_hands = {
 	HUNTER = {"mainhand", "offhand", "ranged"},
 	MAGE = {"mainhand", "ranged"},
 	PALADIN = {"mainhand"},
-	PRIEST = {"mainhand", "offhand"},
+	PRIEST = {"mainhand", "ranged"},
 	ROGUE = {"mainhand", "offhand", "ranged"},
 	SHAMAN = {"mainhand", "offhand"},
-	WARLOCK = {"mainhand", "offhand"},
+	WARLOCK = {"mainhand", "ranged"},
 	WARRIOR = {"mainhand", "offhand", "ranged"},
 }
 
