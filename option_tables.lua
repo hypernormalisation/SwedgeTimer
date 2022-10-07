@@ -225,7 +225,6 @@ function ST:set_opts_funcs()
         -- A setter for bar appearances
         ST.opts_funcs[hand].bar_setter = function(_, info, value)
             for h in ST:generic_iter(settings.hands) do
-                self:Print(hand, h)
                 local db = ST:get_hand_table(h)
                 db[info[#info]] = value
                 ST:configure_bar_size_and_positions(h)
@@ -1120,7 +1119,7 @@ function ST:generate_hand_options_table(hand)
     end
 
     -- Only basic hands and melee hands get visibility behaviour.
-    if hand == "mainhand" or hand == "offhand" or hand == "ranged" or hand == "melee_hands" then
+    if true then --hand == "mainhand" or hand == "offhand" or hand == "ranged" or hand == "melee_hands" then
         local vis_opts = {
             vis_header = {
                 type = "header",
