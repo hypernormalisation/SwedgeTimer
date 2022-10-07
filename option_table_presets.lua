@@ -1099,8 +1099,8 @@ function ST:construct_class_info_panel()
             d2 = {
                 type = "description",
                 order = 1.3,
-                name = "The mainhand bar is configured the change color when the hunter has Raptor Strike "..
-                "queued up for their next attack."
+                name = "The mainhand progress bar is configured to change color when the hunter has Raptor Strike "..
+                "queued for their next attack."
             },
         }
     elseif self.player_class == "MAGE" then
