@@ -15,7 +15,6 @@ ST.defaults = {
 
 		-- Top level
 		welcome_message = true,
-		bars_locked = true,
 		enabled = true, -- top level control
 
 		-- Frame strata/draw level
@@ -35,7 +34,7 @@ ST.defaults = {
 		gcd_marker_fixed_offset = 50,
 
 		-- Deadzone
-		deadzone_scale_factor = 1.4,
+		deadzone_scale_factor = 1.1,
 
 		-- Class-specific defaults
 		['**'] = ST.class_defaults,
@@ -56,49 +55,7 @@ ST.defaults = {
 --=========================================================================================
 -- Functions to handle options
 --=========================================================================================
-function ST:convert_color(t, new_alpha)
-	-- Convert standard 0-255 colors down to WoW 0-1 ranges.
-	local r,g,b,a = unpack(t)
-	a = new_alpha or a
-	r = r/255
-	g = g/255
-	b = b/255
-	return r, g, b, a
-end
 
-function ST:convert_color_up(t, new_alpha)
-	-- Convert WoW 0-1 ranges up to standard 0-255 ranges.
-	local r,g,b,a = unpack(t)
-	a = new_alpha or a
-	r = r * 255
-	g = g * 255
-	b = b * 255
-	return r, g, b, a
-end
-
-function ST:handle_bar_positioning()
-	local db_class = self:get_class_table()
-end
-
-function ST:move_together_dragstart()
-	for h in self:iter_hands() do
-		print(h)
-		local f = self:get_frame(h)
-		LWIN.OnDragStart(f)
-		-- LWIN.windowData[f].isDragging = true
-		-- f:StartMoving()
-	end
-end
-
-function ST:move_together_dragstop()
-	for h in self:iter_hands() do
-		local f = self:get_frame(h)
-		-- LWIN.windowData[f].isDragging = false
-		-- f:StopMovingOrSizing()
-		LWIN.OnDragStop(f)
-		-- LWIN.SavePosition(f)
-	end
-end
 
 --=========================================================================================
 -- End, if debug verify module was read.
