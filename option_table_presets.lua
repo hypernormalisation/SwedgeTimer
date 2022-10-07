@@ -1098,7 +1098,33 @@ function ST:construct_class_info_panel()
             },
         }
     elseif self.player_class == "SHAMAN" then
-
+        per_class = {
+            d1 = {
+                type = "description",
+                order = 1.1,
+                name = "Shamans can use a mainhand and offhand weapon if they are specced as Enhancement, and by default these timers are both "..
+                "enabled. The offhand timer only displays if the player has an offhand weapon equipped."..
+                "\n\nBy default, the timers will only show when the player is in-combat or has an attackable "..
+                "target, and the timers will be dimmed when the player is outside of melee range"..
+                " of their target, or has no target.\n\n"..
+                "The GCD underlay is enabled on the mainhand timer. "..
+                "The GCD markers are split between showing the expected Physical GCD (top) and Spell "..
+                "GCD (bottom). Spell GCD duration is affected by haste rating and related buffs, while the"..
+                " Physical GCD duration is not."..
+                " The markers can also be anchored to the timer's progress instead."
+            },
+            h2 = {
+                type = "header",
+                order = 1.2,
+                name = "Multi-timer controls",
+            },
+            d2 = {
+                type = "description",
+                order = 1.3,
+                name = "A Multi-timer control is included to let the player alter properties of both the mainhand "..
+                "and offhand timers together, accessible from the relevant panel on the left."
+            },
+        }
     elseif self.player_class == "WARLOCK" then
 
     elseif self.player_class == "WARRIOR" then

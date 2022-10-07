@@ -61,7 +61,7 @@ function ST:init_visuals_template(hand)
     -- This frame has to inherit from BackdropTemplate.
     local bar_frame = CreateFrame(
         "Frame",
-        nil,
+        addon_name .. "_" .. hand .. "_" .. "TimerFrame",
         anchor_frame,
         "BackdropTemplate"
     )

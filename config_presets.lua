@@ -108,8 +108,6 @@ ST.bar_defaults = {
 -- DEATHKNIGHT
 ------------------------------------------------------------------------------------
 ST.DEATHKNIGHT.defaults = {
-    tag = "DEATHKNIGHT",
-    has_class_options = false,
     -- Bar options
     ['**'] = ST.bar_defaults,
 	mainhand = {
@@ -130,8 +128,6 @@ ST.DEATHKNIGHT.defaults = {
 -- DRUID
 ------------------------------------------------------------------------------------
 ST.DRUID.defaults = {
-    tag = "DRUID",
-    has_class_options = true,
     -- Class-level options
     enable_maul_color = true,
     maul_color = {224, 76, 116, 1.0},
@@ -163,8 +159,6 @@ ST.DRUID.defaults = {
 -- HUNTER
 ------------------------------------------------------------------------------------
 ST.HUNTER.defaults = {
-    tag = "HUNTER",
-    has_class_options = false,
     -- Bar options
     ['**'] = ST.bar_defaults,
     mainhand = {
@@ -199,8 +193,6 @@ ST.HUNTER.defaults = {
 ------------------------------------------------------------------------------------
 ST.MAGE.defaults = {
     class_enabled = false,
-    tag = "MAGE",
-    has_class_options = false,
     -- Bar options
     ['**'] = ST.bar_defaults,
     mainhand = {
@@ -255,8 +247,6 @@ ST.PALADIN.defaults = {
 ------------------------------------------------------------------------------------
 ST.PRIEST.defaults = {
     class_enabled = false,
-    tag = "PRIEST",
-    has_class_options = false,
     -- Bar options
     ['**'] = ST.bar_defaults,
     mainhand = {
@@ -307,20 +297,19 @@ ST.ROGUE.defaults = {
 -- SHAMAN
 ------------------------------------------------------------------------------------
 ST.SHAMAN.defaults = {
-    tag = "SHAMAN",
-    has_class_options = false,
     -- Bar options
     ['**'] = ST.bar_defaults,
 	mainhand = {
-        bar_color_default = {35, 39, 173, 1.0},
         enable_deadzone = true,
+        gcd1a_marker_mode = "phys",
+        gcd1b_marker_mode = "spell",
     },
 	offhand = {
-		bar_x_offset = 0,
-		bar_y_offset = -144,
-		bar_color_default = {95, 98, 194, 1.0},
+        y = -142,
+		bar_color_default = {13, 79, 115, 0.8},
         show_gcd_underlay = false,
-        gcd1_marker_enabled = false,
+        gcd1a_marker_enabled = false,
+        gcd1b_marker_enabled = false,
 	},
 }
 
@@ -329,8 +318,6 @@ ST.SHAMAN.defaults = {
 ------------------------------------------------------------------------------------
 ST.WARLOCK.defaults = {
     class_enabled = false,
-    tag = "WARLOCK",
-    has_class_options = false,
     -- Bar options
     ['**'] = ST.bar_defaults,
     mainhand = {

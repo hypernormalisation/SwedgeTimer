@@ -167,7 +167,7 @@ function ST:set_opts_case_dict()
             desc = "This panel and its subpanels configure the settings for all timers. It is only visible "..
             "to classes that can use multiple types of weapons (mainhand/offhand/ranged)."..
             "\n\nAny changes made here will apply to *all timers*, use caution!\n",
-            hands = {"mainhand", "offhand", "ranged"},
+            hands = self.class_hands[self.player_class],
             order_offset = 4,
         },
         melee_hands = {
@@ -225,6 +225,7 @@ function ST:set_opts_funcs()
         -- A setter for bar appearances
         ST.opts_funcs[hand].bar_setter = function(_, info, value)
             for h in ST:generic_iter(settings.hands) do
+                self:Print(hand, h)
                 local db = ST:get_hand_table(h)
                 db[info[#info]] = value
                 ST:configure_bar_size_and_positions(h)
