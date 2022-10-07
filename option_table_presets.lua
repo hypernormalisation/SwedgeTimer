@@ -1020,10 +1020,24 @@ function ST:construct_class_info_panel()
             "The bar will also turn a special color when the druid has Maul queued but rage decay or rage spending "..
             "takes them below the rage threshold to cast Maul."
         },
-       }
-        
-    elseif self.player_class == "HUNTER" then
+    }
 
+    elseif self.player_class == "HUNTER" then
+        per_class = {
+            d1 = {
+                type = "description",
+                order = 1.1,
+                name = "The ranged timer is the primary timer for hunters and is visible whenever the player "..
+                "has a target or is in-combat, dimming when out-of-range.\n\n"..
+                "The mainhand timer (and offhand timer if an offhand is equipped) is smaller and placed below the "..
+                "ranged timer. It only appears when the player is in-combat and in melee range of the target.\n\n"..
+                "The GCD underlay is enabled on the bar by default, however the GCD markers are turned off. "..
+                "This is to make room for a central range-finding text, that shows the approximate range the hunter "..
+                "is to the target. While this feature is possible with any class, Hunter is the only one with it enabled"..
+                " by default.\n\n"..
+                "The Deadzone is also enabled on the ranged bar to let Hunters keep an eye on their latency."
+            }
+        }
     elseif self.player_class == "MAGE" then
         per_class = {
             d1 = {
