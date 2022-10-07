@@ -164,6 +164,10 @@ ST.DRUID.defaults = {
 -- HUNTER
 ------------------------------------------------------------------------------------
 ST.HUNTER.defaults = {
+    
+    enable_raptor_strike_color = true,
+    raptor_strike_color = {207, 58, 83, 1.0},
+    
     -- Bar options
     ['**'] = ST.bar_defaults,
     mainhand = {

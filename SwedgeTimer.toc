@@ -35,5 +35,6 @@ option_tables.lua
 config.lua
 
 classes\druid.lua
+classes\hunter.lua
 classes\paladin.lua
 classes\warrior.lua

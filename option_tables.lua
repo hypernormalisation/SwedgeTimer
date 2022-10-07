@@ -713,6 +713,39 @@ function ST.class_opts_funcs.WARRIOR(self)
     return opts_group
 end
 
+function ST.class_opts_funcs.HUNTER(self)
+    local opts_group = {
+        form_color_header = {
+            type = "header",
+            order = 1.0,
+            name = "Raptor Strike Queueing",
+        },
+        rs_desc = {
+            order = 1.001,
+            type = "description",
+            name = "The mainhand progress bar can be configured to turn a custom color when Raptor Strike is queued."
+        },
+        enable_raptor_strike_color = {
+            type = "toggle",
+            order = 1.1,
+            name = "Enable",
+            desc = "Enables a special bar color when Raptor Strike is queued on the next attack.",
+            get = "getter",
+            set = "setter",
+        },
+        raptor_strike_color = {
+            order=1.2,
+            type="color",
+            name="Color",
+            desc="Color to use when Raptor Strike is queued.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+        },
+    }
+    return opts_group
+end
+
 function ST.class_opts_funcs.DRUID(self)
     local opts_group = {
 

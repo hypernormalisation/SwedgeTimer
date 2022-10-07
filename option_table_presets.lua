@@ -1021,7 +1021,6 @@ function ST:construct_class_info_panel()
             "takes them below the rage threshold to cast Maul."
         },
     }
-
     elseif self.player_class == "HUNTER" then
         per_class = {
             d1 = {
@@ -1036,7 +1035,18 @@ function ST:construct_class_info_panel()
                 "is to the target. While this feature is possible with any class, Hunter is the only one with it enabled"..
                 " by default.\n\n"..
                 "The Deadzone is also enabled on the ranged bar to let Hunters keep an eye on their latency."
-            }
+            },
+            h1 = {
+                type = "header",
+                order = 1.2,
+                name = "Raptor Strike Queueing",
+            },
+            d2 = {
+                type = "description",
+                order = 1.3,
+                name = "The mainhand bar is configured the change color when the hunter has Raptor Strike "..
+                "queued up for their next attack."
+            },
         }
     elseif self.player_class == "MAGE" then
         per_class = {
