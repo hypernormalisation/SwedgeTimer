@@ -323,6 +323,13 @@ function ST:construct_bar_appearance_settings_table()
             get = "getter",
             set = "bar_setter",
         },
+        border_desc = {
+            order = 3.21,
+            type = "description",
+            name = "Sometimes due to how the WoW client handles pixels and scaling, the border texture"..
+            " can be uneven around the timer."..
+            " If this happens, the width can be fine-tweaked until the texture is an even thickness on all sides."
+        },
         border_width = {
             order = 3.3,
             type = "range",
@@ -916,8 +923,8 @@ function ST:construct_info_panel()
             order = 1.7,
             name = "SwedgeTimer includes a number of features as standard, including a GCD underlay, adjustable GCD time"..
                 " markers, and a Deadzone indicating the player's latency."..
-                " All of these features can be configured in each bar's submenu on the left panel."..
-                " The bar appearances can also be fully customised there."
+                " All of these features can be configured in each timer's submenu on the left panel,"..
+                " where the timer appearance can also be fully customised."
         },
         header5 = {
             type = "header",
@@ -928,7 +935,7 @@ function ST:construct_info_panel()
             type = "description",
             order = 1.9,
             name = "SwedgeTimer includes modules that display specialised information for certain classes."..
-                " For instance, Paladins have access to seal-dependent bar colors and proc alert glows."..
+                " For instance, Paladins have access to seal-dependent progress bar colors and proc alert glows."..
                 " If a class has such configuration, it will be visible in the left panel of the settings menu.",
         }
     }
@@ -1013,8 +1020,8 @@ function ST:construct_class_info_panel()
                 "\n\nBy default, the timer will only show when the player is in-combat or has an attackable "..
                 "target. By default, the timer will be dimmed when the player is outside of melee range."..
                 "\n\nThe GCD underlay is enabled for the mainhand. "..
-                "The GCD markers are split between showing the expected Spell GCD (top) and Physical "..
-                "GCD (bottom). Spell GCD duration is affected by haste rating and buffs, while the"..
+                "The GCD markers are split between showing the expected Physical GCD (top) and Spell "..
+                "GCD (bottom). Spell GCD duration is affected by haste rating and related buffs, while the"..
                 " Physical GCD duration is not."..
                 "The markers are anchored to the timer's end, and will hide when the bar is inactive."..
                 " The markers can also be anchored to the timer's progress instead."

@@ -612,7 +612,7 @@ function ST.class_opts_funcs.PALADIN(self)
             order = 2.6,
             name = "Glow line length",
             desc = "The glow line length.",
-            min = 1, max = 100, step = 1,
+            min = 1, max = 30, step = 1,
             get = "getter",
             set = "setter",
             disabled = function()

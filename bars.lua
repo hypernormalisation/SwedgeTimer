@@ -26,7 +26,7 @@ function ST:init_visuals_template(hand)
     -- visual frames in our addon, and set its initial size/position properties.
 	local anchor_frame = CreateFrame(
 		"Frame",
-        addon_name .. hand .. "AnchorFrame",
+        addon_name .. "_" .. hand .. "_" .. "AnchorFrame",
         UIParent
 	)
     self[hand].anchor_frame = anchor_frame
@@ -52,7 +52,7 @@ function ST:init_visuals_template(hand)
     -- dim settings.
     local hiding_anchor_frame = CreateFrame(
         "Frame",
-        addon_name .. hand .. "HidingAnchorFrame",
+        addon_name .. "_" .. hand .. "_" .. "HidingAnchorFrame",
         anchor_frame
     )
     anchor_frame.hiding_anchor_frame = hiding_anchor_frame
@@ -138,6 +138,8 @@ function ST:configure_bar_size_and_positions(hand)
     local hiding_anchor_frame = self:get_hiding_anchor_frame(hand)
     hiding_anchor_frame:ClearAllPoints()
     hiding_anchor_frame:SetPoint("CENTER")
+    hiding_anchor_frame:SetWidth(db.bar_width)
+    hiding_anchor_frame:SetHeight(db.bar_height)
     hiding_anchor_frame:Show()
 
     -- Might need to set the width/height of the bar_frame too
@@ -317,12 +319,8 @@ function ST:onupdate_common(hand, elapsed)
         d.current_progress = math.min(1, (t - d.start) /
             (d.ends_at - d.start)
         )
-    else
     end
 
-    -- local timer_width = db.bar_width * d.current_progress
-    -- frame.bar:SetWidth(max(1, timer_width))
-    -- frame.bar:SetTexCoord(0, d.current_progress, 0, 1)
     local progress = d.current_progress
     local w, h = self:get_bar_visuals_width_and_height(hand)
     -- Update the main bar's width

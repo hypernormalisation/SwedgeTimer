@@ -80,7 +80,7 @@ ST.bar_defaults = {
     gcd1a_marker_hide_inactive = true,
     gcd1a_marker_mode = "phys",
     gcd1a_marker_color = {230, 230, 230, 1.0},
-    gcd1a_marker_width = 3,
+    gcd1a_marker_width = 2,
     gcd1a_marker_fractional_height = 0.25,
     gcd1a_swing_anchor_wrap = true,
 
@@ -89,7 +89,7 @@ ST.bar_defaults = {
     gcd1b_marker_hide_inactive = true,
     gcd1b_marker_mode = "phys",
     gcd1b_marker_color = {230, 230, 230, 1.0},
-    gcd1b_marker_width = 3,
+    gcd1b_marker_width = 2,
     gcd1b_marker_fractional_height = 0.25,
     gcd1b_swing_anchor_wrap = true,
 
@@ -112,6 +112,9 @@ ST.DEATHKNIGHT.defaults = {
     has_class_options = false,
     -- Bar options
     ['**'] = ST.bar_defaults,
+    offhand = {
+        y = -150,
+    }
 }
 
 ------------------------------------------------------------------------------------
@@ -218,15 +221,16 @@ ST.PALADIN.defaults = {
     use_aow_glow = true,
     require_exo_ready = true,
     aow_glow_color = {209, 198, 115, 1.0},
-    aow_glow_nlines = 10,
-    aow_glow_freq = 0.04,
-    aow_glow_line_length = 22,
-    -- aow_glow_line_thickness = 1,
-    -- aow_glow_offset = 2,
+    aow_glow_nlines = 12,
+    aow_glow_freq = 0.1,
+    aow_glow_line_length = 12,
 
     -- Bar options
     ['**'] = ST.bar_defaults,
 	mainhand = {
+
+        bar_color_default = {150, 18, 97, 0.9},
+
         enable_deadzone = true,
         gcd1a_marker_mode = "phys",
         gcd1b_marker_mode = "spell",
@@ -336,9 +340,9 @@ ST.WARLOCK.defaults = {
 ST.WARRIOR.defaults = {
     -- Class-level options
     enable_hs_color = true,
-    hs_color = {224, 96, 116, 1.0},
+    hs_color = {130, 7, 9, 1.0},
     enable_cleave_color = true,
-    cleave_color = {154, 219, 68, 1.0},
+    cleave_color = {64, 130, 7, 1.0},
     insufficient_rage_color = {140, 140, 140, 1.0},
     -- Bar options
     ['**'] = ST.bar_defaults,
@@ -347,20 +351,20 @@ ST.WARRIOR.defaults = {
     },
 	offhand = {
         y = -142,
-		bar_color_default = {1, 66, 69, 0.8},
+		bar_color_default = {13, 79, 115, 0.8},
         show_gcd_underlay = false,
         gcd1a_marker_enabled = false,
         gcd1b_marker_enabled = false,
 	},
 	ranged = {
         show_behaviour = "conditional",
-        show_condition = "both",
+        show_condition = "either",
         require_in_range = true,
-		bar_height = 13,
+		bar_height = 15,
 		bar_width = 200,
-        y = -60,
-		bar_color_default = {191, 88, 29, 0.8},
-		font_size = 11,
+        y = -166,
+		bar_color_default = {112, 8, 11, 0.8},
+		font_size = 10,
         show_gcd_underlay = false,
         show_gcd_markers = false,
         show_range_finder = true,

@@ -118,12 +118,10 @@ function ST.PALADIN.process_aow(self)
         self.PALADIN.glow_stop(self)
         return
     end
-
     if not db.use_aow_glow then
         self.PALADIN.glow_stop(self)
         return
     end
-
     if db.require_exo_ready then
         if self.exo_on_cooldown then
             self.PALADIN.glow_stop(self)
@@ -131,7 +129,6 @@ function ST.PALADIN.process_aow(self)
         end
     end
     self.PALADIN.glow_start(self)
-
 end
 
 function ST.PALADIN.set_bar_color(self, hand)

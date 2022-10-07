@@ -3,7 +3,7 @@
 --=========================================================================================
 local addon_name, st = ...
 -- local version = "@project-version@"
-local version = "3.0"
+local version = "2.0"
 local ST = LibStub("AceAddon-3.0"):NewAddon(addon_name, "AceConsole-3.0", "AceEvent-3.0")
 local LSM = LibStub("LibSharedMedia-3.0")
 local STL = LibStub("LibClassicSwingTimerAPI", true)
