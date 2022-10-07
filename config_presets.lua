@@ -54,7 +54,7 @@ ST.bar_defaults = {
     -- Bar Texts
     text_size = 14,
     text_color = {255, 255, 255, 1.0},
-    text_font = "PT Sans Narrow",
+    text_font = "Expressway",
     text_outline_key = "outline",
 
     left_text_key  = "attack_speed",

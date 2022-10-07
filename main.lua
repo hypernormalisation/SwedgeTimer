@@ -192,8 +192,12 @@ function ST:OnInitialize()
 	-- Get player class first
 	self.player_class_pretty, self.player_class = UnitClass("player")
 
+	-- Register our media
 	LSM:Register(
 		"border", "Square Full White", [[Interface\BUTTONS\WHITE8X8]]
+	)
+	LSM:Register(
+		"font", "Expressway", [[Interface\Addons\SwedgeTimer\Media\Fonts\Expressway.ttf]]
 	)
 
 	-- Addon database
