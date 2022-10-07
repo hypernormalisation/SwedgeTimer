@@ -1074,7 +1074,7 @@ function ST:construct_class_info_panel()
                 type = "description",
                 order = 1.1,
                 name = "Rogues have access to mainhand, offhand, and ranged weapons. "..
-                "The mainhand and offhand timers are enabled by default, while the ranged timer is disabled."..
+                "The mainhand and offhand timers are enabled by default, while the ranged timer is disabled. "..
                 "If the ranged timer is enabled, it will be a smaller bar below the offhand, which will only "..
                 "show when the rogue is both in-combat, and in range with the equipped ranged weapon.\n\n"..
                 "The main/offhand timers will by default only show when the player has a valid target, or "..
@@ -1105,7 +1105,7 @@ function ST:construct_class_info_panel()
                 type = "description",
                 order = 1.1,
                 name = "Warriors have access to mainhand, offhand, and ranged weapons. "..
-                "The mainhand and offhand timers are enabled by default, while the ranged timer is disabled."..
+                "The mainhand and offhand timers are enabled by default, while the ranged timer is disabled. "..
                 "If the ranged timer is enabled, it will be a smaller bar below the offhand, which will only "..
                 "show when the warrior is both in-combat, and in range with the equipped ranged weapon.\n\n"..
                 "The main/offhand timers will by default only show when the player has a valid target, or "..
