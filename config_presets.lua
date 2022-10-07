@@ -197,6 +197,7 @@ ST.MAGE.defaults = {
     ['**'] = ST.bar_defaults,
     mainhand = {
         enabled = false,
+        y = -142,
         gcd1a_marker_mode = "spell",
         gcd1b_marker_mode = "spell",
 
@@ -256,6 +257,7 @@ ST.PRIEST.defaults = {
     ['**'] = ST.bar_defaults,
     mainhand = {
         enabled = false,
+        y = -142,
         gcd1a_marker_mode = "spell",
         gcd1b_marker_mode = "spell",
 
@@ -331,6 +333,7 @@ ST.WARLOCK.defaults = {
     -- Bar options
     ['**'] = ST.bar_defaults,
     mainhand = {
+        y = -142,
         enabled = false,
         gcd1a_marker_mode = "spell",
         gcd1b_marker_mode = "spell",
