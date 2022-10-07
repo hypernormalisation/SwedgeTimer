@@ -114,6 +114,8 @@ ST.DEATHKNIGHT.defaults = {
     ['**'] = ST.bar_defaults,
 	mainhand = {
         enable_deadzone = true,
+        gcd1a_marker_mode = "phys",
+        gcd1b_marker_mode = "spell",
     },
 	offhand = {
         y = -142,

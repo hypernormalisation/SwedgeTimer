@@ -962,8 +962,10 @@ function ST:construct_class_info_panel()
                 "\n\nBy default, the timers will only show when the player is in-combat or has an attackable "..
                 "target, and the timers will be dimmed when the player is outside of melee range"..
                 " of their target, or has no target.\n\n"..
-                "The GCD underlay is enabled on the mainhand timer. The GCD markers show the expected "..
-                "Spell GCD duration, and are anchored to the end of the timer."..
+                "The GCD underlay is enabled on the mainhand timer. "..
+                "The GCD markers are split between showing the expected Physical GCD (top) and Spell "..
+                "GCD (bottom). Spell GCD duration is affected by haste rating and related buffs, while the"..
+                " Physical GCD duration is not."..
                 " The markers can also be anchored to the timer's progress instead."
             },
             h2 = {
