@@ -7,6 +7,16 @@ A heavily customisable Swing Timer addon for Wrath of the Lich King Classic, wit
 ![pal1](https://user-images.githubusercontent.com/52763122/194584609-af39cc8a-7522-49f9-a4f9-2c821553d01c.gif)
 ![druid2](https://user-images.githubusercontent.com/52763122/194586258-ee8613db-ffaa-486b-91fa-c47ecef529e0.gif)
 
+## Class-dependent Settings
+And rich features to track your latency, GCDs, buffs, and procs.
+
+![image](https://user-images.githubusercontent.com/52763122/194590004-2ec5c4df-db0c-479b-b6e7-7e9f26399da1.png)
+
+## Heavily customisable appearances
+Change the appearance however you want.
+
+![image](https://user-images.githubusercontent.com/52763122/194590224-8c197ce6-4b55-4064-9a04-d9cc23883f41.png)
+
 ## Install Instructions
 
 It is recommended to install the addon from either Curseforge via the Curse Client, or from the Wago.io provider on the WoWUp Client:
