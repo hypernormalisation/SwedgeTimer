@@ -12,8 +12,8 @@ And rich features to track your latency, GCDs, buffs, and procs.
 
 ![image](https://user-images.githubusercontent.com/52763122/194590004-2ec5c4df-db0c-479b-b6e7-7e9f26399da1.png)
 
-## Heavily customisable appearances
-Change the appearance however you want.
+## Highly customisable appearances
+Change the look and feel of the timers however you want.
 
 ![image](https://user-images.githubusercontent.com/52763122/194590224-8c197ce6-4b55-4064-9a04-d9cc23883f41.png)
 
