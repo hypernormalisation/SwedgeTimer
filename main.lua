@@ -199,6 +199,9 @@ function ST:OnInitialize()
 	LSM:Register(
 		"font", "Expressway", [[Interface\Addons\SwedgeTimer\Media\Fonts\Expressway.ttf]]
 	)
+	LSM:Register(
+		"statusbar", "Minimalist", [[Interface\Addons\SwedgeTimer\Media\Textures\Minimalist.tga]]
+	)
 
 	-- Addon database
 	local SwedgeTimerDB = LibStub("AceDB-3.0"):New(addon_name.."DB", self.defaults, true)
@@ -440,7 +443,7 @@ function ST:post_init()
 
 	-- Set frames to locked or unlocked based on settings.
 	local db_class = self:get_class_table()
-	if db_class.bars_locked then
+	if db_class.timers_locked then
 		self:lock_frames()
 	else
 		self:unlock_frames()

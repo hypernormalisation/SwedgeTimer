@@ -39,7 +39,7 @@ ST.bar_defaults = {
     scale = 1,
 
     -- Timer bar appearance
-    bar_texture_key = "Solid",
+    bar_texture_key = "Minimalist",
     bar_color_default = {5, 71, 176, 0.6},
 
     -- Background and border appearance
@@ -214,7 +214,7 @@ ST.PALADIN.defaults = {
 
     use_seal_colors = true,
     soc_color = {47, 128, 10, 1.0},
-    sov_color = {120, 81, 12, 1.0},
+    sov_color = {192, 60, 38, 1.0},
     sol_color = {6, 140, 104, 1.0},
     sow_color = {22, 100, 117, 1.0},
     sor_color = {95, 47, 112, 1.0},
@@ -230,7 +230,7 @@ ST.PALADIN.defaults = {
     ['**'] = ST.bar_defaults,
 	mainhand = {
 
-        bar_color_default = {150, 18, 97, 0.9},
+        -- bar_color_default = {150, 18, 97, 0.9},
 
         enable_deadzone = true,
         gcd1a_marker_mode = "phys",
