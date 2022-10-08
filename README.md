@@ -1,7 +1,7 @@
 # SwedgeTimer
 A heavily customisable Swing Timer addon for Wrath of the Lich King Classic, with specific implementations for every class in the game.
 
-![war3](https://user-images.githubusercontent.com/52763122/194582434-60b56e5e-0e34-4d0d-92cc-f832e00650f4.gif)
+![war6](https://user-images.githubusercontent.com/52763122/194708178-d93d6c7a-d807-48d2-940b-ff5488064541.gif)
 ![hunt1](https://user-images.githubusercontent.com/52763122/194588644-2a993be1-a936-457a-95b7-6a9d1b16f0b5.gif)
 
 ![pal1](https://user-images.githubusercontent.com/52763122/194584609-af39cc8a-7522-49f9-a4f9-2c821553d01c.gif)
