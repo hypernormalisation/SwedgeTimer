@@ -953,7 +953,7 @@ function ST:construct_info_panel()
                 "Also by default, the timers will only show under certain conditions, usually requiring that "..
                 "the player is either in-combat or has an attackable target. By default, range finders "..
                 "are also enabled that will partially fade the timer when the target is out-of-range.\n\n"..
-                "The visibility conditions can be set in each timer's menu on the right panel."
+                "The visibility conditions can be set in each timer's menu on the left panel."
         },
         header3 = {
             type = "header",

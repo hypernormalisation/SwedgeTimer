@@ -33,8 +33,6 @@ function ST.DRUID.on_spellcast_failed_quiet(self, unit_id, cast_guid, spell_id)
 end
 
 function ST.DRUID.on_spellcast_succeeded(self, unit_target, cast_guid, spell_id)
-    -- print(unit_target)
-    -- print(spell_id)
     if self:is_value_in_array(spell_id, maul_ids) then
         self.maul_queued = false
         self:set_bar_color("mainhand")
@@ -54,7 +52,6 @@ function ST.DRUID.on_current_spell_cast_changed(self, is_cancelled)
         for spell_id in self:generic_iter(maul_ids) do
             local result = IsCurrentSpell(spell_id)
             if result then
-                print('matched maul id: '..tostring(spell_id))
                 self.maul_queued = true
                 self:set_bar_color("mainhand")
                 return
@@ -72,7 +69,6 @@ function ST.DRUID.set_bar_color(self, hand)
     -- insufficient rage to cast them.
     local db_class = self:get_class_table()
     local frame = self:get_visuals_frame(hand)
-    
     if hand ~= "mainhand" then
         return false
     end
@@ -84,7 +80,7 @@ function ST.DRUID.set_bar_color(self, hand)
         )
         return true
     end
-    
+
     -- Insufficient rage for queue.
     if self.maul_queued and self.insufficient_rage then
         frame.bar:SetVertexColor(

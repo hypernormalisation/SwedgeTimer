@@ -1,26 +1,32 @@
-# 1.3.1
+# Changelog
 
-## Features
+## [2.0.1] - 2202-10-08
 
-- The deadzone has been adjusted to use a more accurate representation of the input lag.
-- The deadzone may now be calibrated by the user in the settings menu through use of a scale factor; if the player is unable to twist just outside the deadzone, the scale factor should be increased; if the player is able to twist inside the deadzone, the scale factor should be decreased.
+### Fixed
+- Removed an eroneous debug print when druids cast Maul.
+- Fixed typo in the settings UI's info panel.
 
-# 1.3.0
+## [2.0.0] - 2022-10-07
 
-## Features
+The TBC Ret Paladin version of the Addon has been re-written from the ground up to support
+every class in WotLK.
 
-- The player now has finer control over when the bar is automatically hidden because of no seal or the player being out of combat
-  
-![image](https://user-images.githubusercontent.com/52763122/173918272-a6784d57-ba01-4723-9b14-a913a39cf89c.png)
+### Added
+- Support for mainhand/offhand/ranged swing timers.
+- Ships tailored and customisable timer configurations for every class in WotLK.
+- Some classes (Druid/Hunter/Paladin/Warrior) ship with specific aura/proc monitors that are
+  configurable in the settings menu.
+- Support for adjustable scale with the mousewheel when the timers are not locked.
+- A range finder is now included that can dim the timer when the player is out of range.
+  The range estimation is now an option for timer texts, with a new central text option to support it.
+- GCD markers now support showing the physical or spell GCD duration, and can be anchored to both
+  the end of the swing timer bar, or to the progress bar itself, moving with the timer progress.
 
-- A new "deadzone" feature has been added, that shows the region of the bar near the end of a player's swing where they are locked into their current seal this swing due to latency. This feature is enabled by default, but can be disabled. The deadzone alpha, texture, and color may all be changed in the settings menu.
+### Changed
+- SwedgeTimer no longer implements its own Swing Timer engine, it now uses LibClassicSwingTimerAPI, a project by Ralgathor (with contributions from Swedge and Buds) that produces a standardised swing timer API. It takes account of the many different edge cases the WoW swing timer has for each class.
+- Timer border and background customisation has been improved.
+- Improved timer positioning within the UI powered by LibWindow-1.1.
 
-![image](https://user-images.githubusercontent.com/52763122/173918367-7c92aef6-6f87-4f42-a2e7-d13ed5148315.png)
-
-![image](https://user-images.githubusercontent.com/52763122/173918444-2fda281e-30a8-41d8-826c-b1283c02730f.png)
-
-## Fixes
-
-- Fixed a call that should have been suppressed when the player class is not paladin that produced a small lua error.
-- The backplane is now drawn on the same frame strata, which should lead to fewer incidences where intersecting UI components are above the backplane but below the bar elements.
-- Fixed an issue where the right text was drawn too close to the end of the bar on the bar being moved. Text is now generally further away from the bar borders.
+### Removed
+- With the demise of Seal Twisting, some of the Ret Paladin functionality to help with seal
+  twisting has been removed. Much of that functionality is generally useful, and has been adapted into the rest of the addon.
