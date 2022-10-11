@@ -1,10 +1,12 @@
 # Changelog
 
-## Added
+## [2.0.2] - 2022-10-11
+
+### Added
 - Warrior Bloodsurge glow proc options added
 - Bar Positioning menus now also lets the user change bar dimensions there
 
-## Fixed
+### Fixed
 - Typo in GCD marker settings fixed
 
 ## [2.0.1] - 2202-10-08
