@@ -155,7 +155,11 @@ end
 
 function ST.WARRIOR.process_bloodsurge(self)
     local db = self:get_class_table()
-    if not self.has_bloodsurge and db.use_bloodsurge_glow then
+    if not self.has_bloodsurge then
+        self.WARRIOR.glow_stop(self)
+        return
+    end
+    if not db.use_bloodsurge_glow then
         self.WARRIOR.glow_stop(self)
         return
     end

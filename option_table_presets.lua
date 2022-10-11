@@ -821,7 +821,7 @@ function ST:construct_gcd_marker_settings_table()
         markers_beheaviour_header_bottom = {
             order=2.5,
             type="header",
-            name="Top Marker Behaviour",
+            name="Bottom Marker Behaviour",
         },
         gcd1b_marker_enabled = {
             type = "toggle",

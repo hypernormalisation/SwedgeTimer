@@ -1,5 +1,11 @@
 # Changelog
 
+## Added
+- Warrior Bloodsurge glow proc options added
+
+## Fixed
+- Typo in GCD marker settings fixed
+
 ## [2.0.1] - 2202-10-08
 
 ### Fixed

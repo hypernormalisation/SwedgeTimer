@@ -718,6 +718,78 @@ function ST.class_opts_funcs.WARRIOR(self)
             get = "color_getter",
             set = "color_setter",
         },
+        header3 = {
+            order = 2.0,
+            type = "header",
+            name = "Bloodsurge Glow"
+        },
+        desc3 = {
+            order = 2.1,
+            type = "description",
+            name = "The mainhand timer can be configured to have a glow effect when the"..
+            " player gets a Bloodsurge instant slam proc."
+        },
+        use_bloodsurge_glow = {
+            type = "toggle",
+            order = 2.2,
+            name = "Enable",
+            desc = "Enables a glow color when the Warrior has Bloodsurge",
+            get = "getter",
+            set = "setter",
+        },
+        bloodsurge_glow_color = {
+            order=2.3,
+            type="color",
+            name="Color",
+            desc="Glow color to use.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+            disabled = function()
+                local db = ST:get_class_table()
+                return not db.use_bloodsurge_glow
+            end,
+        },
+        bloodsurge_glow_nlines = {
+            type = "range",
+            order = 2.4,
+            name = "Number of glow lines",
+            desc = "The number of lines to use in the glow effect.",
+            min = 1, max = 200,
+            step = 1,
+            get = "getter",
+            set = "setter",
+            disabled = function()
+                local db = ST:get_class_table()
+                return not db.use_bloodsurge_glow
+            end,
+        },
+        bloodsurge_glow_freq = {
+            type = "range",
+            order = 2.5,
+            name = "Glow frequency",
+            desc = "The rotation frequency of the glow effect.",
+            min = 0.01, max = 1.0, step = 0.01,
+            get = "getter",
+            set = "setter",
+            disabled = function()
+                local db = ST:get_class_table()
+                return not db.use_bloodsurge_glow
+            end,
+        },
+        bloodsurge_glow_line_length = {
+            type = "range",
+            order = 2.6,
+            name = "Glow line length",
+            desc = "The glow line length.",
+            min = 1, max = 30, step = 1,
+            get = "getter",
+            set = "setter",
+            disabled = function()
+                local db = ST:get_class_table()
+                return not db.use_bloodsurge_glow
+            end,
+        },
     }
     return opts_group
 end
