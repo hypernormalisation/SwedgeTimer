@@ -2,6 +2,7 @@
 
 ## Added
 - Warrior Bloodsurge glow proc options added
+- Bar Positioning menus now also lets the user change bar dimensions there
 
 ## Fixed
 - Typo in GCD marker settings fixed

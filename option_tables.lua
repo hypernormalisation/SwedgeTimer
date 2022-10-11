@@ -971,7 +971,7 @@ end
 function ST:generate_bar_position_options_table()
 
     local opts_group = {
-		name = "Timer Positioning/Scale",
+		name = "Size/Positioning/Scale",
 		type = "group",
         desc = "This panel controls the positioning and scales of the bars in SwedgeTimer.",
         order = 0.6,
@@ -1000,6 +1000,46 @@ function ST:generate_bar_position_options_table()
                 type = "header",
                 order = 1.0 + offset,
                 name = name_pretty,
+            },
+            [hand .. "bar_width"] = {
+                type = "range",
+                order = 1.01 + offset,
+                name = "Width",
+                desc = "The pixel width of the swing timer.",
+                min = 100, max = 600, step = 1,
+                get = function()
+                    return ST:get_hand_table(hand).bar_width
+                end,
+                set = function(_, value)
+                    ST:get_hand_table(hand).bar_width = value
+                    ST:configure_bar_size_and_positions(hand)
+                    ST:configure_bar_appearances(hand)
+                    ST:configure_bar_outline(hand)
+                    ST:configure_gcd_markers(hand)
+                    ST:set_gcd_marker_positions(hand)
+                    ST:configure_deadzone(hand)
+                    ST:set_deadzone_width(hand)
+                end
+            },
+            [hand .. "bar_height"] = {
+                type = "range",
+                order = 1.02 + offset,
+                name = "Height",
+                desc = "The pixel height of the swing timer.",
+                min = 6, max = 60, step = 1,
+                get = function()
+                    return ST:get_hand_table(hand).bar_height
+                end,
+                set = function(_, value)
+                    ST:get_hand_table(hand).bar_height = value
+                    ST:configure_bar_size_and_positions(hand)
+                    ST:configure_bar_appearances(hand)
+                    ST:configure_bar_outline(hand)
+                    ST:configure_gcd_markers(hand)
+                    ST:set_gcd_marker_positions(hand)
+                    ST:configure_deadzone(hand)
+                    ST:set_deadzone_width(hand)
+                end
             },
             [hand .. "_x"] = {
                 type = "range",
