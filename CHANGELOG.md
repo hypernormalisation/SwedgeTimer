@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.0.3] - 2022-11-15
+
+### Fixed
+- Addon now uses an updated version of LibClassicSwingTimerAPI, which fixes some lua errors around C_Timers.
+
 ## [2.0.2] - 2022-10-11
 
 ### Added
