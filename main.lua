@@ -749,6 +749,8 @@ function ST:determine_form_visibility_flag()
 		self.should_show_bar_this_form = true
 	elseif i == 5 and db.form_vis_tree and self.has_tree_of_life then
 		self.should_show_bar_this_form = true
+	elseif i == 5 and (not self.has_moonkin and not self.has_tree_of_life) and db.form_vis_flight then
+		self.should_show_bar_this_form = true
 	elseif i == 6 and db.form_vis_flight then
 		self.should_show_bar_this_form = true
 	end

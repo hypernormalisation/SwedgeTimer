@@ -108,7 +108,7 @@ function ST.DRUID.set_bar_color(self, hand)
                 self:convert_color(db_class.form_color_cat)
             )
             return true
-        elseif self.form_index == 5  and self.has_moonkin then
+        elseif self.form_index == 5 and self.has_moonkin then
             frame.bar:SetVertexColor(
                 self:convert_color(db_class.form_color_moonkin)
             )
@@ -118,6 +118,11 @@ function ST.DRUID.set_bar_color(self, hand)
                 self:convert_color(db_class.form_color_tree)
             )
             return true
+        elseif self.form_index == 5 and (not self.has_tree_of_life and not self.has_moonkin) then
+            frame.bar:SetVertexColor(
+                self:convert_color(db_class.form_color_flight)
+            )
+            return true
         elseif self.form_index == 6 then
             frame.bar:SetVertexColor(
                 self:convert_color(db_class.form_color_flight)
@@ -125,7 +130,6 @@ function ST.DRUID.set_bar_color(self, hand)
             return true
         end
     end
-
     return false
 
 end
