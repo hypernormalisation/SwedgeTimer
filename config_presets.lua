@@ -254,6 +254,7 @@ ST.PALADIN.defaults = {
     sol_color = {6, 140, 104, 1.0},
     sow_color = {22, 100, 117, 1.0},
     sor_color = {207, 58, 165, 1.0},
+    soj_color = {204, 185, 18, 1.0},
 
     use_aow_glow = true,
     require_exo_ready = true,

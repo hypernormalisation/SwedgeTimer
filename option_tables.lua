@@ -552,6 +552,19 @@ function ST.class_opts_funcs.PALADIN(self)
                 return not db.use_seal_colors
             end,
         },
+        soj_color = {
+            order=1.17,
+            type="color",
+            name="Seal of Justice",
+            desc="Color to use when Seal of Justice is active.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+            disabled = function()
+                local db = ST:get_class_table()
+                return not db.use_seal_colors
+            end,
+        },
         aow_header = {
             type = "header",
             order = 2.0,

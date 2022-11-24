@@ -13,6 +13,7 @@ local sov_ids = {
 local sol_id = 20165
 local sow_id = 20166
 local sor_id = 21084
+local soj_id = 20164
 
 -- Art of War
 local aow_id = 59578
@@ -48,6 +49,7 @@ function ST.PALADIN.on_aura_change(self)
     self.has_sol = false
     self.has_sow = false
     self.has_sor = false
+    self.has_soj = false
 
     -- Iterate all player auras
     local i = 1
@@ -71,6 +73,9 @@ function ST.PALADIN.on_aura_change(self)
         end
         if spell_id == sor_id then
             self.has_sor = true
+        end
+        if spell_id == soj_id then
+            self.has_soj = true
         end
 
         -- Art of War
@@ -170,6 +175,12 @@ function ST.PALADIN.set_bar_color(self, hand)
         if self.has_sor then
             frame.bar:SetVertexColor(
                 self:convert_color(db_class.sor_color)
+            )
+            return true
+        end
+        if self.has_soj then
+            frame.bar:SetVertexColor(
+                self:convert_color(db_class.soj_color)
             )
             return true
         end
