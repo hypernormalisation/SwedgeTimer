@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.4] - 2022-11-24
+
+### Added 
+- Seal of Justice custom timer bar color added for Paladins.
+- Druids can now enable custom bar visibilities based on their current form.
+- Druids can now enable custom bar colours for travel and flight form.
+
+### Fixed
+- Druid forms now properly respect the adaptive form index for Moonkin and Tree form
+depending on if Moonkin and Tree forms are currently talented.
+
 ## [2.0.3] - 2022-11-15
 
 ### Fixed
