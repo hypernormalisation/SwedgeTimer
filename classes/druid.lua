@@ -69,6 +69,8 @@ function ST.DRUID.set_bar_color(self, hand)
     -- insufficient rage to cast them.
     local db_class = self:get_class_table()
     local frame = self:get_visuals_frame(hand)
+    self:get_druid_talent_info()
+	self:determine_form_visibility_flag()
     if hand ~= "mainhand" then
         return false
     end
@@ -80,7 +82,7 @@ function ST.DRUID.set_bar_color(self, hand)
         )
         return true
     end
-
+    
     -- Insufficient rage for queue.
     if self.maul_queued and self.insufficient_rage then
         frame.bar:SetVertexColor(
@@ -96,19 +98,29 @@ function ST.DRUID.set_bar_color(self, hand)
                 self:convert_color(db_class.form_color_bear)
             )
             return true
+        elseif self.form_index == 4 then
+            frame.bar:SetVertexColor(
+                self:convert_color(db_class.form_color_travel)
+            )
+            return true
         elseif self.form_index == 3 then
             frame.bar:SetVertexColor(
                 self:convert_color(db_class.form_color_cat)
             )
             return true
-        elseif self.form_index == 5 then
+        elseif self.form_index == 5  and self.has_moonkin then
             frame.bar:SetVertexColor(
                 self:convert_color(db_class.form_color_moonkin)
             )
             return true
-        elseif self.form_index == 6 then
+        elseif self.form_index == 5 and self.has_tree_of_life then
             frame.bar:SetVertexColor(
                 self:convert_color(db_class.form_color_tree)
+            )
+            return true
+        elseif self.form_index == 6 then
+            frame.bar:SetVertexColor(
+                self:convert_color(db_class.form_color_flight)
             )
             return true
         end

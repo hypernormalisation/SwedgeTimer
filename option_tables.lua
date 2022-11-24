@@ -2,7 +2,7 @@
 -- Module to contain option table defaults
 --
 -- The module's purpose is to dynamically generate any options tables
--- depending on player class that the addon need. So for example,
+-- depending on player class that the addon needs. So for example,
 -- a Paladin will only ever see the mainhand options, and the Paladin-specific 
 -- class options.
 ------------------------------------------------------------------------------------
@@ -412,6 +412,7 @@ function ST:generate_class_getters_setters()
     ST.class_getsetters.setter = function(_, info, value)
         local db = ST:get_class_table()
         db[info[#info]] = value
+        ST:determine_form_visibility_flag()
         for h in ST:iter_hands() do
             ST:configure_texts(h)
             ST:configure_bar_size_and_positions(h)
@@ -419,6 +420,7 @@ function ST:generate_class_getters_setters()
             ST:configure_bar_outline(h)
             ST:configure_gcd_markers(h)
             ST:set_gcd_marker_positions(h)
+            ST:handle_bar_visibility(h)
         end
     end
 
@@ -830,6 +832,74 @@ end
 function ST.class_opts_funcs.DRUID(self)
     local opts_group = {
 
+        -- Form-dependent visibility
+        form_vis_header = {
+            type = "header",
+            order = 3.0,
+            name = "Form-dependent Visibility"
+        },
+        form_vis_desc = {
+            type = "description",
+            order = 3.1,
+            name = "The timer bar can be configured to be only visible in certain forms.",
+        },
+        form_vis_normal = {
+            type = "toggle",
+            order = 3.2,
+            name = "No Form",
+            desc = "Show the bar when in default form.",
+            get = "getter",
+            set = "setter",
+        },
+        form_vis_bear = {
+            type = "toggle",
+            order = 3.3,
+            name = "Bear/Dire Bear",
+            desc = "Show the bar when in Bear or Dire Bear form.",
+            get = "getter",
+            set = "setter",
+        },
+        form_vis_cat = {
+            type = "toggle",
+            order = 3.4,
+            name = "Cat",
+            desc = "Show the bar when in Cat form.",
+            get = "getter",
+            set = "setter",
+        },
+        form_vis_moonkin = {
+            type = "toggle",
+            order = 3.5,
+            name = "Moonkin",
+            desc = "Show the bar when in Moonkin form.",
+            get = "getter",
+            set = "setter",
+        },
+        form_vis_tree = {
+            type = "toggle",
+            order = 3.6,
+            name = "Tree of Life",
+            desc = "Show the bar when in Tree of Life form.",
+            get = "getter",
+            set = "setter",
+        },
+        form_vis_travel = {
+            type = "toggle",
+            order = 3.7,
+            name = "Travel Form",
+            desc = "Show the bar when in Travel form.",
+            get = "getter",
+            set = "setter",
+        },
+        form_vis_flight = {
+            type = "toggle",
+            order = 3.8,
+            name = "Flight Form",
+            desc = "Show the bar when in Flight form.",
+            get = "getter",
+            set = "setter",
+        },
+
         -- Form-dependent colors
         form_color_header = {
             type = "header",
@@ -840,11 +910,6 @@ function ST.class_opts_funcs.DRUID(self)
             order = 4.1,
             type = "description",
             name = "Enables the timer bar color changing depending on the druid's form."
-        },
-        lb01 = {
-            type = "header",
-            order = 4.2,
-            name = "",
         },
         use_form_colors = {
             type = "toggle",
@@ -895,6 +960,24 @@ function ST.class_opts_funcs.DRUID(self)
             get = "color_getter",
             set = "color_setter",
         },
+        form_color_travel = {
+            order=5.4,
+            type="color",
+            name="Travel Form",
+            desc="Color to use when in Travel form.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+        },
+        form_color_flight = {
+            order=5.5,
+            type="color",
+            name="Flight Form",
+            desc="Color to use when in Flight form.",
+            hasAlpha=true,
+            get = "color_getter",
+            set = "color_setter",
+        },
 
         -- Maul color
         class_header = {
@@ -934,11 +1017,11 @@ function ST.class_opts_funcs.DRUID(self)
             end,
         },
         -- Insufficient rage
-        lb1 = {
-            type = "header",
-            order = 12,
-            name = "",
-        },
+        -- lb1 = {
+        --     type = "header",
+        --     order = 12,
+        --     name = "",
+        -- },
         rage_desc = {
             order = 12.1,
             type = "description",

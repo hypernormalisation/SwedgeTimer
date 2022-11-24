@@ -155,8 +155,17 @@ end
 function ST:show_bar(hand)
 	local db_class = self:get_class_table()
 	if db_class.class_enabled then
-		self:get_bar_frame(hand):Show()
-		self:get_hiding_anchor_frame(hand):Show()
+		if self.player_class == "DRUID" then
+			if self.should_show_bar_this_form then
+				self:get_bar_frame(hand):Show()
+				self:get_hiding_anchor_frame(hand):Show()				
+			else
+				self:hide_bar(hand)
+			end
+		else
+			self:get_bar_frame(hand):Show()
+			self:get_hiding_anchor_frame(hand):Show()
+		end
 	end
 end
 
@@ -282,6 +291,7 @@ function ST:OnInitialize()
 			self.is_cat_or_bear = true
 		end
 	end
+	self.should_show_bar_this_form = true
 
 	-- MH timer containers
 	self.mainhand.start = nil
@@ -339,6 +349,8 @@ function ST:OnInitialize()
 	-----------------------------------------------------------
 	-- Register WoW API events
 	-----------------------------------------------------------
+	self:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+	self:RegisterEvent("CHARACTER_POINTS_CHANGED")
 	self:RegisterEvent("CURRENT_SPELL_CAST_CHANGED")
 	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -429,7 +441,8 @@ function ST:post_init()
 	-- once the libraries and addon are initialised.
 	self:set_gcd_times_before_swing_seconds()
 	self:on_latency_update()
-
+	self:get_druid_talent_info()
+	self:determine_form_visibility_flag()
 	for hand in self:iter_hands() do
 		self:set_gcd_marker_positions(hand)
 		-- self:set_bar_full_state(hand)
@@ -578,6 +591,20 @@ end
 ------------------------------------------------------------------------------------
 -- Wow API event callbacks
 ------------------------------------------------------------------------------------
+function ST:ACTIVE_TALENT_GROUP_CHANGED(event)
+	if self.player_class == "DRUID" then
+		self:get_druid_talent_info()
+		self:determine_form_visibility_flag()
+	end
+end
+
+function ST:CHARACTER_POINTS_CHANGED(event)
+	if self.player_class == "DRUID" then
+		self:get_druid_talent_info()
+		self:determine_form_visibility_flag()
+	end
+end
+
 function ST:CURRENT_SPELL_CAST_CHANGED(event, is_cancelled)
 	self:class_on_current_spell_cast_changed(is_cancelled)
 end
@@ -678,8 +705,15 @@ function ST:UPDATE_SHAPESHIFT_FORM()
 	if not self.class == "DRUID" then
         return
     end
-    self.form_index = GetShapeshiftForm()
-    if self.form_index == 1 or self.form_index ==3 then
+	local i = GetShapeshiftForm()
+
+	-- If form hasn't changed, do nothing.
+	if i == self.form_index then
+		return
+	end
+    self.form_index = i
+	self:determine_form_visibility_flag()
+	if i == 1 or i ==3 then
         self.is_cat_or_bear = true
     else
         self.is_cat_or_bear = false
@@ -692,7 +726,41 @@ function ST:UPDATE_SHAPESHIFT_FORM()
 		self:on_attack_speed_change("mainhand")
 		self:set_bar_color("mainhand")
 	end
+	if self.interfaces_are_initialised then
+		self:handle_bar_visibility("mainhand")
+	end
+end
 
+function ST:determine_form_visibility_flag()
+	-- function called on form or settings change to 
+	-- set the form visibility flag
+	local i = GetShapeshiftForm()
+	local db = self:get_class_table()
+	self.should_show_bar_this_form = false
+	if i == 0 and db.form_vis_normal then
+		self.should_show_bar_this_form = true
+	elseif i == 1 and db.form_vis_bear then
+		self.should_show_bar_this_form = true
+	elseif i == 4 and db.form_vis_travel then
+		self.should_show_bar_this_form = true
+	elseif i == 3 and db.form_vis_cat then
+		self.should_show_bar_this_form = true
+	elseif i == 5 and db.form_vis_moonkin and self.has_moonkin then
+		self.should_show_bar_this_form = true
+	elseif i == 5 and db.form_vis_tree and self.has_tree_of_life then
+		self.should_show_bar_this_form = true
+	elseif i == 6 and db.form_vis_flight then
+		self.should_show_bar_this_form = true
+	end
+end
+
+function ST:get_druid_talent_info()
+	-- function to get the druid talent info and determine
+	-- if the player has moonkin or tree
+	self.has_moonkin = select(5, GetTalentInfo(1, 11)) == 1
+	self.has_tree_of_life = select(5, GetTalentInfo(3, 19)) == 1
+	-- self:Print("has Tree of Life = " .. tostring(self.has_tree_of_life))
+	-- self:Print("has Moonkin = " .. tostring(self.has_moonkin))
 end
 
 ------------------------------------------------------------------------------------

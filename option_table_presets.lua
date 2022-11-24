@@ -1047,7 +1047,7 @@ function ST:construct_class_info_panel()
             "\n\nThe GCD underlay is enabled. "..
             "The GCD markers show the Spell GCD duration while in normal, Moonkin, and Tree form, "..
             "and show the Physical GCD duration while in cat, bear, and dire bear form."..
-            ". Spell GCD duration is affected by haste rating and buffs, while the"..
+            " Spell GCD duration is affected by haste rating and buffs, while the"..
             " physical GCD duration is not."..
             "The markers are anchored to the end of the timer bar, and will hide when the timer is inactive."..
             " The markers can also be anchored to the timer's progress instead."

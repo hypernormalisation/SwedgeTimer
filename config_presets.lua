@@ -138,11 +138,22 @@ ST.DRUID.defaults = {
     maul_color = {112, 19, 189, 1.0},
     insufficient_rage_color = {140, 140, 140, 1.0},
 
+    -- Form-dependent visibility defaults
+    form_vis_normal = true,
+    form_vis_bear = true,
+    form_vis_cat = true,
+    form_vis_moonkin = true,
+    form_vis_tree = true,
+    form_vis_travel = true,
+    form_vis_flight = true,
+
     use_form_colors = true,
     form_color_bear = {159, 4, 44, 1.0},
     form_color_cat = {189, 126, 9, 1.0},
     form_color_moonkin = {4, 148, 214, 1.0},
     form_color_tree = {4, 204, 124, 1.0},
+    form_color_travel = {18, 85, 201, 1.0},
+    form_color_flight = {18, 85, 201, 1.0},
 
     -- Bar options
     ['**'] = ST.bar_defaults,
