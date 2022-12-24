@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.0.6] - 2022-12-25
+
+### Fixed
+- The LibRangeCheck-2.0 library takes a finite amount of time on first client load to gather the information it needs to 
+  function properly. Previously, the code to show and hide bars was blocked until the range checking
+  was functional. Now show/hide checks will be run immediately.
+- Added some additional cross-checks to ensure bars show and hide when necessary.
+
+
 ## [2.0.5] - 2022-12-24
 
 ### Fixed
