@@ -872,9 +872,9 @@ end
 ------------------------------------------------------------------------------------
 function ST:handle_oor()
 	for hand in self:iter_hands() do
-		-- if self:bar_is_enabled(hand) then
-		self:handle_oor_hand(hand)
-		-- end
+		if self:bar_is_enabled(hand) then
+			self:handle_oor_hand(hand)
+		end
 	end
 end
 
