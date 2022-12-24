@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.0.5] - 2022-12-24
+
+### Fixed
+- Fixed an issue with warrior shields where the offhand timer bar initialisation was
+  being broken by a zero attack speed. This might fix a bug warriors have experiencing
+  with the offhand timer bar breaking during swaps, but still unclear.
+- Timer bar elements are now properly recalculated in full when the player's weapon changes.
+
 ## [2.0.4] - 2022-11-24
 
 ### Added 
