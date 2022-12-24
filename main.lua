@@ -403,7 +403,11 @@ function ST:init_timers()
 	for hand in self:iter_hands() do
 		local t = {SwingTimerInfo(hand)}
 		-- print(string.format("%s, %s, %s", tostring(t[1]),
-		-- tostring(t[2]), tostring(t[3])))
+		-- If the player has a shield, the below check prevents zero
+		-- division errors in the offhand timer bar initialisation.
+		if t[1] == 0 then
+			t[1] = 0.1
+		end
 		self[hand].speed = t[1]
 		self[hand].ends_at = t[2]
 		self[hand].start = t[3]
@@ -613,10 +617,13 @@ function ST:PLAYER_ENTERING_WORLD(event, is_initial_login, is_reloading_ui)
 end
 
 function ST:PLAYER_EQUIPMENT_CHANGED(event, slot, has_current)
-	-- print('slot says: '..tostring(slot))
 	if slot == 16 or slot == 17 or slot == 18 then
 		self:check_weapons()
+		for hand in self:iter_hands() do
+			self:on_attack_speed_change(hand)
+		end
 	end
+
 end
 
 function ST:PLAYER_REGEN_ENABLED()
