@@ -154,11 +154,12 @@ end
 
 function ST:show_bar(hand)
 	local db_class = self:get_class_table()
-	if db_class.class_enabled then
+	-- local db_hand = self:get_hand_table(hand)
+	if db_class.class_enabled and self:bar_is_enabled(hand) then
 		if self.player_class == "DRUID" then
 			if self.should_show_bar_this_form then
 				self:get_bar_frame(hand):Show()
-				self:get_hiding_anchor_frame(hand):Show()				
+				self:get_hiding_anchor_frame(hand):Show()
 			else
 				self:hide_bar(hand)
 			end
@@ -166,6 +167,8 @@ function ST:show_bar(hand)
 			self:get_bar_frame(hand):Show()
 			self:get_hiding_anchor_frame(hand):Show()
 		end
+	else
+		self:hide_bar(hand)
 	end
 end
 
@@ -309,7 +312,7 @@ function ST:OnInitialize()
 	self.offhand.speed = nil
 	self.offhand.ends_at = nil
 	self.offhand.inactive_timer = nil
-	self.offhand.has_weapon = nil
+	self.offhand.has_weapon = false
 	self.offhand.is_full = false
 	self.offhand.is_full_timer = nil
 	self.offhand.is_paused = false
@@ -319,7 +322,7 @@ function ST:OnInitialize()
 	self.ranged.speed = nil
 	self.ranged.ends_at = nil
 	self.ranged.inactive_timer = nil
-	self.ranged.has_weapon = nil
+	self.ranged.has_weapon = false
 	self.ranged.is_full = false
 
 	-- GCD info containers
@@ -436,6 +439,7 @@ function ST:check_weapons()
 		else
 			self[hand].has_weapon = true
 		end
+		-- self:Print(string.format("For hand %s, has_weapon = ", hand) .. tostring(self[hand].has_weapon))
 	end
 end
 
@@ -463,6 +467,9 @@ function ST:post_init()
 		self:lock_frames()
 	else
 		self:unlock_frames()
+	end
+	for hand in self:iter_hands() do
+		self:show_bar(hand)
 	end
 end
 
@@ -834,6 +841,7 @@ function ST:rf_update()
 	-- regardless and re-assign the functions until we get valid checkers,
 	-- then resume normal function.
 	if self.melee_range_checker_func == nil then
+		-- self:Print("Range checker offline")
 		C_Timer.After(self.rangefinder_interval, function()
 				self.melee_range_checker_func = LRC:GetHarmMaxChecker(LRC.MeleeRange)
 				local r = 30
@@ -842,6 +850,8 @@ function ST:rf_update()
 				end
 				self.ranged_range_checker_func = LRC:GetHarmMaxChecker(r)
 				self:rf_update()
+				self:set_bar_visibilities()
+
 			end
 		)
 		return
@@ -862,16 +872,20 @@ end
 ------------------------------------------------------------------------------------
 function ST:handle_oor()
 	for hand in self:iter_hands() do
-		if self:bar_is_enabled(hand) then
-			self:handle_oor_hand(hand)
-		end
+		-- if self:bar_is_enabled(hand) then
+		self:handle_oor_hand(hand)
+		-- end
 	end
 end
 
 function ST:handle_oor_hand(hand)
 	local db = self:get_hand_table(hand)
 	local frame = self:get_bar_frame(hand)
+	-- self:Print(db.dim_oor)
 	if db.dim_oor then
+		-- if hand == "offhand" then
+		-- 	-- self:Print(self:get_in_range(hand))
+		-- end
 		if not self:get_in_range(hand) then
 			frame:SetAlpha(db.dim_alpha)
 		else
@@ -893,7 +907,8 @@ function ST:bar_is_enabled(hand)
 		else
 			return false
 		end
-	elseif db.enabled and self[hand].has_weapon then
+	end
+	if db.enabled and self[hand].has_weapon then
 		return true
 	else
 		return false
@@ -967,6 +982,7 @@ function ST:set_bar_visibilities()
 		for hand in self:iter_hands() do
 			self:hide_bar(hand)
 		end
+		return
 	end
 
 	for hand in self:iter_hands() do
