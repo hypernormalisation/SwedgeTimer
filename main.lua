@@ -402,7 +402,6 @@ function ST:init_timers()
 	self:check_weapons()
 	for hand in self:iter_hands() do
 		local t = {SwingTimerInfo(hand)}
-		-- print(string.format("%s, %s, %s", tostring(t[1]),
 		-- If the player has a shield, the below check prevents zero
 		-- division errors in the offhand timer bar initialisation.
 		if t[1] == 0 then
