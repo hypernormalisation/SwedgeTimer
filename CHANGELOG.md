@@ -1,5 +1,10 @@
 # Changelog
 
+## [2.0.7] -- 2023-01-19
+
+### Changed
+- The addon has been confirmed to function properly in 3.4.1 and the Interface tag updated to reflect this.
+
 ## [2.0.6] - 2022-12-25
 
 ### Fixed

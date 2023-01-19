@@ -1,4 +1,4 @@
-## Interface: 30400
+## Interface: 30401
 ## Title: SwedgeTimer
 ## Notes: General purpose swing timer addon for WotLK Classic.
 ## Author: Swedge
