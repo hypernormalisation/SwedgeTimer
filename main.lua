@@ -160,9 +160,15 @@ function ST:check_bar_enable_settings(db_class, hand)
 	if not self:bar_is_enabled(hand) then 	-- Hand enabled
 		return false
 	end
-	-- Spec enabled
-	if not (db_class.enable_spec1 and self.current_talent_group == 1) or (db_class.enable_spec2 and self.current_talent_group == 2) then
-		return false
+	if self.current_talent_group == 1 then  -- Spec 1 enabled
+		if not db_class.enable_spec1 then
+			return false
+		end
+	end
+	if self.current_talent_group == 2 then  -- Spec 1 enabled
+		if not db_class.enable_spec2 then
+			return false
+		end
 	end
 	return true 	-- If we get to the end the bar should be shown.
 end
