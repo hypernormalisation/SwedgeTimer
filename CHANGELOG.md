@@ -7,7 +7,7 @@
 - Further to the above, Warriors now have the option to disable the swing timer when in Arms or Protection spec.
 
 ### Fixed
-- Fixed a bug where indeterminate ordering of evet callbacks was makinng the weapon checks for offhand and ranged lag behind
+- Fixed a bug where indeterminate ordering of event callbacks was makinng the weapon checks for offhand and ranged lag behind
   equipment changes. This will fix a bug for warriors where ElvUI being loaded causes equipping a shield to break the offhand timer.
 - Fixed an issue where an outdated version of LibCustomGlow was being pulled (if any other addon loaded by the user included the 
   more up to date version of this library, the bug would not have occurred).
