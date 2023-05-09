@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.0.8] -- 
+
+### Fixed
+- Fixed a bug where indeterminate ordering of evet callbacks was makinng the weapon checks for offhand and ranged lag behind
+  equipment changes. This will fix a bug for warriors where ElvUI being loaded causes equipping a shield to break the offhand timer.
+
 ## [2.0.7] -- 2023-01-19
 
 ### Changed

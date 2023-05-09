@@ -301,7 +301,7 @@ function ST:OnInitialize()
 	self.mainhand.speed = nil
 	self.mainhand.ends_at = nil
 	self.mainhand.inactive_timer = nil
-	self.mainhand.has_weapon = true
+	self.mainhand.has_weapon = true  -- always true
 	self.mainhand.is_full = true  -- deliberately true
 	self.mainhand.is_full_timer = nil
 	self.mainhand.is_paused = false
@@ -431,15 +431,22 @@ end
 
 function ST:check_weapons()
 	-- Detect what weapon types are equipped.
-	for hand in self:iter_hands() do
-		local speed = SwingTimerInfo(hand)
-		-- print(speed)
-		if speed == 0 then
-			self[hand].has_weapon = false
-		else
-			self[hand].has_weapon = true
-		end
-		-- self:Print(string.format("For hand %s, has_weapon = ", hand) .. tostring(self[hand].has_weapon))
+	-- Before we used the LibClassicSwinngTimer function to get the attack speeds.
+	-- This lib used the same events that this function is triggered on internally,
+	-- which led to inconsistencies depending on callback order. Using the basic 
+	-- WoW API to make these checks fixes the issue.
+	local _, speed_offhand = UnitAttackSpeed("player")
+	speed_offhand = speed_offhand or 0
+	local speed_ranged = UnitRangedDamage("player") or 0
+	if speed_offhand == 0 then
+		self.offhand.has_weapon = false
+	else
+		self.offhand.has_weapon = true
+	end
+	if speed_ranged == 0 then
+		self.ranged.has_weapon = false
+	else
+		self.ranged.has_weapon = true
 	end
 end
 
