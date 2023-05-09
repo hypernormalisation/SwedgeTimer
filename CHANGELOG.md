@@ -3,7 +3,8 @@
 ## [2.0.8] -- 2023-05-09
 
 ### Added
-- Warriors now have the option to disable the swing timer when in Arms or Protection spec.
+- Swing timers can now be enabled or disabled depending on which Dual-Specialization group the player is using.
+- Further to the above, Warriors now have the option to disable the swing timer when in Arms or Protection spec.
 
 ### Fixed
 - Fixed a bug where indeterminate ordering of evet callbacks was makinng the weapon checks for offhand and ranged lag behind
