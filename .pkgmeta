@@ -18,7 +18,6 @@ externals:
     tag: v2.0.2
   Libs/LibCustomGlow-1.0:
     url: https://github.com/Stanzilla/LibCustomGlow
-    tag: 1.0.3
 
 ignore:
   - README.md
