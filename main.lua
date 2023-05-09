@@ -152,10 +152,24 @@ function ST:hide_bar(hand)
 	self:get_hiding_anchor_frame(hand):Hide()
 end
 
+function ST:check_bar_enable_settings(db_class, hand)
+	-- Function to check if the settings indicate the bar should be shown or hidden.
+	if not db_class.class_enabled then 	-- Global enable/disable
+		return false
+	end
+	if not self:bar_is_enabled(hand) then 	-- Hand enabled
+		return false
+	end
+	-- Spec enabled
+	if not (db_class.enable_spec1 and self.current_talent_group == 1) or (db_class.enable_spec2 and self.current_talent_group == 2) then
+		return false
+	end
+	return true 	-- If we get to the end the bar should be shown.
+end
+
 function ST:show_bar(hand)
 	local db_class = self:get_class_table()
-	-- local db_hand = self:get_hand_table(hand)
-	if db_class.class_enabled and self:bar_is_enabled(hand) then
+	if self:check_bar_enable_settings(db_class, hand) then
 		if self.player_class == "DRUID" then
 			if self.should_show_bar_this_form then
 				self:get_bar_frame(hand):Show()
@@ -295,6 +309,8 @@ function ST:OnInitialize()
 	self.is_melee_attacking = false
 	self.has_target = false
 	self.has_attackable_target = false
+
+	self.current_talent_group = GetActiveTalentGroup()
 
 	self.form_index = GetShapeshiftForm()
 	self.is_cat_or_bear = false
@@ -618,8 +634,6 @@ end
 ------------------------------------------------------------------------------------
 -- Wow API event callbacks
 ------------------------------------------------------------------------------------
-
-
 function ST:CURRENT_SPELL_CAST_CHANGED(event, is_cancelled)
 	self:class_on_current_spell_cast_changed(is_cancelled)
 end
@@ -777,7 +791,8 @@ end
 ------------------------------------------------------------------------------------
 -- Talent information.
 ------------------------------------------------------------------------------------
-function ST:ACTIVE_TALENT_GROUP_CHANGED(event)
+function ST:ACTIVE_TALENT_GROUP_CHANGED(event, group)
+	self.current_talent_group = group
 	if self.player_class == "DRUID" then
 		self:get_druid_talent_info()
 		self:determine_form_visibility_flag()

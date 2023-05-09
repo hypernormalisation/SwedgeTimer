@@ -83,6 +83,36 @@ function ST:generate_top_level_options_table()
             db.class_enabled = value
         end,
     }
+    self.opts_table.args.enable_spec1 = {
+        type = "toggle",
+        order = 1.11,
+        name = "Spec 1",
+        desc = "Enables the timer when Talent Specialization 1 is active.",
+        get = function()
+            return ST:get_class_table().enable_spec1
+        end,
+        set = function(_, value)
+            ST:get_class_table().enable_spec1 = value
+        end,
+        disabled = function()
+            return not ST:get_class_table().class_enabled
+        end,
+    }
+    self.opts_table.args.enable_spec2 = {
+        type = "toggle",
+        order = 1.12,
+        name = "Spec 2",
+        desc = "Enables the timer when Talent Specialization 2 is active.",
+        get = function()
+            return ST:get_class_table().enable_spec2
+        end,
+        set = function(_, value)
+            ST:get_class_table().enable_spec2 = value
+        end,
+        disabled = function()
+            return not ST:get_class_table().class_enabled
+        end,
+    }
     self.opts_table.args.timers_locked = {
         type = "toggle",
         order = 1.2,
