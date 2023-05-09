@@ -164,11 +164,13 @@ function ST:show_bar(hand)
 				self:hide_bar(hand)
 			end
 		elseif self.player_class == "WARRIOR" then
-			if not (db_class.hide_in_tank_spec and self.has_devastate) then
+			if db_class.hide_in_tank_spec and self.has_devastate then
+				self:hide_bar(hand)
+			elseif db_class.hide_in_arms_spec and self.has_bladestorm then
+				self:hide_bar(hand)
+			else
 				self:get_bar_frame(hand):Show()
 				self:get_hiding_anchor_frame(hand):Show()
-			else
-				self:hide_bar(hand)
 			end
 		else
 			self:get_bar_frame(hand):Show()
@@ -806,9 +808,10 @@ function ST:get_druid_talent_info()
 end
 
 function ST:get_warrior_talent_info()
-	-- Function to determine if the player is in tank spec,
-	-- i.e. has Devastate talented.
+	-- Functions to get talents for specs that the user may want to hide
+	-- the swing timer in.
 	self.has_devastate = select(5, GetTalentInfo(3, 20)) == 1
+	self.has_bladestorm = select(5, GetTalentInfo(1, 27)) == 1
 end
 
 ------------------------------------------------------------------------------------
@@ -1051,24 +1054,12 @@ function ST:register_slashcommands()
 end
 
 function ST:test1()
-	-- local db = self:get_class_table()
-	-- if db.bars_locked then
-	-- 	self:Print("Unlocking bar frames")
-	-- 	db.bars_locked = false
-	-- 	self:unlock_frames()
-	-- else
-	-- 	self:Print("Locking bar frames")
-	-- 	db.bars_locked = true
-	-- 	self:lock_frames()
-	-- end
 end
 
 function ST:open_menu()
 	local ACD = LibStub("AceConfigDialog-3.0")
 	ACD:Open(addon_name.."_Options")
 end
-
-if st.debug then st.utils.print_msg('-- Parsed main1.lua module correctly') end
 
 --=========================================================================================
 -- Funcs to apply per-class settings
@@ -1086,3 +1077,8 @@ function ST:class_on_current_spell_cast_changed(is_cancelled)
 		self[c].on_current_spell_cast_changed(self, is_cancelled)
 	end
 end
+
+--=========================================================================================
+-- For debug and lua syntax errors
+--=========================================================================================
+if st.debug then st.utils.print_msg('-- Parsed main1.lua module correctly') end

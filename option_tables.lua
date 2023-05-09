@@ -653,14 +653,23 @@ function ST.class_opts_funcs.WARRIOR(self)
         tank_vid_header = {
             type = "header",
             order = 0.8,
-            name = "Hide when in tank spec"
+            name = "Spec-dependent enable/disable"
         },
         hide_in_tank_spec = {
             type = "toggle",
             order = 0.81,
-            name = "Enable",
-            desc = "When enabled, the timer will hide when the Warrior is in a tanking spec ("..
+            name = "Hide when Protection",
+            desc = "When enabled, the timer will hide when the Warrior is in Protection spec ("..
             "determined when Devastate is talented).",
+            get = "getter",
+            set = "setter",
+        },
+        hide_in_arms_spec = {
+            type = "toggle",
+            order = 0.82,
+            name = "Hide when Arms",
+            desc = "When enabled, the timer will hide when the Warrior is in Arms spec ("..
+            "determined when Bladestorm is talented).",
             get = "getter",
             set = "setter",
         },

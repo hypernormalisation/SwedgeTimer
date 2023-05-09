@@ -2,6 +2,9 @@
 
 ## [2.0.8] -- 2023-05-09
 
+### Added
+- Warriors now have the option to disable the swing timer when in Arms or Protection spec.
+
 ### Fixed
 - Fixed a bug where indeterminate ordering of evet callbacks was makinng the weapon checks for offhand and ranged lag behind
   equipment changes. This will fix a bug for warriors where ElvUI being loaded causes equipping a shield to break the offhand timer.

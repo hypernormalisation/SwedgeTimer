@@ -399,6 +399,7 @@ ST.WARRIOR.defaults = {
     bloodsurge_glow_line_length = 12,
 
     hide_in_tank_spec = false,
+    hide_in_arms_spec = false,
 
     -- Bar options
     ['**'] = ST.bar_defaults,
