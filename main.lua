@@ -164,7 +164,7 @@ function ST:show_bar(hand)
 				self:hide_bar(hand)
 			end
 		elseif self.player_class == "WARRIOR" then
-			if db_class.hide_in_tank_spec and self.has_devastate then
+			if db_class.hide_in_tank_spec and self.has_imp_def_stance then
 				self:hide_bar(hand)
 			elseif db_class.hide_in_arms_spec and self.has_bladestorm then
 				self:hide_bar(hand)
@@ -811,6 +811,7 @@ function ST:get_warrior_talent_info()
 	-- Functions to get talents for specs that the user may want to hide
 	-- the swing timer in.
 	self.has_devastate = select(5, GetTalentInfo(3, 20)) == 1
+	self.has_imp_def_stance = select(5, GetTalentInfo(3, 16)) ~= 0
 	self.has_bladestorm = select(5, GetTalentInfo(1, 27)) == 1
 end
 

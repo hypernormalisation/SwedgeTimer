@@ -660,7 +660,7 @@ function ST.class_opts_funcs.WARRIOR(self)
             order = 0.81,
             name = "Hide when Protection",
             desc = "When enabled, the timer will hide when the Warrior is in Protection spec ("..
-            "determined when Devastate is talented).",
+            "activated when Improved Defensive Stance is talented).",
             get = "getter",
             set = "setter",
         },
@@ -669,7 +669,7 @@ function ST.class_opts_funcs.WARRIOR(self)
             order = 0.82,
             name = "Hide when Arms",
             desc = "When enabled, the timer will hide when the Warrior is in Arms spec ("..
-            "determined when Bladestorm is talented).",
+            "activated when Bladestorm is talented).",
             get = "getter",
             set = "setter",
         },
