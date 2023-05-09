@@ -653,13 +653,16 @@ function ST.class_opts_funcs.WARRIOR(self)
         tank_vid_header = {
             type = "header",
             order = 0.8,
-            name = "Hide when in tanking spec."
+            name = "Hide when in tank spec"
         },
         hide_in_tank_spec = {
             type = "toggle",
-            order = 8.1,
-            name = "When enabled, the timer will hide when the Warrior is in a tanking spec ("..
-            "determined when Devastate is talented)."
+            order = 0.81,
+            name = "Enable",
+            desc = "When enabled, the timer will hide when the Warrior is in a tanking spec ("..
+            "determined when Devastate is talented).",
+            get = "getter",
+            set = "setter",
         },
         class_header = {
             type = "header",

@@ -462,7 +462,8 @@ function ST:post_init()
 	-- once the libraries and addon are initialised.
 	self:set_gcd_times_before_swing_seconds()
 	self:on_latency_update()
-	self:get_druid_talent_info()
+	-- self:get_druid_talent_info()
+	self:get_talent_information()
 	self:determine_form_visibility_flag()
 	for hand in self:iter_hands() do
 		self:set_gcd_marker_positions(hand)
