@@ -12,6 +12,8 @@ ST.class_defaults = {
     class_enabled = true,
     timers_locked = true,
     bar_movement_mode = "all",
+    enable_spec1 = true,
+    enable_spec2 = true,
 }
 
 -- This table is used by AceDB's smart defaults feature
@@ -175,10 +177,10 @@ ST.DRUID.defaults = {
 -- HUNTER
 ------------------------------------------------------------------------------------
 ST.HUNTER.defaults = {
-    
+
     enable_raptor_strike_color = true,
     raptor_strike_color = {207, 58, 83, 1.0},
-    
+
     -- Bar options
     ['**'] = ST.bar_defaults,
     mainhand = {
@@ -395,6 +397,9 @@ ST.WARRIOR.defaults = {
     bloodsurge_glow_nlines = 12,
     bloodsurge_glow_freq = 0.1,
     bloodsurge_glow_line_length = 12,
+
+    hide_in_tank_spec = false,
+
     -- Bar options
     ['**'] = ST.bar_defaults,
 	mainhand = {

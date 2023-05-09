@@ -163,6 +163,13 @@ function ST:show_bar(hand)
 			else
 				self:hide_bar(hand)
 			end
+		elseif self.player_class == "WARRIOR" then
+			if not (db_class.hide_in_tank_spec and self.has_devastate) then
+				self:get_bar_frame(hand):Show()
+				self:get_hiding_anchor_frame(hand):Show()
+			else
+				self:hide_bar(hand)
+			end
 		else
 			self:get_bar_frame(hand):Show()
 			self:get_hiding_anchor_frame(hand):Show()
@@ -608,19 +615,7 @@ end
 ------------------------------------------------------------------------------------
 -- Wow API event callbacks
 ------------------------------------------------------------------------------------
-function ST:ACTIVE_TALENT_GROUP_CHANGED(event)
-	if self.player_class == "DRUID" then
-		self:get_druid_talent_info()
-		self:determine_form_visibility_flag()
-	end
-end
 
-function ST:CHARACTER_POINTS_CHANGED(event)
-	if self.player_class == "DRUID" then
-		self:get_druid_talent_info()
-		self:determine_form_visibility_flag()
-	end
-end
 
 function ST:CURRENT_SPELL_CAST_CHANGED(event, is_cancelled)
 	self:class_on_current_spell_cast_changed(is_cancelled)
@@ -776,13 +771,43 @@ function ST:determine_form_visibility_flag()
 	end
 end
 
+------------------------------------------------------------------------------------
+-- Talent information.
+------------------------------------------------------------------------------------
+function ST:ACTIVE_TALENT_GROUP_CHANGED(event)
+	if self.player_class == "DRUID" then
+		self:get_druid_talent_info()
+		self:determine_form_visibility_flag()
+	elseif self.player_class == "WARRIOR" then
+		self:get_warrior_talent_info()
+	end
+end
+
+function ST:CHARACTER_POINTS_CHANGED(event)
+	if self.player_class == "DRUID" then
+		self:get_druid_talent_info()
+		self:determine_form_visibility_flag()
+	elseif self.player_class == "WARRIOR" then
+		self:get_warrior_talent_info()
+	end
+end
+
+function ST:get_talent_information()
+	self:get_druid_talent_info()
+	self:get_warrior_talent_info()
+end
+
 function ST:get_druid_talent_info()
 	-- function to get the druid talent info and determine
 	-- if the player has moonkin or tree
 	self.has_moonkin = select(5, GetTalentInfo(1, 11)) == 1
 	self.has_tree_of_life = select(5, GetTalentInfo(3, 19)) == 1
-	-- self:Print("has Tree of Life = " .. tostring(self.has_tree_of_life))
-	-- self:Print("has Moonkin = " .. tostring(self.has_moonkin))
+end
+
+function ST:get_warrior_talent_info()
+	-- Function to determine if the player is in tank spec,
+	-- i.e. has Devastate talented.
+	self.has_devastate = select(5, GetTalentInfo(3, 20)) == 1
 end
 
 ------------------------------------------------------------------------------------
