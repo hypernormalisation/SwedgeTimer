@@ -15,19 +15,21 @@ local print = st.utils.print_msg
 -- This object will eventually be passed to AceConfig as the options
 -- table for the addon. We'll build it dynamically upon addon init.
 ST.opts_table = {
-    name = "SwedgeTimer",
+    name = "Welcome to SwedgeTimer!",
     type = "group",
     args = {
-        -- global_header = {
-        --     order = 0.01,
-        --     type = "header",
-        --     name = "Global and Class Configuration",
-        -- },
+        desc1 = {
+            type = "description",
+            order = 1.1,
+            name = "SwedgeTimer is a general-purpose swing timer addon for Vanilla and Wrath. "..
+                "It aims to be a one-stop-shop for swing timers, supporting independent and feature-rich "..
+                "timer configurations for every use-case.",
+        },
         -- This title breaks the bar submenus from the global one.
         bar_header = {
             order = 10,
             type = "header",
-            name = "Timer Configuration",
+            name = "Configuration",
         },
     },
 }
@@ -69,97 +71,91 @@ end
 function ST:generate_top_level_options_table()
     -- Set the top-level options that are displayed above the settings menu.
     self.opts_table.handler = self.opts_funcs.global
-    self.opts_table.args.class_enabled = {
-        type = "toggle",
-        order = 1.1,
-        name = string.format("%s Enable/Disable", self.player_class_pretty),
-        desc = "Enables or disables SwedgeTimer for this class.",
-        get = function()
-            local db = ST:get_class_table()
-            return db.class_enabled
-        end,
-        set = function(_, value)
-            local db = ST:get_class_table()
-            db.class_enabled = value
-        end,
-    }
-    self.opts_table.args.enable_spec1 = {
-        type = "toggle",
-        order = 1.11,
-        name = "Spec 1",
-        desc = "Enables the timer when Talent Specialization 1 is active.",
-        get = function()
-            return ST:get_class_table().enable_spec1
-        end,
-        set = function(_, value)
-            ST:get_class_table().enable_spec1 = value
-        end,
-        disabled = function()
-            return not ST:get_class_table().class_enabled
-        end,
-    }
-    self.opts_table.args.enable_spec2 = {
-        type = "toggle",
-        order = 1.12,
-        name = "Spec 2",
-        desc = "Enables the timer when Talent Specialization 2 is active.",
-        get = function()
-            return ST:get_class_table().enable_spec2
-        end,
-        set = function(_, value)
-            ST:get_class_table().enable_spec2 = value
-        end,
-        disabled = function()
-            return not ST:get_class_table().class_enabled
-        end,
-    }
-    self.opts_table.args.timers_locked = {
-        type = "toggle",
-        order = 1.2,
-        name = "Timers locked",
-        desc = "Prevents all swing timers from being dragged or scaled with the mouse.",
-        get = function()
-            local db = ST:get_class_table()
-            return db.timers_locked
-        end,
-        set = function(_, input)
-            local db = ST:get_class_table()
-            db.timers_locked = input
-            if db.timers_locked then
-                ST:lock_frames()
-            else
-                ST:unlock_frames()
-            end
-        end,
-    }
-    self.opts_table.args.welcome_message = {
-        type = "toggle",
-        order = 1.3,
-        name = "Welcome message",
-        desc = "Displays a login message showing the addon version on player login or reload.",
-        get = "getter",
-        set = "setter",
-    }
 
+    local main_args = {
+        class_enabled = {
+            type = "toggle",
+            order = 1.1,
+            name = string.format("%s Enable/Disable", self.player_class_pretty),
+            desc = "Enables or disables SwedgeTimer for this class.",
+            get = function()
+                local db = ST:get_class_table()
+                return db.class_enabled
+            end,
+            set = function(_, value)
+                local db = ST:get_class_table()
+                db.class_enabled = value
+            end,
+        },
+        enable_spec1 = {
+            type = "toggle",
+            order = 1.11,
+            name = "Spec 1",
+            desc = "Enables the timer when Talent Specialization 1 is active.",
+            get = function()
+                return ST:get_class_table().enable_spec1
+            end,
+            set = function(_, value)
+                ST:get_class_table().enable_spec1 = value
+            end,
+            disabled = function()
+                return not ST:get_class_table().class_enabled
+            end,
+        },
+        enable_spec2 = {
+            type = "toggle",
+            order = 1.12,
+            name = "Spec 2",
+            desc = "Enables the timer when Talent Specialization 2 is active.",
+            get = function()
+                return ST:get_class_table().enable_spec2
+            end,
+            set = function(_, value)
+                ST:get_class_table().enable_spec2 = value
+            end,
+            disabled = function()
+                return not ST:get_class_table().class_enabled
+            end,
+        },
+        timers_locked = {
+            type = "toggle",
+            order = 1.2,
+            name = "Timers locked",
+            desc = "Prevents all swing timers from being dragged or scaled with the mouse.",
+            get = function()
+                local db = ST:get_class_table()
+                return db.timers_locked
+            end,
+            set = function(_, input)
+                local db = ST:get_class_table()
+                db.timers_locked = input
+                if db.timers_locked then
+                    ST:lock_frames()
+                else
+                    ST:unlock_frames()
+                end
+            end,
+        },
+        ["Welcome message"] = {
+            type = "toggle",
+            order = 1.3,
+            name = "Welcome message",
+            desc = "Displays a login message showing the addon version on player login or reload.",
+            get = "getter",
+            set = "setter",
+        },
+    }
+    self.opts_table.args.main = {
+        type = "group",
+        order = 0.1,
+        name = "Main Settings",
+        args = main_args,
+    }
     -- Add behaviour panel
     ST.opts_table.args.behaviour = ST.behaviour_group
 
 end
 
-function ST:generate_info_panel()
-    self.opts_table.args.info = {
-        type = "group",
-        order = 0.1,
-        name = "Info",
-        args = ST.info_panel,
-    }
-    self.opts_table.args.class_info = {
-        type = "group",
-        order = 0.2,
-        name = string.format("%s Info", self.player_class_pretty),
-        args = ST.class_info_panel,
-    }
-end
 
 --=========================================================================================
 -- This section sets the widget set/get functions using handlers.
@@ -485,7 +481,7 @@ function ST:generate_class_options_table()
             type = "group",
             desc = string.format("This panel contains settings specific to the %s class.",
                 self.player_class_pretty),
-            order = 0.5,
+            order = 2.5,
             args = args,
             handler = self.class_getsetters,
         }
@@ -1056,11 +1052,6 @@ function ST.class_opts_funcs.DRUID(self)
             type = "description",
             name = "The timer bar can be configured to turn a custom color when maul is queued."
         },
-        -- lb0 = {
-        --     type = "header",
-        --     order = 11.03,
-        --     name = "",
-        -- },
         enable_maul_color = {
             type = "toggle",
             order = 11.1,
@@ -1082,12 +1073,6 @@ function ST.class_opts_funcs.DRUID(self)
                 return not db.enable_maul_color
             end,
         },
-        -- Insufficient rage
-        -- lb1 = {
-        --     type = "header",
-        --     order = 12,
-        --     name = "",
-        -- },
         rage_desc = {
             order = 12.1,
             type = "description",
@@ -1095,11 +1080,6 @@ function ST.class_opts_funcs.DRUID(self)
                 "has queued Maul, but has since dropped below the rage threshold necessary "..
                 "to use the ability."
         },
-        -- lb2 = {
-        --     type = "header",
-        --     order = 12.2,
-        --     name = "",
-        -- },
         insufficient_rage_color = {
             order=12.3,
             type="color",
@@ -1289,46 +1269,12 @@ function ST:generate_hand_options_table(hand)
             get = "getter",
             set = "setter",
         },
-
-        -- -- Bar size options
-        -- size_header = {
-        --     order = 1.1,
-        --     name = "Bar Size",
-        --     type = "header",
-        -- },
-        -- bar_width = {
-        --     type = "range",
-        --     order = 2,
-        --     name = "Width",
-        --     desc = "The width of the swing timer.",
-        --     min = 100, max = 600, step = 1,
-        --     get = "getter",
-        --     set = "bar_setter",
-        -- },
-        -- bar_height = {
-        --     type = "range",
-        --     order = 3,
-        --     name = "Height",
-        --     desc = "The height of the swing timer.",
-        --     min = 6, max = 60, step = 1,
-        --     get = "getter",
-        --     set = "bar_setter",
-        -- },
-
         bar_appearance_group = {
             type = "group",
             order = 1.5,
             name = "Appearance",
             args = ST.bar_appearance_preset,
         },
-
-        -- -- Border options go here.
-        -- bar_borders_group = {
-        --     type = "group",
-        --     order = 1.7,
-        --     name = "Border",
-        --     args = ST.borders_preset,
-        -- },
 
         -- Font options all go here.
         texts_group = {
@@ -1367,12 +1313,6 @@ function ST:generate_hand_options_table(hand)
 
     -- Any optional groups should go here.
     if hand == "mainhand" or hand == "ranged" then
-        -- opts_group.args.gcd_markers_group = {
-        --     type = "group",
-        --     order = 3.0,
-        --     name = "GCD Markers",
-        --     args = ST.gcd_markers_preset
-        -- }
         -- Add in the GCD mode options, which are class-dependent.
         if self.player_class == "DRUID" then
             opts_group.args.gcd_markers_group.args.gcd1a_marker_mode = {
@@ -1530,7 +1470,6 @@ function ST:set_opts()
 	self:set_opts_funcs()
 
     -- Generate the top level, position, and class opts if they exist.
-	self:generate_info_panel()
     self:generate_top_level_options_table()
 	self:generate_bar_position_options_table()
 	self:generate_class_options_table()

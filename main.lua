@@ -232,7 +232,7 @@ function ST:OnInitialize()
 
 	if st.is_version_supported == false then
 		self:Print("WARNING: SwedgeTimer does not support this version of World of Warcraft!"
-				   .." You may experience malfunctions.")
+				   .." You may experience malfunctions")
 	end
 
 	-- Get player class first
