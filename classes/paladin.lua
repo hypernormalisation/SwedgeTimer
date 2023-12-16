@@ -8,7 +8,7 @@ local LCG = LibStub("LibCustomGlow-1.0")
 -- Seal IDs
 local soc_id = 20375
 local sov_ids = {
-    31801, 348704
+    31801, 348704, 407798
 }
 local sol_id = 20165
 local sow_id = 20166
