@@ -26,7 +26,7 @@ function ST.WARRIOR.on_rage_update(self)
     
     if self.hs_queued then
         local power = UnitPower("player")
-        local rage_cost = GetSpellPowerCost(47450)[1].cost
+        local rage_cost = GetSpellPowerCost(78)[1].cost
         if power < rage_cost then
             self.insufficient_rage = true
             self:set_bar_color("mainhand")
@@ -39,7 +39,7 @@ function ST.WARRIOR.on_rage_update(self)
 
     if self.cleave_queued then
         local power = UnitPower("player")
-        local rage_cost = GetSpellPowerCost(47520)[1].cost
+        local rage_cost = GetSpellPowerCost(845)[1].cost
         if power < rage_cost then
             self.insufficient_rage = true
             self:set_bar_color("mainhand")
